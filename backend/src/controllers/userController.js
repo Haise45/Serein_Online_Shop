@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const asyncHandler = require("../middlewares/asyncHandler");
+const mongoose = require("mongoose");
 
 // @desc    Get user profile
 // @route   GET /api/v1/users/profile
@@ -162,6 +163,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   // Có thể thêm logic xóa các dữ liệu liên quan khác ở đây nếu cần (ví dụ: đơn hàng của user đó? - cân nhắc kỹ)
   res.status(200).json({ message: "Người dùng đã được xóa thành công." });
 });
+
 // --- Hàm quản lý địa chỉ ---
 // @desc    Get user addresses
 // @route   GET /api/v1/users/addresses
@@ -282,7 +284,7 @@ const deleteAddress = asyncHandler(async (req, res) => {
   }
 
   // Kiểm tra nếu xóa địa chỉ mặc định và còn địa chỉ khác
-  if (address.isDefault && user.addresses.length > 1) {
+  if (address.isDefault === true && user.addresses.length > 1) {
     res.status(400);
     throw new Error(
       "Không thể xóa địa chỉ mặc định. Vui lòng đặt địa chỉ khác làm mặc định trước."
