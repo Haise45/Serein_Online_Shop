@@ -116,9 +116,185 @@ const addressSchemaValidation = Joi.object({
   isDefault: Joi.boolean().optional(),
 });
 
+const createCategorySchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).required().messages({
+    "string.base": `"Tên danh mục" phải là chuỗi`,
+    "string.empty": `"Tên danh mục" không được để trống`,
+    "string.min": `"Tên danh mục" phải có ít nhất {#limit} ký tự`,
+    "string.max": `"Tên danh mục" không được vượt quá {#limit} ký tự`,
+    "any.required": `"Tên danh mục" là trường bắt buộc`,
+  }),
+  description: Joi.string()
+    .trim()
+    .max(500)
+    .optional()
+    .allow(null, "")
+    .messages({
+      "string.base": `"Mô tả" phải là chuỗi`,
+      "string.max": `"Mô tả" không được vượt quá {#limit} ký tự`,
+    }),
+  parent: Joi.string().optional().allow(null, "").messages({
+    "string.base": `"Danh mục cha" phải là ID hợp lệ`,
+  }),
+  image: Joi.string().optional().allow(null, "").messages({
+    "string.base": `"Ảnh" phải là một URL hợp lệ`,
+  }),
+  isActive: Joi.boolean().optional(),
+});
+
+const updateCategorySchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).required().messages({
+    "string.base": `"Tên danh mục" phải là chuỗi`,
+    "string.empty": `"Tên danh mục" không được để trống`,
+    "string.min": `"Tên danh mục" phải có ít nhất {#limit} ký tự`,
+    "string.max": `"Tên danh mục" không được vượt quá {#limit} ký tự`,
+    "any.required": `"Tên danh mục" là trường bắt buộc`,
+  }),
+  description: Joi.string()
+    .trim()
+    .max(500)
+    .optional()
+    .allow(null, "")
+    .messages({
+      "string.base": `"Mô tả" phải là chuỗi`,
+      "string.max": `"Mô tả" không được vượt quá {#limit} ký tự`,
+    }),
+  parent: Joi.string().optional().allow(null, "").messages({
+    "string.base": `"Danh mục cha" phải là ID hợp lệ`,
+  }),
+  image: Joi.string().optional().allow(null, "").messages({
+    "string.base": `"Ảnh" phải là một URL hợp lệ`,
+  }),
+  isActive: Joi.boolean().optional(),
+}).min(1); // Yêu cầu ít nhất một trường được cung cấp để cập nhật
+
+// Schema cho một giá trị thuộc tính của biến thể
+const variantOptionValueSchema = Joi.object({
+  attributeName: Joi.string()
+    .required()
+    .messages({ "any.required": "Tên thuộc tính của biến thể là bắt buộc" }),
+  value: Joi.string().required().messages({
+    "any.required": "Giá trị thuộc tính của biến thể là bắt buộc",
+  }),
+});
+
+// Schema cho một biến thể
+const variantSchemaValidation = Joi.object({
+  sku: Joi.string()
+    .trim()
+    .required()
+    .messages({ "any.required": "SKU của biến thể là bắt buộc" }),
+  price: Joi.number().min(0).required().messages({
+    "any.required": "Giá của biến thể là bắt buộc",
+    "number.min": "Giá biến thể không được âm",
+  }),
+  stockQuantity: Joi.number().integer().min(0).required().messages({
+    "any.required": "Số lượng tồn kho của biến thể là bắt buộc",
+    "number.min": "Số lượng tồn kho không được âm",
+  }),
+  image: Joi.string()
+    .uri()
+    .optional()
+    .allow(null, "")
+    .messages({ "string.uri": "Ảnh biến thể phải là URL hợp lệ" }),
+  optionValues: Joi.array()
+    .items(variantOptionValueSchema)
+    .min(1)
+    .required()
+    .messages({
+      "any.required": "Biến thể phải có ít nhất một cặp thuộc tính-giá trị",
+      "array.min": "Biến thể phải có ít nhất một cặp thuộc tính-giá trị",
+    }),
+});
+
+// Schema cho một thuộc tính định nghĩa trên sản phẩm
+const productAttributeSchema = Joi.object({
+  name: Joi.string()
+    .required()
+    .messages({ "any.required": "Tên thuộc tính là bắt buộc" }),
+  values: Joi.array().items(Joi.string()).min(1).required().messages({
+    "any.required": "Thuộc tính phải có ít nhất một giá trị",
+    "array.min": "Thuộc tính phải có ít nhất một giá trị",
+  }),
+});
+
+// Schema cho tạo sản phẩm mới
+const createProductSchema = Joi.object({
+  name: Joi.string().trim().min(3).max(200).required().messages({
+    "any.required": "Tên sản phẩm là bắt buộc",
+    "string.min": "Tên sản phẩm phải có ít nhất {#limit} ký tự",
+    "string.max": "Tên sản phẩm không được vượt quá {#limit} ký tự",
+    "string.base": "Tên sản phẩm phải là chuỗi",
+    "string.empty": "Tên sản phẩm không được để trống",
+  }),
+  description: Joi.string().trim().optional().allow(""),
+  price: Joi.number().min(0).required().messages({
+    "any.required": "Giá sản phẩm là bắt buộc",
+    "number.min": "Giá không được âm",
+  }),
+  sku: Joi.string().trim().optional().allow(null, ""), // SKU chính là tùy chọn
+  category: Joi.string().hex().length(24).required().messages({
+    "any.required": "Danh mục là bắt buộc",
+    "string.length": "ID Danh mục không hợp lệ",
+    "string.hex": "ID Danh mục không hợp lệ",
+  }),
+  images: Joi.array()
+    .items(Joi.string().uri())
+    .optional()
+    .default([])
+    .messages({ "string.uri": "Mỗi ảnh phải là một URL hợp lệ" }),
+  stockQuantity: Joi.number()
+    .integer()
+    .min(0)
+    .optional()
+    .default(0)
+    .messages({ "number.min": "Số lượng tồn kho không được âm" }),
+  isPublished: Joi.boolean().optional().default(false),
+  attributes: Joi.array().items(productAttributeSchema).optional().default([]),
+  variants: Joi.array().items(variantSchemaValidation).optional().default([]),
+});
+
+// Schema cho cập nhật sản phẩm
+const updateProductSchema = Joi.object({
+  name: Joi.string().trim().min(3).max(200).required().messages({
+    "any.required": "Tên sản phẩm là bắt buộc",
+    "string.min": "Tên sản phẩm phải có ít nhất {#limit} ký tự",
+    "string.max": "Tên sản phẩm không được vượt quá {#limit} ký tự",
+    "string.base": "Tên sản phẩm phải là chuỗi",
+    "string.empty": "Tên sản phẩm không được để trống",
+  }),
+  description: Joi.string().trim().optional().allow(""),
+  price: Joi.number()
+    .min(0)
+    .optional()
+    .messages({ "number.min": "Giá không được âm" }),
+  sku: Joi.string().trim().optional().allow(null, ""),
+  category: Joi.string().hex().length(24).optional().messages({
+    "string.length": "ID Danh mục không hợp lệ",
+    "string.hex": "ID Danh mục không hợp lệ",
+  }),
+  images: Joi.array()
+    .items(Joi.string().uri())
+    .optional()
+    .messages({ "string.uri": "Mỗi ảnh phải là một URL hợp lệ" }),
+  stockQuantity: Joi.number()
+    .integer()
+    .min(0)
+    .optional()
+    .messages({ "number.min": "Số lượng tồn kho không được âm" }),
+  isPublished: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(), // Cho phép cập nhật trạng thái active (soft delete)
+  attributes: Joi.array().items(productAttributeSchema).optional(),
+  variants: Joi.array().items(variantSchemaValidation).optional(),
+}).min(1); // Phải có ít nhất một trường để cập nhật
+
 module.exports = {
   registerSchema,
   loginSchema,
   updateProfileSchema,
   addressSchemaValidation,
+  createCategorySchema,
+  updateCategorySchema,
+  createProductSchema,
+  updateProductSchema,
 };

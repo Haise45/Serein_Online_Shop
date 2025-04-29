@@ -1,0 +1,1897 @@
+{
+  "categories": [
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1a1",
+      "name": "Thời trang Nam",
+      "slug": "thoi-trang-nam",
+      "parent": null,
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1a2",
+      "name": "Thời trang Nữ",
+      "slug": "thoi-trang-nu",
+      "parent": null,
+      "isActive": true
+    },
+
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1b1",
+      "name": "Áo Nam",
+      "slug": "ao-nam",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1a1",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1b2",
+      "name": "Quần Nam",
+      "slug": "quan-nam",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1a1",
+      "isActive": true
+    },
+
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1b3",
+      "name": "Áo Nữ",
+      "slug": "ao-nu",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1a2",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1b4",
+      "name": "Quần Nữ",
+      "slug": "quan-nu",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1a2",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1b5",
+      "name": "Váy Nữ",
+      "slug": "vay-nu",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1a2",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c1",
+      "name": "Áo Thun Nam",
+      "slug": "ao-thun-nam",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b1",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c2",
+      "name": "Áo Sơ Mi Nam",
+      "slug": "ao-so-mi-nam",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b1",
+      "isActive": true
+    },
+
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c3",
+      "name": "Quần Jeans Nam",
+      "slug": "quan-jeans-nam",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b2",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c4",
+      "name": "Quần Short Nam",
+      "slug": "quan-short-nam",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b2",
+      "isActive": true
+    },
+
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c5",
+      "name": "Áo Thun Nữ",
+      "slug": "ao-thun-nu",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b3",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c6",
+      "name": "Áo Sơ Mi Nữ",
+      "slug": "ao-so-mi-nu",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b3",
+      "isActive": true
+    },
+
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c7",
+      "name": "Quần Jeans Nữ",
+      "slug": "quan-jeans-nu",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b4",
+      "isActive": true
+    },
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c8",
+      "name": "Quần Legging",
+      "slug": "quan-legging",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b4",
+      "isActive": true
+    },
+
+    {
+      "_id": "64f1a0e8a9b8c2a5a4e8d1c9",
+      "name": "Chân Váy",
+      "slug": "chan-vay",
+      "parent": "64f1a0e8a9b8c2a5a4e8d1b5",
+      "isActive": true
+    }
+  ],
+  "products": [
+    {
+      "name": "Áo Thun Nam Cổ Tròn Cotton Basic",
+      "slug": "ao-thun-nam-co-tron-cotton-basic",
+      "description": "Áo thun nam cổ tròn chất liệu 100% cotton mềm mại, thoáng mát, thấm hút mồ hôi tốt. Kiểu dáng basic dễ phối đồ.",
+      "price": 150000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c1",
+      "images": [
+        "/uploads/images/products/placeholder-atn-1.jpg",
+        "/uploads/images/products/placeholder-atn-2.jpg"
+      ],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Trắng", "Đen", "Xanh Navy"] },
+        { "name": "Size", "values": ["38", "39", "40", "41", "42"] }
+      ],
+      "variants": [
+        {
+          "sku": "ATN-CT-TR-38",
+          "price": 150000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "38" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-TR-39",
+          "price": 150000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-TR-40",
+          "price": 150000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-TR-41",
+          "price": 150000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-TR-42",
+          "price": 150000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-DE-38",
+          "price": 150000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "38" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-DE-39",
+          "price": 150000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-DE-40",
+          "price": 150000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-DE-41",
+          "price": 150000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-DE-42",
+          "price": 150000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-NV-39",
+          "price": 155000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Navy" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-NV-40",
+          "price": 155000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Navy" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ATN-CT-NV-41",
+          "price": 155000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Navy" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Jeans Nam Slimfit Co Giãn",
+      "slug": "quan-jeans-nam-slimfit-co-gian",
+      "description": "Quần jeans nam form slimfit ôm vừa vặn, tôn dáng. Chất liệu denim co giãn nhẹ mang lại sự thoải mái khi vận động. Màu xanh wash cơ bản.",
+      "price": 450000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c3",
+      "images": [
+        "/uploads/images/products/placeholder-qjn-1.jpg",
+        "/uploads/images/products/placeholder-qjn-2.jpg"
+      ],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Xanh Đậm Wash", "Đen Tuyền"] },
+        { "name": "Size", "values": ["28", "29", "30", "31", "32", "34"] }
+      ],
+      "variants": [
+        {
+          "sku": "QJN-SF-XDW-28",
+          "price": 450000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Đậm Wash" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-XDW-29",
+          "price": 450000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Đậm Wash" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-XDW-30",
+          "price": 450000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Đậm Wash" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-XDW-31",
+          "price": 450000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Đậm Wash" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-XDW-32",
+          "price": 450000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Đậm Wash" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-XDW-34",
+          "price": 450000,
+          "stockQuantity": 20,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Đậm Wash" },
+            { "attributeName": "Size", "value": "34" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-DET-29",
+          "price": 460000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen Tuyền" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-DET-30",
+          "price": 460000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen Tuyền" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-DET-31",
+          "price": 460000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen Tuyền" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QJN-SF-DET-32",
+          "price": 460000,
+          "stockQuantity": 28,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen Tuyền" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Sơ Mi Nam Tay Dài Vải Oxford",
+      "slug": "ao-so-mi-nam-tay-dai-vai-oxford",
+      "description": "Áo sơ mi nam công sở lịch lãm, chất vải Oxford dày dặn, đứng form. Thiết kế cổ điển, phù hợp đi làm hoặc dự tiệc.",
+      "price": 380000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c2",
+      "images": ["/uploads/images/products/placeholder-asmn-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        {
+          "name": "Màu sắc",
+          "values": ["Trắng", "Xanh Dương Nhạt", "Hồng Phấn"]
+        },
+        { "name": "Size", "values": ["39", "40", "41", "42"] }
+      ],
+      "variants": [
+        {
+          "sku": "ASMN-OX-TR-39",
+          "price": 380000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-TR-40",
+          "price": 380000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-TR-41",
+          "price": 380000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-TR-42",
+          "price": 380000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-XN-40",
+          "price": 380000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Dương Nhạt" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-XN-41",
+          "price": 380000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Dương Nhạt" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-HP-39",
+          "price": 390000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Phấn" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ASMN-OX-HP-40",
+          "price": 390000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Phấn" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Thun Nữ Cổ Tim Vải Cotton Mềm",
+      "slug": "ao-thun-nu-co-tim-vai-cotton-mem",
+      "description": "Áo thun nữ cổ tim thanh lịch, chất cotton mềm mịn, co giãn tốt. Form áo ôm nhẹ, dễ dàng kết hợp với nhiều loại trang phục.",
+      "price": 130000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c5",
+      "images": ["/uploads/images/products/placeholder-atnu-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        {
+          "name": "Màu sắc",
+          "values": ["Trắng", "Đen", "Hồng Pastel", "Vàng Mustard"]
+        },
+        { "name": "Size", "values": ["26", "27", "28", "29"] }
+      ],
+      "variants": [
+        {
+          "sku": "ATNU-CT-TR-26",
+          "price": 130000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-TR-27",
+          "price": 130000,
+          "stockQuantity": 80,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-TR-28",
+          "price": 130000,
+          "stockQuantity": 75,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-TR-29",
+          "price": 130000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-DE-26",
+          "price": 130000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-DE-27",
+          "price": 130000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-DE-28",
+          "price": 130000,
+          "stockQuantity": 68,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-HP-27",
+          "price": 135000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Pastel" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-HP-28",
+          "price": 135000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Pastel" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-VM-28",
+          "price": 135000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Vàng Mustard" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ATNU-CT-VM-29",
+          "price": 135000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Vàng Mustard" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Jeans Nữ Skinny Lưng Cao",
+      "slug": "quan-jeans-nu-skinny-lung-cao",
+      "description": "Quần jeans nữ skinny ôm sát, lưng cao giúp hack dáng hiệu quả. Chất liệu co giãn tốt, thoải mái vận động. Dễ phối đồ đi chơi, đi làm.",
+      "price": 420000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c7",
+      "images": ["/uploads/images/products/placeholder-qjnu-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Xanh Nhạt", "Đen", "Xám Chì"] },
+        { "name": "Size", "values": ["26", "27", "28", "29", "30"] }
+      ],
+      "variants": [
+        {
+          "sku": "QJNU-SK-XN-26",
+          "price": 420000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Nhạt" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-XN-27",
+          "price": 420000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Nhạt" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-XN-28",
+          "price": 420000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Nhạt" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-XN-29",
+          "price": 420000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Nhạt" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-XN-30",
+          "price": 420000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Nhạt" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-DE-27",
+          "price": 420000,
+          "stockQuantity": 48,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-DE-28",
+          "price": 420000,
+          "stockQuantity": 58,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-DE-29",
+          "price": 420000,
+          "stockQuantity": 52,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-XC-28",
+          "price": 430000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Chì" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QJNU-SK-XC-29",
+          "price": 430000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Chì" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Chân Váy Chữ A Công Sở Kèm Belt",
+      "slug": "chan-vay-chu-a-cong-so-kem-belt",
+      "description": "Chân váy chữ A thanh lịch, độ dài qua gối, phù hợp môi trường công sở. Chất liệu tuyết mưa đứng form, kèm belt tạo điểm nhấn.",
+      "price": 280000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c9",
+      "images": ["/uploads/images/products/placeholder-cv-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Đen", "Be", "Nâu"] },
+        { "name": "Size", "values": ["26", "27", "28", "29"] }
+      ],
+      "variants": [
+        {
+          "sku": "CV-A-DE-26",
+          "price": 280000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "CV-A-DE-27",
+          "price": 280000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "CV-A-DE-28",
+          "price": 280000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "CV-A-DE-29",
+          "price": 280000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "CV-A-BE-27",
+          "price": 280000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "CV-A-BE-28",
+          "price": 280000,
+          "stockQuantity": 38,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "CV-A-NA-28",
+          "price": 290000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nâu" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "CV-A-NA-29",
+          "price": 290000,
+          "stockQuantity": 20,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nâu" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Short Nam Kaki Túi Hộp",
+      "slug": "quan-short-nam-kaki-tui-hop",
+      "description": "Quần short nam vải kaki bền đẹp, thoáng mát. Thiết kế túi hộp năng động, trẻ trung, phù hợp đi chơi, dạo phố.",
+      "price": 250000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c4",
+      "images": ["/uploads/images/products/placeholder-qsn-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Be Vàng", "Xanh Rêu", "Đen"] },
+        { "name": "Size", "values": ["29", "30", "31", "32", "34"] }
+      ],
+      "variants": [
+        {
+          "sku": "QSN-KK-BV-29",
+          "price": 250000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Vàng" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-BV-30",
+          "price": 250000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Vàng" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-BV-31",
+          "price": 250000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Vàng" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-BV-32",
+          "price": 250000,
+          "stockQuantity": 38,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Vàng" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-BV-34",
+          "price": 250000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Vàng" },
+            { "attributeName": "Size", "value": "34" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-XR-30",
+          "price": 250000,
+          "stockQuantity": 42,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-XR-31",
+          "price": 250000,
+          "stockQuantity": 48,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-XR-32",
+          "price": 250000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-DE-31",
+          "price": 250000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QSN-KK-DE-32",
+          "price": 250000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Sơ Mi Nữ Lụa Tay Bồng",
+      "slug": "ao-so-mi-nu-lua-tay-bong",
+      "description": "Áo sơ mi nữ chất liệu lụa mềm mại, thoáng mát, ít nhăn. Thiết kế tay bồng tiểu thư, thanh lịch.",
+      "price": 320000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c6",
+      "images": ["/uploads/images/products/placeholder-asmnu-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        {
+          "name": "Màu sắc",
+          "values": ["Trắng Kem", "Xanh Mint", "Hồng Nude"]
+        },
+        { "name": "Size", "values": ["26", "27", "28"] }
+      ],
+      "variants": [
+        {
+          "sku": "ASMNU-LU-TK-26",
+          "price": 320000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng Kem" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "ASMNU-LU-TK-27",
+          "price": 320000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng Kem" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ASMNU-LU-TK-28",
+          "price": 320000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng Kem" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ASMNU-LU-XM-27",
+          "price": 330000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Mint" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ASMNU-LU-XM-28",
+          "price": 330000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Mint" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ASMNU-LU-HN-27",
+          "price": 330000,
+          "stockQuantity": 28,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Nude" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ASMNU-LU-HN-28",
+          "price": 330000,
+          "stockQuantity": 32,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Nude" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Legging Nữ Cạp Cao Co Giãn 4 Chiều",
+      "slug": "quan-legging-nu-cap-cao-co-gian-4-chieu",
+      "description": "Quần legging nữ cạp cao giúp gen bụng, tôn dáng. Chất liệu thun co giãn 4 chiều, thấm hút mồ hôi, phù hợp tập gym, yoga hoặc mặc hàng ngày.",
+      "price": 180000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c8",
+      "images": ["/uploads/images/products/placeholder-qlg-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Đen", "Xám Đậm", "Xanh Navy"] },
+        { "name": "Size", "values": ["26", "27", "28", "29"] }
+      ],
+      "variants": [
+        {
+          "sku": "QLG-CC-DE-26",
+          "price": 180000,
+          "stockQuantity": 80,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-DE-27",
+          "price": 180000,
+          "stockQuantity": 90,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-DE-28",
+          "price": 180000,
+          "stockQuantity": 85,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-DE-29",
+          "price": 180000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-XD-27",
+          "price": 180000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Đậm" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-XD-28",
+          "price": 180000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Đậm" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-NV-28",
+          "price": 185000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Navy" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QLG-CC-NV-29",
+          "price": 185000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Navy" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Thun Nam Cotton In Họa Tiết Chữ",
+      "slug": "ao-thun-nam-cotton-in-hoa-tiet-chu",
+      "description": "Áo thun nam trẻ trung với họa tiết chữ in nổi bật. Chất cotton thoáng mát, form regular fit.",
+      "price": 190000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c1",
+      "images": ["/uploads/images/products/placeholder-atn-ht-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Trắng", "Đen", "Xám"] },
+        { "name": "Size", "values": ["39", "40", "41"] }
+      ],
+      "variants": [
+        {
+          "sku": "ATN-HT-TR-39",
+          "price": 190000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ATN-HT-TR-40",
+          "price": 190000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ATN-HT-TR-41",
+          "price": 190000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ATN-HT-DE-40",
+          "price": 190000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ATN-HT-DE-41",
+          "price": 190000,
+          "stockQuantity": 48,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ATN-HT-XA-40",
+          "price": 190000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ATN-HT-XA-41",
+          "price": 190000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Jeans Nam Rách Gối Phong Cách",
+      "slug": "quan-jeans-nam-rach-goi-phong-cach",
+      "description": "Quần jeans nam wash rách gối cá tính, tạo điểm nhấn phong cách. Form slimfit trẻ trung.",
+      "price": 480000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c3",
+      "images": ["/uploads/images/products/placeholder-qjn-rg-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Xanh Bạc", "Đen Wash"] },
+        { "name": "Size", "values": ["29", "30", "31", "32"] }
+      ],
+      "variants": [
+        {
+          "sku": "QJN-RG-XB-29",
+          "price": 480000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Bạc" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QJN-RG-XB-30",
+          "price": 480000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Bạc" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QJN-RG-XB-31",
+          "price": 480000,
+          "stockQuantity": 28,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Bạc" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QJN-RG-XB-32",
+          "price": 480000,
+          "stockQuantity": 22,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Bạc" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        },
+        {
+          "sku": "QJN-RG-DW-30",
+          "price": 490000,
+          "stockQuantity": 20,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen Wash" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QJN-RG-DW-31",
+          "price": 490000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen Wash" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Polo Nam Pique Cotton Basic",
+      "slug": "ao-polo-nam-pique-cotton-basic",
+      "description": "Áo polo nam chất liệu pique cotton mắt chim thoáng khí. Kiểu dáng basic lịch sự, dễ phối đồ.",
+      "price": 280000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1b1",
+      "images": ["/uploads/images/products/placeholder-apn-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Trắng", "Đen", "Xanh Than", "Đỏ Đô"] },
+        { "name": "Size", "values": ["39", "40", "41", "42"] }
+      ],
+      "variants": [
+        {
+          "sku": "APN-PQ-TR-39",
+          "price": 280000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-TR-40",
+          "price": 280000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-DE-40",
+          "price": 280000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-DE-41",
+          "price": 280000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-XT-40",
+          "price": 290000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Than" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-XT-41",
+          "price": 290000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Than" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-DD-41",
+          "price": 290000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đỏ Đô" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "APN-PQ-DD-42",
+          "price": 290000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đỏ Đô" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Croptop Nữ Thun Gân Tay Ngắn",
+      "slug": "ao-croptop-nu-thun-gan-tay-ngan",
+      "description": "Áo croptop nữ trẻ trung, năng động. Chất liệu thun gân co giãn, ôm dáng. Dễ dàng mix với quần hoặc chân váy cạp cao.",
+      "price": 120000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c5",
+      "images": ["/uploads/images/products/placeholder-acrp-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Trắng", "Đen", "Be"] },
+        { "name": "Size", "values": ["26", "27", "28"] }
+      ],
+      "variants": [
+        {
+          "sku": "ACRP-TG-TR-26",
+          "price": 120000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "ACRP-TG-TR-27",
+          "price": 120000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ACRP-TG-DE-27",
+          "price": 120000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ACRP-TG-DE-28",
+          "price": 120000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "ACRP-TG-BE-27",
+          "price": 125000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "ACRP-TG-BE-28",
+          "price": 125000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Baggy Nữ Vải Kaki Lưng Thun",
+      "slug": "quan-baggy-nu-vai-kaki-lung-thun",
+      "description": "Quần baggy nữ form rộng thoải mái, lưng thun co giãn. Chất liệu kaki mềm, phù hợp mặc đi học, đi làm.",
+      "price": 260000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1b4",
+      "images": ["/uploads/images/products/placeholder-qbgn-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Đen", "Be", "Xanh Rêu"] },
+        { "name": "Size", "values": ["27", "28", "29", "30"] }
+      ],
+      "variants": [
+        {
+          "sku": "QBGN-KK-DE-27",
+          "price": 260000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "QBGN-KK-DE-28",
+          "price": 260000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QBGN-KK-DE-29",
+          "price": 260000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QBGN-KK-BE-28",
+          "price": 260000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "QBGN-KK-BE-29",
+          "price": 260000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QBGN-KK-XR-29",
+          "price": 270000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "QBGN-KK-XR-30",
+          "price": 270000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Váy Hoa Nhí Nữ Dáng Xòe Cổ V",
+      "slug": "vay-hoa-nhi-nu-dang-xoe-co-v",
+      "description": "Váy hoa nhí nữ tính, nhẹ nhàng. Dáng xòe, cổ V, tay ngắn. Chất liệu voan mềm mại, có lớp lót.",
+      "price": 350000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1b5",
+      "images": ["/uploads/images/products/placeholder-vhn-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        {
+          "name": "Màu sắc",
+          "values": ["Nền Trắng Hoa Xanh", "Nền Vàng Hoa Cam"]
+        },
+        { "name": "Size", "values": ["26", "27", "28"] }
+      ],
+      "variants": [
+        {
+          "sku": "VHN-XOE-NTX-26",
+          "price": 350000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nền Trắng Hoa Xanh" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "VHN-XOE-NTX-27",
+          "price": 350000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nền Trắng Hoa Xanh" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "VHN-XOE-NTX-28",
+          "price": 350000,
+          "stockQuantity": 28,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nền Trắng Hoa Xanh" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "VHN-XOE-NVC-27",
+          "price": 360000,
+          "stockQuantity": 20,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nền Vàng Hoa Cam" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "VHN-XOE-NVC-28",
+          "price": 360000,
+          "stockQuantity": 22,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Nền Vàng Hoa Cam" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Khoác Nam Bomber Kaki 2 Lớp",
+      "slug": "ao-khoac-nam-bomber-kaki-2-lop",
+      "description": "Áo khoác bomber nam phong cách, chất liệu kaki dày dặn 2 lớp, chống gió tốt. Bo tay và bo gấu.",
+      "price": 550000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1b1",
+      "images": ["/uploads/images/products/placeholder-akb-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Đen", "Xanh Rêu", "Be"] },
+        { "name": "Size", "values": ["40", "41", "42"] }
+      ],
+      "variants": [
+        {
+          "sku": "AKB-KK-DE-40",
+          "price": 550000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "AKB-KK-DE-41",
+          "price": 550000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "AKB-KK-DE-42",
+          "price": 550000,
+          "stockQuantity": 25,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        },
+        {
+          "sku": "AKB-KK-XR-41",
+          "price": 560000,
+          "stockQuantity": 28,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "AKB-KK-XR-42",
+          "price": 560000,
+          "stockQuantity": 22,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xanh Rêu" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        },
+        {
+          "sku": "AKB-KK-BE-40",
+          "price": 550000,
+          "stockQuantity": 20,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "AKB-KK-BE-41",
+          "price": 550000,
+          "stockQuantity": 26,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Hoodie Nữ Nỉ Bông Có Mũ Trùm",
+      "slug": "ao-hoodie-nu-ni-bong-co-mu-trum",
+      "description": "Áo hoodie nữ ấm áp, chất liệu nỉ bông mềm mại. Có mũ trùm đầu và túi kangaroo tiện lợi.",
+      "price": 300000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1b3",
+      "images": ["/uploads/images/products/placeholder-ahd-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        {
+          "name": "Màu sắc",
+          "values": ["Xám Lông Chuột", "Hồng Đất", "Be Sữa"]
+        },
+        { "name": "Size", "values": ["27", "28", "29"] }
+      ],
+      "variants": [
+        {
+          "sku": "AHD-NB-XLC-27",
+          "price": 300000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Lông Chuột" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "AHD-NB-XLC-28",
+          "price": 300000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Lông Chuột" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "AHD-NB-XLC-29",
+          "price": 300000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Lông Chuột" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "AHD-NB-HD-28",
+          "price": 310000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Đất" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "AHD-NB-HD-29",
+          "price": 310000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Đất" },
+            { "attributeName": "Size", "value": "29" }
+          ]
+        },
+        {
+          "sku": "AHD-NB-BS-27",
+          "price": 300000,
+          "stockQuantity": 38,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Sữa" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "AHD-NB-BS-28",
+          "price": 300000,
+          "stockQuantity": 42,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Be Sữa" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Quần Jogger Nam Thun Thể Thao",
+      "slug": "quan-jogger-nam-thun-the-thao",
+      "description": "Quần jogger nam chất thun thể thao co giãn, thoáng khí. Form ống bo, lưng thun có dây rút. Phù hợp tập luyện hoặc mặc ở nhà.",
+      "price": 220000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1b2",
+      "images": ["/uploads/images/products/placeholder-qjg-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Đen", "Xám Đậm"] },
+        { "name": "Size", "values": ["30", "31", "32", "34"] }
+      ],
+      "variants": [
+        {
+          "sku": "QJG-TH-DE-30",
+          "price": 220000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "30" }
+          ]
+        },
+        {
+          "sku": "QJG-TH-DE-31",
+          "price": 220000,
+          "stockQuantity": 70,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QJG-TH-DE-32",
+          "price": 220000,
+          "stockQuantity": 65,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        },
+        {
+          "sku": "QJG-TH-DE-34",
+          "price": 220000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "34" }
+          ]
+        },
+        {
+          "sku": "QJG-TH-XD-31",
+          "price": 220000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Đậm" },
+            { "attributeName": "Size", "value": "31" }
+          ]
+        },
+        {
+          "sku": "QJG-TH-XD-32",
+          "price": 220000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Xám Đậm" },
+            { "attributeName": "Size", "value": "32" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Chân Váy Tennis Xếp Ly Nữ Kèm Quần Trong",
+      "slug": "chan-vay-tennis-xep-ly-nu-kem-quan-trong",
+      "description": "Chân váy tennis xếp ly trẻ trung, năng động. Có kèm quần bảo hộ bên trong tiện lợi. Chất liệu vải kaki mềm.",
+      "price": 230000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c9",
+      "images": ["/uploads/images/products/placeholder-cvt-1.jpg"],
+      "isPublished": true,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Trắng", "Đen", "Hồng Baby"] },
+        { "name": "Size", "values": ["26", "27", "28"] }
+      ],
+      "variants": [
+        {
+          "sku": "CVT-XL-TR-26",
+          "price": 230000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "26" }
+          ]
+        },
+        {
+          "sku": "CVT-XL-TR-27",
+          "price": 230000,
+          "stockQuantity": 55,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "CVT-XL-TR-28",
+          "price": 230000,
+          "stockQuantity": 50,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Trắng" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "CVT-XL-DE-27",
+          "price": 230000,
+          "stockQuantity": 60,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "CVT-XL-DE-28",
+          "price": 230000,
+          "stockQuantity": 52,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Đen" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        },
+        {
+          "sku": "CVT-XL-HB-27",
+          "price": 240000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Baby" },
+            { "attributeName": "Size", "value": "27" }
+          ]
+        },
+        {
+          "sku": "CVT-XL-HB-28",
+          "price": 240000,
+          "stockQuantity": 35,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Hồng Baby" },
+            { "attributeName": "Size", "value": "28" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Áo Sơ Mi Nam Caro Ngắn Tay Form Regular",
+      "slug": "ao-so-mi-nam-caro-ngan-tay-form-regular",
+      "description": "Áo sơ mi nam ngắn tay họa tiết caro trẻ trung. Chất liệu kate thấm hút tốt, form regular fit thoải mái.",
+      "price": 290000,
+      "category": "64f1a0e8a9b8c2a5a4e8d1c2",
+      "images": ["/uploads/images/products/placeholder-asmn-nt-1.jpg"],
+      "isPublished": false,
+      "isActive": true,
+      "attributes": [
+        { "name": "Màu sắc", "values": ["Caro Đỏ Đen", "Caro Xanh Trắng"] },
+        { "name": "Size", "values": ["39", "40", "41", "42"] }
+      ],
+      "variants": [
+        {
+          "sku": "ASMN-NT-CRDD-39",
+          "price": 290000,
+          "stockQuantity": 33,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Caro Đỏ Đen" },
+            { "attributeName": "Size", "value": "39" }
+          ]
+        },
+        {
+          "sku": "ASMN-NT-CRDD-40",
+          "price": 290000,
+          "stockQuantity": 43,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Caro Đỏ Đen" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ASMN-NT-CRDD-41",
+          "price": 290000,
+          "stockQuantity": 38,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Caro Đỏ Đen" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ASMN-NT-CRXT-40",
+          "price": 295000,
+          "stockQuantity": 40,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Caro Xanh Trắng" },
+            { "attributeName": "Size", "value": "40" }
+          ]
+        },
+        {
+          "sku": "ASMN-NT-CRXT-41",
+          "price": 295000,
+          "stockQuantity": 45,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Caro Xanh Trắng" },
+            { "attributeName": "Size", "value": "41" }
+          ]
+        },
+        {
+          "sku": "ASMN-NT-CRXT-42",
+          "price": 295000,
+          "stockQuantity": 30,
+          "optionValues": [
+            { "attributeName": "Màu sắc", "value": "Caro Xanh Trắng" },
+            { "attributeName": "Size", "value": "42" }
+          ]
+        }
+      ]
+    }
+  ]
+}
