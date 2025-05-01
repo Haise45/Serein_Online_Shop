@@ -702,19 +702,25 @@ const updateVariantStock = asyncHandler(async (req, res) => {
     throw new Error("ID sản phẩm hoặc biến thể không hợp lệ.");
   }
   if (change === undefined && set === undefined) {
-    /* ... lỗi thiếu input ... */
+    res.status(400);
+    throw new Error(
+      'Vui lòng cung cấp "change" (số lượng thay đổi) hoặc "set" (số lượng mới).'
+    );
   }
   if (change !== undefined && typeof change !== "number") {
-    /* ... lỗi kiểu dữ liệu change ... */
+    res.status(400);
+    throw new Error('"change" phải là một số.');
   }
   if (
     set !== undefined &&
     (typeof set !== "number" || set < 0 || !Number.isInteger(set))
   ) {
-    /* ... lỗi kiểu/giá trị set ... */
+    res.status(400);
+    throw new Error('"set" phải là một số nguyên không âm.');
   }
   if (change !== undefined && set !== undefined) {
-    /* ... lỗi cung cấp cả hai ... */
+    res.status(400);
+    throw new Error('Không thể cung cấp cả "change" và "set" cùng lúc.');
   }
 
   // --- 2. Tìm sản phẩm và biến thể ---
