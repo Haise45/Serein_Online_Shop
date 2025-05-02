@@ -14,7 +14,7 @@ const variantSchema = new mongoose.Schema(
       required: [true, "Biến thể phải có giá"],
       min: [0, "Giá không được âm"],
     },
-    stockQuality: {
+    stockQuantity: {
       type: Number,
       required: [true, "Biến thể phải có số lượng tồn kho"],
       min: [0, "Số lượng tồn kho không được âm"],
