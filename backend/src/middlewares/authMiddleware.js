@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const asyncHandler = require("./asyncHandler");
 require("dotenv").config();
 
 // Middleware to protect routes requiring authentication
@@ -23,11 +24,9 @@ const protect = async (req, res, next) => {
       req.user = await User.findById(decoded.id).select("-password");
 
       if (!req.user) {
-        return res
-          .status(401)
-          .json({
-            message: "Không tìm thấy người dùng liên kết với token này.",
-          });
+        return res.status(401).json({
+          message: "Không tìm thấy người dùng liên kết với token này.",
+        });
       }
 
       next(); // Proceed to the next middleware/route handler
@@ -66,4 +65,48 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, isAdmin };
+// --- Hàm protectOptional ---
+// Mục đích: Cố gắng xác thực token nếu có, nhưng không báo lỗi nếu thiếu/sai. Luôn gọi next().
+const protectOptional = asyncHandler(async (req, res, next) => {
+  let token;
+  req.user = null;
+
+  // Kiểm tra xem header Authorization có tồn tại và bắt đầu bằng 'Bearer' không
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      // Lấy token từ header
+      token = req.headers.authorization.split(" ")[1];
+      // Xác thực token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Tìm user trong DB dựa trên ID từ token
+      const userFound = await User.findById(decoded.id).select("-password");
+      // Nếu tìm thấy user, gắn vào request
+      if (userFound) {
+        req.user = userFound;
+        console.log("[Protect Optional] Người dùng đã xác thực:", req.user._id);
+      } else {
+        // Token hợp lệ nhưng user không còn trong DB
+        console.log(
+          "[Protect Optional] Token hợp lệ nhưng không tìm thấy user trong DB."
+        );
+      }
+    } catch (error) {
+      // Nếu token không hợp lệ (sai, hết hạn), bỏ qua lỗi và chỉ log ra
+      console.log(
+        "[Protect Optional] Xác thực token thất bại hoặc token hết hạn (bỏ qua lỗi):",
+        error.message
+      );
+    }
+  } else {
+    // Không tìm thấy token trong header
+    console.log(
+      "[Protect Optional] Không tìm thấy token trong header Authorization."
+    );
+  }
+
+  next();
+});
+module.exports = { protect, isAdmin, protectOptional };

@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 const passwordResetTemplate = require("../utils/emailTemplates/passwordResetTemplate");
+const { mergeGuestCartToUserCart, clearGuestCartCookie } = require("../utils/cartUtils");
 
 // --- Tiện ích thiết lập Cookie ---
 const setRefreshTokenCookie = (res, token) => {
@@ -42,6 +43,9 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Số điện thoại đã được sử dụng.");
   }
 
+  // Lấy guestId TỪ TRƯỚC KHI tạo user (nếu có)
+  const guestId = req.cookies.cartGuestId;
+
   // 3. Create new user (password hashing is handled by pre-save hook in model)
   const user = await User.create({
     name,
@@ -50,13 +54,21 @@ const registerUser = asyncHandler(async (req, res) => {
     phone,
   });
 
-  // 3. Respond with user info and token
+  // 4. Respond with user info and token
   if (user) {
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
     // Gửi refresh token qua httpOnly cookie
     setRefreshTokenCookie(res, refreshToken);
+
+    // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
+    if (guestId) {
+      await mergeGuestCartToUserCart(guestId, user._id, res);
+    } else {
+      // Nếu không có guestId, vẫn có thể xóa cookie
+      clearGuestCartCookie(res);
+    }
 
     res.status(201).json({
       // 201 Created
@@ -80,12 +92,23 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  // Lấy guestId TỪ TRƯỚC KHI tạo user (nếu có)
+  const guestId = req.cookies.cartGuestId;
+
   // 1. Find user by email
   const user = await User.findOne({ email }); //.select('+password'); // select password here if needed or use matchPassword method which does it
 
   // 2. Check if user exists and password matches
   if (user && (await user.matchPassword(password))) {
     const accessToken = generateAccessToken(user._id);
+
+    // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
+    if (guestId) {
+      await mergeGuestCartToUserCart(guestId, user._id, res);
+    } else {
+      // Nếu không có guestId, vẫn có thể xóa cookie
+      clearGuestCartCookie(res);
+    }
 
     res.json({
       _id: user._id,
@@ -106,6 +129,9 @@ const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
 const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  // Lấy guestId TỪ TRƯỚC KHI tạo user (nếu có)
+  const guestId = req.cookies.cartGuestId;
+
   // 1. Find user by email
   const user = await User.findOne({ email }); //.select('+password'); // select password here if needed or use matchPassword method which does it
 
@@ -116,6 +142,15 @@ const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
 
     // Gửi refresh token qua httpOnly cookie
     setRefreshTokenCookie(res, refreshToken);
+
+    // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
+    if (guestId) {
+      await mergeGuestCartToUserCart(guestId, user._id, res);
+    } else {
+      // Nếu không có guestId, vẫn có thể xóa cookie
+      clearGuestCartCookie(res);
+    }
+
     res.json({
       _id: user._id,
       name: user.name,

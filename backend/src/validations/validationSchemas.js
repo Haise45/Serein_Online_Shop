@@ -288,6 +288,35 @@ const updateProductSchema = Joi.object({
   variants: Joi.array().items(variantSchemaValidation).optional(),
 }).min(1); // Phải có ít nhất một trường để cập nhật
 
+// Schema cho việc thêm item vào giỏ hàng
+const addToCartSchema = Joi.object({
+  productId: Joi.string().hex().length(24).required().messages({
+    "any.required": "ID sản phẩm là bắt buộc",
+    "string.length": "ID sản phẩm không hợp lệ",
+    "string.hex": "ID sản phẩm không hợp lệ",
+  }),
+  variantId: Joi.string().hex().length(24).optional().allow(null, "").messages({
+    "string.length": "ID biến thể không hợp lệ",
+    "string.hex": "ID biến thể không hợp lệ",
+  }),
+  quantity: Joi.number().integer().min(1).required().messages({
+    "any.required": "Số lượng là bắt buộc",
+    "number.base": "Số lượng phải là một số",
+    "number.integer": "Số lượng phải là số nguyên",
+    "number.min": "Số lượng phải lớn hơn 0",
+  }),
+});
+
+// Schema cho việc cập nhật số lượng item trong giỏ hàng
+const updateCartItemSchema = Joi.object({
+  quantity: Joi.number().integer().min(1).required().messages({
+    "any.required": "Số lượng là bắt buộc",
+    "number.base": "Số lượng phải là một số",
+    "number.integer": "Số lượng phải là số nguyên",
+    "number.min": "Số lượng phải lớn hơn 0",
+  }),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -297,4 +326,6 @@ module.exports = {
   updateCategorySchema,
   createProductSchema,
   updateProductSchema,
+  addToCartSchema,
+  updateCartItemSchema,
 };
