@@ -4,6 +4,8 @@ const morgan = require("morgan");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
+const { protectOptional } = require("./middlewares/authMiddleware");
+const identifyCartUser = require("./middlewares/identifyCartUser");
 
 // Import routes
 const authRoutes = require("./routes/authRoutes");
@@ -12,6 +14,7 @@ const locationRoutes = require("./routes/locationRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
 // Import error handler middleware
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
@@ -45,12 +48,15 @@ app.get("/api/v1", (req, res) => {
   res.send("Shop API is running...");
 });
 
+app.use("/api/v1/cart", protectOptional, identifyCartUser);
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/locations", locationRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/cart", cartRoutes);
 
 // Custom Error Handling Middlewares
 app.use(notFound);
