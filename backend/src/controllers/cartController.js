@@ -97,7 +97,7 @@ const populateAndCalculateCart = async (cart) => {
           // Lấy thông tin các option của variant này
           _id: variant._id,
           options: variant.optionValues.map((opt) => ({
-            name: opt.attributeName,
+            attributeName: opt.attributeName,
             value: opt.value,
           })),
         };
@@ -749,4 +749,5 @@ module.exports = {
   updateCartItem,
   removeCartItem,
   clearCart,
+  populateAndCalculateCart,
 };

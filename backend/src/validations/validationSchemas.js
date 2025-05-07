@@ -114,6 +114,7 @@ const addressSchemaValidation = Joi.object({
     "any.required": `"Tên Phường/Xã" là trường bắt buộc`,
   }),
   isDefault: Joi.boolean().optional(),
+  _id: Joi.string().hex().length(24).optional(),
 });
 
 const createCategorySchema = Joi.object({
@@ -395,6 +396,32 @@ const updateCouponSchema = Joi.object({
   applicableIds: Joi.array().items(Joi.string().hex().length(24)).optional(),
 }).min(1); // Yêu cầu ít nhất một trường để cập nhật
 
+// --- Schema cho Tạo Đơn Hàng Mới ---
+const createOrderSchema = Joi.object({
+  // Chỉ được phép chọn MỘT trong hai: địa chỉ đã lưu hoặc địa chỉ mới
+  shippingAddressId: Joi.string()
+    .hex()
+    .length(24)
+    .optional()
+    .allow(null, "")
+    .messages({
+      "string.length": "ID Địa chỉ đã lưu không hợp lệ.",
+      "string.hex": "ID Địa chỉ đã lưu không hợp lệ.",
+    }),
+  shippingAddress: addressSchemaValidation.optional().allow(null),
+  paymentMethod: Joi.string().required().messages({
+    "any.required": "Phương thức thanh toán là bắt buộc.",
+    "string.empty": "Phương thức thanh toán không được để trống.",
+  }),
+  shippingMethod: Joi.string().optional().allow("").default("Standard"),
+  notes: Joi.string().trim().optional().allow(""),
+})
+  .xor("shippingAddressId", "shippingAddress")
+  .messages({
+    "object.xor":
+      "Vui lòng chọn địa chỉ đã lưu HOẶC nhập địa chỉ mới, không chọn cả hai hoặc bỏ trống.",
+  });
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -408,4 +435,5 @@ module.exports = {
   updateCartItemSchema,
   createCouponSchema,
   updateCouponSchema,
+  createOrderSchema,
 };

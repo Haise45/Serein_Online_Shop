@@ -8,43 +8,8 @@ const { uploadImages } = require("../controllers/uploadController");
 
 const router = express.Router();
 
-// --- Cấu hình Multer động ---
-const UPLOAD_BASE_DIR = path.join(
-  __dirname,
-  "..",
-  "..",
-  "public",
-  "uploads",
-  "images"
-);
-
-// Danh sách các khu vực được phép upload (quan trọng để bảo mật)
-const allowedAreas = ["products", "categories", "users", "general"]; // Thêm các khu vực khác nếu cần
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const area = req.params.area; // Lấy khu vực từ URL
-
-    // Kiểm tra xem khu vực có hợp lệ không
-    if (!allowedAreas.includes(area)) {
-      return cb(new Error(`Khu vực upload không hợp lệ: ${area}`), null);
-    }
-
-    const destinationPath = path.join(UPLOAD_BASE_DIR, area);
-
-    // Tạo thư mục nếu chưa tồn tại
-    // Dùng fs.promises để tạo thư mục bất đồng bộ (tốt hơn cho hiệu năng)
-    fs.promises
-      .mkdir(destinationPath, { recursive: true })
-      .then(() => cb(null, destinationPath)) // Gọi callback khi tạo xong
-      .catch((err) => cb(err, null)); // Gọi callback với lỗi nếu tạo thất bại
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = uuidv4();
-    const extension = path.extname(file.originalname);
-    cb(null, uniqueSuffix + extension); // Tên file duy nhất
-  },
-});
+// --- Cấu hình Multer với MemoryStorage ---
+const storage = multer.memoryStorage();
 
 // Filter chỉ cho phép upload ảnh
 const imageFileFilter = (req, file, cb) => {
