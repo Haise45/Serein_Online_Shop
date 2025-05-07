@@ -5,7 +5,7 @@ const passwordResetTemplate = (userName, resetUrl) => {
   // Lấy tên shop từ biến môi trường hoặc đặt giá trị mặc định
   const shopName = process.env.SHOP_NAME || "Cửa Hàng Của Bạn";
   // Lấy URL logo từ biến môi trường hoặc đặt giá trị mặc định/null
-  const logoUrl = process.env.SHOP_LOGO_URL || null; // Ví dụ: 'https://yourshop.com/logo.png'
+  const logoUrl = process.env.SHOP_LOGO_URL || null;
 
   // Sử dụng template literals (dấu ``) để dễ dàng nhúng biến và viết HTML
   return `
@@ -25,7 +25,7 @@ const passwordResetTemplate = (userName, resetUrl) => {
         .container { background-color: #f8f9fa; padding: 20px; }
         .content { background-color: #ffffff; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e9ecef; border-radius: 8px; }
         .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 20px; }
-        .footer { text-align: center; padding-block: 20px; margin-top: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #e9ecef; }
+        .footer { text-align: center; padding: 10px; margin-top: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #e9ecef; }
     </style>
 </head>
 <body>
@@ -46,7 +46,7 @@ const passwordResetTemplate = (userName, resetUrl) => {
                     </tr>
                     <!-- Body -->
                     <tr>
-                        <td style="padding:20px; color:#343a40;">
+                        <td style="padding-left: 20px; padding-right: 20px; color:#343a40;">
                             <p style="margin-bottom:15px;">Xin chào ${
                               userName || "bạn"
                             },</p>

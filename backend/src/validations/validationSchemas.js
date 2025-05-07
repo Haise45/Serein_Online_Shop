@@ -114,6 +114,7 @@ const addressSchemaValidation = Joi.object({
     "any.required": `"Tên Phường/Xã" là trường bắt buộc`,
   }),
   isDefault: Joi.boolean().optional(),
+  _id: Joi.string().hex().length(24).optional(),
 });
 
 const createCategorySchema = Joi.object({
@@ -317,6 +318,110 @@ const updateCartItemSchema = Joi.object({
   }),
 });
 
+// Schema cho việc tạo mã giảm giá
+const createCouponSchema = Joi.object({
+  code: Joi.string().trim().uppercase().min(3).max(50).required().messages({
+    "any.required": "Mã giảm giá là bắt buộc.",
+    "string.empty": "Mã giảm giá không được để trống.",
+    "string.min": "Mã giảm giá phải có ít nhất {#limit} ký tự.",
+    "string.max": "Mã giảm giá không được vượt quá {#limit} ký tự.",
+    "string.uppercase": "Mã giảm giá phải là chữ hoa.",
+  }),
+  description: Joi.string().trim().optional().allow(""),
+  discountType: Joi.string()
+    .valid("percentage", "fixed_amount")
+    .required()
+    .messages({
+      "any.required": "Loại giảm giá là bắt buộc.",
+      "any.only": 'Loại giảm giá phải là "percentage" hoặc "fixed_amount".',
+    }),
+  discountValue: Joi.number().positive().required().messages({
+    "any.required": "Giá trị giảm giá là bắt buộc.",
+    "number.base": "Giá trị giảm giá phải là số.",
+    "number.positive": "Giá trị giảm giá phải lớn hơn 0.",
+  }),
+  minOrderValue: Joi.number().min(0).optional().default(0).messages({
+    "number.min": "Giá trị đơn hàng tối thiểu không được âm.",
+  }),
+  maxUsage: Joi.number().integer().min(1).optional().allow(null).messages({
+    "number.min": "Số lần sử dụng tối đa phải ít nhất là 1.",
+    "number.integer": "Số lần sử dụng tối đa phải là số nguyên.",
+  }),
+  // usageCount không cần validate khi tạo
+  maxUsagePerUser: Joi.number()
+    .integer()
+    .min(1)
+    .optional()
+    .default(1)
+    .messages({
+      "number.min":
+        "Số lần sử dụng tối đa cho mỗi người dùng phải ít nhất là 1.",
+      "number.integer":
+        "Số lần sử dụng tối đa cho mỗi người dùng phải là số nguyên.",
+    }),
+  startDate: Joi.date().optional().allow(null).messages({
+    "date.base": "Ngày bắt đầu không hợp lệ.",
+  }),
+  expiryDate: Joi.date().required().messages({
+    // Ngày hết hạn là bắt buộc
+    "any.required": "Ngày hết hạn là bắt buộc.",
+    "date.base": "Ngày hết hạn không hợp lệ.",
+  }),
+  isActive: Joi.boolean().optional().default(true),
+  applicableTo: Joi.string()
+    .valid("all", "categories", "products")
+    .optional()
+    .default("all"),
+  applicableIds: Joi.array()
+    .items(Joi.string().hex().length(24))
+    .optional()
+    .default([])
+    .messages({
+      "string.length": "ID áp dụng không hợp lệ.",
+      "string.hex": "ID áp dụng không hợp lệ.",
+    }),
+});
+
+// Schema cho việc cập nhật mã giảm giá
+const updateCouponSchema = Joi.object({
+  description: Joi.string().trim().optional().allow(""),
+  // Không cho phép sửa code, discountType, discountValue
+  minOrderValue: Joi.number().min(0).optional(),
+  maxUsage: Joi.number().integer().min(1).optional().allow(null),
+  maxUsagePerUser: Joi.number().integer().min(1).optional(),
+  startDate: Joi.date().optional().allow(null),
+  expiryDate: Joi.date().optional(),
+  isActive: Joi.boolean().optional(),
+  applicableTo: Joi.string().valid("all", "categories", "products").optional(),
+  applicableIds: Joi.array().items(Joi.string().hex().length(24)).optional(),
+}).min(1); // Yêu cầu ít nhất một trường để cập nhật
+
+// --- Schema cho Tạo Đơn Hàng Mới ---
+const createOrderSchema = Joi.object({
+  // Chỉ được phép chọn MỘT trong hai: địa chỉ đã lưu hoặc địa chỉ mới
+  shippingAddressId: Joi.string()
+    .hex()
+    .length(24)
+    .optional()
+    .allow(null, "")
+    .messages({
+      "string.length": "ID Địa chỉ đã lưu không hợp lệ.",
+      "string.hex": "ID Địa chỉ đã lưu không hợp lệ.",
+    }),
+  shippingAddress: addressSchemaValidation.optional().allow(null),
+  paymentMethod: Joi.string().required().messages({
+    "any.required": "Phương thức thanh toán là bắt buộc.",
+    "string.empty": "Phương thức thanh toán không được để trống.",
+  }),
+  shippingMethod: Joi.string().optional().allow("").default("Standard"),
+  notes: Joi.string().trim().optional().allow(""),
+})
+  .xor("shippingAddressId", "shippingAddress")
+  .messages({
+    "object.xor":
+      "Vui lòng chọn địa chỉ đã lưu HOẶC nhập địa chỉ mới, không chọn cả hai hoặc bỏ trống.",
+  });
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -328,4 +433,7 @@ module.exports = {
   updateProductSchema,
   addToCartSchema,
   updateCartItemSchema,
+  createCouponSchema,
+  updateCouponSchema,
+  createOrderSchema,
 };

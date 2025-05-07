@@ -39,6 +39,15 @@ const cartSchema = new mongoose.Schema(
       default: null,
     },
     items: [cartItemSchema], // Mảng các sản phẩm trong giỏ
+    appliedCoupon: { // Lưu thông tin coupon đã áp dụng
+      code: { type: String, uppercase: true, trim: true },
+      discountType: {
+        type: String,
+        enum: ["percentage", "fixed_amount"],
+      },
+      discountValue: { type: Number },
+      discountAmount: { type: Number }, // Số tiền giảm giá thực tế đã tính cho giỏ hàng này
+    },
   },
   {
     timestamps: true,

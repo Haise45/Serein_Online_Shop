@@ -1,5 +1,7 @@
 const express = require("express");
 const {
+  applyCoupon,
+  removeCoupon,
   addItemToCart,
   getCart,
   updateCartItem,
@@ -34,5 +36,13 @@ router.delete("/items/:itemId", removeCartItem);
 
 // DELETE /api/v1/cart : Xóa toàn bộ giỏ hàng
 router.delete("/", clearCart);
+
+// --- Routes cho Coupon ---
+// POST /api/v1/cart/apply-coupon
+// Body: { "couponCode": "YOUR_CODE" }
+router.post("/apply-coupon", applyCoupon);
+
+// DELETE /api/v1/cart/remove-coupon
+router.delete("/remove-coupon", removeCoupon);
 
 module.exports = router;
