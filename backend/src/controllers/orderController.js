@@ -1,0 +1,1203 @@
+const Order = require("../models/Order");
+const Cart = require("../models/Cart");
+const Product = require("../models/Product");
+const Coupon = require("../models/Coupon");
+const User = require("../models/User");
+const asyncHandler = require("../middlewares/asyncHandler");
+const mongoose = require("mongoose");
+const sendEmail = require("../utils/sendEmail");
+const { populateAndCalculateCart } = require("../controllers/cartController");
+const orderConfirmationTemplate = require("../utils/emailTemplates/orderConfirmationTemplate");
+const orderShippedTemplate = require("../utils/emailTemplates/orderShippedTemplate");
+const orderDeliveredTemplate = require("../utils/emailTemplates/orderDeliveredTemplate");
+const requestAdminNotificationTemplate = require("../utils/emailTemplates/requestAdminNotificationTemplate");
+const requestStatusUpdateTemplate = require("../utils/emailTemplates/requestStatusUpdateTemplate");
+
+require("dotenv").config();
+
+// --- Hàm Helper: Cập nhật tồn kho và coupon usage ---
+const updateStockAndCouponUsage = async (
+  orderItems,
+  appliedCouponCode,
+  session
+) => {
+  console.log(
+    "[Stock Update Debug] Dữ liệu orderItems nhận được để cập nhật stock:",
+    JSON.stringify(orderItems, null, 2)
+  );
+  if (!Array.isArray(orderItems) || orderItems.length === 0) {
+    console.error(
+      "[Stock Update Error] Dữ liệu orderItems không hợp lệ hoặc rỗng."
+    );
+    // Không nên tiếp tục nếu dữ liệu sai
+    return; // Hoặc throw new Error('Dữ liệu items không hợp lệ để cập nhật stock.');
+  }
+  console.log("[Stock Update] Bắt đầu cập nhật tồn kho và coupon.");
+  const bulkOps = []; // Mảng các hành động cập nhật tồn kho
+
+  // 1. Chuẩn bị cập nhật tồn kho
+  for (const item of orderItems) {
+    const decrementAmount = item.quantity;
+    if (item.variant?.variantId) {
+      // Giảm tồn kho của biến thể
+      filter = { _id: item.product, "variants._id": item.variant.variantId };
+      update = { $inc: { "variants.$.stockQuantity": -decrementAmount } };
+    } else {
+      // Giảm tồn kho của sản phẩm chính
+      filter = { _id: item.product };
+      update = { $inc: { stockQuantity: -decrementAmount } };
+    }
+    bulkOps.push({ updateOne: { filter, update } });
+  }
+
+  // 2. Chuẩn bị cập nhật coupon usage (nếu có)
+  let couponUpdatePromise = Promise.resolve();
+  if (appliedCouponCode) {
+    couponUpdatePromise = Coupon.updateOne(
+      { code: appliedCouponCode },
+      { $inc: { usageCount: 1 } }
+    ).session(session);
+  }
+
+  // 3. Thực thi cập nhật với session
+  if (bulkOps.length > 0) {
+    console.log("[Stock Update] Đang thực thi bulkWrite...");
+    await Product.bulkWrite(bulkOps, { session });
+    console.log("[Stock Update] Đã thực thi bulkWrite.");
+  }
+  await couponUpdatePromise;
+  console.log("[Stock Update] Cập nhật coupon usage thành công (nếu có).");
+};
+
+// @desc    Tạo đơn hàng mới từ giỏ hàng
+// @route   POST /api/v1/orders
+// @access  Private (Yêu cầu đăng nhập)
+const createOrder = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const {
+    shippingAddressId,
+    shippingAddress: newShippingAddressData,
+    paymentMethod,
+    shippingMethod,
+    notes,
+  } = req.body;
+
+  // --- Xác định các phương thức thanh toán trả trước ---
+  const prepaidPaymentMethods = ["BANK_TRANSFER", "PAYPAL", "VNPAY", "MOMO"];
+
+  // --- Bắt đầu Transaction ---
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  console.log("[Transaction] Bắt đầu Transaction tạo đơn hàng.");
+
+  let createdOrder;
+
+  try {
+    // --- 1. Tìm giỏ hàng và populate thông tin cần thiết ---
+    const cart = await Cart.findOne({ userId: userId }).session(session);
+    if (!cart || cart.items.length === 0) {
+      res.status(404);
+      throw new Error("Giỏ hàng của bạn đang trống.");
+    }
+
+    // Populate đầy đủ để lấy thông tin mới nhất và re-validate
+    const populatedCart = await populateAndCalculateCart(cart);
+    if (!populatedCart || populatedCart.items.length === 0) {
+      res.status(404);
+      throw new Error("Giỏ hàng không có sản phẩm hợp lệ.");
+    }
+
+    // --- 2. Lấy và xác thực địa chỉ giao hàng ---
+    let finalShippingAddress = null;
+    if (shippingAddressId) {
+      if (!mongoose.Types.ObjectId.isValid(shippingAddressId)) {
+        res.status(400);
+        throw new Error("ID địa chỉ giao hàng không hợp lệ.");
+      }
+      // Tìm user đầy đủ để lấy addresses
+      const userWithAddresses = await User.findById(userId)
+        .select("addresses")
+        .session(session);
+      const address = userWithAddresses?.addresses?.id(shippingAddressId);
+      if (!address) {
+        res.status(404);
+        throw new Error(
+          "Không tìm thấy địa chỉ giao hàng này trong tài khoản của bạn."
+        );
+      }
+      // Tạo snapshot từ địa chỉ tìm được
+      finalShippingAddress = {
+        fullName: address.fullName,
+        phone: address.phone,
+        street: address.street,
+        communeCode: address.communeCode,
+        communeName: address.communeName,
+        districtCode: address.districtCode,
+        districtName: address.districtName,
+        provinceCode: address.provinceCode,
+        provinceName: address.provinceName,
+        countryCode: address.countryCode,
+      };
+    } else if (newShippingAddressData) {
+      // Lấy lại user đầy đủ để cập nhật địa chỉ
+      const userWithAddresses = await User.findById(userId)
+        .select("addresses")
+        .session(session);
+      if (!userWithAddresses) {
+        res.status(404);
+        throw new Error("Lỗi không tìm thấy thông tin người dùng.");
+      }
+
+      // Kiểm tra xem có nên đặt làm mặc định không
+      const isDefaultAddress =
+        !userWithAddresses.addresses ||
+        userWithAddresses.addresses.length === 0;
+
+      // Thêm địa chỉ mới vào danh sách của user
+      userWithAddresses.addresses.push({
+        ...newShippingAddressData,
+        isDefault: isDefaultAddress,
+      });
+      await userWithAddresses.save({ session }); // <<< Lưu user trong transaction >>>
+      console.log("[Address] Đã lưu địa chỉ mới vào user.");
+
+      // Sử dụng địa chỉ mới này cho đơn hàng
+      finalShippingAddress = { ...newShippingAddressData };
+    }
+
+    // --- 3. Re-validate Tồn kho lần cuối ---
+    const productIds = populatedCart.items.map((item) => item.productId);
+    // Fetch lại thông tin stock mới nhất
+    const productsInCart = await Product.find({ _id: { $in: productIds } })
+      .select("variants stockQuantity")
+      .session(session);
+    const productMap = new Map(
+      productsInCart.map((product) => [product._id.toString(), product])
+    );
+
+    for (const item of populatedCart.items) {
+      const productData = productMap.get(item.productId.toString());
+      let availableStock = 0;
+      if (productData) {
+        if (item.variantId) {
+          const variant = productData.variants.id(item.variantId);
+          availableStock = variant ? variant.stockQuantity : 0;
+        } else {
+          availableStock = productData.stockQuantity;
+        }
+      }
+      if (item.quantity > availableStock) {
+        res.status(400);
+        throw new Error(
+          `Sản phẩm "${item.name}" (SKU: ${item.sku}) không đủ số lượng tồn kho (Còn ${availableStock}, cần ${item.quantity}).`
+        );
+      }
+    }
+    console.log("[Transaction] Kiểm tra tồn kho thành công.");
+
+    // --- 4. Tạo mảng orderItems (snapshot) ---
+    const populatedCartResult = await populateAndCalculateCart(cart);
+
+    if (!populatedCartResult || !Array.isArray(populatedCartResult.items)) {
+      console.error(
+        "[Debug] LỖI: populatedCartResult.items không phải là mảng!",
+        populatedCartResult
+      );
+      throw new Error("Dữ liệu giỏ hàng sau khi populate không hợp lệ.");
+    }
+
+    const orderItemsData = populatedCartResult.items.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price, // Giá tại thời điểm đặt hàng
+      image: item.image,
+      product: item.productId, // Chỉ lưu ID sản phẩm gốc
+      variant: item.variantId
+        ? {
+            // Chỉ lưu nếu có variant
+            variantId: item.variantId,
+            sku: item.sku, // SKU của variant
+            options: item.variantInfo?.options || [], // Các lựa chọn của variant
+          }
+        : null,
+    }));
+    console.log(
+      "[Debug] Dữ liệu orderItemsData TRƯỚC KHI tạo Order:",
+      JSON.stringify(orderItemsData, null, 2)
+    );
+
+    // --- 5. Tạo đối tượng Order ---
+    let initialStatus = "Pending";
+    let initialIsPaid = false;
+    let initialPaidAt = null;
+
+    // <<< KIỂM TRA THANH TOÁN TRẢ TRƯỚC >>>
+    if (prepaidPaymentMethods.includes(paymentMethod)) {
+      initialStatus = "Processing"; // Chuyển thẳng sang Processing
+      initialIsPaid = true; // Đánh dấu đã thanh toán
+      initialPaidAt = new Date(); // Ghi nhận thời điểm thanh toán
+      console.log(
+        `[Order Create] Thanh toán trả trước (${paymentMethod}). Đặt trạng thái Processing, isPaid=true.`
+      );
+    }
+    const order = new Order({
+      user: userId,
+      orderItems: orderItemsData,
+      shippingAddress: finalShippingAddress,
+      paymentMethod: paymentMethod || "COD",
+      shippingMethod: shippingMethod || "Standard",
+      itemsPrice: populatedCart.subtotal,
+      shippingPrice: 0,
+      taxPrice: 0, // Tạm thời
+      discountAmount: populatedCart.discountAmount || 0,
+      totalPrice: populatedCart.finalTotal || populatedCart.subtotal,
+      appliedCouponCode: populatedCart.appliedCoupon?.code || null,
+      status: initialStatus,
+      notes: notes || "",
+      isPaid: initialIsPaid,
+      paidAt: initialPaidAt,
+      isDelivered: false,
+    });
+
+    // --- 6. Lưu Order ---
+    createdOrder = await order.save({ session });
+    console.log(`[Transaction] Đã lưu Order: ${createdOrder._id}`);
+    console.log(
+      "[Debug] Dữ liệu createdOrder.orderItems SAU KHI lưu:",
+      JSON.stringify(createdOrder.orderItems, null, 2)
+    );
+
+    // --- 7. Cập nhật tồn kho và coupon usage ---
+    console.log("[Debug] createdOrder type:", typeof createdOrder);
+    console.log(
+      "[Debug] createdOrder.orderItems type:",
+      typeof createdOrder.orderItems
+    );
+    console.log(
+      "[Debug] Is createdOrder.orderItems an array?",
+      Array.isArray(createdOrder.orderItems)
+    );
+    if (!Array.isArray(createdOrder.orderItems)) {
+      console.error(
+        "[Debug] LỖI: createdOrder.orderItems không phải là mảng!",
+        createdOrder.orderItems
+      );
+    }
+    await updateStockAndCouponUsage(
+      createdOrder.orderItems,
+      createdOrder.appliedCouponCode,
+      session
+    );
+    console.log("[Transaction] Đã cập nhật stock và coupon.");
+
+    // --- 8. Xóa giỏ hàng ---
+    cart.items = [];
+    cart.appliedCoupon = null;
+    await cart.save({ session });
+    console.log(
+      `[Cart] Đã xóa giỏ hàng cho User ${userId} sau khi tạo Order ${createdOrder._id}`
+    );
+
+    // --- 9. Commit Transaction ---
+    await session.commitTransaction();
+    console.log("[Transaction] Commit Transaction thành công.");
+  } catch (error) {
+    // --- Nếu có lỗi ở bất kỳ bước nào, Abort Transaction ---
+    console.error(
+      "[Transaction] Gặp lỗi, đang abort transaction:",
+      error.message
+    );
+    await session.abortTransaction(); // Hủy bỏ mọi thay đổi trong transaction
+    console.log("[Transaction] Đã abort transaction.");
+    // Ném lỗi ra ngoài để global error handler xử lý
+    throw new Error(error.message || "Tạo đơn hàng thất bại.");
+  } finally {
+    // --- Kết thúc Session ---
+    await session.endSession();
+    console.log("[Transaction] Đã kết thúc session.");
+  }
+
+  // --- Bước 10: Gửi Email Xác nhận ---
+  if (createdOrder) {
+    try {
+      const orderForEmail = await Order.findById(createdOrder._id)
+        .populate("user", "name email")
+        .lean();
+      if (orderForEmail) {
+        const emailHtml = orderConfirmationTemplate(
+          orderForEmail.user.name,
+          orderForEmail
+        );
+        await sendEmail({
+          email: orderForEmail.user.email,
+          subject: `Xác nhận đơn hàng #${orderForEmail._id
+            .toString()
+            .slice(-6)} tại ${process.env.SHOP_NAME || "Shop"}`,
+          message: `Cảm ơn bạn đã đặt hàng! Mã đơn hàng của bạn là ${orderForEmail._id}.`,
+          html: emailHtml,
+        });
+      }
+    } catch (emailError) {
+      console.error(
+        `Lỗi gửi email xác nhận cho đơn hàng ${createdOrder._id}:`,
+        emailError
+      );
+    }
+    // --- Trả về đơn hàng đã tạo ---
+    await createdOrder.populate("user", "name email");
+    res.status(201).json(createdOrder);
+  }
+});
+
+// @desc    Lấy danh sách đơn hàng của người dùng hiện tại (Phân trang)
+// @route   GET /api/v1/orders/my
+// @access  Private
+const getMyOrders = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter = { user: userId };
+
+  const sort = { createAt: -1 };
+
+  const ordersQuery = Order.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .select("_id status totalPrice createdAt orderItems.name orderItems.image")
+    .lean();
+
+  const totalOrdersQuery = Order.countDocuments(filter);
+
+  const [orders, totalOrders] = await Promise.all([
+    ordersQuery.exec(),
+    totalOrdersQuery.exec(),
+  ]);
+
+  const totalPages = Math.ceil(totalOrders / limit);
+
+  res.status(200).json({
+    currentPage: page,
+    totalPages: totalPages,
+    totalOrders: totalOrders,
+    limit: limit,
+    orders: orders,
+  });
+});
+
+// @desc    Lấy chi tiết đơn hàng (cho User hoặc Admin)
+// @route   GET /api/v1/orders/:id
+// @access  Private
+const getOrderById = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  // Populate thêm thông tin user (tên, email)
+  const order = await Order.findById(orderId).populate("user", "name email");
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng này.");
+  }
+
+  // Kiểm tra quyền truy cập: Hoặc là Admin, hoặc là chủ đơn hàng
+  if (
+    req.user.role !== "admin" &&
+    order.user._id.toString() !== req.user._id.toString()
+  ) {
+    res.status(403);
+    throw new Error("Bạn không có quyền truy cập vào đơn hàng này.");
+  }
+  res.status(200).json(order);
+});
+
+// @desc    User yêu cầu hủy đơn hàng
+// @route   PUT /api/v1/orders/:id/request-cancellation
+// @access  Private (Chủ đơn hàng)
+const requestCancellation = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const userId = req.user._id;
+  const { reason, imageUrls } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  if (!reason) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp lý do yêu cầu hủy.");
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  // Kiểm tra xem đúng là chủ đơn hàng không
+  if (order.user.toString() !== userId.toString()) {
+    res.status(403);
+    throw new Error("Bạn không có quyền cập nhật đơn hàng này.");
+  }
+
+  // Chỉ cho phép yêu cầu hủy khi đang 'Pending' hoặc 'Processing'
+  if (!["Pending", "Processing"].includes(order.status)) {
+    res.status(400);
+    throw new Error(
+      `Không thể yêu cầu hủy đơn hàng đang ở trạng thái "${order.status}".`
+    );
+  }
+
+  // Kiểm tra xem đã yêu cầu trước đó chưa
+  if (order.status === "CancellationRequested") {
+    return res
+      .status(400)
+      .json({ message: "Bạn đã gửi yêu cầu hủy cho đơn hàng này rồi." });
+  }
+
+  order.previousStatus = order.status;
+  order.status = "CancellationRequested";
+  order.cancellationRequest = {
+    reason,
+    imageUrls: imageUrls || [],
+    requestedAt: new Date(),
+  };
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  if (process.env.ADMIN_EMAIL_NOTIFICATIONS && updatedOrder.user) {
+    // Kiểm tra có user không
+    try {
+      const adminHtml = requestAdminNotificationTemplate(
+        "cancellation",
+        updatedOrder,
+        updatedOrder.cancellationRequest
+      );
+      await sendEmail({
+        email: process.env.ADMIN_EMAIL_NOTIFICATIONS,
+        subject: `[Yêu Cầu Hủy] Đơn #${orderId.slice(-6)} từ KH: ${
+          updatedOrder.user.name
+        } (${updatedOrder.user.email})`,
+        message: `Khách hàng ${updatedOrder.user.name} (Email: ${updatedOrder.user.email}) yêu cầu hủy đơn hàng ${orderId}. Lý do: ${reason}`,
+        html: adminHtml,
+        replyTo: updatedOrder.user.email,
+      });
+    } catch (emailError) {
+      console.error("Lỗi gửi mail thông báo hủy cho admin:", emailError);
+    }
+  }
+
+  res.json({
+    message: "Yêu cầu hủy đơn hàng của bạn đã được gửi.",
+    order: updatedOrder,
+  });
+});
+
+// @desc    User yêu cầu trả hàng/hoàn tiền
+// @route   PUT /api/v1/orders/:id/request-refund
+// @access  Private (Chủ đơn hàng)
+const requestRefund = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const userId = req.user._id;
+  const { reason, imageUrls } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  if (!reason) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp lý do yêu cầu hoàn tiền.");
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  // Kiểm tra xem đúng là chủ đơn hàng không
+  if (order.user.toString() !== userId.toString()) {
+    res.status(403);
+    throw new Error("Bạn không có quyền cập nhật đơn hàng này.");
+  }
+
+  // Chỉ cho phép yêu cầu hoàn tiền khi đã 'Delivered'
+  if (order.status !== "Delivered") {
+    res.status(400);
+    throw new Error(
+      `Chỉ có thể yêu cầu hoàn tiền cho đơn hàng đã được giao thành công.`
+    );
+  }
+
+  // Kiểm tra xem đã yêu cầu trước đó chưa
+  if (order.status === "RefundRequested") {
+    return res
+      .status(400)
+      .json({ message: "Bạn đã gửi yêu cầu hoàn tiền cho đơn hàng này rồi." });
+  }
+
+  order.previousStatus = order.status;
+  order.status = "RefundRequested";
+  order.refundRequest = {
+    reason,
+    imageUrls: imageUrls || [],
+    requestedAt: new Date(),
+  };
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi email cho Admin ---
+  if (process.env.ADMIN_EMAIL_NOTIFICATIONS && updatedOrder.user) {
+    try {
+      const adminHtml = requestAdminNotificationTemplate(
+        "refund",
+        updatedOrder,
+        updatedOrder.refundRequest
+      );
+      await sendEmail({
+        email: process.env.ADMIN_EMAIL_NOTIFICATIONS,
+        subject: `[Yêu Cầu Hoàn Tiền] Đơn #${orderId.slice(-6)} từ KH: ${
+          updatedOrder.user.name
+        } (${updatedOrder.user.email})`,
+        message: `Khách hàng ${updatedOrder.user.name} (Email: ${updatedOrder.user.email}) yêu cầu hoàn tiền đơn hàng ${orderId}. Lý do: ${reason}`,
+        html: adminHtml,
+        replyTo: updatedOrder.user.email,
+      });
+    } catch (emailError) {
+      console.error("Lỗi gửi mail thông báo hoàn tiền cho admin:", emailError);
+    }
+  }
+
+  res.json({
+    message: "Yêu cầu trả hàng/hoàn tiền của bạn đã được gửi.",
+    order: updatedOrder,
+  });
+});
+
+// @desc    Người dùng xác nhận đã nhận hàng
+// @route   PUT /api/v1/orders/:id/deliver
+// @access  Private (Chủ đơn hàng)
+const markOrderAsDelivered = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const userId = req.user._id;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  // Kiểm tra xem đúng là chủ đơn hàng không
+  if (order.user.toString() !== userId.toString()) {
+    res.status(403);
+    throw new Error("Bạn không có quyền cập nhật đơn hàng này.");
+  }
+
+  // Chỉ cho phép cập nhật từ trạng thái 'Shipped'
+  if (order.status !== "Shipped") {
+    res.status(400);
+    throw new Error(
+      `Không thể xác nhận đã nhận hàng cho đơn hàng ở trạng thái "${order.status}".`
+    );
+  }
+
+  // Cập nhật trạng thái và thời gian
+  order.status = "Delivered";
+  order.isDelivered = true;
+  order.deliveredAt = Date.now();
+
+  if (order.paymentMethod === "COD" && !order.isPaid) {
+    order.isPaid = true;
+    order.paidAt = Date.now();
+    console.log(
+      `[Order Delivered] Đơn hàng COD ${order._id} được đánh dấu đã thanh toán.`
+    );
+  }
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi Email xác nhận đã giao ---
+  try {
+    const userEmailHtml = orderDeliveredTemplate(
+      updatedOrder.user.name,
+      updatedOrder
+    );
+    await sendEmail({
+      email: updatedOrder.user.email,
+      subject: `Đơn hàng #${updatedOrder._id
+        .toString()
+        .slice(-6)} đã giao thành công!`,
+      message: `Đơn hàng ${updatedOrder._id} đã giao thành công.`,
+      html: userEmailHtml,
+    });
+  } catch (emailError) {
+    console.error(
+      `Lỗi gửi mail delivered cho order ${updatedOrder._id}:`,
+      emailError
+    );
+  }
+
+  res.json(updatedOrder);
+});
+
+// --- Các hàm cho Admin ---
+
+// Helper sort cho admin order
+const buildOrderSort = (query) => {
+  const sort = {};
+  if (query.sortBy) {
+    const allowed = ["createdAt", "totalPrice", "status"];
+    if (allowed.includes(query.sortBy)) {
+      sort[query.sortBy] = query.sortOrder === "desc" ? -1 : 1;
+    }
+  }
+  if (Object.keys(sort).length === 0) sort.createdAt = -1;
+  return sort;
+};
+
+// @desc    Lấy tất cả đơn hàng (Admin, có filter, sort, pagination)
+// @route   GET /api/v1/orders
+// @access  Private/Admin
+const getAllOrders = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+
+  // Xây dựng Filter cho Admin
+  const filter = {};
+  if (
+    req.query.status &&
+    [
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+      "Refunded",
+      "CancellationRequested",
+      "RefundRequested",
+    ].includes(req.query.status)
+  ) {
+    filter.status = req.query.status;
+  }
+  if (req.query.userId && mongoose.Types.ObjectId.isValid(req.query.userId)) {
+    filter.user = req.query.userId;
+  }
+  // Lọc theo ngày (ví dụ: ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD)
+  if (req.query.startDate) {
+    const startDate = new Date(req.query.startDate);
+    startDate.setHours(0, 0, 0, 0); // Bắt đầu ngày
+    if (!isNaN(startDate))
+      filter.createAt = { ...filter.createAt, $gte: startDate };
+  }
+  if (req.query.endDate) {
+    const endDate = new Date(req.query.endDate);
+    endDate.setHours(23, 59, 59, 999); // Kết thúc ngày
+    if (!isNaN(endDate))
+      filter.createAt = { ...filter.createAt, $lte: endDate };
+  }
+
+  // Sắp xếp
+  const sort = buildOrderSort(req.query);
+
+  const ordersQuery = Order.find(filter)
+    .populate("user", "name email")
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .select("-orderItems.variant")
+    .lean();
+
+  const totalOrdersQuery = Order.countDocuments(filter);
+
+  const [orders, totalOrders] = await Promise.all([
+    ordersQuery.exec(),
+    totalOrdersQuery.exec(),
+  ]);
+
+  const totalPages = Math.ceil(totalOrders / limit);
+
+  res.status(200).json({
+    currentPage: page,
+    totalPages: totalPages,
+    totalOrders: totalOrders,
+    limit: limit,
+    orders: orders,
+  });
+});
+
+// @desc    Cập nhật trạng thái đơn hàng (Admin)
+// @route   PUT /api/v1/orders/:id/status
+// @access  Private/Admin
+const updateOrderStatus = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const { status } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  // Validate status mới
+  const allowedStatusByAdmin = [
+    "Processing",
+    "Shipped",
+    "Cancelled",
+    "Refunded",
+  ];
+  if (!status || !allowedStatusByAdmin.includes(status)) {
+    res.status(400);
+    throw new Error(
+      `Admin chỉ có thể cập nhật trạng thái thành: ${allowedStatusByAdmin.join(
+        ", "
+      )}.`
+    );
+  }
+
+  const order = await Order.findById(orderId);
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  // --- Kiểm tra logic chuyển trạng thái ---
+  const currentStatus = order.status;
+  // Admin chỉ có thể hủy đơn khi đang Pending hoặc Processing (hoặc user request)
+  if (
+    status === "Cancelled" &&
+    !["Pending", "Processing", "CancellationRequested"].includes(currentStatus)
+  ) {
+    res.status(400);
+    throw new Error(
+      `Không thể hủy đơn hàng đang ở trạng thái "${currentStatus}".`
+    );
+  }
+  // Admin chỉ hoàn tiền khi user đã request hoặc đơn đã bị hủy trước đó
+  if (
+    status === "Refunded" &&
+    !["Delivered", "RefundRequested", "Cancelled"].includes(currentStatus)
+  ) {
+    res.status(400);
+    throw new Error(
+      `Không thể hoàn tiền cho đơn hàng đang ở trạng thái "${currentStatus}".`
+    );
+  }
+  // Admin chuyển trạng thái Shipped từ Processing
+  if (status === "Shipped" && !["Processing"].includes(currentStatus)) {
+    res.status(400);
+    throw new Error(
+      `Chỉ có thể chuyển sang 'Shipped' từ trạng thái 'Processing'.`
+    );
+  }
+  // Admin chuyển trạng thái Processing từ Pending
+  if (
+    status === "Processing" &&
+    !["Pending", "CancellationRequested", "RefundRequested"].includes(
+      currentStatus
+    )
+  ) {
+    res.status(400);
+    throw new Error(
+      `Không thể chuyển sang 'Processing' từ trạng thái "${currentStatus}".`
+    );
+  }
+
+  // Cập nhật trạng thái
+  order.status = status;
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi Email khi chuyển sang 'Shipped' ---
+  if (updatedOrder.status === "Shipped" && currentStatus !== "Shipped") {
+    // Chỉ gửi nếu status thực sự thay đổi thành Shipped
+    try {
+      const userEmailHtml = orderShippedTemplate(
+        updatedOrder.user.name,
+        updatedOrder
+      );
+      await sendEmail({
+        email: updatedOrder.user.email,
+        subject: `Đơn hàng #${updatedOrder._id
+          .toString()
+          .slice(-6)} của bạn đã được giao đi!`,
+        message: `Đơn hàng ${updatedOrder._id} đã được giao đi.`,
+        html: userEmailHtml,
+      });
+    } catch (emailError) {
+      console.error(
+        `Lỗi gửi mail shipped cho order ${updatedOrder._id}:`,
+        emailError
+      );
+    }
+  }
+  res.json(updatedOrder);
+});
+
+// @desc    Admin chấp nhận yêu cầu hủy đơn hàng
+// @route   PUT /api/v1/orders/:id/approve-cancellation
+// @access  Private/Admin
+const approveCancellation = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  const order = await Order.findById(orderId);
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  // Chỉ chấp nhận khi đang ở trạng thái yêu cầu hủy
+  if (order.status !== "CancellationRequested") {
+    res.status(400);
+    throw new Error("Đơn hàng này không có yêu cầu hủy đang chờ xử lý.");
+  }
+
+  // Chuyển trạng thái sang Cancelled
+  order.status = "Cancelled";
+  order.adminNotes = "Yêu cầu hủy được chấp nhận.";
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi email thông báo cho User ---
+  try {
+    const userEmailHtml = requestStatusUpdateTemplate(
+      updatedOrder.user.name,
+      updatedOrder,
+      "cancellation",
+      true
+    );
+    await sendEmail({
+      email: updatedOrder.user.email,
+      subject: `Yêu cầu hủy đơn hàng #${updatedOrder._id
+        .toString()
+        .slice(-6)} đã được chấp nhận`,
+      message: `Yêu cầu hủy đơn hàng ${updatedOrder._id} được chấp nhận.`,
+      html: userEmailHtml,
+    });
+  } catch (emailError) {
+    console.error(
+      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      emailError
+    );
+  }
+
+  res.json({
+    message: "Đã chấp nhận yêu cầu hủy đơn hàng.",
+    order: updatedOrder,
+  });
+});
+
+// @desc    Admin từ chối yêu cầu hủy đơn hàng
+// @route   PUT /api/v1/orders/:id/reject-cancellation
+// @access  Private/Admin
+const rejectCancellation = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const { reason } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  if (!reason) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp lý do từ chối yêu cầu hủy đơn.");
+  }
+
+  const order = await Order.findById(orderId);
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  if (order.status !== "CancellationRequested") {
+    res.status(400);
+    throw new Error("Đơn hàng này không có yêu cầu hủy đang chờ xử lý.");
+  }
+
+  const statusToRevert = order.previousStatus || "Processing";
+  order.status = statusToRevert;
+  order.previousStatus = null;
+  order.adminNotes = `Yêu cầu hủy bị từ chối: ${
+    reason || "Không có lý do cụ thể"
+  }`;
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi email thông báo cho User ---
+  try {
+    const userEmailHtml = requestStatusUpdateTemplate(
+      updatedOrder.user.name,
+      updatedOrder,
+      "cancellation",
+      false,
+      reason
+    );
+    await sendEmail({
+      email: updatedOrder.user.email,
+      subject: `Yêu cầu hủy đơn hàng #${updatedOrder._id
+        .toString()
+        .slice(-6)} bị từ chối`,
+      message: `Yêu cầu hủy đơn hàng ${updatedOrder._id} bị từ chối. Lý do: ${reason}`,
+      html: userEmailHtml,
+    });
+  } catch (emailError) {
+    console.error(
+      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      emailError
+    );
+  }
+
+  res.json({
+    message: "Đã từ chối yêu cầu hủy đơn hàng.",
+    order: updatedOrder,
+  });
+});
+
+// @desc    Admin chấp nhận yêu cầu trả hàng/hoàn tiền
+// @route   PUT /api/v1/orders/:id/approve-refund
+// @access  Private/Admin
+const approveRefund = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  const order = await Order.findById(orderId);
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  if (order.status !== "RefundRequested") {
+    res.status(400);
+    throw new Error("Đơn hàng này không có yêu cầu hoàn tiền đang chờ xử lý.");
+  }
+
+  // Chuyển trạng thái sang Refunded
+  order.status = "Refunded";
+  // (Tùy chọn) Cập nhật isPaid = false, paidAt = null ? Tùy quy trình kế toán
+  order.isPaid = false;
+  order.paidAt = null;
+  order.adminNotes = "Yêu cầu hoàn tiền được chấp nhận.";
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi email thông báo cho User ---
+  try {
+    const userEmailHtml = requestStatusUpdateTemplate(
+      updatedOrder.user.name,
+      updatedOrder,
+      "refund",
+      true
+    );
+    await sendEmail({
+      email: updatedOrder.user.email,
+      subject: `Yêu cầu hoàn tiền đơn hàng #${updatedOrder._id
+        .toString()
+        .slice(-6)} đã được chấp nhận`,
+      message: `Yêu cầu hoàn tiền đơn hàng ${updatedOrder._id} được chấp nhận.`,
+      html: userEmailHtml,
+    });
+  } catch (emailError) {
+    console.error(
+      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      emailError
+    );
+  }
+
+  // Thay thế phương thức refund thực tế
+  console.log(`[Action Required] Kích hoạt hoàn tiền cho Order ID: ${orderId}`);
+
+  res.json({
+    message:
+      "Đã chấp nhận yêu cầu hoàn tiền. Quy trình hoàn tiền sẽ được xử lý.",
+    order: updatedOrder,
+  });
+});
+
+// @desc    Admin từ chối yêu cầu trả hàng/hoàn tiền
+// @route   PUT /api/v1/orders/:id/reject-refund
+// @access  Private/Admin
+const rejectRefund = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const { reason } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  if (!reason) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp lý do từ chối yêu cầu hoàn tiền.");
+  }
+
+  const order = await Order.findById(orderId);
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  if (order.status !== "RefundRequested") {
+    res.status(400);
+    throw new Error("Đơn hàng này không có yêu cầu hoàn tiền đang chờ xử lý.");
+  }
+
+  // Trạng thái trước đó khi yêu cầu refund luôn là 'Delivered'
+  const statusToRevert = order.previousStatus || "Processing";
+  order.status = statusToRevert;
+  order.previousStatus = null;
+  order.adminNotes = `Yêu cầu hoàn tiền bị từ chối: ${
+    reason || "Không có lý do cụ thể"
+  }`;
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate("user", "name email");
+
+  // --- Gửi email thông báo cho User ---
+  try {
+    const userEmailHtml = requestStatusUpdateTemplate(
+      updatedOrder.user.name,
+      updatedOrder,
+      "refund",
+      false,
+      reason
+    );
+    await sendEmail({
+      email: updatedOrder.user.email,
+      subject: `Yêu cầu hoàn tiền đơn hàng #${updatedOrder._id
+        .toString()
+        .slice(-6)} bị từ chối`,
+      message: `Yêu cầu hoàn tiền đơn hàng ${updatedOrder._id} bị từ chối. Lý do: ${reason}`,
+      html: userEmailHtml,
+    });
+  } catch (emailError) {
+    console.error(
+      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      emailError
+    );
+  }
+
+  res.json({ message: "Đã từ chối yêu cầu hoàn tiền.", order: updatedOrder });
+});
+
+// @desc    Admin khôi phục tồn kho cho đơn hàng
+// @route   POST /api/v1/orders/:id/restock
+// @access  Private/Admin
+const restockOrderItems = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("ID đơn hàng không hợp lệ.");
+  }
+
+  const order = await Order.findById(orderId).lean();
+  if (!order) {
+    res.status(404);
+    throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  // Chỉ nên cho phép restock nếu đơn hàng thực sự đã bị hủy hoặc hoàn tiền
+  if (!["Cancelled", "Refunded"].includes(order.status)) {
+    res.status(400);
+    throw new Error(
+      `Chỉ có thể khôi phục tồn kho cho đơn hàng đã Hủy hoặc Hoàn tiền (Trạng thái hiện tại: ${order.status}).`
+    );
+  }
+
+  // --- Logic khôi phục tồn kho ---
+  console.log(`[Restock] Bắt đầu khôi phục tồn kho cho Order ${orderId}`);
+  const bulkOps = [];
+  for (const item of order.orderItems) {
+    const incrementAmount = item.quantity;
+    if (item.variant?.variantId) {
+      // Tăng tồn kho biến thể
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: item.product, "variants._id": item.variant.variantId },
+          update: { $inc: { "variants.$.stockQuantity": +incrementAmount } },
+        },
+      });
+    } else {
+      // Tăng tồn kho sản phẩm chính
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: item.product },
+          update: { $inc: { stockQuantity: +incrementAmount } },
+        },
+      });
+    }
+  }
+
+  // Thực thi cập nhật
+  if (bulkOps.length > 0) {
+    try {
+      const result = await Product.bulkWrite(bulkOps);
+      console.log(
+        "[Restock] Kết quả khôi phục tồn kho:",
+        JSON.stringify(result)
+      );
+      // Kiểm tra kết quả nếu cần
+      if (result.modifiedCount === 0 && result.matchedCount > 0) {
+        console.warn(
+          "[Restock] Có thể một số sản phẩm/variant không tìm thấy để khôi phục stock."
+        );
+      }
+      res.status(200).json({
+        message: `Đã khôi phục tồn kho cho ${result.modifiedCount} mục sản phẩm.`,
+      });
+    } catch (error) {
+      console.error("[Restock] Lỗi khi khôi phục tồn kho:", error);
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi khôi phục tồn kho.");
+    }
+  } else {
+    res.status(400).json({
+      message: "Không có mục nào trong đơn hàng để khôi phục tồn kho.",
+    });
+  }
+});
+
+module.exports = {
+  createOrder,
+  getMyOrders,
+  getOrderById,
+  getAllOrders,
+  updateOrderStatus,
+  markOrderAsDelivered,
+  requestCancellation,
+  requestRefund,
+  restockOrderItems,
+  approveCancellation,
+  rejectCancellation,
+  approveRefund,
+  rejectRefund,
+};
