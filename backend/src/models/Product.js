@@ -67,7 +67,6 @@ const productSchema = new mongoose.Schema(
     },
     sku: {
       type: String,
-      unique: true,
       sparse: true,
       trim: true,
     },
@@ -100,6 +99,19 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       index: true,
+    },
+    // Thêm các trường Rating/Review
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: [0, "Điểm đánh giá trung bình không thể âm"],
+      max: [5, "Điểm đánh giá trung bình không thể lớn hơn 5"],
+    },
+    numReviews: {
+      // Tổng số lượt đánh giá đã được duyệt
+      type: Number,
+      default: 0,
+      min: [0, "Số lượt đánh giá không thể âm"],
     },
     // Lưu định nghĩa các thuộc tính và giá trị áp dụng cho sản phẩm này
     // Ví dụ: [{ name: 'Màu sắc', values: ['Đỏ', 'Xanh'] }, { name: 'Kích thước', values: ['S', 'M'] }]

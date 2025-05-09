@@ -181,10 +181,14 @@ const variantOptionValueSchema = Joi.object({
 
 // Schema cho một biến thể
 const variantSchemaValidation = Joi.object({
-  sku: Joi.string()
-    .trim()
-    .required()
-    .messages({ "any.required": "SKU của biến thể là bắt buộc" }),
+  sku: Joi.string().trim().optional().allow(null, "").messages({
+    // Cho phép rỗng, model sẽ tự tạo
+    // Có thể thêm các ràng buộc khác nếu người dùng nhập, ví dụ:
+    "string.min":
+      "SKU biến thể phải có ít nhất {#limit} ký tự nếu được cung cấp.",
+    "string.max":
+      "SKU biến thể không được vượt quá {#limit} ký tự nếu được cung cấp.",
+  }),
   price: Joi.number().min(0).required().messages({
     "any.required": "Giá của biến thể là bắt buộc",
     "number.min": "Giá biến thể không được âm",
@@ -396,7 +400,7 @@ const updateCouponSchema = Joi.object({
   applicableIds: Joi.array().items(Joi.string().hex().length(24)).optional(),
 }).min(1); // Yêu cầu ít nhất một trường để cập nhật
 
-// --- Schema cho Tạo Đơn Hàng Mới ---
+// Schema cho Tạo Đơn Hàng Mới
 const createOrderSchema = Joi.object({
   // Chỉ được phép chọn MỘT trong hai: địa chỉ đã lưu hoặc địa chỉ mới
   shippingAddressId: Joi.string()
@@ -422,6 +426,44 @@ const createOrderSchema = Joi.object({
       "Vui lòng chọn địa chỉ đã lưu HOẶC nhập địa chỉ mới, không chọn cả hai hoặc bỏ trống.",
   });
 
+// Schema cho User tạo/sửa review
+const reviewSchemaValidation = Joi.object({
+  rating: Joi.number().integer().min(1).max(5).required().messages({
+    "any.required": "Vui lòng chọn điểm đánh giá.",
+    "number.base": "Điểm đánh giá phải là số.",
+    "number.integer": "Điểm đánh giá phải là số nguyên.",
+    "number.min": "Điểm đánh giá phải từ 1 đến 5.",
+    "number.max": "Điểm đánh giá phải từ 1 đến 5.",
+  }),
+  comment: Joi.string().trim().max(1000).optional().allow("").messages({
+    "string.max": "Bình luận không được vượt quá {#limit} ký tự.",
+  }),
+  orderId: Joi.string().hex().length(24).required().messages({
+    // <<< Cần orderId để xác thực người mua khi tạo
+    "any.required": "ID đơn hàng là bắt buộc để đánh giá.",
+    "string.length": "ID đơn hàng không hợp lệ.",
+    "string.hex": "ID đơn hàng không hợp lệ.",
+  }),
+  userImages: Joi.array()
+    .items(Joi.string().uri())
+    .optional()
+    .default([])
+    .messages({
+      // <<< Validate ảnh user gửi
+      "string.uri": "Mỗi ảnh phải là một URL hợp lệ.",
+    }),
+});
+
+// Schema cho Admin phản hồi review
+const adminReplySchemaValidation = Joi.object({
+  comment: Joi.string().trim().min(1).max(500).required().messages({
+    "any.required": "Nội dung phản hồi là bắt buộc.",
+    "string.empty": "Nội dung phản hồi không được để trống.",
+    "string.min": "Nội dung phản hồi phải có ít nhất {#limit} ký tự.",
+    "string.max": "Nội dung phản hồi không được vượt quá {#limit} ký tự.",
+  }),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -436,4 +478,6 @@ module.exports = {
   createCouponSchema,
   updateCouponSchema,
   createOrderSchema,
+  reviewSchemaValidation,
+  adminReplySchemaValidation,
 };

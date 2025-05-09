@@ -17,6 +17,11 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const {
+  productReviewRouter,
+  adminReviewRouter,
+} = require("./routes/reviewRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
 
 // Import error handler middleware
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
@@ -57,10 +62,13 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/locations", locationRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/products/:productId/reviews", productReviewRouter);
 app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/coupons", couponRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/reviews", adminReviewRouter);
+app.use("/api/v1/wishlist", wishlistRoutes);
 
 // Custom Error Handling Middlewares
 app.use(notFound);

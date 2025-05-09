@@ -8,7 +8,7 @@ const {
   updateProductStock,
   updateVariantStock,
 } = require("../controllers/productController");
-const { protect, isAdmin } = require("../middlewares/authMiddleware");
+const { protect, isAdmin, protectOptional  } = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validationMiddleware");
 const {
   createProductSchema,
@@ -21,11 +21,11 @@ const router = express.Router();
 
 // GET /api/v1/products : Lấy danh sách sản phẩm
 // Hỗ trợ các query params: page, limit, sortBy, sortOrder, category (slug), categoryId, minPrice, maxPrice, search, attributes[...]
-router.get("/", getProducts);
+router.get("/",protectOptional, getProducts);
 
 // GET /api/v1/products/:idOrSlug : Lấy chi tiết một sản phẩm
 // :idOrSlug có thể là ID của sản phẩm hoặc slug của sản phẩm
-router.get("/:idOrSlug", getProductByIdOrSlug);
+router.get("/:idOrSlug",protectOptional, getProductByIdOrSlug);
 
 // === Admin Routes ===
 
