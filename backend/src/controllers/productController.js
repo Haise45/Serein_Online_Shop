@@ -6,21 +6,23 @@ const mongoose = require("mongoose");
 // --- Hàm Helper: Xây dựng bộ lọc MongoDB từ query params ---
 // Tham số: query (từ req.query), isAdmin (bool - xác định quyền để lọc khác nhau)
 const buildFilter = async (query, isAdmin = false) => {
-  const filter = {}; // Khởi tạo đối tượng filter rỗng
+  const andConditions = []; // Sử dụng mảng này để gom các điều kiện AND
 
-  // 1. Filter Cơ bản theo trạng thái (Active/Published)
-  if (!isAdmin) {
-    // Người dùng thường chỉ thấy sản phẩm đang hoạt động và đã công khai
-    filter.isActive = true;
-    filter.isPublished = true;
-  } else {
-    // Admin có thể lọc theo trạng thái nếu gửi query param
+  // --- 1. Filter Cơ bản (Active/Published) ---
+  if (isAdmin) {
+    // Nếu là admin, chỉ áp dụng filter isActive/isPublished NẾU nó được truyền trong query
     if (query.isActive !== undefined) {
-      filter.isActive = query.isActive === "true"; // Chuyển đổi chuỗi sang boolean
+      andConditions.push({ isActive: query.isActive === "true" });
     }
     if (query.isPublished !== undefined) {
-      filter.isPublished = query.isPublished === "true";
+      andConditions.push({ isPublished: query.isPublished === "true" });
     }
+    // Nếu admin KHÔNG truyền query.isActive hoặc query.isPublished,
+    // thì sẽ không có điều kiện isActive/isPublished trong filter -> lấy tất cả.
+  } else {
+    // Người dùng thường luôn chỉ thấy sản phẩm đang hoạt động và đã công khai
+    andConditions.push({ isActive: true });
+    andConditions.push({ isPublished: true });
   }
 
   // 2. Filter theo Category (Ưu tiên Slug)
@@ -32,7 +34,7 @@ const buildFilter = async (query, isAdmin = false) => {
         .lean()
         .select("_id");
       if (category) {
-        filter.category = category._id; // Gán ID category vào bộ lọc
+        andConditions.push({ category: category._id }); // Gán ID category vào bộ lọc
       } else {
         // Nếu slug không tồn tại, trả về điều kiện không thể khớp để không trả về sản phẩm nào
         console.log(
@@ -51,10 +53,11 @@ const buildFilter = async (query, isAdmin = false) => {
     mongoose.Types.ObjectId.isValid(query.categoryId)
   ) {
     // Nếu có 'categoryId' hợp lệ
-    filter.category = query.categoryId;
+    andConditions.push({ category: query.categoryId });
   }
 
   // 3. Filter theo Khoảng giá
+  let priceOrCondition = null;
   if (query.minPrice || query.maxPrice) {
     const priceFilter = {};
     const minPriceNum = Number(query.minPrice);
@@ -77,20 +80,19 @@ const buildFilter = async (query, isAdmin = false) => {
     // Chỉ thêm filter giá nếu có điều kiện hợp lệ
     if (Object.keys(priceFilter).length > 0) {
       // Áp dụng lọc cho giá gốc HOẶC giá của bất kỳ biến thể nào (phổ biến)
-      filter.$or = [
-        { price: priceFilter }, // Lọc giá gốc của sản phẩm
-        { variants: { $elemMatch: { price: priceFilter } } }, // Lọc nếu có biến thể nào đó nằm trong khoảng giá
-      ];
-      // Nếu chỉ muốn lọc theo giá gốc: filter.price = priceFilter;
+      priceOrCondition = {
+        $or: [
+          { price: priceFilter },
+          { variants: { $elemMatch: { price: priceFilter } } },
+        ],
+      };
     }
   }
 
   // 4. Filter theo Thuộc tính của Biến thể
   // Định dạng query param: ?attributes[Tên Thuộc Tính]=Giá trị 1,Giá trị 2
-  // Ví dụ: ?attributes[Màu sắc]=Đỏ,Xanh&attributes[Kích thước]=L
+  // Ví dụ: ?attributes[Màu sắc]=Đỏ,Xanh&attributes[Size]=L
   if (query.attributes && typeof query.attributes === "object") {
-    const attributeFilters = []; // Mảng chứa các điều kiện $elemMatch cho từng thuộc tính
-
     for (const attrName in query.attributes) {
       if (Object.prototype.hasOwnProperty.call(query.attributes, attrName)) {
         const attrValues = query.attributes[attrName]; // Lấy chuỗi giá trị (vd: "Đỏ,Xanh")
@@ -105,76 +107,94 @@ const buildFilter = async (query, isAdmin = false) => {
           // Tìm sản phẩm mà có ÍT NHẤT MỘT variant ($elemMatch ngoài)
           // mà trong mảng optionValues của variant đó ($elemMatch trong)
           // có MỘT phần tử khớp tên thuộc tính VÀ giá trị nằm trong danh sách yêu cầu ($in)
-          attributeFilters.push({
+          andConditions.push({
             variants: {
               $elemMatch: {
-                // Phải có ít nhất một variant thỏa mãn điều kiện bên trong optionValues
                 optionValues: {
                   $elemMatch: {
-                    // Tìm trong mảng optionValues của variant
-                    attributeName: attrName, // Tên thuộc tính phải khớp
-                    value: { $in: valuesArray }, // Giá trị phải nằm trong danh sách (OR)
+                    attributeName: attrName,
+                    value: { $in: valuesArray },
                   },
                 },
               },
             },
           });
+          console.log(
+            `[Filter Debug] Đã thêm điều kiện lọc cho thuộc tính "${attrName}"`
+          );
         }
-      }
-    }
-
-    // Nếu có bất kỳ filter thuộc tính nào, kết hợp chúng bằng $and
-    // Điều này nghĩa là sản phẩm phải thỏa mãn TẤT CẢ các filter thuộc tính (Vd: có Màu Đỏ VÀ có Size L)
-    if (attributeFilters.length > 0) {
-      if (filter.$and) {
-        // Nếu đã có $and từ các filter khác
-        filter.$and.push(...attributeFilters); // Thêm các điều kiện thuộc tính vào mảng $and hiện có
-      } else {
-        // Nếu chưa có $and
-        filter.$and = attributeFilters; // Tạo mảng $and mới
       }
     }
   }
 
   // 5. Filter theo tìm kiếm Text ($text index) - Đặt cuối cùng để kết hợp đúng
   if (query.search) {
-    const textFilter = { $text: { $search: query.search } };
-    // Kết hợp $text với các filter hiện có dùng $and
-    // Tạo một đối tượng chứa các filter đã có (trừ $or nếu có)
-    const existingScalarFilters = {};
-    const existingAndFilters = filter.$and ? [...filter.$and] : []; // Sao chép mảng $and nếu có
-    const existingOrFilter = filter.$or ? { $or: filter.$or } : null; // Giữ lại $or nếu có
-
-    // Lấy các filter đơn lẻ
-    Object.keys(filter).forEach((key) => {
-      if (key !== "$or" && key !== "$and") {
-        existingScalarFilters[key] = filter[key];
-      }
-    });
-
-    // Tạo mảng $and mới
-    filter.$and = [];
-    if (Object.keys(existingScalarFilters).length > 0) {
-      filter.$and.push(existingScalarFilters);
-    }
-    if (existingAndFilters.length > 0) {
-      filter.$and.push(...existingAndFilters);
-    }
-    // Thêm $text filter vào $and
-    filter.$and.push(textFilter);
-
-    // Xóa các key gốc đã đưa vào $and
-    Object.keys(existingScalarFilters).forEach((key) => delete filter[key]);
-    // Giữ lại $or nếu có
-    if (existingOrFilter) filter.$or = existingOrFilter.$or;
-    // Xóa $and gốc nếu đã đưa vào $and mới
-    if (filter.$and === existingAndFilters) delete filter.$and;
+    console.log(
+      `[Filter Debug] Thêm điều kiện tìm kiếm text: "${query.search}"`
+    );
+    andConditions.push({ $text: { $search: query.search } });
   }
 
-  console.log("--- [Filter] Đối tượng Filter cuối cùng ---");
-  console.log(JSON.stringify(filter, null, 2)); // Log để debug
-  console.log("----------------------------------------");
-  return filter;
+  // --- 6. Kết hợp cuối cùng ---
+  let finalFilter = {};
+
+  // Nếu có các điều kiện AND (isActive, isPublished, category, attributes, search)
+  if (andConditions.length > 0) {
+    finalFilter.$and = andConditions;
+  }
+
+  // Nếu có điều kiện OR (từ giá)
+  if (priceOrCondition) {
+    // Nếu đã có $and, kết hợp $or vào cùng cấp
+    if (finalFilter.$and) {
+      // Để đảm bảo logic (A AND B AND C) AND (X OR Y)
+      // Ta cần cấu trúc: { $and: [ { $and: [A,B,C] }, { $or: [X,Y] } ] } hoặc { $and: [A,B,C, {$or:[X,Y]}] }
+      // Cách đơn giản là gộp tất cả vào một $and lớn
+      finalFilter.$and = [...(finalFilter.$and || []), priceOrCondition];
+    } else {
+      // Nếu chỉ có $or (và không có điều kiện andConditions nào)
+      // Cần phải đảm bảo các điều kiện cơ bản (isActive, isPublished) vẫn được áp dụng nếu là user thường
+      if (!isAdmin) {
+        finalFilter.$and = [
+          { isActive: true },
+          { isPublished: true },
+          priceOrCondition,
+        ];
+      } else {
+        // Nếu là admin và chỉ lọc giá
+        Object.assign(finalFilter, priceOrCondition);
+      }
+    }
+  }
+
+  // Xử lý trường hợp không có filter nào cả (cho admin)
+  // Nếu finalFilter vẫn rỗng và là admin, thì trả về {} để lấy tất cả
+  if (isAdmin && Object.keys(finalFilter).length === 0) {
+    console.log("[Filter] Admin không lọc gì, trả về filter rỗng.");
+    return {};
+  }
+  if (
+    !priceOrCondition &&
+    finalFilter.$and &&
+    finalFilter.$and.length === (isAdmin ? 0 : 2)
+  ) {
+    if (isAdmin && finalFilter.$and.length === 0) return {};
+    if (
+      !isAdmin &&
+      finalFilter.$and.every(
+        (cond) =>
+          ("isActive" in cond && cond.isActive) ||
+          ("isPublished" in cond && cond.isPublished)
+      )
+    ) {
+      // Chỉ còn điều kiện mặc định, trả về filter này
+    }
+  }
+
+  console.log("--- [Filter] Đối tượng Filter cuối cùng (trước khi trả về) ---");
+  console.log(JSON.stringify(finalFilter, null, 2));
+  console.log("--------------------------------------------------------");
+  return finalFilter;
 };
 
 // --- Hàm Helper: Xây dựng đối tượng sắp xếp MongoDB ---

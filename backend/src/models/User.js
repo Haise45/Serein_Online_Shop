@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     addresses: [addressSchema],
+    wishlistItems: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    }],
     passwordResetToken: String, // Lưu token (đã hash) để reset mật khẩu
     passwordResetExpires: Date, // Thời gian hết hạn của token
   },

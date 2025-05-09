@@ -46,7 +46,7 @@ const requestAdminNotificationTemplate = (
     .slice(-6)}</title>
     <style>
         body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; color: #333333; background-color: #f4f4f7; }
-        table { border-collapse: collapse; width: 100%; } td, th { padding: 0; vertical-align: top; } a { color: #0d6efd; text-decoration: none; }
+        table { border-collapse: collapse; width: 100%; } td, th { padding: 0;  } a { color: #0d6efd; text-decoration: none; }
         .button { background-color: #0d6efd; color: #ffffff !important; padding: 12px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 6px; font-weight: 500; font-size: 15px; }
         .button:hover { background-color: #0b5ed7; } .container { background-color: #f4f4f7; padding: 20px; }
         .content { background-color: #ffffff; max-width: 680px; margin: 0 auto; padding: 30px; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }

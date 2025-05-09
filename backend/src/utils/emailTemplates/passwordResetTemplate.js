@@ -18,7 +18,7 @@ const passwordResetTemplate = (userName, resetUrl) => {
         /* CSS Reset cơ bản */
         body { margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; }
         table { border-collapse: collapse; width: 100%; }
-        td { padding: 0; vertical-align: top; }
+        td { padding: 0;  }
         a { color: #007bff; text-decoration: none; }
         .button { background-color: #007bff; color: #ffffff; padding: 12px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-weight: bold; }
         .button:hover { background-color: #0056b3; }
