@@ -109,4 +109,26 @@ const protectOptional = asyncHandler(async (req, res, next) => {
 
   next();
 });
-module.exports = { protect, isAdmin, protectOptional };
+
+// --- Hàm kiểm tra User đã xác thực Email chưa ---
+// Middleware này phải chạy SAU 'protect' (hoặc 'protectOptional' nếu áp dụng cho route đó)
+const isVerifiedUser = (req, res, next) => {
+  // Giả định req.user đã được gắn bởi middleware protect/protectOptional
+  if (req.user && req.user.isEmailVerified) {
+    // Nếu user tồn tại và đã xác thực email, cho phép tiếp tục
+    next();
+  } else if (req.user && !req.user.isEmailVerified) {
+    // Nếu user tồn tại nhưng chưa xác thực email
+    res.status(403); // Forbidden
+    throw new Error(
+      "Tài khoản của bạn chưa được xác thực email. Vui lòng kiểm tra email và nhập mã OTP."
+    );
+  } else {
+    res.status(401); // Unauthorized
+    throw new Error(
+      "Yêu cầu đăng nhập và xác thực email để thực hiện hành động này."
+    );
+  }
+};
+
+module.exports = { protect, isAdmin, protectOptional, isVerifiedUser };
