@@ -57,10 +57,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     addresses: [addressSchema],
-    wishlistItems: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-    }],
+    wishlistItems: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: String, // Lưu OTP (đã hash) để xác thực email
+    emailVerificationExpires: Date, // Thời gian hết hạn của OTP
     passwordResetToken: String, // Lưu token (đã hash) để reset mật khẩu
     passwordResetExpires: Date, // Thời gian hết hạn của token
   },
@@ -116,6 +124,23 @@ userSchema.methods.createPasswordResetToken = function () {
 
   // Trả về token gốc (chưa hash) để gửi qua email
   return resetToken;
+};
+
+// Method: Tạo và hash OTP Email
+userSchema.methods.createEmailVerificationOTP = function () {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  // Hash OTP
+  const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
+
+  this.emailVerificationToken = hashedOTP;
+
+  // Thời gian hết hạn OTP
+  this.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 phút\
+
+  console.log(
+    `[OTP Gen] User: ${this.email}, OTP: ${otp}, Expires: ${this.emailVerificationExpires}`
+  );
+  return otp; // Trả về OTP gốc để gửi email
 };
 
 const User = mongoose.model("User", userSchema);
