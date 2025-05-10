@@ -8,7 +8,11 @@ const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 const passwordResetTemplate = require("../utils/emailTemplates/passwordResetTemplate");
-const { mergeGuestCartToUserCart, clearGuestCartCookie } = require("../utils/cartUtils");
+const emailVerificationOTPTemplate = require("../utils/emailTemplates/emailVerificationOTPTemplate");
+const {
+  mergeGuestCartToUserCart,
+  clearGuestCartCookie,
+} = require("../utils/cartUtils");
 
 // --- Tiện ích thiết lập Cookie ---
 const setRefreshTokenCookie = (res, token) => {
@@ -52,37 +56,150 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     phone,
+    isEmailVerified: false,
   });
 
-  // 4. Respond with user info and token
-  if (user) {
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+  // 4. Tạo OTP và thời gian hết hạn
+  const verificationOTP = user.createEmailVerificationOTP();
+  // Lưu user với OTP
+  await user.save();
 
-    // Gửi refresh token qua httpOnly cookie
-    setRefreshTokenCookie(res, refreshToken);
-
-    // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
-    if (guestId) {
-      await mergeGuestCartToUserCart(guestId, user._id, res);
-    } else {
-      // Nếu không có guestId, vẫn có thể xóa cookie
-      clearGuestCartCookie(res);
-    }
-
-    res.status(201).json({
-      // 201 Created
-      _id: user._id,
-      name: user.name,
+  // --- Gửi Email chứa OTP ---
+  try {
+    const emailHtml = emailVerificationOTPTemplate(user.name, verificationOTP);
+    await sendEmail({
       email: user.email,
-      role: user.role,
-      phone: user.phone,
-      addresses: user.addresses,
-      accessToken: accessToken,
+      subject: `Mã Xác Thực Email Của Bạn Tại ${
+        process.env.SHOP_NAME || "Shop"
+      }`,
+      message: `Mã OTP của bạn là: ${verificationOTP}. Mã này có hiệu lực trong 10 phút.`,
+      html: emailHtml,
     });
-  } else {
+  } catch (emailError) {
+    console.error(`Lỗi gửi email OTP cho ${user.email}:`, emailError);
+    res.status(500);
+    throw new Error("Không thể gửi email xác thực. Vui lòng thử lại sau.");
+  }
+
+  // --- KHÔNG trả về token ngay ---
+  res.status(201).json({
+    message:
+      "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP xác thực tài khoản.",
+    userId: user._id,
+  });
+});
+
+// @desc    Xác thực OTP để kích hoạt email
+// @route   POST /api/v1/auth/verify-email
+// @access  Public
+const verifyEmailOTP = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
     res.status(400);
-    throw new Error("Dữ liệu người dùng không hợp lệ.");
+    throw new Error("Vui lòng cung cấp email và mã OTP");
+  }
+
+  // Tìm user bằng email
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    res.status(404);
+    throw new Error("Người dùng không tồn tại.");
+  }
+
+  if (user.isEmailVerified) {
+    res.status(400);
+    throw new Error("Email đã được xác thực.");
+  }
+
+  // Kiểm tra OTP
+  const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
+  if (user.emailVerificationToken !== hashedOTP) {
+    // So sánh OTP gốc
+    res.status(400);
+    throw new Error("Mã OTP không chính xác.");
+  }
+  // Kiểm tra thời gian hết hạn OTP
+  if (user.emailVerificationExpires < Date.now()) {
+    res.status(400);
+    throw new Error("Mã OTP đã hết hạn. Vui lòng yêu cầu gửi lại.");
+  }
+
+  // Xác thực thành công
+  user.isEmailVerified = true;
+  user.emailVerificationToken = undefined; // Xóa token sau khi dùng
+  user.emailVerificationExpires = undefined; // Xóa thời gian hết hạn
+  await user.save();
+
+  // --- Tự động đăng nhập user và gộp giỏ hàng ---
+  const accessToken = generateAccessToken(user._id);
+  const refreshTokenVal = generateRefreshToken(user._id); // Đổi tên để không trùng
+  setRefreshTokenCookie(res, refreshTokenVal);
+
+  // Gộp giỏ hàng guest
+  const guestId = req.cookies.cartGuestId;
+  if (guestId) {
+    await mergeGuestCartToUserCart(guestId, user._id, res);
+  }
+
+  res.status(200).json({
+    message: "Xác thực email thành công! Tài khoản của bạn đã được kích hoạt.",
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    isEmailVerified: user.isEmailVerified,
+    accessToken: accessToken,
+  });
+});
+
+// @desc    Yêu cầu gửi lại mã OTP xác thực email
+// @route   POST /api/v1/auth/resend-verification-email
+// @access  Public
+const resendVerificationEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp địa chỉ email.");
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    // Vẫn trả về thành công để tránh lộ email
+    return res.status(200).json({
+      message: "Nếu email tồn tại và chưa xác thực, mã OTP mới sẽ được gửi.",
+    });
+  }
+  if (user.isEmailVerified) {
+    return res.status(400).json({ message: "Email này đã được xác thực." });
+  }
+
+  // Tạo OTP mới và lưu
+  const verificationOTP = user.createEmailVerificationOTP();
+  console.log(verificationOTP);
+  await user.save();
+
+  // Gửi email
+  try {
+    const emailHtml = emailVerificationOTPTemplate(user.name, verificationOTP);
+    await sendEmail({
+      email: user.email,
+      subject: `Mã Xác Thực Email Của Bạn Tại ${
+        process.env.SHOP_NAME || "Shop"
+      }`,
+      message: `Mã OTP của bạn là: ${verificationOTP}. Mã này có hiệu lực trong 10 phút.`,
+      html: emailHtml,
+    });
+    res
+      .status(200)
+      .json({ message: "Mã OTP xác thực mới đã được gửi đến email của bạn." });
+  } catch (emailError) {
+    console.error(`Lỗi gửi lại email OTP cho ${user.email}:`, emailError);
+    res.status(500);
+    throw new Error("Không thể gửi lại email xác thực. Vui lòng thử lại sau.");
   }
 });
 
@@ -361,6 +478,8 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 module.exports = {
   registerUser,
+  verifyEmailOTP,
+  resendVerificationEmail,
   loginUserAccessTokenOnly,
   loginUserWithRefreshToken,
   refreshToken,

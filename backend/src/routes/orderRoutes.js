@@ -14,7 +14,11 @@ const {
   approveRefund,
   rejectRefund,
 } = require("../controllers/orderController");
-const { protect, isAdmin } = require("../middlewares/authMiddleware");
+const {
+  protect,
+  isAdmin,
+  isVerifiedUser,
+} = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validationMiddleware");
 const { createOrderSchema } = require("../validations/validationSchemas");
 
@@ -22,7 +26,13 @@ const router = express.Router();
 
 // --- User Routes ---
 // Đặt hàng mới (yêu cầu đăng nhập)
-router.post("/", protect, validateRequest(createOrderSchema), createOrder);
+router.post(
+  "/",
+  protect,
+  isVerifiedUser,
+  validateRequest(createOrderSchema),
+  createOrder
+);
 
 // Lấy danh sách đơn hàng của tôi (yêu cầu đăng nhập)
 router.get("/my", protect, getMyOrders); // Hỗ trợ query params: page, limit

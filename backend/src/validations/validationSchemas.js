@@ -47,6 +47,27 @@ const loginSchema = Joi.object({
   }),
 });
 
+const emailSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.empty": `"Email" không được để trống`,
+    "string.email": `"Email" không đúng định dạng`,
+    "any.required": `"Email" là trường bắt buộc`,
+  }),
+});
+
+const verifyOtpSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.empty": `"Email" không được để trống`,
+    "string.email": `"Email" không đúng định dạng`,
+    "any.required": `"Email" là trường bắt buộc`,
+  }),
+  otp: Joi.string().length(6).required().messages({
+    "string.empty": `"Mã OTP" không được để trống`,
+    "string.length": `"Mã OTP" phải có 6 ký tự`,
+    "any.required": `"Mã OTP" là trường bắt buộc`,
+  }),
+});
+
 const updateProfileSchema = Joi.object({
   name: Joi.string().min(3).max(50).optional().messages({
     "string.min": `"Tên" phải có ít nhất {#limit} ký tự`,
@@ -466,6 +487,8 @@ const adminReplySchemaValidation = Joi.object({
 
 module.exports = {
   registerSchema,
+  emailSchema,
+  verifyOtpSchema,
   loginSchema,
   updateProfileSchema,
   addressSchemaValidation,
