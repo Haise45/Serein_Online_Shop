@@ -1,10 +1,10 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
 const { protect, isAdmin } = require("../middlewares/authMiddleware");
-const { uploadImages } = require("../controllers/uploadController");
+const {
+  uploadImages,
+  uploadEditorImage,
+} = require("../controllers/uploadController");
 
 const router = express.Router();
 
@@ -49,6 +49,16 @@ router.post(
     next();
   },
   uploadImages // Controller xử lý logic sau khi upload thành công
+);
+
+// Route cho CKEditor Upload Adapter
+// Thường CKEditor adapter sẽ POST lên đây
+router.post(
+  "/editor", // Ví dụ: /api/v1/upload/editor
+  protect,
+  isAdmin,
+  upload.single("upload"), // CKEditor thường gửi file với field name là 'upload'
+  uploadEditorImage
 );
 
 // Middleware bắt lỗi Multer tổng quát (ví dụ file quá lớn)

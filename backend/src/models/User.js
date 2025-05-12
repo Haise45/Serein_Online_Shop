@@ -57,12 +57,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     addresses: [addressSchema],
-    wishlistItems: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
     isEmailVerified: {
       type: Boolean,
       default: false,

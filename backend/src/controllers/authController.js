@@ -13,6 +13,11 @@ const {
   mergeGuestCartToUserCart,
   clearGuestCartCookie,
 } = require("../utils/cartUtils");
+const {
+  mergeGuestWishlistToUser,
+  clearGuestWishlistCookie,
+} = require("../utils/wishlistUtils");
+const { createAdminNotification } = require("../utils/notificationUtils");
 
 // --- Tiện ích thiết lập Cookie ---
 const setRefreshTokenCookie = (res, token) => {
@@ -47,9 +52,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Số điện thoại đã được sử dụng.");
   }
 
-  // Lấy guestId TỪ TRƯỚC KHI tạo user (nếu có)
-  const guestId = req.cookies.cartGuestId;
-
   // 3. Create new user (password hashing is handled by pre-save hook in model)
   const user = await User.create({
     name,
@@ -63,6 +65,15 @@ const registerUser = asyncHandler(async (req, res) => {
   const verificationOTP = user.createEmailVerificationOTP();
   // Lưu user với OTP
   await user.save();
+
+  // --- Gửi thông báo cho Admin ---
+  await createAdminNotification(
+    "Người dùng mới đăng ký",
+    `Người dùng "${user.name}" (Email: ${user.email}) vừa đăng ký tài khoản.`,
+    "NEW_USER_REGISTERED",
+    `/admin/users/${user._id}`, // Link tới trang chi tiết user (ví dụ)
+    { userId: user._id }
+  );
 
   // --- Gửi Email chứa OTP ---
   try {
@@ -137,10 +148,18 @@ const verifyEmailOTP = asyncHandler(async (req, res) => {
   const refreshTokenVal = generateRefreshToken(user._id); // Đổi tên để không trùng
   setRefreshTokenCookie(res, refreshTokenVal);
 
-  // Gộp giỏ hàng guest
-  const guestId = req.cookies.cartGuestId;
-  if (guestId) {
-    await mergeGuestCartToUserCart(guestId, user._id, res);
+  // Gộp giỏ hàng, wishlist guest
+  const guestCartId = req.cookies.cartGuestId;
+  const guestWishlistId = req.cookies.wishlistGuestId;
+  if (guestCartId) {
+    await mergeGuestCartToUserCart(guestCartId, user._id, res);
+  } else {
+    clearGuestCartCookie(res);
+  }
+  if (guestWishlistId) {
+    await mergeGuestWishlistToUser(guestWishlistId, user._id, res);
+  } else {
+    clearGuestWishlistCookie(res);
   }
 
   res.status(200).json({
@@ -210,7 +229,8 @@ const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Lấy guestId TỪ TRƯỚC KHI tạo user (nếu có)
-  const guestId = req.cookies.cartGuestId;
+  const guestCartId = req.cookies.cartGuestId;
+  const guestWishlistId = req.cookies.wishlistGuestId;
 
   // 1. Find user by email
   const user = await User.findOne({ email }); //.select('+password'); // select password here if needed or use matchPassword method which does it
@@ -220,11 +240,17 @@ const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
     const accessToken = generateAccessToken(user._id);
 
     // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
-    if (guestId) {
-      await mergeGuestCartToUserCart(guestId, user._id, res);
+    if (guestCartId) {
+      await mergeGuestCartToUserCart(guestCartId, user._id, res);
     } else {
       // Nếu không có guestId, vẫn có thể xóa cookie
       clearGuestCartCookie(res);
+    }
+
+    if (guestWishlistId) {
+      await mergeGuestWishlistToUser(guestWishlistId, user._id, res);
+    } else {
+      clearGuestWishlistCookie(res);
     }
 
     res.json({
@@ -247,7 +273,8 @@ const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Lấy guestId TỪ TRƯỚC KHI tạo user (nếu có)
-  const guestId = req.cookies.cartGuestId;
+  const guestCartId = req.cookies.cartGuestId;
+  const guestWishlistId = req.cookies.wishlistGuestId;
 
   // 1. Find user by email
   const user = await User.findOne({ email }); //.select('+password'); // select password here if needed or use matchPassword method which does it
@@ -260,12 +287,16 @@ const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
     // Gửi refresh token qua httpOnly cookie
     setRefreshTokenCookie(res, refreshToken);
 
-    // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
-    if (guestId) {
-      await mergeGuestCartToUserCart(guestId, user._id, res);
+    // --- GỌI HÀM GỘP GIỎ HÀNG, WISHLIST SAU KHI TẠO USER ---
+    if (guestCartId) {
+      await mergeGuestCartToUserCart(guestCartId, user._id, res);
     } else {
-      // Nếu không có guestId, vẫn có thể xóa cookie
       clearGuestCartCookie(res);
+    }
+    if (guestWishlistId) {
+      await mergeGuestWishlistToUser(guestWishlistId, user._id, res);
+    } else {
+      clearGuestWishlistCookie(res);
     }
 
     res.json({

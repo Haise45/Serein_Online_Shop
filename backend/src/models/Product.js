@@ -14,14 +14,23 @@ const variantSchema = new mongoose.Schema(
       required: [true, "Biến thể phải có giá"],
       min: [0, "Giá không được âm"],
     },
+    salePrice: {
+      type: Number,
+      min: [0, "Giá khuyến mãi không được âm"],
+      default: null,
+    },
+    salePriceEffectiveDate: { type: Date, default: null },
+    salePriceExpiryDate: { type: Date, default: null },
     stockQuantity: {
       type: Number,
       required: [true, "Biến thể phải có số lượng tồn kho"],
       min: [0, "Số lượng tồn kho không được âm"],
       default: 0,
     },
-    image: {
-      type: String,
+    images: {
+      // Mảng các URL ảnh biến thể của sản phẩm
+      type: [String],
+      default: [],
     },
     optionValues: [
       // Mảng các cặp thuộc tính-giá trị xác định biến thể này
@@ -65,6 +74,13 @@ const productSchema = new mongoose.Schema(
       required: [true, "Vui lòng nhập giá sản phẩm"],
       min: [0, "Giá không được âm"],
     },
+    salePrice: {
+      type: Number,
+      min: [0, "Giá khuyến mãi không được âm"],
+      default: null,
+    },
+    salePriceEffectiveDate: { type: Date, default: null },
+    salePriceExpiryDate: { type: Date, default: null },
     sku: {
       type: String,
       sparse: true,
@@ -122,6 +138,13 @@ const productSchema = new mongoose.Schema(
         values: { type: [String], required: true, default: [] },
       },
     ],
+    totalSold: {
+      // Tổng số lượng đã bán (cho sản phẩm này và các biến thể của nó)
+      type: Number,
+      default: 0,
+      min: 0,
+      index: true,
+    },
     // Mảng các biến thể sản phẩm (nếu có)
     variants: [variantSchema],
   },
@@ -131,6 +154,50 @@ const productSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// --- VIRTUAL FIELD: Tính toán giá hiển thị (displayPrice) ---
+// Virtual này sẽ tính giá cuối cùng dựa trên việc có salePrice hợp lệ không
+// Áp dụng cho cả Product chính và mỗi Variant
+const displayPriceVirtual = function () {
+  const now = new Date();
+  let effectivePrice = this.price; // Mặc định là giá gốc
+
+  if (this.salePrice !== null && this.salePrice < this.price) {
+    const isSaleActive =
+      (!this.salePriciceEffectiveDate || this.salePriceEffectiveDate <= now) &&
+      (!this.salePreExpiryDate || this.salePriceExpiryDate >= now);
+
+    if (isSaleActive) {
+      effectivePrice = this.salePrice;
+    }
+  }
+  return effectivePrice;
+};
+
+productSchema.virtual("displayPrice").get(displayPriceVirtual);
+variantSchema.virtual("displayPrice").get(displayPriceVirtual); // Áp dụng cả cho variant
+
+// --- VIRTUAL FIELD: Kiểm tra sản phẩm có đang sale không ---
+const onSaleVirtual = function () {
+  const now = new Date();
+  return (
+    this.salePrice !== null &&
+    this.salePrice < this.price &&
+    (!this.salePriceEffectiveDate || this.salePriceEffectiveDate <= now) &&
+    (!this.salePriceExpiryDate || this.salePriceExpiryDate >= now)
+  );
+};
+productSchema.virtual("isOnSale").get(onSaleVirtual);
+variantSchema.virtual("isOnSale").get(onSaleVirtual);
+
+// --- VIRTUAL FIELD: Kiểm tra sản phẩm có phải MỚI không ---
+const IS_NEW_PRODUCT_DAYS_LIMIT = 20; // Số ngày coi là sản phẩm mới
+productSchema.virtual("isNew").get(function () {
+  if (!this.createdAt) return false;
+  const twentyDaysAgo = new Date();
+  twentyDaysAgo.setDate(twentyDaysAgo.getDate() - IS_NEW_PRODUCT_DAYS_LIMIT);
+  return this.createdAt >= twentyDaysAgo;
+});
 
 // Middleware tạo slug tự động
 productSchema.pre("save", function (next) {

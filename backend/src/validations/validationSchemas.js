@@ -214,6 +214,23 @@ const variantSchemaValidation = Joi.object({
     "any.required": "Giá của biến thể là bắt buộc",
     "number.min": "Giá biến thể không được âm",
   }),
+  salePrice: Joi.number()
+    .min(0)
+    .optional()
+    .allow(null)
+    .messages({ "number.min": "Giá sale biến thể không được âm" }),
+  salePriceEffectiveDate: Joi.date()
+    .optional()
+    .allow(null)
+    .messages({ "date.base": "Ngày bắt đầu sale biến thể không hợp lệ" }),
+  salePriceExpiryDate: Joi.date()
+    .greater(Joi.ref("salePriceEffectiveDate"))
+    .optional()
+    .allow(null)
+    .messages({
+      "date.base": "Ngày kết thúc sale biến thể không hợp lệ",
+      "date.greater": "Ngày kết thúc sale biến thể phải sau ngày bắt đầu",
+    }),
   stockQuantity: Joi.number().integer().min(0).required().messages({
     "any.required": "Số lượng tồn kho của biến thể là bắt buộc",
     "number.min": "Số lượng tồn kho không được âm",
@@ -258,6 +275,23 @@ const createProductSchema = Joi.object({
     "any.required": "Giá sản phẩm là bắt buộc",
     "number.min": "Giá không được âm",
   }),
+  salePrice: Joi.number()
+    .min(0)
+    .optional()
+    .allow(null)
+    .messages({ "number.min": "Giá sale biến thể không được âm" }),
+  salePriceEffectiveDate: Joi.date()
+    .optional()
+    .allow(null)
+    .messages({ "date.base": "Ngày bắt đầu sale biến thể không hợp lệ" }),
+  salePriceExpiryDate: Joi.date()
+    .greater(Joi.ref("salePriceEffectiveDate"))
+    .optional()
+    .allow(null)
+    .messages({
+      "date.base": "Ngày kết thúc sale biến thể không hợp lệ",
+      "date.greater": "Ngày kết thúc sale biến thể phải sau ngày bắt đầu",
+    }),
   sku: Joi.string().trim().optional().allow(null, ""), // SKU chính là tùy chọn
   category: Joi.string().hex().length(24).required().messages({
     "any.required": "Danh mục là bắt buộc",
@@ -294,6 +328,12 @@ const updateProductSchema = Joi.object({
     .min(0)
     .optional()
     .messages({ "number.min": "Giá không được âm" }),
+  salePrice: Joi.number().min(0).optional().allow(null),
+  salePriceEffectiveDate: Joi.date().optional().allow(null),
+  salePriceExpiryDate: Joi.date()
+    .greater(Joi.ref("salePriceEffectiveDate"))
+    .optional()
+    .allow(null),
   sku: Joi.string().trim().optional().allow(null, ""),
   category: Joi.string().hex().length(24).optional().messages({
     "string.length": "ID Danh mục không hợp lệ",
@@ -492,6 +532,7 @@ module.exports = {
   loginSchema,
   updateProfileSchema,
   addressSchemaValidation,
+  variantSchemaValidation,
   createCategorySchema,
   updateCategorySchema,
   createProductSchema,

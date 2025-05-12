@@ -39,7 +39,8 @@ const cartSchema = new mongoose.Schema(
       default: null,
     },
     items: [cartItemSchema], // Mảng các sản phẩm trong giỏ
-    appliedCoupon: { // Lưu thông tin coupon đã áp dụng
+    appliedCoupon: {
+      // Lưu thông tin coupon đã áp dụng
       code: { type: String, uppercase: true, trim: true },
       discountType: {
         type: String,
@@ -57,11 +58,19 @@ const cartSchema = new mongoose.Schema(
 // Đảm bảo chỉ có userId hoặc guestId tồn tại
 cartSchema.index(
   { userId: 1 },
-  { unique: true, partialFilterExpression: { userId: { $exists: true } } }
+  {
+    unique: true,
+    sparse: true,
+    partialFilterExpression: { userId: { $exists: true } },
+  }
 );
 cartSchema.index(
   { guestId: 1 },
-  { unique: true, partialFilterExpression: { guestId: { $exists: true } } }
+  {
+    unique: true,
+    sparse: true,
+    partialFilterExpression: { guestId: { $exists: true } },
+  }
 );
 
 const Cart = mongoose.model("Cart", cartSchema);

@@ -22,6 +22,7 @@ const {
   adminReviewRouter,
 } = require("./routes/reviewRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 // Import error handler middleware
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
@@ -69,6 +70,7 @@ app.use("/api/v1/coupons", couponRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/reviews", adminReviewRouter);
 app.use("/api/v1/wishlist", wishlistRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 
 // Custom Error Handling Middlewares
 app.use(notFound);
