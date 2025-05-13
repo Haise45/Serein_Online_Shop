@@ -165,12 +165,11 @@ const createCategorySchema = Joi.object({
 });
 
 const updateCategorySchema = Joi.object({
-  name: Joi.string().trim().min(2).max(100).required().messages({
+  name: Joi.string().trim().min(2).max(100).optional().messages({
     "string.base": `"Tên danh mục" phải là chuỗi`,
     "string.empty": `"Tên danh mục" không được để trống`,
     "string.min": `"Tên danh mục" phải có ít nhất {#limit} ký tự`,
     "string.max": `"Tên danh mục" không được vượt quá {#limit} ký tự`,
-    "any.required": `"Tên danh mục" là trường bắt buộc`,
   }),
   description: Joi.string()
     .trim()
@@ -316,8 +315,7 @@ const createProductSchema = Joi.object({
 
 // Schema cho cập nhật sản phẩm
 const updateProductSchema = Joi.object({
-  name: Joi.string().trim().min(3).max(200).required().messages({
-    "any.required": "Tên sản phẩm là bắt buộc",
+  name: Joi.string().trim().min(3).max(200).optional().messages({
     "string.min": "Tên sản phẩm phải có ít nhất {#limit} ký tự",
     "string.max": "Tên sản phẩm không được vượt quá {#limit} ký tự",
     "string.base": "Tên sản phẩm phải là chuỗi",
@@ -375,8 +373,7 @@ const addToCartSchema = Joi.object({
 
 // Schema cho việc cập nhật số lượng item trong giỏ hàng
 const updateCartItemSchema = Joi.object({
-  quantity: Joi.number().integer().min(1).required().messages({
-    "any.required": "Số lượng là bắt buộc",
+  quantity: Joi.number().integer().min(1).optional().messages({
     "number.base": "Số lượng phải là một số",
     "number.integer": "Số lượng phải là số nguyên",
     "number.min": "Số lượng phải lớn hơn 0",

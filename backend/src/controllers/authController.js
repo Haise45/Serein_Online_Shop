@@ -67,13 +67,19 @@ const registerUser = asyncHandler(async (req, res) => {
   await user.save();
 
   // --- Gửi thông báo cho Admin ---
+  console.log(
+    ">>> [AUTH CTRL] Chuẩn bị gọi createAdminNotification cho user:",
+    user._id
+  ); // <<< THÊM LOG
+  // --- Gửi thông báo cho Admin ---
   await createAdminNotification(
     "Người dùng mới đăng ký",
     `Người dùng "${user.name}" (Email: ${user.email}) vừa đăng ký tài khoản.`,
     "NEW_USER_REGISTERED",
-    `/admin/users/${user._id}`, // Link tới trang chi tiết user (ví dụ)
+    `/admin/users/${user._id}`,
     { userId: user._id }
   );
+  console.log(">>> [AUTH CTRL] ĐÃ GỌI createAdminNotification.");
 
   // --- Gửi Email chứa OTP ---
   try {
@@ -121,7 +127,7 @@ const verifyEmailOTP = asyncHandler(async (req, res) => {
 
   if (user.isEmailVerified) {
     res.status(400);
-    throw new Error("Email đã được xác thực.");
+    throw new Error("Email này đã được xác thực trước đó.");
   }
 
   // Kiểm tra OTP
@@ -258,6 +264,7 @@ const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      isEmailVerified: user.isEmailVerified,
       accessToken: accessToken,
     });
   } else {
@@ -304,6 +311,7 @@ const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      isEmailVerified: user.isEmailVerified,
       accessToken: accessToken,
     });
   } else {
@@ -442,7 +450,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: "Đặt lại mật khẩu Serein Online Store",
+      subject: `Yêu cầu đặt lại mật khẩu tại ${
+        process.env.SHOP_NAME || "Shop Online"
+      }`,
       message: textMessage,
       html: htmlMessage,
     });

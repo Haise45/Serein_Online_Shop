@@ -560,10 +560,10 @@ const addItemToCart = asyncHandler(async (req, res) => {
       (item.variantId ? item.variantId.equals(variantId) : variantId === null)
   );
 
-  let newQuantity = quantity; // Số lượng mới sẽ được set/thêm vào
+  let newQuantity = Number(quantity);
   if (existingItemIndex > -1) {
-    // Nếu item đã tồn tại, cộng dồn số lượng
-    newQuantity = cart.items[existingItemIndex].quantity + quantity;
+    const existingQty = Number(cart.items[existingItemIndex].quantity);
+    newQuantity = existingQty + Number(quantity);
   }
 
   // --- 4. Kiểm tra tồn kho trước khi thêm/cập nhật ---
@@ -577,7 +577,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
   // --- 5. Cập nhật hoặc thêm mới item ---
   if (existingItemIndex > -1) {
     // Cập nhật số lượng item đã có
-    cart.items[existingItemIndex].quantity = newQuantity;
+    cart.items[existingItemIndex].quantity = Number(newQuantity);
     console.log(
       `[Cart] Updated quantity for item ${cart.items[existingItemIndex]._id} to ${newQuantity}`
     );
@@ -586,7 +586,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
     cart.items.push({
       productId,
       variantId: variant ? variant._id : null,
-      quantity,
+      quantity: Number(quantity),
     });
     console.log(
       `[Cart] Added new item: Product ${productId}, Variant ${

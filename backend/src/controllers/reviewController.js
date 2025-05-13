@@ -172,7 +172,7 @@ const createReview = asyncHandler(async (req, res) => {
   }).lean();
 
   if (!order) {
-    res.status(400);
+    res.status(403);
     throw new Error(
       "Bạn chỉ có thể đánh giá sản phẩm sau khi đã nhận hàng thành công từ đơn hàng này."
     );
@@ -253,6 +253,12 @@ const getProductReviews = asyncHandler(async (req, res) => {
     .lean();
 
   const totalReviewsQuery = Review.countDocuments(filter);
+
+  const productExists = await Product.countDocuments({ _id: productId });
+  if (productExists === 0) {
+    res.status(404);
+    throw new Error("Sản phẩm không tồn tại.");
+  }
 
   const [reviews, totalReviews] = await Promise.all([
     reviewsQuery.exec(),
