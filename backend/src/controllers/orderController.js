@@ -12,6 +12,7 @@ const orderShippedTemplate = require("../utils/emailTemplates/orderShippedTempla
 const orderDeliveredTemplate = require("../utils/emailTemplates/orderDeliveredTemplate");
 const requestAdminNotificationTemplate = require("../utils/emailTemplates/requestAdminNotificationTemplate");
 const requestStatusUpdateTemplate = require("../utils/emailTemplates/requestStatusUpdateTemplate");
+const { createAdminNotification } = require("../utils/notificationUtils");
 
 require("dotenv").config();
 
@@ -32,25 +33,43 @@ const updateStockAndCouponUsage = async (
     // Không nên tiếp tục nếu dữ liệu sai
     return; // Hoặc throw new Error('Dữ liệu items không hợp lệ để cập nhật stock.');
   }
-  console.log("[Stock Update] Bắt đầu cập nhật tồn kho và coupon.");
-  const bulkOps = []; // Mảng các hành động cập nhật tồn kho
+  console.log(
+    "[Stock & Sold Update] Bắt đầu cập nhật tồn kho, totalSold và coupon."
+  );
+  const stockBulkOps = []; // Cho tồn kho
+  const soldBulkOps = []; // Cho totalSold
 
   // 1. Chuẩn bị cập nhật tồn kho
   for (const item of orderItems) {
-    const decrementAmount = item.quantity;
+    const changeAmount = item.quantity;
+
+    // 1. Chuẩn bị giảm tồn kho
     if (item.variant?.variantId) {
-      // Giảm tồn kho của biến thể
-      filter = { _id: item.product, "variants._id": item.variant.variantId };
-      update = { $inc: { "variants.$.stockQuantity": -decrementAmount } };
+      stockBulkOps.push({
+        updateOne: {
+          filter: { _id: item.product, "variants._id": item.variant.variantId },
+          update: { $inc: { "variants.$.stockQuantity": -changeAmount } },
+        },
+      });
     } else {
-      // Giảm tồn kho của sản phẩm chính
-      filter = { _id: item.product };
-      update = { $inc: { stockQuantity: -decrementAmount } };
+      stockBulkOps.push({
+        updateOne: {
+          filter: { _id: item.product },
+          update: { $inc: { stockQuantity: -changeAmount } },
+        },
+      });
     }
-    bulkOps.push({ updateOne: { filter, update } });
+
+    // 2. Chuẩn bị tăng totalSold cho sản phẩm gốc
+    soldBulkOps.push({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { totalSold: +changeAmount } }, // Tăng totalSold
+      },
+    });
   }
 
-  // 2. Chuẩn bị cập nhật coupon usage (nếu có)
+  // 3. Chuẩn bị cập nhật coupon usage (nếu có)
   let couponUpdatePromise = Promise.resolve();
   if (appliedCouponCode) {
     couponUpdatePromise = Coupon.updateOne(
@@ -59,14 +78,19 @@ const updateStockAndCouponUsage = async (
     ).session(session);
   }
 
-  // 3. Thực thi cập nhật với session
-  if (bulkOps.length > 0) {
-    console.log("[Stock Update] Đang thực thi bulkWrite...");
-    await Product.bulkWrite(bulkOps, { session });
-    console.log("[Stock Update] Đã thực thi bulkWrite.");
+  // 4. Thực thi cập nhật với session
+  if (stockBulkOps.length > 0) {
+    await Product.bulkWrite(stockBulkOps, { session });
+    console.log("[Stock & Sold Update] Đã cập nhật tồn kho.");
+  }
+  if (soldBulkOps.length > 0) {
+    await Product.bulkWrite(soldBulkOps, { session });
+    console.log("[Stock & Sold Update] Đã cập nhật totalSold.");
   }
   await couponUpdatePromise;
-  console.log("[Stock Update] Cập nhật coupon usage thành công (nếu có).");
+  console.log(
+    "[Stock & Sold Update] Cập nhật coupon usage thành công (nếu có)."
+  );
 };
 
 // @desc    Tạo đơn hàng mới từ giỏ hàng
@@ -343,6 +367,20 @@ const createOrder = asyncHandler(async (req, res) => {
         emailError
       );
     }
+
+    // --- Gửi thông báo cho Admin ---
+    await createAdminNotification(
+      "Đơn hàng mới được đặt",
+      `Đơn hàng #${createdOrder._id.toString().slice(-6)} bởi "${
+        req.user.name
+      }" vừa được đặt. Tổng tiền: ${createdOrder.totalPrice.toLocaleString(
+        "vi-VN"
+      )}đ.`,
+      "NEW_ORDER_PLACED",
+      `/admin/orders/${createdOrder._id}`,
+      { orderId: createdOrder._id, userId: req.user._id }
+    );
+
     // --- Trả về đơn hàng đã tạo ---
     await createdOrder.populate("user", "name email");
     res.status(201).json(createdOrder);
@@ -494,6 +532,15 @@ const requestCancellation = asyncHandler(async (req, res) => {
     }
   }
 
+  // --- Gửi thông báo cho Admin ---
+  await createAdminNotification(
+    `Yêu cầu hủy đơn hàng #${updatedOrder._id.toString().slice(-6)}`,
+    `Khách hàng "${updatedOrder.user.name}" yêu cầu hủy đơn. Lý do: ${updatedOrder.cancellationRequest.reason}`,
+    "ORDER_CANCELLATION_REQUESTED",
+    `/admin/orders/${updatedOrder._id}`,
+    { orderId: updatedOrder._id, userId: updatedOrder.user._id }
+  );
+
   res.json({
     message: "Yêu cầu hủy đơn hàng của bạn đã được gửi.",
     order: updatedOrder,
@@ -579,6 +626,15 @@ const requestRefund = asyncHandler(async (req, res) => {
     }
   }
 
+  // --- Gửi thông báo cho Admin ---
+  await createAdminNotification(
+    `Yêu cầu hoàn tiền đơn #${updatedOrder._id.toString().slice(-6)}`,
+    `Khách hàng "${updatedOrder.user.name}" yêu cầu hoàn tiền. Lý do: ${updatedOrder.refundRequest.reason}`,
+    "ORDER_REFUND_REQUESTED",
+    `/admin/orders/${updatedOrder._id}`,
+    { orderId: updatedOrder._id, userId: updatedOrder.user._id }
+  );
+
   res.json({
     message: "Yêu cầu trả hàng/hoàn tiền của bạn đã được gửi.",
     order: updatedOrder,
@@ -654,6 +710,15 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
       emailError
     );
   }
+
+  // --- Gửi thông báo cho Admin ---
+  await createAdminNotification(
+    `Đơn hàng #${updatedOrder._id.toString().slice(-6)} đã giao thành công`,
+    `Khách hàng "${updatedOrder.user.name}" đã xác nhận nhận hàng.`,
+    "ORDER_STATUS_DELIVERED",
+    `/admin/orders/${updatedOrder._id}`,
+    { orderId: updatedOrder._id, userId: updatedOrder.user._id }
+  );
 
   res.json(updatedOrder);
 });

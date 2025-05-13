@@ -1,42 +1,48 @@
-const User = require("../models/User");
+const Wishlist = require("../models/Wishlist");
 const Product = require("../models/Product");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 
-// @desc    Lấy danh sách yêu thích của người dùng
-// @route   GET /api/v1/wishlist
-// @access  Private
-const getWishlist = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+// --- Hàm helper tìm hoặc tạo Wishlist ---
+const findOrCreateWishlist = async (identifier) => {
+  let wishlist = await Wishlist.findOne(identifier);
+  if (!wishlist) {
+    console.log("[Wishlist] Creating new wishlist for:", identifier);
+    wishlist = await Wishlist.create(identifier);
+  }
+  return wishlist;
+};
 
-  // Tìm user và populate các sản phẩm trong wishlist
-  // Populate để lấy các thông tin cần thiết của sản phẩm hiển thị trong wishlist
-  const user = await User.findById(userId)
+// @desc    Lấy danh sách yêu thích của người dùng/guest
+// @route   GET /api/v1/wishlist
+// @access  Public (xác định user/guest qua middleware)
+const getWishlist = asyncHandler(async (req, res) => {
+  const identifier = req.wishlistIdentifier;
+
+  const wishlist = await Wishlist.findOne(identifier)
     .populate({
-      path: "wishlistItems",
+      path: "items", // Populate các product ID trong mảng items
       match: { isActive: true, isPublished: true },
       select: "name slug price images category averageRating numReviews",
       populate: { path: "category", select: "name slug" },
     })
-    .select("wishlistItems")
     .lean();
 
-  if (!user) {
-    return res.status(404).json({ message: "Không tìm thấy người dùng." });
+  if (!wishlist || !wishlist.items) {
+    return res.json([]); // Trả về mảng rỗng nếu không có wishlist hoặc không có item
   }
 
-  const validWishlistItems = user.wishlistItems
-    ? user.wishlistItems.filter((item) => item !== null)
-    : [];
+  // Lọc bỏ các items là null (do sản phẩm không còn active/published sau populate)
+  const validWishlistItems = wishlist.items.filter((item) => item !== null);
 
-  res.status(200).json({ wishlistItems: validWishlistItems });
+  res.json(validWishlistItems);
 });
 
 // @desc    Thêm sản phẩm vào danh sách yêu thích
 // @route   POST /api/v1/wishlist/:productId
 // @access  Private
 const addToWishlist = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  const identifier = req.wishlistIdentifier;
   const { productId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -55,30 +61,25 @@ const addToWishlist = asyncHandler(async (req, res) => {
     throw new Error("Không tìm thấy sản phẩm.");
   }
 
-  // 2. Thêm productId vào mảng wishlistItems của user
-  // Sử dụng $addToSet để đảm bảo không thêm trùng lặp
-  const updateUser = await User.findOneAndUpdate(
-    { _id: userId },
-    { $addToSet: { wishlistItems: productId } },
-    { new: true, runValidators: true }
-  ).select("wishlistItems");
+  // 2. Tìm hoặc tạo wishlist
+  const wishlist = await findOrCreateWishlist(identifier);
 
-  if (!updateUser) {
-    res.status(404);
-    throw new Error("Không tìm thấy người dùng.");
-  }
+  // Thêm productId vào mảng items (dùng $addToSet để không trùng)
+  await Wishlist.updateOne(
+    { _id: wishlist._id },
+    { $addToSet: { items: new mongoose.Types.ObjectId(productId) } }
+  );
 
-  res.status(200).json({
-    message: "Sản phẩm đã được thêm vào danh sách yêu thích.",
-    wishlistItems: updateUser.wishlistItems,
-  });
+  res
+    .status(200)
+    .json({ message: "Sản phẩm đã được thêm vào danh sách yêu thích." });
 });
 
 // @desc    Xóa sản phẩm khỏi danh sách yêu thích
 // @route   DELETE /api/v1/wishlist/:productId
 // @access  Private
 const removeFromWishlist = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  const identifier = req.wishlistIdentifier;
   const { productId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -86,22 +87,23 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
     throw new Error("ID sản phẩm không hợp lệ.");
   }
 
-  // Sử dụng $pull để xóa productId khỏi mảng wishlistItems
-  const updateUser = await User.findOneAndUpdate(
-    userId,
-    { $pull: { wishlistItems: productId } },
-    { new: true, runValidators: true  }
-  ).select("wishlistItems");
-
-  if (!updateUser) {
-    res.status(404);
-    throw new Error("Không tìm thấy người dùng.");
+  // Tìm wishlist
+  const wishlist = await Wishlist.findOne(identifier);
+  if (!wishlist) {
+    // Nếu không có wishlist, coi như đã xóa thành công
+    return res
+      .status(200)
+      .json({ message: "Sản phẩm không có trong danh sách yêu thích." });
   }
+  // Xóa productId khỏi mảng items
+  await Wishlist.updateOne(
+    { _id: wishlist._id },
+    { $pull: { items: new mongoose.Types.ObjectId(productId) } }
+  );
 
-  res.status(200).json({
-    message: "Sản phẩm đã được xóa khỏi danh sách yêu thích.",
-    wishlistItems: updateUser.wishlistItems,
-  });
+  res
+    .status(200)
+    .json({ message: "Sản phẩm đã được xóa khỏi danh sách yêu thích." });
 });
 
 module.exports = {

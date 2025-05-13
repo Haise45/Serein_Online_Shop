@@ -119,7 +119,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     if (parent === null || parent === "") {
       category.parent = null;
     } else if (mongoose.Types.ObjectId.isValid(parent)) {
-      if (parent === id) {
+      if (parent.toString() === id.toString()) {
         // Kiểm tra tự làm cha
         res.status(400);
         throw new Error("Danh mục không thể tự làm danh mục cha của chính nó.");

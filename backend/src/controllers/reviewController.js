@@ -4,6 +4,7 @@ const Order = require("../models/Order");
 const User = require("../models/User");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
+const { createAdminNotification } = require("../utils/notificationUtils");
 
 // --- Hàm Helper Tính toán Rating ---
 const calculateAndUpdateProductRating = async (productId) => {
@@ -171,7 +172,7 @@ const createReview = asyncHandler(async (req, res) => {
   }).lean();
 
   if (!order) {
-    res.status(400);
+    res.status(403);
     throw new Error(
       "Bạn chỉ có thể đánh giá sản phẩm sau khi đã nhận hàng thành công từ đơn hàng này."
     );
@@ -198,6 +199,21 @@ const createReview = asyncHandler(async (req, res) => {
     userImages: userImages || [], // Lưu ảnh user gửi
     isApproved: false, // Chờ admin duyệt
   });
+
+  // --- Gửi thông báo cho Admin ---
+  // Populate product để lấy tên cho thông báo
+  const productForNotification = await Product.findById(productId)
+    .select("name")
+    .lean();
+  await createAdminNotification(
+    "Đánh giá sản phẩm mới",
+    `Có đánh giá mới cho sản phẩm "${
+      productForNotification?.name || "Không rõ"
+    }" từ người dùng "${req.user.name}".`,
+    "NEW_REVIEW_SUBMITTED",
+    `/admin/reviews?isApproved=false`, // Link tới trang duyệt review
+    { reviewId: review._id, productId: productId, userId: req.user._id }
+  );
 
   res.status(201).json({
     message: "Đánh giá của bạn đã được gửi và đang chờ duyệt.",
@@ -237,6 +253,12 @@ const getProductReviews = asyncHandler(async (req, res) => {
     .lean();
 
   const totalReviewsQuery = Review.countDocuments(filter);
+
+  const productExists = await Product.countDocuments({ _id: productId });
+  if (productExists === 0) {
+    res.status(404);
+    throw new Error("Sản phẩm không tồn tại.");
+  }
 
   const [reviews, totalReviews] = await Promise.all([
     reviewsQuery.exec(),
