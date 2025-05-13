@@ -56,7 +56,11 @@ categorySchema.pre("save", function (next) {
 
 // Middleware: Đảm bảo không tự đặt mình làm cha
 categorySchema.pre("save", function (next) {
-  if (this.parent && this.parent.toString() === this._id.toString()) {
+  if (
+    this.isModified("parent") &&
+    this.parent &&
+    this.parent.toString() === this._id.toString()
+  ) {
     const err = new Error(
       "Danh mục không thể tự làm danh mục cha của chính nó."
     );

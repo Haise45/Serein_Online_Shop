@@ -2,6 +2,10 @@ const Product = require("../models/Product");
 const Category = require("../models/Category");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
+const sanitizeHtml = require("../utils/sanitize");
+const { createAdminNotification } = require("../utils/notificationUtils");
+
+const LOW_STOCK_THRESHOLD = 5; // Ngưỡng cảnh báo tồn kho thấp
 
 // --- Hàm Helper: Xây dựng bộ lọc MongoDB từ query params ---
 // Tham số: query (từ req.query), isAdmin (bool - xác định quyền để lọc khác nhau)
@@ -127,7 +131,19 @@ const buildFilter = async (query, isAdmin = false) => {
     }
   }
 
-  // 5. Filter theo tìm kiếm Text ($text index) - Đặt cuối cùng để kết hợp đúng
+  // 5. Filter theo mininum ratting
+  const minRatingQuery = parseFloat(query.minRating);
+  if (!isNaN(minRatingQuery) && minRatingQuery >= 0 && minRatingQuery <= 5) {
+    // Chỉ lọc sản phẩm có averageRating >= minRatingQuery
+    // và phải có ít nhất 1 review (numReviews > 0) để rating có ý nghĩa
+    andConditions.push({ averageRating: { $gte: minRatingQuery } });
+    andConditions.push({ numReviews: { $gt: 0 } }); // Chỉ lọc SP có review
+    console.log(
+      `[Filter Debug] Thêm điều kiện lọc rating >= ${minRatingQuery}`
+    );
+  }
+
+  // 6. Filter theo tìm kiếm Text ($text index) - Đặt cuối cùng để kết hợp đúng
   if (query.search) {
     console.log(
       `[Filter Debug] Thêm điều kiện tìm kiếm text: "${query.search}"`
@@ -135,7 +151,7 @@ const buildFilter = async (query, isAdmin = false) => {
     andConditions.push({ $text: { $search: query.search } });
   }
 
-  // --- 6. Kết hợp cuối cùng ---
+  // --- 7. Kết hợp cuối cùng ---
   let finalFilter = {};
 
   // Nếu có các điều kiện AND (isActive, isPublished, category, attributes, search)
@@ -207,7 +223,14 @@ const buildSort = (query) => {
   // Xử lý sortBy và sortOrder
   if (query.sortBy) {
     // Danh sách các trường cho phép sắp xếp (để bảo mật và tránh lỗi)
-    const allowedSortFields = ["price", "name", "createdAt", "updatedAt"];
+    const allowedSortFields = [
+      "price",
+      "name",
+      "createdAt",
+      "updatedAt",
+      "totalSold",
+      "averageRating",
+    ];
     if (allowedSortFields.includes(query.sortBy)) {
       const sortOrder = query.sortOrder === "desc" ? -1 : 1; // Mặc định là 'asc' (1)
       // Chỉ thêm nếu sortBy không phải là 'score' hoặc không có tìm kiếm text (vì score đã được ưu tiên)
@@ -238,7 +261,7 @@ const buildSort = (query) => {
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
   // Dữ liệu sản phẩm đã được xác thực bởi middleware validateRequest(createProductSchema)
-  const { name, category, variants, sku, ...restData } = req.body;
+  const { name, description, category, variants, sku, ...restData } = req.body;
 
   // --- 1. Kiểm tra sự tồn tại và trạng thái của Category ---
   if (!mongoose.Types.ObjectId.isValid(category)) {
@@ -304,6 +327,7 @@ const createProduct = asyncHandler(async (req, res) => {
   // --- 3. Tạo đối tượng Product mới ---
   const product = new Product({
     name,
+    description: description ? sanitizeHtml(description) : "",
     category, // Lưu ID category
     variants: variants || [], // Đảm bảo là mảng rỗng nếu không có
     sku: sku || null, // Đảm bảo là null nếu không có
@@ -571,6 +595,12 @@ const updateProduct = asyncHandler(async (req, res) => {
   });
 
   // --- Bước 5: Xử lý cập nhật mảng Variants ---
+  if (updateData.description !== undefined) {
+    product.description = updateData.description
+      ? sanitizeHtml(updateData.description)
+      : "";
+  }
+
   if (updateData.variants !== undefined) {
     // Cách đơn giản và thường dùng nhất là ghi đè hoàn toàn mảng variants
     // Mongoose sẽ tự động xử lý việc thêm/sửa/xóa các subdocument dựa trên _id
@@ -695,8 +725,30 @@ const updateProductStock = asyncHandler(async (req, res) => {
 
   // Cập nhật tồn kho và lưu lại
   product.stockQuantity = finalQuantity;
-  // product.updatedBy = req.user._id; // Gán người cập nhật nếu cần
   await product.save();
+
+  // --- Gửi thông báo tồn kho ---
+  if (product.stockQuantity <= 0) {
+    await createAdminNotification(
+      "Sản phẩm hết hàng!",
+      `Sản phẩm "${product.name}" (SKU: ${
+        product.sku || "N/A"
+      }) đã hết hàng (Tồn kho: 0).`,
+      "PRODUCT_OUT_OF_STOCK",
+      `/admin/products/edit/${product._id}`, // Link sửa sản phẩm
+      { productId: product._id }
+    );
+  } else if (product.stockQuantity <= LOW_STOCK_THRESHOLD) {
+    await createAdminNotification(
+      "Sản phẩm sắp hết hàng!",
+      `Sản phẩm "${product.name}" (SKU: ${
+        product.sku || "N/A"
+      }) sắp hết hàng (Tồn kho: ${product.stockQuantity}).`,
+      "PRODUCT_LOW_STOCK",
+      `/admin/products/edit/${product._id}`,
+      { productId: product._id }
+    );
+  }
 
   // --- 4. Trả về kết quả ---
   res.json({
@@ -781,9 +833,29 @@ const updateVariantStock = asyncHandler(async (req, res) => {
 
   // Cập nhật tồn kho cho biến thể
   variant.stockQuantity = finalQuantity;
-  // product.updatedBy = req.user._id; // Cập nhật người sửa ở product cha
-  // Quan trọng: Phải lưu lại document product cha để thay đổi trong subdocument variant được ghi nhận
   await product.save();
+
+  // --- Gửi thông báo tồn kho cho biến thể ---
+  const variantName = `${product.name} (${variant.optionValues
+    .map((o) => o.value)
+    .join("/")})`;
+  if (variant.stockQuantity <= 0) {
+    await createAdminNotification(
+      "Biến thể hết hàng!",
+      `Biến thể "${variantName}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" đã hết hàng (Tồn kho: 0).`,
+      "PRODUCT_OUT_OF_STOCK", // Có thể tạo type riêng: VARIANT_OUT_OF_STOCK
+      `/admin/products/edit/${product._id}`, // Link sửa sản phẩm
+      { productId: product._id, variantId: variant._id }
+    );
+  } else if (variant.stockQuantity <= LOW_STOCK_THRESHOLD) {
+    await createAdminNotification(
+      "Biến thể sắp hết hàng!",
+      `Biến thể "${variantName}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" sắp hết hàng (Tồn kho: ${variant.stockQuantity}).`,
+      "PRODUCT_LOW_STOCK", // Có thể tạo type riêng: VARIANT_LOW_STOCK
+      `/admin/products/edit/${product._id}`,
+      { productId: product._id, variantId: variant._id }
+    );
+  }
 
   // --- 4. Trả về kết quả ---
   res.json({

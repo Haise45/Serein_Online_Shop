@@ -71,6 +71,51 @@ const uploadImages = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Upload single image from CKEditor
+// @route   POST /api/v1/upload/editor
+// @access  Private/Admin
+const uploadEditorImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    // CKEditor mong đợi lỗi có cấu trúc cụ thể
+    return res.status(400).json({
+      uploaded: 0,
+      error: { message: "Không có file nào được tải lên." },
+    });
+  }
+
+  // Upload lên Cloudinary (hoặc lưu vào thư mục public/uploads/images/editor)
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "shop/editor", resource_type: "auto" },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+    });
+
+    if (!result || !result.secure_url) {
+      throw new Error("Upload lên Cloudinary không trả về URL.");
+    }
+
+    // CKEditor mong đợi response dạng này khi thành công
+    res.status(200).json({
+      uploaded: 1,
+      fileName: req.file.originalname, // Hoặc result.public_id
+      url: result.secure_url, // URL từ Cloudinary
+    });
+  } catch (error) {
+    console.error("[CKEditor Upload] Lỗi:", error);
+    res.status(500).json({
+      uploaded: 0,
+      error: { message: error.message || "Upload ảnh cho editor thất bại." },
+    });
+  }
+});
+
 module.exports = {
   uploadImages,
+  uploadEditorImage,
 };

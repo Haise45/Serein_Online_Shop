@@ -1,11 +1,16 @@
+const http = require("http");
 const app = require("./app");
 const connectDB = require("./config/db");
+const { initSocket } = require("./socket");
 require("dotenv").config();
 
 // Connect to Database
 connectDB();
 
 const PORT = process.env.PORT || 5000;
+
+const httpServer = http.createServer(app);
+const io = initSocket(httpServer);
 
 const server = app.listen(PORT, () => {
   console.log(
