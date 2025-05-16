@@ -324,6 +324,27 @@ const createProduct = asyncHandler(async (req, res) => {
     }
   }
 
+  // Áp dụng logic sale cho variants khi tạo mới
+  if (variants && variants.length > 0) {
+    const mainProductHasSalePrice =
+      salePrice !== undefined && salePrice !== null;
+    const anyVariantHasSpecificSalePrice = variants.some(
+      (v) => v.salePrice !== undefined && v.salePrice !== null
+    );
+
+    if (mainProductHasSalePrice && !anyVariantHasSpecificSalePrice) {
+      finalVariants = variants.map((v) => ({
+        ...v,
+        salePrice: salePrice,
+        salePriceEffectiveDate: salePriceEffectiveDate || null,
+        salePriceExpiryDate: salePriceExpiryDate || null,
+      }));
+      console.log(
+        `[CreateProduct] Áp dụng sale chính cho tất cả các Variants mới.`
+      );
+    }
+  }
+
   // --- 3. Tạo đối tượng Product mới ---
   const product = new Product({
     name,
@@ -331,6 +352,9 @@ const createProduct = asyncHandler(async (req, res) => {
     category, // Lưu ID category
     variants: variants || [], // Đảm bảo là mảng rỗng nếu không có
     sku: sku || null, // Đảm bảo là null nếu không có
+    salePrice, // salePrice cho sản phẩm chính
+    salePriceEffectiveDate,
+    salePriceExpiryDate,
     ...restData, // Các trường còn lại như description, price, images, isPublished...
   });
 
@@ -364,18 +388,37 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // --- Xây dựng projection (chọn lọc các trường trả về) ---
   let projection = {};
+
   // Các trường cần thiết cho hiển thị danh sách sản phẩm
   const selectFieldsForList = {
-    name: 1, // Tên sản phẩm
-    slug: 1, // Slug để tạo link
-    price: 1, // Giá gốc (để hiển thị hoặc làm giá tham khảo)
-    images: { $slice: 1 }, // Chỉ lấy ảnh đầu tiên làm ảnh đại diện
-    category: 1, // ID category (sẽ được populate)
-    createdAt: 1, // Ngày tạo (để sort)
-    isPublished: 1, // Trạng thái publish (cho admin xem)
-    isActive: 1, // Trạng thái active (cho admin xem)
-    // Thêm các trường tóm tắt khác nếu cần: ví dụ rating trung bình, % giảm giá,...
+    name: 1,
+    slug: 1,
+    price: 1, // Giá gốc
+    salePrice: 1, // Giá sale (nếu có)
+    salePriceEffectiveDate: 1,
+    salePriceExpiryDate: 1,
+    images: { $slice: 2 }, // Lấy 2 ảnh đầu tiên (cho hover đổi ảnh)
+    category: 1, // Sẽ được populate
+    averageRating: 1,
+    numReviews: 1,
+    totalSold: 1,
+    createdAt: 1, // Để tính isNew
+    isPublished: 1, // Cho admin và logic
+    isActive: 1, // Cho admin và logic
+    attributes: 1, // <<< Lấy attributes để biết có "Màu sắc" không
+    variants: {
+      _id: 1,
+      sku: 1, // Có thể cần SKU nếu click màu chọn variant
+      price: 1,
+      salePrice: 1,
+      salePriceEffectiveDate: 1,
+      salePriceExpiryDate: 1,
+      images: { $slice: 1 }, // Ảnh riêng của variant
+      optionValues: 1, // QUAN TRỌNG: để lấy màu sắc, size
+      stockQuantity: 1, // Có thể cần để check còn hàng không
+    },
   };
+
   // Nếu có tìm kiếm text, thêm trường 'score' vào projection
   if (req.query.search) {
     projection.score = { $meta: "textScore" };
@@ -388,8 +431,7 @@ const getProducts = asyncHandler(async (req, res) => {
     .select({ ...projection, ...selectFieldsForList }) // Chọn lọc các trường cần thiết và score (nếu có)
     .sort(sort) // Áp dụng sắp xếp
     .skip(skip) // Bỏ qua các sản phẩm của trang trước
-    .limit(limit) // Giới hạn số lượng sản phẩm trên trang này
-    .lean(); // Dùng lean() để kết quả là plain JS object, nhanh hơn cho việc đọc
+    .limit(limit); // Giới hạn số lượng sản phẩm trên trang này
 
   // Query đếm tổng số sản phẩm thỏa mãn bộ lọc (để tính tổng số trang)
   const totalProductsQuery = Product.countDocuments(filter);
@@ -594,24 +636,90 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   });
 
-  // --- Bước 5: Xử lý cập nhật mảng Variants ---
-  if (updateData.description !== undefined) {
-    product.description = updateData.description
-      ? sanitizeHtml(updateData.description)
-      : "";
-  }
-
+  // --- Bước 5: Xử lý cập nhật mảng Variants VÀ LOGIC SALE MỚI ---
   if (updateData.variants !== undefined) {
-    // Cách đơn giản và thường dùng nhất là ghi đè hoàn toàn mảng variants
-    // Mongoose sẽ tự động xử lý việc thêm/sửa/xóa các subdocument dựa trên _id
-    // Đảm bảo frontend gửi lên _id cho các variant hiện có cần giữ lại/sửa đổi
-    // và không gửi _id cho các variant mới cần thêm vào
-    product.variants = updateData.variants;
+    // Kiểm tra xem có salePrice nào được set cho sản phẩm chính không
+    const mainProductHasSalePrice =
+      updateData.salePrice !== undefined && updateData.salePrice !== null;
+
+    // Kiểm tra xem có bất kỳ variant nào trong payload có salePrice được set riêng không
+    const anyVariantHasSpecificSalePrice = updateData.variants.some(
+      (v) => v.salePrice !== undefined && v.salePrice !== null
+    );
+
+    let variantsToUpdate = updateData.variants.map((variantData) => {
+      // Tìm variant hiện có bằng _id để giữ lại các trường không được gửi lên
+      const existingVariant = product.variants.find(
+        (v) =>
+          v._id &&
+          variantData._id &&
+          v._id.toString() === variantData._id.toString()
+      );
+
+      let finalVariantData = { ...existingVariant?.toObject(), ...variantData };
+
+      if (mainProductHasSalePrice && !anyVariantHasSpecificSalePrice) {
+        // Áp dụng sale từ sản phẩm chính cho variant này
+        finalVariantData.salePrice = updateData.salePrice;
+        finalVariantData.salePriceEffectiveDate =
+          updateData.salePriceEffectiveDate || null;
+        finalVariantData.salePriceExpiryDate =
+          updateData.salePriceExpiryDate || null;
+        console.log(
+          `[UpdateProduct] Áp dụng sale chính cho Variant ID: ${
+            finalVariantData._id || "Mới"
+          }, SKU: ${finalVariantData.sku}. Sale Price: ${
+            finalVariantData.salePrice
+          }`
+        );
+      } else if (variantData.salePrice === undefined && existingVariant) {
+        // Nếu không có salePrice trong payload cho variant này,
+        // và không rơi vào trường hợp apply sale chính, thì giữ nguyên salePrice cũ của variant (nếu có)
+        // hoặc để là null nếu variantData.salePrice là null (nghĩa là client muốn xóa sale của variant)
+        finalVariantData.salePrice = variantData.hasOwnProperty("salePrice")
+          ? variantData.salePrice
+          : existingVariant.salePrice;
+        finalVariantData.salePriceEffectiveDate = variantData.hasOwnProperty(
+          "salePriceEffectiveDate"
+        )
+          ? variantData.salePriceEffectiveDate
+          : existingVariant.salePriceEffectiveDate;
+        finalVariantData.salePriceExpiryDate = variantData.hasOwnProperty(
+          "salePriceExpiryDate"
+        )
+          ? variantData.salePriceExpiryDate
+          : existingVariant.salePriceExpiryDate;
+      } else {
+        // Nếu variant có salePrice riêng trong payload, hoặc đây là variant mới không có sale chính áp dụng
+        // thì các trường salePrice, salePriceEffectiveDate, salePriceExpiryDate sẽ lấy từ variantData
+        // (đã được gán qua spread operator ở trên)
+        // Nếu variantData.salePrice là null, nó sẽ xóa sale của variant đó.
+        // Nếu variantData.salePrice không được gửi (undefined), và không có sale chính áp dụng,
+        // thì nó sẽ giữ nguyên salePrice của variant cũ (nếu là update) hoặc là null (nếu là tạo mới).
+        // Dòng này đảm bảo nếu client gửi salePrice: null cho variant, nó sẽ được áp dụng
+        if (variantData.hasOwnProperty("salePrice")) {
+          finalVariantData.salePrice = variantData.salePrice;
+          finalVariantData.salePriceEffectiveDate =
+            variantData.salePriceEffectiveDate || null;
+          finalVariantData.salePriceExpiryDate =
+            variantData.salePriceExpiryDate || null;
+        }
+      }
+      return finalVariantData;
+    });
+    product.variants = variantsToUpdate;
   }
 
   // Đảm bảo stock chính = 0 nếu có variant
   if (product.variants && product.variants.length > 0) {
     product.stockQuantity = 0;
+  } else {
+    // Nếu xóa hết variant và không có stockQuantity trong updateData, product.stockQuantity sẽ là giá trị cũ
+    // Cần đảm bảo nó có giá trị nếu không có variant
+    if (product.stockQuantity === undefined || product.stockQuantity === null) {
+      product.stockQuantity =
+        updateData.stockQuantity !== undefined ? updateData.stockQuantity : 0;
+    }
   }
 
   // --- Bước 6: Lưu sản phẩm (Các pre-save hook sẽ chạy) ---

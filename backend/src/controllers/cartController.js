@@ -44,7 +44,7 @@ const populateAndCalculateCart = async (cart) => {
   await cart.populate({
     path: "items.productId",
     select:
-      "name slug price images variants sku stockQuantity isActive isPublished category", // Chọn các trường cần thiết
+      "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category", // Chọn các trường cần thiết
     match: { isActive: true, isPublished: true }, // Chỉ populate sản phẩm active/published?
     populate: { path: "category", select: "name slug _id isActive" }, // Populate thêm category
   });
@@ -53,7 +53,6 @@ const populateAndCalculateCart = async (cart) => {
   const activeCategoryMap = await fetchAndMapCategories({ isActive: true });
 
   let subtotal = 0;
-  let totalQuantity = 0;
   const populatedItems = [];
   const productIdsInCart = new Set();
   const categoryIdsInCart = new Set();
@@ -79,17 +78,19 @@ const populateAndCalculateCart = async (cart) => {
       continue;
     }
 
-    let itemPrice = product.price; // Giá mặc định là giá sản phẩm gốc
+    let itemPrice = product.displayPrice; // Giá mặc định là giá sản phẩm gốc
     let itemSku = product.sku;
     let itemImage = product.images?.length > 0 ? product.images[0] : null;
     let availableStock = product.stockQuantity;
     let variantInfo = null; // Thông tin biến thể cụ thể
+    let originalPrice = product.price;
 
     // Nếu item này là một biến thể
     if (item.variantId) {
       const variant = product.variants.id(item.variantId); // Tìm subdocument variant bằng ID
       if (variant) {
-        itemPrice = variant.price;
+        itemPrice = variant.displayPrice;
+        originalPrice = variant.price;
         itemSku = variant.sku;
         itemImage = variant.image || itemImage; // Ưu tiên ảnh variant, nếu không có dùng ảnh chính
         availableStock = variant.stockQuantity;
@@ -131,6 +132,8 @@ const populateAndCalculateCart = async (cart) => {
       slug: product.slug,
       sku: itemSku,
       price: itemPrice,
+      originalPrice: originalPrice,
+      isOnSale: itemPrice < originalPrice,
       quantity: item.quantity,
       lineTotal: itemPrice * item.quantity,
       image: itemImage,
@@ -146,7 +149,6 @@ const populateAndCalculateCart = async (cart) => {
     });
 
     subtotal += itemPrice * item.quantity;
-    totalQuantity += item.quantity;
     productIdsInCart.add(product._id.toString()); // Thêm ID sản phẩm vào Set
     if (product.category._id) {
       categoryIdsInCart.add(product.category._id.toString()); // Thêm ID category vào Set
@@ -304,11 +306,13 @@ const populateAndCalculateCart = async (cart) => {
     });
   }
 
+  const totalDistinctItems = populatedItems.length;
+
   return {
     _id: cart._id,
     items: populatedItems,
     subtotal: subtotal,
-    totalQuantity: totalQuantity,
+    totalQuantity: totalDistinctItems,
     appliedCoupon: appliedCouponInfo,
     discountAmount: discountAmount,
     finalTotal: finalTotal,
@@ -345,7 +349,8 @@ const applyCoupon = asyncHandler(async (req, res) => {
   // Populate items để kiểm tra
   await cart.populate({
     path: "items.productId",
-    select: "price variants category stockQuantity isActive isPublished", // Lấy category ID
+    select:
+      "price salePrice salePriceEffectiveDate salePriceExpiryDate variants category stockQuantity isActive isPublished", // Lấy category ID
     match: { isActive: true, isPublished: true },
     populate: { path: "category", select: "_id parent" }, // Populate category của sản phẩm
   });
@@ -358,10 +363,10 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
   let subtotal = 0; // Tính subtotal nhanh
   for (const item of validCartItems) {
-    let itemPrice = item.productId.price;
+    let itemPrice = item.productId.displayPrice;
     if (item.variantId) {
       const variant = item.productId.variants.id(item.variantId);
-      if (variant) itemPrice = variant.price;
+      if (variant) itemPrice = variant.displayPrice;
       else continue; // Bỏ qua nếu variant ko tìm thấy
     } else if (item.productId.variants?.length > 0) continue; // Bỏ qua nếu item ko có variantId mà sp lại có
     subtotal += itemPrice * item.quantity;
@@ -441,10 +446,10 @@ const applyCoupon = asyncHandler(async (req, res) => {
       if (isItemApplicable) {
         foundApplicableItem = true;
         // Tính giá trị của item này để cộng vào applicableSubtotal
-        let itemPrice = item.productId.price;
+        let itemPrice = item.productId.displayPrice;
         if (item.variantId) {
           const variant = item.productId.variants.id(item.variantId);
-          if (variant) itemPrice = variant.price;
+          if (variant) itemPrice = variant.displayPrice;
           else itemPrice = 0; // Lấy giá variant
         }
         applicableSubtotal += itemPrice * item.quantity;
@@ -522,7 +527,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
 
   // --- 2. Kiểm tra sản phẩm và tồn kho ---
   const product = await Product.findById(productId).select(
-    "variants stockQuantity isActive isPublished name"
+    "variants stockQuantity isActive isPublished name price salePrice salePriceEffectiveDate salePriceExpiryDate"
   );
   if (!product || !product.isActive || !product.isPublished) {
     res.status(404);

@@ -2,19 +2,21 @@
 
 import { buildCategoryTree } from "@/lib/utils";
 import { getAllCategories } from "@/services/categoryService";
-import { RootState } from "@/store";
 import { Category } from "@/types";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FiHeart, FiMenu, FiSearch, FiShoppingCart } from "react-icons/fi";
-import { useSelector } from "react-redux";
 
+import { useGetCart } from "@/lib/react-query/cartQueries";
+import { useGetWishlist } from "@/lib/react-query/wishlistQueries";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import CartPreviewModal from "./CartPreviewModal";
 import CategoryMenu from "./CategoryMenu";
 import SideDrawer from "./SideDrawer";
 import UserMenu from "./UserMenu";
 
 export default function NavbarClient() {
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,9 +28,11 @@ export default function NavbarClient() {
 
   // Lấy số lượng item trong giỏ hàng (ví dụ từ Redux hoặc API)
   // Tạm thời để 0, bạn cần tích hợp với state cart thực tế
-  const cartItemCount = useSelector(
-    (state: RootState) => state.cart?.totalQuantity || 0,
-  ); // Giả sử có cartSlice
+  const { data: cartData } = useGetCart();
+  const cartItemCount = cartData?.totalQuantity || 0;
+
+  const { data: wishlistItemsData } = useGetWishlist(); // Lấy dữ liệu wishlist
+  const wishlistCount = wishlistItemsData?.length || 0;
 
   const router = useRouter();
   const pathname = usePathname();
@@ -70,7 +74,7 @@ export default function NavbarClient() {
     <>
       <header className="shadow-m sticky top-0 z-30 bg-gray-900 text-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex py-6 items-center justify-between">
+          <div className="flex items-center justify-between py-6">
             {/* Left Section: Hamburger (Mobile) & Logo */}
             <div className="flex items-center">
               <button
@@ -123,7 +127,7 @@ export default function NavbarClient() {
             </div>
 
             {/* Right Section: Icons */}
-            <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="flex items-center space-x-1 md:space-x-4">
               {/* Search Icon & Form */}
               <div className="relative">
                 <button
@@ -143,7 +147,7 @@ export default function NavbarClient() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Tìm kiếm sản phẩm..."
-                      className="w-full rounded-md px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="w-full rounded-md px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none"
                       autoFocus
                     />
                   </form>
@@ -152,25 +156,29 @@ export default function NavbarClient() {
 
               <Link
                 href="/wishlist"
-                className="rounded-full p-2 text-gray-300 hover:bg-gray-700 hover:text-white"
+                className="relative rounded-full p-2 text-gray-300 hover:bg-gray-700 hover:text-white"
                 title="Danh sách yêu thích"
               >
                 <FiHeart className="h-6 w-6" />
-                {/* Badge số lượng wishlist (nếu có) */}
-              </Link>
-
-              <Link
-                href="/cart"
-                className="relative rounded-full p-2 text-gray-300 hover:bg-gray-700 hover:text-white"
-                title="Giỏ hàng"
-              >
-                <FiShoppingCart className="h-6 w-6" />
-                {cartItemCount > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs leading-none font-bold text-red-100">
-                    {cartItemCount}
+                {wishlistCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex translate-x-1/3 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs leading-none font-bold text-red-100">
+                    {wishlistCount}
                   </span>
                 )}
               </Link>
+
+              <button
+                className="relative rounded-full p-2 text-gray-300 hover:bg-gray-700 hover:text-white"
+                title="Giỏ hàng"
+                onClick={() => setIsCartModalOpen(true)}
+              >
+                <FiShoppingCart className="h-6 w-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex translate-x-1/3 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs leading-none font-bold text-red-100">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
 
               <UserMenu />
             </div>
@@ -182,6 +190,10 @@ export default function NavbarClient() {
         isOpen={isDrawerOpen}
         setIsOpen={setIsDrawerOpen}
         categories={categories}
+      />
+      <CartPreviewModal
+        isOpen={isCartModalOpen}
+        setIsOpen={setIsCartModalOpen}
       />
     </>
   );

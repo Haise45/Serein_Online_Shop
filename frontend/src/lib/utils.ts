@@ -44,3 +44,28 @@ export const flattenTreeForSelect = (
   }
   return flattened;
 };
+
+/**
+ * Định dạng số thành chuỗi tiền tệ VND.
+ * @param amount Số tiền cần định dạng.
+ * @param defaultValue Giá trị trả về nếu amount không hợp lệ (mặc định là chuỗi rỗng).
+ * @returns Chuỗi tiền tệ đã định dạng hoặc giá trị mặc định.
+ */
+export const formatCurrency = (
+  amount?: number | null,
+  defaultValue: string = "",
+): string => {
+  // Kiểm tra xem amount có phải là số hợp lệ không
+  if (typeof amount !== "number" || isNaN(amount)) {
+    return defaultValue; // Trả về giá trị mặc định nếu không phải số
+  }
+  try {
+    return amount.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  } catch (error) {
+    console.error("Lỗi khi định dạng tiền tệ:", error, "Với giá trị:", amount);
+    return defaultValue; // Trả về giá trị mặc định nếu có lỗi xảy ra
+  }
+};
