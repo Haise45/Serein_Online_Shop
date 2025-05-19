@@ -1,7 +1,7 @@
 "use client";
 
-import FooterClient from "@/components/client/FooterClient";
-import NavbarClient from "@/components/client/NavbarClient";
+import FooterClient from "@/components/client/layout/FooterClient";
+import NavbarClient from "@/components/client/layout/NavbarClient";
 import { useAuthAutoRefresh } from "@/hooks/useAuth";
 import React from "react";
 
@@ -14,7 +14,9 @@ export default function ClientLayout({
   return (
     <>
       <NavbarClient />
-      <main className="mx-auto bg-gray-100 flex-grow px-4 py-8">{children}</main>
+      <main className="mx-auto flex-grow bg-gray-100 px-4 py-8">
+        {children}
+      </main>
       <FooterClient />
     </>
   );

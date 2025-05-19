@@ -14,7 +14,7 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { FiHome, FiLogIn, FiUserPlus, FiX } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import CategoryMenu from "./CategoryMenu";
+import CategoryMenu from "../category/CategoryMenu";
 
 interface SideDrawerProps {
   isOpen: boolean;

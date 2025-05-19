@@ -16,9 +16,9 @@ router.use(protectOptional, identifyWishlistUser);
 router.get("/", getWishlist);
 
 // POST /api/v1/wishlist/:productId : Thêm sản phẩm vào wishlist
-router.post("/:productId", addToWishlist);
+router.post("/", addToWishlist);
 
 // DELETE /api/v1/wishlist/:productId : Xóa sản phẩm khỏi wishlist
-router.delete("/:productId", removeFromWishlist);
+router.delete("/remove", removeFromWishlist);
 
 module.exports = router;

@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import cartReducer from "./slices/cartSlice";
 import wishlistReducer from "./slices/wishlistSlice";
+import notificationPopupReducer from './slices/notificationPopupSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     cart: cartReducer,
     wishlist: wishlistReducer,
+    notificationPopup: notificationPopupReducer,
     // Thêm các reducers khác ở đây
   },
   // Middleware (tùy chọn, ví dụ Redux Logger cho dev)

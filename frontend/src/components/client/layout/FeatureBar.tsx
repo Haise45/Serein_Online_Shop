@@ -59,7 +59,6 @@ const features: FeatureItem[] = [
 export default function FeatureBar() {
   return (
     <section className="bg-gray-100 py-12 sm:py-16">
-      {" "}
       {/* Nền trắng cho section */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center sm:mb-12">

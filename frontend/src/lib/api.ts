@@ -1,7 +1,6 @@
-// src/lib/api.ts
-import { ApiErrorResponse } from "@/types/api"; // Giả sử bạn có type này
-import { AxiosRequestConfig, AxiosResponse } from "axios";
-import axiosInstance from "./axiosInstance"; // Import axiosInstance đã cấu hình
+import { ApiErrorResponse } from "@/types/api";
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axiosInstance from "./axiosInstance";
 
 export const fetchApi = async <T = unknown>( // Generic type T cho data trả về
   endpoint: string,
@@ -25,17 +24,21 @@ export const fetchApi = async <T = unknown>( // Generic type T cho data trả v�
       response.data,
     );
     return response.data;
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as AxiosError;
+
     console.error(
       `[API Fetch Error (fetchApi)] ${options.method || "GET"} ${axiosInstance.defaults.baseURL}${endpoint}:`,
       error,
     );
+
     const apiError: ApiErrorResponse = {
       message:
-        error.response?.data?.message || error.message || "Đã có lỗi xảy ra.",
-      // Thêm các trường lỗi khác từ error.response?.data nếu có
+        (error.response?.data as { message?: string })?.message ||
+        error.message ||
+        "Đã có lỗi xảy ra.",
     };
-    throw apiError; // Ném lỗi đã được chuẩn hóa
+    throw apiError;
   }
 };
 
@@ -64,14 +67,19 @@ export const uploadFilesApi = async <T = unknown>(
       response.data,
     );
     return response.data;
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as AxiosError;
+
     console.error(
       `[API Upload Fetch Error (fetchApi)] POST ${axiosInstance.defaults.baseURL}${endpoint}:`,
       error,
     );
+
     const apiError: ApiErrorResponse = {
       message:
-        error.response?.data?.message || error.message || "Upload thất bại.",
+        (error.response?.data as { message?: string })?.message ||
+        error.message ||
+        "Upload thất bại.",
     };
     throw apiError;
   }
