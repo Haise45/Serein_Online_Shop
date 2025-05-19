@@ -47,7 +47,9 @@ const variantSchema = new mongoose.Schema(
       },
     ],
   },
-  { _id: true }
+  {
+    _id: true,
+  }
 ); // Cho phép mỗi variant có _id riêng để dễ quản lý/cập nhật
 
 // Định nghĩa Schema chính cho Sản phẩm (Product)
@@ -164,8 +166,8 @@ const displayPriceVirtual = function () {
 
   if (this.salePrice !== null && this.salePrice < this.price) {
     const isSaleActive =
-      (!this.salePriciceEffectiveDate || this.salePriceEffectiveDate <= now) &&
-      (!this.salePreExpiryDate || this.salePriceExpiryDate >= now);
+      (!this.salePriceEffectiveDate || this.salePriceEffectiveDate <= now) &&
+      (!this.salePriceExpiryDate || this.salePriceExpiryDate >= now);
 
     if (isSaleActive) {
       effectivePrice = this.salePrice;

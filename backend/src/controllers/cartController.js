@@ -44,16 +44,15 @@ const populateAndCalculateCart = async (cart) => {
   await cart.populate({
     path: "items.productId",
     select:
-      "name slug price images variants sku stockQuantity isActive isPublished category", // Chọn các trường cần thiết
+      "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category", // Chọn các trường cần thiết
     match: { isActive: true, isPublished: true }, // Chỉ populate sản phẩm active/published?
-    populate: { path: "category", select: "name slug _id isActive" }, // Populate thêm category
+    populate: { path: "category", select: "name slug _id isActive parent" }, // Populate thêm category
   });
 
   // --- Fetch tất cả category active một lần để tra cứu ---
   const activeCategoryMap = await fetchAndMapCategories({ isActive: true });
 
   let subtotal = 0;
-  let totalQuantity = 0;
   const populatedItems = [];
   const productIdsInCart = new Set();
   const categoryIdsInCart = new Set();
@@ -79,19 +78,26 @@ const populateAndCalculateCart = async (cart) => {
       continue;
     }
 
-    let itemPrice = product.price; // Giá mặc định là giá sản phẩm gốc
+    let itemPrice = product.displayPrice; // Giá mặc định là giá sản phẩm gốc
     let itemSku = product.sku;
-    let itemImage = product.images?.length > 0 ? product.images[0] : null;
+    let itemImage =
+      product.images && product.images.length > 0 ? product.images[0] : null;
     let availableStock = product.stockQuantity;
     let variantInfo = null; // Thông tin biến thể cụ thể
+    let originalPrice = product.price;
 
     // Nếu item này là một biến thể
     if (item.variantId) {
       const variant = product.variants.id(item.variantId); // Tìm subdocument variant bằng ID
       if (variant) {
-        itemPrice = variant.price;
+        itemPrice = variant.displayPrice;
+        originalPrice = variant.price;
         itemSku = variant.sku;
-        itemImage = variant.image || itemImage; // Ưu tiên ảnh variant, nếu không có dùng ảnh chính
+        // Ưu tiên ảnh ĐẦU TIÊN của biến thể nếu có.
+        // Nếu biến thể không có ảnh, itemImage sẽ giữ nguyên ảnh của sản phẩm chính.
+        if (variant.images && variant.images.length > 0 && variant.images[0]) {
+          itemImage = variant.images[0];
+        }
         availableStock = variant.stockQuantity;
         variantInfo = {
           // Lấy thông tin các option của variant này
@@ -131,6 +137,8 @@ const populateAndCalculateCart = async (cart) => {
       slug: product.slug,
       sku: itemSku,
       price: itemPrice,
+      originalPrice: originalPrice,
+      isOnSale: itemPrice < originalPrice,
       quantity: item.quantity,
       lineTotal: itemPrice * item.quantity,
       image: itemImage,
@@ -140,13 +148,13 @@ const populateAndCalculateCart = async (cart) => {
             _id: product.category._id,
             name: product.category.name,
             slug: product.category.slug,
+            parent: product.category.parent,
           }
         : null,
       variantInfo: variantInfo, // Thông tin các lựa chọn của biến thể
     });
 
     subtotal += itemPrice * item.quantity;
-    totalQuantity += item.quantity;
     productIdsInCart.add(product._id.toString()); // Thêm ID sản phẩm vào Set
     if (product.category._id) {
       categoryIdsInCart.add(product.category._id.toString()); // Thêm ID category vào Set
@@ -283,10 +291,13 @@ const populateAndCalculateCart = async (cart) => {
         await cart.save();
       }
       appliedCouponInfo = {
+        _id: coupon._id, // Thêm ID coupon
         code: coupon.code,
         discountType: coupon.discountType,
         discountValue: coupon.discountValue,
-        discountAmount: discountAmount, // Số tiền giảm giá thực tế
+        minOrderValue: coupon.minOrderValue,
+        applicableTo: coupon.applicableTo,
+        applicableIds: coupon.applicableIds,
       };
       finalTotal = subtotal - discountAmount; // Tính lại tổng cuối
     }
@@ -304,11 +315,13 @@ const populateAndCalculateCart = async (cart) => {
     });
   }
 
+  const totalDistinctItems = populatedItems.length;
+
   return {
     _id: cart._id,
     items: populatedItems,
     subtotal: subtotal,
-    totalQuantity: totalQuantity,
+    totalQuantity: totalDistinctItems,
     appliedCoupon: appliedCouponInfo,
     discountAmount: discountAmount,
     finalTotal: finalTotal,
@@ -345,7 +358,8 @@ const applyCoupon = asyncHandler(async (req, res) => {
   // Populate items để kiểm tra
   await cart.populate({
     path: "items.productId",
-    select: "price variants category stockQuantity isActive isPublished", // Lấy category ID
+    select:
+      "price salePrice salePriceEffectiveDate salePriceExpiryDate variants category stockQuantity isActive isPublished", // Lấy category ID
     match: { isActive: true, isPublished: true },
     populate: { path: "category", select: "_id parent" }, // Populate category của sản phẩm
   });
@@ -358,10 +372,10 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
   let subtotal = 0; // Tính subtotal nhanh
   for (const item of validCartItems) {
-    let itemPrice = item.productId.price;
+    let itemPrice = item.productId.displayPrice;
     if (item.variantId) {
       const variant = item.productId.variants.id(item.variantId);
-      if (variant) itemPrice = variant.price;
+      if (variant) itemPrice = variant.displayPrice;
       else continue; // Bỏ qua nếu variant ko tìm thấy
     } else if (item.productId.variants?.length > 0) continue; // Bỏ qua nếu item ko có variantId mà sp lại có
     subtotal += itemPrice * item.quantity;
@@ -441,10 +455,10 @@ const applyCoupon = asyncHandler(async (req, res) => {
       if (isItemApplicable) {
         foundApplicableItem = true;
         // Tính giá trị của item này để cộng vào applicableSubtotal
-        let itemPrice = item.productId.price;
+        let itemPrice = item.productId.displayPrice;
         if (item.variantId) {
           const variant = item.productId.variants.id(item.variantId);
-          if (variant) itemPrice = variant.price;
+          if (variant) itemPrice = variant.displayPrice;
           else itemPrice = 0; // Lấy giá variant
         }
         applicableSubtotal += itemPrice * item.quantity;
@@ -522,7 +536,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
 
   // --- 2. Kiểm tra sản phẩm và tồn kho ---
   const product = await Product.findById(productId).select(
-    "variants stockQuantity isActive isPublished name"
+    "variants stockQuantity isActive isPublished name price salePrice salePriceEffectiveDate salePriceExpiryDate"
   );
   if (!product || !product.isActive || !product.isPublished) {
     res.status(404);
@@ -617,12 +631,30 @@ const getCart = asyncHandler(async (req, res) => {
 // @access  Public (User hoặc Guest)
 const updateCartItem = asyncHandler(async (req, res) => {
   const { itemId } = req.params; // ID của cart item (subdocument)
-  const { quantity } = req.body; // Số lượng mới (đã validate)
+  const { quantity, newVariantId } = req.body; // Số lượng, Variant mới (đã validate)
   const identifier = req.cartIdentifier;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     res.status(400);
     throw new Error("ID item trong giỏ hàng không hợp lệ.");
+  }
+
+  if (
+    quantity !== undefined &&
+    (isNaN(parseInt(quantity)) || parseInt(quantity) < 1)
+  ) {
+    res.status(400);
+    throw new Error("Số lượng không hợp lệ.");
+  }
+  const newQuantity = quantity !== undefined ? parseInt(quantity) : undefined;
+
+  if (
+    newVariantId !== undefined &&
+    newVariantId !== null &&
+    !mongoose.Types.ObjectId.isValid(newVariantId)
+  ) {
+    res.status(400);
+    throw new Error("ID biến thể mới không hợp lệ.");
   }
 
   // --- 1. Tìm giỏ hàng ---
@@ -639,59 +671,159 @@ const updateCartItem = asyncHandler(async (req, res) => {
     throw new Error("Không tìm thấy sản phẩm này trong giỏ hàng.");
   }
 
-  // --- 3. Kiểm tra tồn kho với số lượng MỚI ---
-  const product = await Product.findById(itemToUpdate.productId).select(
-    "variants stockQuantity isActive isPublished"
-  );
+  // --- 3. Lấy thông tin sản phẩm gốc ---
+  // Populate một lần để có thông tin product và variants
+  const product = await Product.findById(itemToUpdate.productId)
+    .select(
+      "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category"
+    )
+    .populate({ path: "category", select: "name slug _id isActive parent" });
+
   if (!product || !product.isActive || !product.isPublished) {
-    // Nếu sản phẩm gốc không hợp lệ, xóa item khỏi giỏ
+    // Nếu sản phẩm gốc không hợp lệ, nên xóa item khỏi giỏ
     cart.items.pull({ _id: itemId });
     await cart.save();
     const populatedCart = await populateAndCalculateCart(cart);
+    console.warn(
+      `[Cart Update] Sản phẩm ${itemToUpdate.productId} không còn hợp lệ, đã xóa item ${itemId} khỏi giỏ.`
+    );
+    // Trả về lỗi hoặc giỏ hàng đã cập nhật với thông báo
     res
       .status(404)
-      .json({ message: "Sản phẩm không còn tồn tại.", cart: populatedCart });
-    return;
-  }
-
-  let availableStock = product.stockQuantity;
-  if (itemToUpdate.variantId) {
-    const variant = product.variants.id(itemToUpdate.variantId);
-    if (!variant) {
-      cart.items.pull({ _id: itemId });
-      await cart.save();
-      const populatedCart = await populateAndCalculateCart(cart);
-      res.status(404).json({
-        message: "Biến thể sản phẩm không còn tồn tại.",
+      .json({
+        message: "Sản phẩm không còn tồn tại hoặc không hoạt động.",
         cart: populatedCart,
       });
-      return;
-    }
-    availableStock = variant.stockQuantity;
-  } else if (product.variants && product.variants.length > 0) {
-    // Lỗi dữ liệu: sản phẩm có variant nhưng item lại không có variantId
-    cart.items.pull({ _id: itemId });
-    await cart.save();
-    const populatedCart = await populateAndCalculateCart(cart);
-    res.status(400).json({
-      message: "Lỗi dữ liệu giỏ hàng, vui lòng thêm lại sản phẩm.",
-      cart: populatedCart,
-    });
     return;
   }
 
-  if (availableStock < quantity) {
+  let finalQuantity =
+    newQuantity !== undefined ? newQuantity : itemToUpdate.quantity;
+  let targetVariantId = itemToUpdate.variantId; // Variant ID hiện tại hoặc mới
+  let targetVariant = null;
+  let availableStock = 0;
+
+  // --- 4. Xử lý nếu có yêu cầu đổi sang newVariantId ---
+  if (newVariantId !== undefined) {
+    // newVariantId có thể là null nếu muốn đổi về sản phẩm không có variant
+    if (
+      newVariantId === null &&
+      product.variants &&
+      product.variants.length > 0
+    ) {
+      res.status(400);
+      throw new Error(
+        "Không thể đổi sang sản phẩm không có biến thể khi sản phẩm gốc yêu cầu biến thể."
+      );
+    }
+
+    if (newVariantId !== null) {
+      // Nếu đang đổi sang một variant cụ thể
+      targetVariant = product.variants.id(newVariantId);
+      if (!targetVariant) {
+        res.status(404);
+        throw new Error("Biến thể mới không tồn tại cho sản phẩm này.");
+      }
+      targetVariantId = targetVariant._id;
+      availableStock = targetVariant.stockQuantity;
+    } else {
+      // newVariantId là null (muốn đổi về sản phẩm không có variant)
+      if (product.variants && product.variants.length > 0) {
+        // Trường hợp này đã chặn ở trên, nhưng để an toàn
+        res.status(400);
+        throw new Error("Sản phẩm này yêu cầu chọn biến thể.");
+      }
+      targetVariantId = null;
+      availableStock = product.stockQuantity;
+    }
+
+    // Kiểm tra tồn kho cho variant mới với số lượng hiện tại (hoặc số lượng mới nếu có)
+    if (availableStock < finalQuantity) {
+      res.status(400);
+      throw new Error(
+        `Biến thể mới chỉ còn ${availableStock} sản phẩm. Không đủ số lượng ${finalQuantity}.`
+      );
+    }
+    // Cập nhật variantId trong cart item
+    itemToUpdate.variantId = targetVariantId;
+    console.log(
+      `[Cart Update] Item ${itemId} đổi sang variant ${
+        targetVariantId || "sản phẩm gốc"
+      }.`
+    );
+  } else {
+    // Nếu không đổi variant, chỉ cập nhật số lượng (nếu có)
+    // Lấy stock của variant hiện tại hoặc sản phẩm chính
+    if (itemToUpdate.variantId) {
+      const currentVariant = product.variants.id(itemToUpdate.variantId);
+      if (!currentVariant) {
+        // Variant hiện tại không còn tồn tại -> lỗi dữ liệu, xóa item
+        cart.items.pull({ _id: itemId });
+        await cart.save();
+        const populatedCart = await populateAndCalculateCart(cart);
+        console.warn(
+          `[Cart Update] Variant hiện tại ${itemToUpdate.variantId} của item ${itemId} không tồn tại, đã xóa item.`
+        );
+        res
+          .status(404)
+          .json({
+            message: "Biến thể sản phẩm hiện tại không còn tồn tại.",
+            cart: populatedCart,
+          });
+        return;
+      }
+      availableStock = currentVariant.stockQuantity;
+    } else {
+      if (product.variants && product.variants.length > 0) {
+        // Lỗi: Item này nên có variantId
+        cart.items.pull({ _id: itemId });
+        await cart.save();
+        const populatedCart = await populateAndCalculateCart(cart);
+        res
+          .status(400)
+          .json({
+            message: "Lỗi dữ liệu: sản phẩm này yêu cầu biến thể.",
+            cart: populatedCart,
+          });
+        return;
+      }
+      availableStock = product.stockQuantity;
+    }
+  }
+
+  // --- 5. Cập nhật số lượng (nếu có) và kiểm tra tồn kho cuối cùng ---
+  if (newQuantity !== undefined) {
+    if (availableStock < newQuantity) {
+      res.status(400);
+      // Thông báo lỗi sẽ khác nhau tùy thuộc vào việc có đổi variant hay không
+      const stockSource =
+        newVariantId !== undefined
+          ? "biến thể mới"
+          : "sản phẩm/biến thể hiện tại";
+      throw new Error(
+        `Số lượng tồn kho của ${stockSource} không đủ (Chỉ còn ${availableStock}). Không thể cập nhật thành ${newQuantity}.`
+      );
+    }
+    itemToUpdate.quantity = newQuantity;
+    console.log(
+      `[Cart Update] Item ${itemId} cập nhật số lượng thành ${newQuantity}.`
+    );
+  }
+  // Nếu không có newQuantity, finalQuantity (số lượng hiện tại của item) vẫn phải được kiểm tra với stock mới (nếu đã đổi variant)
+  else if (
+    newVariantId !== undefined &&
+    availableStock < itemToUpdate.quantity
+  ) {
     res.status(400);
     throw new Error(
-      `Số lượng tồn kho không đủ (Chỉ còn ${availableStock} sản phẩm). Không thể cập nhật thành ${quantity}.`
+      `Biến thể mới chỉ còn ${availableStock} sản phẩm, không đủ cho số lượng hiện tại (${itemToUpdate.quantity}). Vui lòng giảm số lượng.`
     );
   }
 
-  // --- 4. Cập nhật số lượng và lưu ---
-  itemToUpdate.quantity = quantity;
+  // --- 6. Lưu giỏ hàng ---
   await cart.save();
-  const populatedCart = await populateAndCalculateCart(cart);
-  res.status(200).json(populatedCart); // Trả về giỏ hàng đã cập nhật
+  const populatedCart = await populateAndCalculateCart(cart); // Hàm này sẽ tính toán lại giá, hình ảnh, v.v.
+  res.status(200).json(populatedCart);
 });
 
 // @desc    Xóa một item khỏi giỏ hàng

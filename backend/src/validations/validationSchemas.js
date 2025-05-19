@@ -234,11 +234,13 @@ const variantSchemaValidation = Joi.object({
     "any.required": "Số lượng tồn kho của biến thể là bắt buộc",
     "number.min": "Số lượng tồn kho không được âm",
   }),
-  image: Joi.string()
-    .uri()
+  images: Joi.array()
+    .items(Joi.string().uri())
     .optional()
-    .allow(null, "")
-    .messages({ "string.uri": "Ảnh biến thể phải là URL hợp lệ" }),
+    .default([])
+    .messages({
+      "string.uri": "Mỗi ảnh của biến thể phải là một URL hợp lệ.",
+    }),
   optionValues: Joi.array()
     .items(variantOptionValueSchema)
     .min(1)

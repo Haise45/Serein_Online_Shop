@@ -15,11 +15,14 @@ const {
 
 const router = express.Router();
 
-// Tất cả các route này đều yêu cầu đăng nhập và quyền Admin
-router.use(protect, isAdmin);
-
 // POST /api/v1/coupons : Tạo coupon mới
-router.post("/", validateRequest(createCouponSchema), createCoupon);
+router.post(
+  "/",
+  protect,
+  isAdmin,
+  validateRequest(createCouponSchema),
+  createCoupon
+);
 
 // GET /api/v1/coupons : Lấy danh sách coupons
 router.get("/", getCoupons);
@@ -28,9 +31,15 @@ router.get("/", getCoupons);
 router.get("/:idOrCode", getCouponByCodeOrId);
 
 // PUT /api/v1/coupons/:id : Cập nhật coupon
-router.put("/:id", validateRequest(updateCouponSchema), updateCoupon);
+router.put(
+  "/:id",
+  protect,
+  isAdmin,
+  validateRequest(updateCouponSchema),
+  updateCoupon
+);
 
 // DELETE /api/v1/coupons/:id : Vô hiệu hóa coupon (Soft Delete)
-router.delete("/:id", deleteCoupon);
+router.delete("/:id", protect, isAdmin, deleteCoupon);
 
 module.exports = router;

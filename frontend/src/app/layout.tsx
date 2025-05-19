@@ -1,9 +1,10 @@
 import { ReduxProvider } from "@/store/Provider";
 import { Inter } from "next/font/google";
 import AuthInitializerWrapper from "./AuthInitializerWrapper";
+import AddedToCartPopupManager from "@/components/client/cart/AddedToCartPopupManager";
 import "./globals.css";
 import QueryProvider from "./QueryProvider";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,8 +23,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <ReduxProvider>
           <QueryProvider>
-            <div><Toaster position="top-right" reverseOrder={false} /></div>
-            <AuthInitializerWrapper>{children}</AuthInitializerWrapper>
+            <div>
+              <Toaster position="top-right" reverseOrder={false} />
+            </div>
+            <AuthInitializerWrapper>
+              {children}
+              <AddedToCartPopupManager />
+            </AuthInitializerWrapper>
           </QueryProvider>
         </ReduxProvider>
       </body>

@@ -27,40 +27,91 @@ const mergeGuestWishlistToUser = async (guestId, userId, res) => {
       userWishlist = new Wishlist({ user: userId, items: [] });
     }
 
-    // Gộp items từ guest vào user wishlist
-    const userItemIds = new Set(userWishlist.items.map((id) => id.toString()));
-    guestWishlist.items.forEach((guestItemId) => {
-      if (guestItemId) {
-        // Đảm bảo guestItemId không null/undefined
-        userItemIds.add(guestItemId.toString());
+    let itemsActuallyAddedCount = 0;
+
+    // Lặp qua từng item trong guestWishlist
+    guestWishlist.items.forEach((guestItem) => {
+      // Bỏ qua nếu guestItem hoặc guestItem.product không hợp lệ
+      if (!guestItem || !guestItem.product) {
+        console.warn(
+          "[Wishlist Merge] Bỏ qua guest item không hợp lệ:",
+          guestItem
+        );
+        return;
+      }
+
+      // guestItem.product và guestItem.variant (nếu có) đã là ObjectId do .lean()
+      const guestProductIdString = guestItem.product.toString();
+      const guestVariantIdString = guestItem.variant
+        ? guestItem.variant.toString()
+        : null;
+
+      // Kiểm tra xem item này (product + variant) đã tồn tại trong userWishlist chưa
+      const itemAlreadyExists = userWishlist.items.some((userItem) => {
+        if (!userItem || !userItem.product) return false;
+
+        const userProductIdString = userItem.product.toString();
+        const userVariantIdString = userItem.variant
+          ? userItem.variant.toString()
+          : null;
+
+        // So sánh product ID
+        if (userProductIdString !== guestProductIdString) {
+          return false;
+        }
+
+        // So sánh variant ID (cả hai phải cùng null hoặc cùng giá trị)
+        return userVariantIdString === guestVariantIdString;
+      });
+
+      if (!itemAlreadyExists) {
+        // Thêm item từ guestWishlist vào userWishlist.
+        userWishlist.items.push({
+          product: guestItem.product, // Đây là ObjectId
+          variant: guestItem.variant, // Đây là ObjectId hoặc null
+        });
+        itemsActuallyAddedCount++;
+        console.log(
+          `[Wishlist Merge] Đang thêm item: ProductID=${guestProductIdString}, VariantID=${guestVariantIdString} vào wishlist của user.`
+        );
+      } else {
+        console.log(
+          `[Wishlist Merge] Item đã tồn tại: ProductID=${guestProductIdString}, VariantID=${guestVariantIdString}. Bỏ qua.`
+        );
       }
     });
 
-    userWishlist.items = Array.from(userItemIds).map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
+    // Chỉ lưu nếu có sự thay đổi thực sự
+    if (itemsActuallyAddedCount > 0) {
+      await userWishlist.save();
+      console.log(
+        `[Wishlist Merge] Đã gộp ${itemsActuallyAddedCount} item(s) và lưu wishlist cho User.`
+      );
+    } else {
+      console.log(
+        "[Wishlist Merge] Không có item mới nào được thêm vào user wishlist."
+      );
+    }
 
-    await userWishlist.save();
-    console.log("[Wishlist Merge] Đã gộp và lưu wishlist cho User.");
-
-    // Xóa wishlist của guest
+    // Xóa wishlist của guest sau khi đã gộp thành công
     await Wishlist.deleteOne({ guestId: guestId });
     console.log("[Wishlist Merge] Đã xóa wishlist của Guest.");
 
     clearGuestWishlistCookie(res);
   } catch (error) {
     console.error("[Wishlist Merge] Lỗi trong quá trình gộp wishlist:", error);
-    clearGuestWishlistCookie(res); // Cố gắng xóa cookie dù lỗi
+    // Cân nhắc việc không xóa cookie nếu có lỗi nghiêm trọng để có thể thử lại hoặc debug.
+    // clearGuestWishlistCookie(res); // Tạm thời không xóa cookie nếu lỗi
   }
 };
 
 const clearGuestWishlistCookie = (res) => {
   console.log("[Wishlist Merge] Đang xóa cookie wishlistGuestId.");
   res.cookie("wishlistGuestId", "", {
-    httpOnly: false,
+    httpOnly: process.env.NODE_ENV === "production", // Nên là true cho production nếu cookie chỉ dùng server-side
     expires: new Date(0),
     secure: process.env.NODE_ENV === "production",
-    sameSite: "Lax",
+    sameSite: "Lax", // Hoặc "Strict" nếu phù hợp
     path: "/",
   });
 };
