@@ -1,5 +1,5 @@
 import {
-  getProductBySlugOrId,
+  getProductByIdOrSlug,
   getProducts,
   GetProductsParams,
   PaginatedProductsResponse,
@@ -30,7 +30,7 @@ export const useGetProducts = (
     queryFn: () => getProducts(params), // Hàm gọi API
     enabled: options?.enabled ?? true, // Query sẽ tự động chạy trừ khi enabled = false
     // Các tùy chọn khác:
-    staleTime: 5 * 60 * 1000, // Dữ liệu được coi là "stale" sau 5 phút
+    // staleTime: 5 * 60 * 1000, // Dữ liệu được coi là "stale" sau 5 phút
     // cacheTime: 10 * 60 * 1000, // Dữ liệu bị xóa khỏi cache sau 10 phút không active
     // refetchOnWindowFocus: true, // Mặc định là true
   });
@@ -45,7 +45,7 @@ export const useGetProductDetails = (
     queryKey: productKeys.detail(idOrSlug),
     queryFn: () => {
       if (!idOrSlug) return Promise.resolve(null); // Trả về null nếu không có idOrSlug
-      return getProductBySlugOrId(idOrSlug);
+      return getProductByIdOrSlug(idOrSlug);
     },
     enabled: options?.enabled ?? !!idOrSlug, // Chỉ chạy khi có idOrSlug
   });

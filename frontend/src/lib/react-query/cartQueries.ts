@@ -1,9 +1,11 @@
 import {
-  addItemToCart as addItemToCartApi, // <<< Cần tạo type này
+  addItemToCart as addItemToCartApi,
   clearCart as clearCartApi,
   getCart as getCartApi,
   removeCartItem as removeCartItemApi,
-  updateCartItem as updateCartItemApi, // <<< Cần tạo type này
+  updateCartItem as updateCartItemApi,
+  applyCoupon as applyCouponApi,
+  removeCoupon as removeCouponApi,
 } from "@/services/cartService"; // Giả sử bạn đã tạo cartService.ts
 import {
   AddToCartPayload,
@@ -102,5 +104,30 @@ export const useClearCart = () => {
   });
 };
 
-// Thêm hook cho applyCoupon và removeCoupon tương tự
-// ...
+export const useApplyCoupon = () => {
+  const queryClient = useQueryClient();
+  return useMutation<CartData, Error, string>({ // string là couponCode
+    mutationFn: applyCouponApi,
+    onSuccess: (updatedCart) => {
+      queryClient.setQueryData(cartKeys.cart, updatedCart); // Cập nhật cache giỏ hàng
+      toast.success("Áp dụng mã giảm giá thành công!");
+    },
+    onError: (error) => { // Bắt lỗi cụ thể từ server nếu có
+      toast.error(error.message || "Áp dụng mã giảm giá thất bại.");
+    },
+  });
+};
+
+export const useRemoveCoupon = () => {
+  const queryClient = useQueryClient();
+  return useMutation<CartData, Error, void>({ // không cần input
+    mutationFn: removeCouponApi,
+    onSuccess: (updatedCart) => {
+      queryClient.setQueryData(cartKeys.cart, updatedCart);
+      toast.success("Đã xóa mã giảm giá.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Xóa mã giảm giá thất bại.");
+    },
+  });
+};

@@ -1,5 +1,5 @@
-// src/components/client/CartPreviewModal.tsx
 "use client";
+import CustomSpinner from "@/components/shared/CustomSpinner";
 import {
   useGetCart,
   useRemoveCartItem,
@@ -15,8 +15,15 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
-import { FiMinus, FiPlus, FiShoppingCart, FiTrash2, FiX } from "react-icons/fi";
-import CustomSpinner from "@/components/shared/CustomSpinner";
+import {
+  FiAlertTriangle,
+  FiMinus,
+  FiPlus,
+  FiRefreshCw,
+  FiShoppingCart,
+  FiTrash2,
+  FiX,
+} from "react-icons/fi";
 
 const formatCurrency = (amount: number | undefined) => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";
@@ -32,7 +39,7 @@ export default function CartPreviewModal({
   isOpen,
   setIsOpen,
 }: CartPreviewModalProps) {
-  const { data: cartData, isLoading, isError, error } = useGetCart();
+  const { data: cartData, isLoading, isError, error, refetch } = useGetCart();
   const removeCartItemMutation = useRemoveCartItem();
   const updateCartItemMutation = useUpdateCartItem();
 
@@ -58,6 +65,12 @@ export default function CartPreviewModal({
     }
   };
 
+  const handleRetryFetchCart = () => {
+    if (refetch) {
+      refetch();
+    }
+  };
+  
   let content;
   if (isLoading) {
     content = (
@@ -67,10 +80,29 @@ export default function CartPreviewModal({
     );
   } else if (isError && error) {
     content = (
-      <div className="px-4 py-10 text-center">
-        <p className="text-sm text-red-600">Lỗi tải giỏ hàng.</p>
-        <p className="mt-1 text-xs text-red-500">{error.message}</p>
-        {/* Có thể thêm nút thử lại */}
+      <div className="flex min-h-[250px] flex-col items-center justify-center px-4 py-10 text-center">
+        <FiAlertTriangle className="mb-4 h-12 w-12 text-red-400" />
+        <h3 className="text-base font-semibold text-gray-800">
+          Lỗi tải giỏ hàng
+        </h3>
+        <p className="mt-1 text-sm text-red-600">
+          Đã có lỗi xảy ra khi tải thông tin giỏ hàng của bạn.
+        </p>
+        {error.message && (
+          <p className="mt-1 text-xs text-gray-500">
+            Chi tiết: {error.message}
+          </p>
+        )}
+        <button
+          onClick={handleRetryFetchCart}
+          disabled={isLoading}
+          className="mt-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-400"
+        >
+          <FiRefreshCw
+            className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+          />
+          Thử lại
+        </button>
       </div>
     );
   } else if (!cartData || !cartData.items || cartData.items.length === 0) {
@@ -144,15 +176,16 @@ export default function CartPreviewModal({
                           updateCartItemMutation.isPending &&
                           updateCartItemMutation.variables?.itemId === item._id
                         }
-                        className="px-2 py-1 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
+                        className="rounded-s-md p-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
                         aria-label={`Giảm số lượng sản phẩm ${item.name}`}
                       >
                         <FiMinus className="h-3.5 w-3.5" />
                       </button>
                       <input
                         type="text"
+                        readOnly
                         value={item.quantity}
-                        className="w-10 p-1 text-center text-sm text-gray-700 focus:border-gray-300 focus:ring-0"
+                        className="w-10 border-x border-y-0 border-gray-300 p-1 text-center text-sm text-gray-700 focus:outline-none"
                         aria-label={`Số lượng hiện tại của ${item.name}`}
                         title={`Số lượng ${item.name}`}
                       />
@@ -166,7 +199,7 @@ export default function CartPreviewModal({
                               item._id) ||
                           item.quantity >= item.availableStock
                         }
-                        className="px-2 py-1 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
+                        className="rounded-e-md p-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
                         aria-label={`Tăng số lượng sản phẩm ${item.name}`}
                       >
                         <FiPlus className="h-3.5 w-3.5" />
@@ -189,9 +222,9 @@ export default function CartPreviewModal({
                     </div>
                   </div>
                   {/* Hiển thị tổng tiền của item này (nếu muốn) */}
-                  {/* <p className="mt-1 text-right text-xs font-medium text-indigo-600">
+                  <p className="mt-1 text-right text-xs font-medium text-indigo-600">
                     Tổng: {formatCurrency(item.price * item.quantity)}
-                  </p> */}
+                  </p>
                 </div>
               </li>
             ))}
@@ -292,9 +325,9 @@ export default function CartPreviewModal({
                         </div>
                         {/* Có thể thêm thông tin số lượng item ở đây */}
                         {cartData && cartData.totalQuantity > 0 && (
-                            <p className="mt-1 text-sm text-indigo-200">
-                                Hiện có {cartData.totalQuantity} sản phẩm.
-                            </p>
+                          <p className="mt-1 text-sm text-indigo-200">
+                            Hiện có {cartData.totalQuantity} sản phẩm.
+                          </p>
                         )}
                       </div>
                       {/* Phần nội dung chính (danh sách item,...) */}

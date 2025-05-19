@@ -1,4 +1,3 @@
-// src/services/cartService.ts
 import axiosInstance from "@/lib/axiosInstance";
 import {
   AddToCartPayload,

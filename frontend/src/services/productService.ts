@@ -1,25 +1,25 @@
-// src/services/productService.ts
-import axiosInstance from "@/lib/axiosInstance"; // Sử dụng axiosInstance đã cấu hình
-import { Product, Variant } from "@/types"; // Import type Product
+import axiosInstance from "@/lib/axiosInstance";
+import { Product, Variant } from "@/types";
+import { AxiosError } from "axios";
 
-// Interface cho các tham số query khi lấy danh sách sản phẩm
+// --- Interfaces ---
+
 export interface GetProductsParams {
   page?: number;
   limit?: number;
-  sortBy?: string; // Ví dụ: 'createdAt', 'price', 'totalSold', 'averageRating'
+  sortBy?: string;
   sortOrder?: "asc" | "desc";
-  category?: string; // Slug của category
-  categoryId?: string; // ID của category
+  category?: string;
+  categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
   search?: string;
-  attributes?: Record<string, string>; // Ví dụ: { "Màu sắc": "Đỏ,Xanh", "Size": "M" }
-  isActive?: boolean; // Cho admin
-  isPublished?: boolean; // Cho admin
-  minRating?: number; // Lọc theo rating
+  attributes?: Record<string, string>;
+  isActive?: boolean;
+  isPublished?: boolean;
+  minRating?: number;
 }
 
-// Interface cho response từ API lấy danh sách sản phẩm (nếu có phân trang)
 export interface PaginatedProductsResponse {
   currentPage: number;
   totalPages: number;
@@ -27,62 +27,6 @@ export interface PaginatedProductsResponse {
   limit: number;
   products: Product[];
 }
-
-/**
- * Lấy danh sách sản phẩm với các tùy chọn lọc, sắp xếp, phân trang.
- * @param params Các tham số query
- * @returns Promise chứa đối tượng PaginatedProductsResponse
- */
-export const getProducts = async (
-  params?: GetProductsParams,
-): Promise<PaginatedProductsResponse> => {
-  try {
-    // API backend GET /products sẽ nhận các params này trong req.query
-    const response = await axiosInstance.get<PaginatedProductsResponse>(
-      "/products",
-      { params },
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error(
-      "Lỗi khi lấy danh sách sản phẩm:",
-      error.response?.data || error.message,
-    );
-    // Ném lỗi đã được chuẩn hóa bởi interceptor của axiosInstance hoặc tạo lỗi mới
-    throw new Error(
-      error.response?.data?.message || "Không thể tải danh sách sản phẩm.",
-    );
-  }
-};
-
-/**
- * Lấy chi tiết một sản phẩm bằng slug hoặc ID.
- * @param idOrSlug ID hoặc Slug của sản phẩm
- * @returns Promise chứa thông tin chi tiết sản phẩm hoặc null nếu không tìm thấy
- */
-export const getProductBySlugOrId = async (
-  idOrSlug: string,
-): Promise<Product | null> => {
-  try {
-    const response = await axiosInstance.get<Product>(`/products/${idOrSlug}`);
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
-      return null; // Trả về null nếu không tìm thấy
-    }
-    console.error(
-      `Lỗi khi lấy sản phẩm "${idOrSlug}":`,
-      error.response?.data || error.message,
-    );
-    throw new Error(
-      error.response?.data?.message ||
-        `Không thể tải thông tin sản phẩm "${idOrSlug}".`,
-    );
-  }
-};
-
-// --- Các hàm cho Admin (ví dụ) ---
-// Bạn sẽ cần các type cho ProductCreationData và ProductUpdateData
 
 export interface ProductCreationData
   extends Omit<
@@ -98,9 +42,54 @@ export interface ProductCreationData
     | "isOnSale"
     | "isNew"
   > {
-  // Các trường cần thiết khi tạo
-  category: string; // ID của category
+  category: string;
 }
+
+export interface ProductUpdateData extends Partial<ProductCreationData> {
+  isActive?: boolean;
+  isPublished?: boolean;
+  variants?: Variant[];
+}
+
+// --- Utils ---
+
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  const error = err as AxiosError<{ message?: string }>;
+  return error.response?.data?.message || error.message || fallback;
+};
+
+// --- API Services ---
+
+export const getProducts = async (
+  params?: GetProductsParams,
+): Promise<PaginatedProductsResponse> => {
+  try {
+    const response = await axiosInstance.get<PaginatedProductsResponse>(
+      "/products",
+      { params },
+    );
+    return response.data;
+  } catch (err: unknown) {
+    console.error("Lỗi khi lấy danh sách sản phẩm:", err);
+    throw new Error(getErrorMessage(err, "Không thể tải danh sách sản phẩm."));
+  }
+};
+
+export const getProductByIdOrSlug = async (
+  idOrSlug: string,
+): Promise<Product | null> => {
+  try {
+    const response = await axiosInstance.get<Product>(`/products/${idOrSlug}`);
+    return response.data;
+  } catch (err: unknown) {
+    const error = err as AxiosError;
+    if (error.response?.status === 404) return null;
+    console.error(`Lỗi khi lấy sản phẩm "${idOrSlug}":`, err);
+    throw new Error(
+      getErrorMessage(err, `Không thể tải thông tin sản phẩm "${idOrSlug}".`),
+    );
+  }
+};
 
 export const createProduct = async (
   productData: ProductCreationData,
@@ -111,21 +100,11 @@ export const createProduct = async (
       productData,
     );
     return response.data;
-  } catch (error: any) {
-    console.error(
-      "Lỗi khi tạo sản phẩm:",
-      error.response?.data || error.message,
-    );
-    throw new Error(error.response?.data?.message || "Tạo sản phẩm thất bại.");
+  } catch (err: unknown) {
+    console.error("Lỗi khi tạo sản phẩm:", err);
+    throw new Error(getErrorMessage(err, "Tạo sản phẩm thất bại."));
   }
 };
-
-export interface ProductUpdateData extends Partial<ProductCreationData> {
-  // Các trường có thể cập nhật, ví dụ:
-  isActive?: boolean;
-  isPublished?: boolean;
-  variants?: Variant[]; // Cho phép cập nhật toàn bộ mảng variants
-}
 
 export const updateProduct = async (
   productId: string,
@@ -137,14 +116,10 @@ export const updateProduct = async (
       productData,
     );
     return response.data;
-  } catch (error: any) {
-    console.error(
-      `Lỗi khi cập nhật sản phẩm ${productId}:`,
-      error.response?.data || error.message,
-    );
+  } catch (err: unknown) {
+    console.error(`Lỗi khi cập nhật sản phẩm ${productId}:`, err);
     throw new Error(
-      error.response?.data?.message ||
-        `Cập nhật sản phẩm ${productId} thất bại.`,
+      getErrorMessage(err, `Cập nhật sản phẩm ${productId} thất bại.`),
     );
   }
 };
@@ -157,15 +132,10 @@ export const deleteProduct = async (
       `/products/${productId}`,
     );
     return response.data;
-  } catch (error: any) {
-    console.error(
-      `Lỗi khi xóa sản phẩm ${productId}:`,
-      error.response?.data || error.message,
-    );
+  } catch (err: unknown) {
+    console.error(`Lỗi khi xóa sản phẩm ${productId}:`, err);
     throw new Error(
-      error.response?.data?.message || `Xóa sản phẩm ${productId} thất bại.`,
+      getErrorMessage(err, `Xóa sản phẩm ${productId} thất bại.`),
     );
   }
 };
-
-// Thêm các service khác nếu cần (ví dụ: updateStock, ...)

@@ -10,8 +10,8 @@ export interface Variant {
   sku: string;
   price: number;
   salePrice?: number | null;
-  salePriceEffectiveDate?: string | null;
-  salePriceExpiryDate?: string | null;
+  salePriceEffectiveDate?: string | Date | null;
+  salePriceExpiryDate?: string | Date | null;
   stockQuantity: number;
   images?: string[];
   optionValues: VariantOptionValue[];
@@ -31,8 +31,8 @@ export interface Product {
   description?: string;
   price: number;
   salePrice?: number | null;
-  salePriceEffectiveDate?: string | null;
-  salePriceExpiryDate?: string | null;
+  salePriceEffectiveDate?: string | Date | null;
+  salePriceExpiryDate?: string | Date | null;
   sku?: string | null;
   category: Category | string;
   images: string[]; // Mảng các URL ảnh chính của sản phẩm

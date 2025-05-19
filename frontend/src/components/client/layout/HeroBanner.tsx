@@ -49,7 +49,7 @@ const bannerSlides = [
 
 export default function HeroBanner() {
   return (
-    <div className="group relative h-[300px] w-full sm:h-[400px] md:h-[500px] lg:h-[600px]">
+    <div className="group relative w-full aspect-[16/7]">
       <Swiper
         modules={[Navigation, Pagination, Autoplay, EffectFade, A11y]}
         spaceBetween={0}
@@ -92,7 +92,7 @@ export default function HeroBanner() {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1200px"
               style={{ objectFit: "cover" }}
               priority={slide.id === 1}
-              className="transition-all duration-500 group-hover:brightness-70"
+              className="transition-all duration-500 group-hover:brightness-70 object-center"
             />
             {/* Container cho text và button */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white opacity-0 transition-opacity duration-500 group-hover:opacity-100 sm:p-8">

@@ -10,8 +10,8 @@ import { FiHeart, FiMenu, FiSearch, FiShoppingCart } from "react-icons/fi";
 import { useGetCart } from "@/lib/react-query/cartQueries";
 import { useGetWishlist } from "@/lib/react-query/wishlistQueries";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import CartPreviewModal from "./CartPreviewModal";
-import CategoryMenu from "./CategoryMenu";
+import CartPreviewModal from "../cart/CartPreviewModal";
+import CategoryMenu from "../category/CategoryMenu";
 import SideDrawer from "./SideDrawer";
 import UserMenu from "./UserMenu";
 
@@ -88,7 +88,9 @@ export default function NavbarClient() {
                 <FiMenu className="h-6 w-6" />
               </button>
               <Link href="/">
-                <span className="text-3xl font-bold italic">SEREIN</span>{" "}
+                <span className="text-2xl font-bold italic sm:text-3xl">
+                  SEREIN
+                </span>{" "}
                 {/* Hoặc logo image */}
               </Link>
             </div>

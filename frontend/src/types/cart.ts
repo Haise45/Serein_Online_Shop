@@ -1,5 +1,5 @@
-// src/types/cart.ts
-import { Product } from "./product"; // Giả sử bạn có type Product và Variant
+import { Coupon } from "./coupon";
+import { Product } from "./product";
 
 export interface CartItemOption {
   attributeName: string;
@@ -18,28 +18,30 @@ export interface CartItem {
   lineTotal: number;
   image?: string | null;
   availableStock: number;
-  category?: { name: string; slug: string; _id: string } | null;
+  category: { name: string; slug: string; _id: string };
   variantInfo?: {
     _id: string;
+    sku?: string;
     options: CartItemOption[];
-  } | null;
+  } | null ;
 }
 
-export interface AppliedCouponInfo {
-  code: string;
-  discountType?: "percentage" | "fixed_amount";
-  discountValue?: number;
-  discountAmount: number; // Số tiền giảm giá thực tế
-  error?: string; // Thông báo lỗi nếu coupon không hợp lệ khi re-validate
-}
+// export interface AppliedCouponInfo {
+//   code: string;
+//   discountType?: "percentage" | "fixed_amount";
+//   discountValue?: number;
+//   discountAmount: number; // Số tiền giảm giá thực tế
+//   error?: string; // Thông báo lỗi nếu coupon không hợp lệ khi re-validate
+// }
 
 export interface CartData {
   _id?: string; // ID của document Cart
   items: CartItem[];
   subtotal: number;
   totalQuantity: number;
-  appliedCoupon?: AppliedCouponInfo | null;
+  appliedCoupon?: Coupon | null;
   discountAmount: number;
+  shippingFee?: number;
   finalTotal: number;
   userId?: string;
   guestId?: string;
@@ -54,5 +56,6 @@ export interface AddToCartPayload {
 }
 
 export interface UpdateCartItemPayload {
-  quantity: number;
+  quantity?: number;
+  newVariantId?: string | null;
 }

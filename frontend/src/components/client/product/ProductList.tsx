@@ -1,10 +1,9 @@
-// src/components/client/ProductList.tsx
 "use client";
 import { Product } from "@/types";
 import ProductCard from "./ProductCard";
 
 interface ProductListProps {
-  title?: string; // Tiêu đề cho section (ví dụ: "Sản Phẩm Mới Nhất")
+  title?: string;
   products: Product[];
   loading?: boolean;
   error?: string | null;
@@ -17,7 +16,6 @@ export default function ProductList({
   error,
 }: ProductListProps) {
   if (loading) {
-    // Hiển thị skeleton loading
     return (
       <div className="py-8">
         {title && (
@@ -25,22 +23,22 @@ export default function ProductList({
             {title}
           </h2>
         )}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {[...Array(4)].map(
-            (
-              _,
-              i, // Hiển thị 4 skeleton cards
-            ) => (
-              <div
-                key={i}
-                className="animate-pulse rounded-lg border border-gray-200 p-4"
-              >
-                <div className="aspect-w-1 aspect-h-1 mb-3 rounded bg-gray-300"></div>
-                <div className="mb-2 h-4 w-3/4 rounded bg-gray-300"></div>
-                <div className="h-6 w-1/2 rounded bg-gray-300"></div>
+        {/* Điều chỉnh grid cho skeleton để khớp với grid sản phẩm thật */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              // className="animate-pulse rounded-lg border border-gray-200 p-4" // Bỏ padding ở đây nếu card tự có
+              className="animate-pulse rounded-xl border border-gray-200 bg-white shadow-sm"
+            >
+              <div className="aspect-square w-full rounded-t-xl bg-gray-300"></div>
+              <div className="p-3 sm:p-4"> {/* Thêm padding cho nội dung skeleton */}
+                <div className="mb-2 h-5 w-3/4 rounded bg-gray-300"></div> {/* Tăng chiều cao tên */}
+                <div className="h-4 w-full rounded bg-gray-300 sm:h-5"></div> {/* Thêm dòng cho màu/thuộc tính */}
+                <div className="mt-2 h-6 w-1/2 rounded bg-gray-300"></div> {/* Tăng chiều cao giá */}
               </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -79,7 +77,14 @@ export default function ProductList({
           {title}
         </h2>
       )}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+      {/*
+        Thay đổi grid layout:
+        - md:grid-cols-3 (thay vì 3)
+        - lg:grid-cols-3 (thay vì 4) -> Card sẽ to hơn trên màn hình lớn
+        - xl:grid-cols-4 (thay vì 5) -> Card sẽ to hơn trên màn hình rất lớn
+        - Tăng gap một chút nếu muốn
+      */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product._id} product={product} />
         ))}

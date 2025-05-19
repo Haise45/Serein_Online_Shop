@@ -1,9 +1,9 @@
 "use client";
-import FeatureBar from "@/components/client/FeatureBar";
-import FooterClient from "@/components/client/FooterClient";
-import HeroBanner from "@/components/client/HeroBanner";
-import NavbarClient from "@/components/client/NavbarClient";
-import ProductList from "@/components/client/ProductList";
+import FeatureBar from "@/components/client/layout/FeatureBar";
+import FooterClient from "@/components/client/layout/FooterClient";
+import HeroBanner from "@/components/client/layout/HeroBanner";
+import NavbarClient from "@/components/client/layout/NavbarClient";
+import ProductList from "@/components/client/product/ProductList";
 import { useGetProducts } from "@/lib/react-query/productQueries";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -56,37 +56,39 @@ export default function HomePage() {
       <NavbarClient />
       <HeroBanner />
       <FeatureBar />
-      <main className="mx-auto min-h-screen flex-grow bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
-        <ProductList
-          title="Sản Phẩm Mới Nhất"
-          products={newProducts}
-          loading={isLoadingNew}
-          error={
-            isErrorNew
-              ? errorNewObject?.message || "Lỗi tải sản phẩm mới."
-              : null
-          }
-        />
+      <main className="bg-gray-100">
+        <section className="container mx-auto min-h-screen flex-grow px-4 py-8 sm:px-6 lg:px-8">
+          <ProductList
+            title="Sản Phẩm Mới Nhất"
+            products={newProducts}
+            loading={isLoadingNew}
+            error={
+              isErrorNew
+                ? errorNewObject?.message || "Lỗi tải sản phẩm mới."
+                : null
+            }
+          />
 
-        <ProductList
-          title="Sản Phẩm Bán Chạy"
-          products={popularProducts}
-          loading={isLoadingPopular}
-          error={
-            isErrorPopular
-              ? errorPopularObject?.message || "Lỗi tải sản phẩm phổ biến."
-              : null
-          }
-        />
+          <ProductList
+            title="Sản Phẩm Bán Chạy"
+            products={popularProducts}
+            loading={isLoadingPopular}
+            error={
+              isErrorPopular
+                ? errorPopularObject?.message || "Lỗi tải sản phẩm phổ biến."
+                : null
+            }
+          />
 
-        <div className="py-12 text-center">
-          <Link
-            href="/products"
-            className="rounded-lg bg-indigo-600 px-6 py-3 text-lg font-bold text-white shadow-md transition duration-300 hover:bg-indigo-700 hover:shadow-lg"
-          >
-            Xem Tất Cả Sản Phẩm
-          </Link>
-        </div>
+          <div className="py-12 text-center">
+            <Link
+              href="/products"
+              className="rounded-lg bg-indigo-600 px-6 py-3 text-lg font-bold text-white shadow-md transition duration-300 hover:bg-indigo-700 hover:shadow-lg"
+            >
+              Xem Tất Cả Sản Phẩm
+            </Link>
+          </div>
+        </section>
       </main>
       <FooterClient />
     </>

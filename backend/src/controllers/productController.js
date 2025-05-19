@@ -4,6 +4,10 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 const sanitizeHtml = require("../utils/sanitize");
 const { createAdminNotification } = require("../utils/notificationUtils");
+const {
+  getCategoryDescendants, // Import hàm mới
+  fetchAndMapCategories,
+} = require("../utils/categoryUtils");
 
 const LOW_STOCK_THRESHOLD = 5; // Ngưỡng cảnh báo tồn kho thấp
 
@@ -29,35 +33,75 @@ const buildFilter = async (query, isAdmin = false) => {
     andConditions.push({ isPublished: true });
   }
 
-  // 2. Filter theo Category (Ưu tiên Slug)
-  if (query.category) {
-    // Nếu có query param 'category' (là slug)
+  // 2. Filter theo Category (bao gồm cả con cháu)
+  if (query.category || query.categoryId) {
     try {
-      // Tìm ID của category dựa trên slug
-      const category = await Category.findOne({ slug: query.category })
-        .lean()
-        .select("_id");
-      if (category) {
-        andConditions.push({ category: category._id }); // Gán ID category vào bộ lọc
-      } else {
-        // Nếu slug không tồn tại, trả về điều kiện không thể khớp để không trả về sản phẩm nào
-        console.log(
-          `[Filter] Category slug "${query.category}" không tồn tại.`
+      const categoryMap = await fetchAndMapCategories({ isActive: true });
+      let targetCategory = null;
+
+      if (query.category) {
+        // Ưu tiên query.category (slug)
+        const slugToFind = query.category;
+        for (const cat of categoryMap.values()) {
+          if (cat.slug === slugToFind) {
+            targetCategory = cat;
+            break;
+          }
+        }
+        if (!targetCategory) {
+          console.log(
+            `[Filter] Category slug "${slugToFind}" không tồn tại hoặc không hoạt động.`
+          );
+          return {
+            _id: new mongoose.Types.ObjectId("000000000000000000000000"),
+          };
+        }
+      } else if (
+        query.categoryId &&
+        mongoose.Types.ObjectId.isValid(query.categoryId)
+      ) {
+        const idToFind = query.categoryId.toString(); // Chuyển ObjectId sang string để so sánh với key của Map
+        targetCategory = categoryMap.get(idToFind);
+        if (!targetCategory) {
+          console.log(
+            `[Filter] Category ID "${idToFind}" không tồn tại trong map hoặc không hoạt động.`
+          );
+          return {
+            _id: new mongoose.Types.ObjectId("000000000000000000000000"),
+          };
+        }
+      }
+
+      if (targetCategory) {
+        const categoryIdsToFilter = [targetCategory._id.toString()];
+        const descendantIds = getCategoryDescendants(
+          targetCategory._id,
+          categoryMap
         );
-        // Trả về một điều kiện lọc không thể xảy ra
-        return { _id: new mongoose.Types.ObjectId("000000000000000000000000") }; // ID không bao giờ tồn tại
+        categoryIdsToFilter.push(...descendantIds);
+
+        const objectIdArray = categoryIdsToFilter.map(
+          (id) => new mongoose.Types.ObjectId(id)
+        );
+        andConditions.push({ category: { $in: objectIdArray } });
+
+        console.log(
+          `[Filter] Lọc theo category "${targetCategory.name}" (ID: ${
+            targetCategory._id
+          }) và các con cháu. IDs: ${categoryIdsToFilter.join(", ")}`
+        );
+      } else if (
+        query.categoryId &&
+        !mongoose.Types.ObjectId.isValid(query.categoryId)
+      ) {
+        // Nếu categoryId được cung cấp nhưng không hợp lệ
+        console.log(`[Filter] Category ID "${query.categoryId}" không hợp lệ.`);
+        return { _id: new mongoose.Types.ObjectId("000000000000000000000000") };
       }
     } catch (error) {
-      console.error("[Filter] Lỗi khi tìm category bằng slug:", error);
-      // Lỗi thì cũng không trả về gì
+      console.error("[Filter] Lỗi khi xử lý filter category:", error);
       return { _id: new mongoose.Types.ObjectId("000000000000000000000000") };
     }
-  } else if (
-    query.categoryId &&
-    mongoose.Types.ObjectId.isValid(query.categoryId)
-  ) {
-    // Nếu có 'categoryId' hợp lệ
-    andConditions.push({ category: query.categoryId });
   }
 
   // 3. Filter theo Khoảng giá
@@ -364,7 +408,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
   // --- 5. Populate thông tin category sau khi lưu ---
   // Làm cho response trả về có đầy đủ thông tin category thay vì chỉ ID
-  await createdProduct.populate("category", "name slug");
+  await createdProduct.populate("category", "name slug parent");
 
   // --- 6. Trả về kết quả ---
   res.status(201).json(createdProduct);
@@ -413,7 +457,7 @@ const getProducts = asyncHandler(async (req, res) => {
       salePrice: 1,
       salePriceEffectiveDate: 1,
       salePriceExpiryDate: 1,
-      images: { $slice: 1 }, // Ảnh riêng của variant
+      images: { $slice: 2 }, // Ảnh riêng của variant
       optionValues: 1, // QUAN TRỌNG: để lấy màu sắc, size
       stockQuantity: 1, // Có thể cần để check còn hàng không
     },
@@ -427,7 +471,7 @@ const getProducts = asyncHandler(async (req, res) => {
   // --- Thực hiện Query ---
   // Query lấy danh sách sản phẩm
   const productsQuery = Product.find(filter) // Áp dụng bộ lọc
-    .populate("category", "name slug") // Lấy thông tin 'name' và 'slug' của category liên kết
+    .populate("category", "name slug parent") // Lấy thông tin 'name' và 'slug' của category liên kết
     .select({ ...projection, ...selectFieldsForList }) // Chọn lọc các trường cần thiết và score (nếu có)
     .sort(sort) // Áp dụng sắp xếp
     .skip(skip) // Bỏ qua các sản phẩm của trang trước
@@ -475,7 +519,7 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
     queryConditions._id = idOrSlug; // Thêm điều kiện tìm theo ID
     product = await Product.findOne(queryConditions).populate(
       "category",
-      "name slug image"
+      "name slug image parent"
     ); // Lấy đủ thông tin category
   }
 
@@ -486,7 +530,7 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
     queryConditions.slug = idOrSlug; // Thêm điều kiện tìm theo slug
     product = await Product.findOne(queryConditions).populate(
       "category",
-      "name slug image"
+      "name slug image parent"
     );
   }
 
