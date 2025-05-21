@@ -10,6 +10,10 @@ import {
   Transition,
 } from "@headlessui/react";
 import Link from "next/link";
+import {
+  useSearchParams as useNextSearchParamsHook,
+  usePathname,
+} from "next/navigation";
 import { Fragment } from "react";
 import {
   FiFileText,
@@ -27,6 +31,10 @@ export default function UserMenu() {
   );
   const dispatch = useDispatch<AppDispatch>();
 
+  // Lấy thông tin URL hiện tại
+  const pathname = usePathname();
+  const searchParams = useNextSearchParamsHook();
+
   const handleLogout = async () => {
     try {
       await logoutUserApi();
@@ -36,12 +44,19 @@ export default function UserMenu() {
     dispatch(logout());
   };
 
+  // Tạo redirectUrl từ pathname và searchParams hiện tại
+  const currentQueryString = searchParams.toString();
+  const redirectUrl =
+    pathname + (currentQueryString ? `?${currentQueryString}` : "");
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton className="rounded-full p-2 text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none">
+        <MenuButton
+          className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        >
           <span className="sr-only">Mở menu người dùng</span>
-          <FiUser className="h-6 w-6" aria-hidden="true" />
+          <FiUser className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
         </MenuButton>
       </div>
       <Transition
@@ -53,35 +68,40 @@ export default function UserMenu() {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg focus:outline-none">
+        <MenuItems className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/10 focus:outline-none">
           {isAuthenticated && user ? (
+            // ... (Phần menu cho người dùng đã đăng nhập giữ nguyên)
             <>
               <div className="px-4 py-3">
-                <p className="text-sm text-gray-900">Chào, {user.name}!</p>
+                <p className="text-sm font-medium text-gray-900">
+                  Chào, {user.name}!
+                </p>
                 <p className="truncate text-xs text-gray-500">{user.email}</p>
               </div>
               <MenuItem as={Fragment}>
                 <Link
                   href="/profile"
-                  className="ui-active:bg-gray-100 flex w-full items-center px-4 py-2 text-left text-sm text-gray-700"
+                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiSettings className="mr-2 h-4 w-4" /> Thông tin cá nhân
+                  <FiSettings className="mr-2 inline-block h-4 w-4" /> Thông tin
+                  cá nhân
                 </Link>
               </MenuItem>
               <MenuItem as={Fragment}>
                 <Link
                   href="/profile/orders"
-                  className="ui-active:bg-gray-100 flex w-full items-center px-4 py-2 text-left text-sm text-gray-700"
+                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiFileText className="mr-2 h-4 w-4" /> Đơn hàng của tôi
+                  <FiFileText className="mr-2 inline-block h-4 w-4" /> Đơn hàng
+                  của tôi
                 </Link>
               </MenuItem>
               <MenuItem>
                 <button
                   onClick={handleLogout}
-                  className="ui-active:bg-gray-100 flex w-full items-center px-4 py-2 text-left text-sm text-gray-700"
+                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiLogOut className="mr-2 h-4 w-4" /> Đăng xuất
+                  <FiLogOut className="mr-2 inline-block h-4 w-4" /> Đăng xuất
                 </button>
               </MenuItem>
             </>
@@ -89,18 +109,20 @@ export default function UserMenu() {
             <>
               <MenuItem as={Fragment}>
                 <Link
-                  href="/login"
-                  className="ui-active:bg-gray-100 flex w-full items-center px-4 py-2 text-left text-sm text-gray-700"
+                  // Thêm redirect query parameter
+                  href={`/login?redirect=${encodeURIComponent(redirectUrl)}`}
+                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiLogIn className="mr-2 h-4 w-4" /> Đăng nhập
+                  <FiLogIn className="mr-2 inline-block h-4 w-4" /> Đăng nhập
                 </Link>
               </MenuItem>
               <MenuItem as={Fragment}>
                 <Link
-                  href="/register"
-                  className="ui-active:bg-gray-100 flex w-full items-center px-4 py-2 text-left text-sm text-gray-700"
+                  // Thêm redirect query parameter cho trang đăng ký luôn
+                  href={`/register?redirect=${encodeURIComponent(redirectUrl)}`}
+                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiUserPlus className="mr-2 h-4 w-4" /> Đăng ký
+                  <FiUserPlus className="mr-2 inline-block h-4 w-4" /> Đăng ký
                 </Link>
               </MenuItem>
             </>

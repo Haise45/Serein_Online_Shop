@@ -18,7 +18,7 @@ export interface CartItem {
   lineTotal: number;
   image?: string | null;
   availableStock: number;
-  category: { name: string; slug: string; _id: string };
+  category?: { name: string; slug: string; _id: string };
   variantInfo?: {
     _id: string;
     sku?: string;

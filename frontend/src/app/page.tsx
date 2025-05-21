@@ -59,7 +59,7 @@ export default function HomePage() {
       <main className="bg-gray-100">
         <section className="container mx-auto min-h-screen flex-grow px-4 py-8 sm:px-6 lg:px-8">
           <ProductList
-            title="Sản Phẩm Mới Nhất"
+            title="#SảnPhẩmMớiNhất"
             products={newProducts}
             loading={isLoadingNew}
             error={
@@ -70,7 +70,7 @@ export default function HomePage() {
           />
 
           <ProductList
-            title="Sản Phẩm Bán Chạy"
+            title="#SảnPhẩmBánChạy"
             products={popularProducts}
             loading={isLoadingPopular}
             error={
