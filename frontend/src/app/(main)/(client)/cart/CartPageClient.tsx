@@ -191,12 +191,14 @@ export default function CartPageClient() {
             onSelectItem={handleSelectItem}
           />
         </section>
-        <CartSummary
-          originalCart={cart}
-          selectedItemsForSummary={selectedItems}
-          categoryMap={activeCategoryMapClient}
-          getAncestorsFn={getCategoryAncestorsClient}
-        />
+        <div className="lg:col-span-4">
+          <CartSummary
+            originalCart={cart}
+            selectedItemsForSummary={selectedItems}
+            categoryMap={activeCategoryMapClient}
+            getAncestorsFn={getCategoryAncestorsClient}
+          />
+        </div>
       </div>
     </div>
   );

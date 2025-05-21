@@ -1,3 +1,4 @@
+// src/app/(auth)/login/page.tsx (hoặc đường dẫn LoginPage của bạn)
 "use client";
 
 import { loginUser, loginUserWithRefresh } from "@/services/authService";
@@ -11,8 +12,8 @@ import { LoginResponse } from "@/types/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation"; // Đã import
+import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
@@ -21,11 +22,43 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [redirectUrl, setRedirectUrl] = useState<string>("/"); // State để lưu URL chuyển hướng
 
   const router = useRouter();
-  const searchParams = useSearchParams(); // Hook to get query parameters
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams(); // Hook để đọc query params
+
+  // Lấy URL redirect từ query params khi component mount
+  useEffect(() => {
+    const redirect = searchParams.get("redirect");
+    console.log("[LoginPage] Raw redirect param from URL:", redirect); // DEBUG
+    if (redirect && redirect.startsWith("/")) {
+      try {
+        const decodedRedirect = decodeURIComponent(redirect);
+        setRedirectUrl(decodedRedirect);
+        console.log(
+          "[LoginPage] Decoded and set redirectUrl to:",
+          decodedRedirect,
+        ); // DEBUG
+      } catch (e) {
+        console.error(
+          "[LoginPage] Error decoding redirect URL:",
+          e,
+          "Raw redirect:",
+          redirect,
+        );
+        setRedirectUrl("/"); // Fallback
+      }
+    } else if (redirect) {
+      console.warn(
+        "[LoginPage] Invalid or non-internal redirect parameter received:",
+        redirect,
+      );
+      setRedirectUrl("/"); // Fallback cho redirect không hợp lệ
+    }
+    // Nếu không có redirect param, redirectUrl sẽ giữ giá trị mặc định là "/"
+  }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,12 +69,12 @@ export default function LoginPage() {
     if (!emailRegex.test(email)) {
       toast.error("Địa chỉ email không hợp lệ");
       dispatch(loginFailure("Địa chỉ email không hợp lệ"));
-      setLoading(false); // Ensure loading is set to false
+      setLoading(false);
       return;
     }
 
     try {
-      let data: LoginResponse;
+      let data: LoginResponse; // Khai báo data ở đây
       if (rememberMe) {
         data = await loginUserWithRefresh({ email, password });
       } else {
@@ -54,32 +87,38 @@ export default function LoginPage() {
             _id: data._id,
             name: data.name,
             email: data.email,
-            role: data.role as "admin" | "customer",
+            role: data.role as "admin" | "customer", // Đảm bảo role có kiểu cụ thể
             phone: data.phone,
             isEmailVerified: data.isEmailVerified,
+            // Thêm các trường khác từ LoginResponse nếu User type của bạn cần
           },
-          accessToken: data.accessToken,
+          accessToken: data.accessToken, // Giả sử LoginResponse có accessToken
         }),
       );
       toast.success("Đăng nhập thành công!");
 
+      // Invalidate queries để fetch lại dữ liệu mới cho user đã đăng nhập
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
       await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
 
-      const redirectPath = searchParams.get("redirect"); // Get the redirect path from query params
+      console.log(
+        "[LoginPage] Login successful. Current redirectUrl state:",
+        redirectUrl,
+      ); // DEBUG
+      console.log("[LoginPage] User data from API:", data);
 
       if (!data.isEmailVerified) {
+        // Nếu email chưa xác thực, chuyển đến trang xác thực và mang theo redirectUrl
         router.push(
-          `/verify-email?email=${encodeURIComponent(data.email)}&message=${encodeURIComponent("Vui lòng xác thực email của bạn.")}`,
+          `/verify-email?email=${encodeURIComponent(data.email)}&message=${encodeURIComponent("Vui lòng xác thực email của bạn.")}&redirect=${encodeURIComponent(redirectUrl)}`,
         );
       } else if (data.role === "admin") {
         router.push("/admin/dashboard");
-      } else if (redirectPath) {
-        // If a redirect path is provided, use it
-        router.push(redirectPath);
       } else {
-        // Otherwise, redirect to homepage for regular users
-        router.push("/");
+        // Chuyển hướng về redirectUrl đã lưu (hoặc trang mặc định nếu redirectUrl không hợp lệ)
+        const finalRedirect = redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
+        console.log("[LoginPage] User is customer, redirecting to finalRedirect:", finalRedirect); // DEBUG
+        router.push(finalRedirect);
       }
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
@@ -95,84 +134,122 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 px-4 md:px-0">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
-        <h1 className="mb-8 text-center text-3xl font-bold text-gray-800">
-          Đăng Nhập
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-xl bg-white py-8 px-6 shadow-xl sm:p-10">
+        {/* ... Tiêu đề và form ... */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Đăng Nhập
+          </h1>
+          <p className="mt-2 text-sm text-gray-600">Chào mừng trở lại!</p>
+        </div>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          {/* ... Inputs for email, password ... */}
           <div>
             <label
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
               htmlFor="email"
             >
-              Email
+              Email của bạn
             </label>
             <input
-              className="input-field w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="input-field"
               id="email"
+              name="email"
               type="email"
-              placeholder="Email của bạn"
+              autoComplete="email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loading}
             />
           </div>
           <div>
-            <label
-              className="mb-1 block text-sm font-medium text-gray-700"
-              htmlFor="password"
-            >
-              Mật khẩu
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                className="mb-1.5 block text-sm font-medium text-gray-700"
+                htmlFor="password"
+              >
+                Mật khẩu
+              </label>
+            </div>
             <input
-              className="input-field w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="input-field"
               id="password"
+              name="password"
               type="password"
+              autoComplete="current-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={loading}
             />
           </div>
           <div className="flex items-center justify-between">
-            <label className="inline-flex items-center">
+            <div className="flex items-center">
               <input
+                id="remember-me"
+                name="remember-me"
                 type="checkbox"
-                className="form-checkbox h-4 w-4 rounded text-indigo-600 transition duration-150 ease-in-out"
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                disabled={loading}
               />
-              <span className="ml-2 text-sm text-gray-600">Ghi nhớ tôi</span>
-            </label>
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-700"
+              >
+                Ghi nhớ tôi
+              </label>
+            </div>
             <Link
-              href="/forgot-password"
-              className="text-sm text-indigo-600 hover:text-indigo-500 hover:underline"
+              href="/forgot-password" // Trang forgot-password sẽ tự xử lý redirect nếu cần
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
             >
               Quên mật khẩu?
             </Link>
           </div>
           <div>
             <button
-              className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${
-                loading
-                  ? "cursor-not-allowed bg-indigo-400"
-                  : "bg-indigo-600 hover:bg-indigo-700"
-              }`}
+              className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
               type="submit"
               disabled={loading}
             >
-              {loading ? "Đang xử lý..." : "Đăng Nhập"}
+              {/* ... Loading state ... */}
+              {loading ? (
+                <>
+                  <svg
+                    className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Đang xử lý...
+                </>
+              ) : (
+                "Đăng Nhập"
+              )}
             </button>
           </div>
         </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-8 text-center text-sm text-gray-600">
           Chưa có tài khoản?{" "}
           <Link
-            href="/register"
+            href={`/register${redirectUrl && redirectUrl !== "/" ? `?redirect=${encodeURIComponent(redirectUrl)}` : ""}`}
             className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
           >
             Đăng ký ngay

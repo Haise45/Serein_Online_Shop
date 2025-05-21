@@ -40,6 +40,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const MAX_VISIBLE_COLORS = 4;
   const dispatch: AppDispatch = useDispatch(); // Khởi tạo dispatch
   const addToCartMutation = useAddToCart();
 
@@ -50,21 +51,33 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [activeVariant, setActiveVariant] = useState<Variant | null>(null);
 
   const isFavorite = useMemo(() => {
-    if (!wishlistData) return false;
-    return wishlistData.some(
-      (item) =>
-        item._id === product._id &&
-        ((activeVariant && item.wishlistedVariantId === activeVariant._id) ||
-          (!activeVariant &&
-            !item.wishlistedVariantId &&
-            product.variants &&
-            product.variants.length === 0) || // Thích sản phẩm không có variant
-          (!activeVariant &&
-            product.variants &&
-            product.variants.length > 0 &&
-            !item.wishlistedVariantId)), // Trường hợp đặc biệt: thích sản phẩm chung có variant (ít phổ biến)
-    );
-  }, [wishlistData, product._id, product.variants, activeVariant]);
+    if (!wishlistData || !product) return false;
+
+    if (activeVariant) {
+      // Nếu một variant đang được active, kiểm tra xem chính xác variant đó có trong wishlist không
+      return wishlistData.some(
+        (item) =>
+          item._id === product._id && // So sánh productId của item trong wishlist với product._id
+          item.wishlistedVariantId === activeVariant._id,
+      );
+    } else {
+      // Nếu không có variant nào active (đang xem sản phẩm chung)
+      // Kiểm tra xem có BẤT KỲ variant nào của sản phẩm này được thích không
+      if (product.variants && product.variants.length > 0) {
+        return wishlistData.some(
+          (item) =>
+            item._id === product._id && // So sánh productId
+            item.wishlistedVariantId !== null && // Đảm bảo item này là một variant đã thích
+            product.variants.some((pv) => pv._id === item.wishlistedVariantId), // Kiểm tra xem variant đã thích đó có thuộc sản phẩm hiện tại không
+        );
+      } else {
+        // Sản phẩm không có variant, kiểm tra xem sản phẩm chung (không có variantId) có được thích không
+        return wishlistData.some(
+          (item) => item._id === product._id && !item.wishlistedVariantId,
+        );
+      }
+    }
+  }, [wishlistData, product, activeVariant]);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -76,6 +89,22 @@ export default function ProductCard({ product }: ProductCardProps) {
       return;
     }
 
+    // Trường hợp 1: Đang xem sản phẩm chung (chưa chọn variant), sản phẩm có variant,
+    // và icon trái tim đang active (do một variant nào đó đã được thích)
+    if (
+      product.variants &&
+      product.variants.length > 0 &&
+      !activeVariant &&
+      isFavorite
+    ) {
+      toast.success(
+        "Một phiên bản của sản phẩm này đã được yêu thích. Hãy chọn phiên bản để quản lý.",
+        { icon: "ℹ️" },
+      );
+      return;
+    }
+
+    // Trường hợp 2: Sản phẩm có variant, chưa chọn variant, và muốn THÊM MỚI vào wishlist (icon chưa active)
     if (
       product.variants &&
       product.variants.length > 0 &&
@@ -88,28 +117,52 @@ export default function ProductCard({ product }: ProductCardProps) {
       return;
     }
 
+    // Từ đây, hoặc là sản phẩm không có variant, hoặc đã chọn activeVariant,
+    // hoặc đang xóa một variant cụ thể đã được thích.
     const productIdToToggle = product._id;
-    const variantIdToToggle = activeVariant?._id || null;
+    const variantIdToToggle = activeVariant?._id || null; // Nếu không có activeVariant, đây là thích/bỏ thích sản phẩm chung
 
-    if (isFavorite) {
-      // Khi xóa, chúng ta cần gửi productId và variantId (nếu có) của item đang được hiển thị là favorite
+    // Xác định lại isCurrentlyFavorite cho hành động cụ thể này, vì 'isFavorite' state có thể đang chỉ báo trạng thái tổng hợp
+    let isCurrentlyFavoriteForAction = false;
+    if (activeVariant) {
+      isCurrentlyFavoriteForAction =
+        wishlistData?.some(
+          (item) =>
+            item._id === productIdToToggle &&
+            item.wishlistedVariantId === variantIdToToggle,
+        ) || false;
+    } else if (!product.variants || product.variants.length === 0) {
+      // Sản phẩm không có variant
+      isCurrentlyFavoriteForAction =
+        wishlistData?.some(
+          (item) => item._id === productIdToToggle && !item.wishlistedVariantId,
+        ) || false;
+    }
+    // Nếu không có activeVariant và sản phẩm có variant, chúng ta không cho phép thêm/xóa "sản phẩm chung" ở đây
+    if (isCurrentlyFavoriteForAction) {
       removeFromWishlistMutation.mutate(
-        { productId: productIdToToggle, variantId: variantIdToToggle }, // Gửi cả variantId nếu đang active
-        {
-          onError: (error) => {
-            console.error("Lỗi xóa khỏi wishlist trên card:", error);
-          },
-        },
+        { productId: productIdToToggle, variantId: variantIdToToggle },
+        { onError: (error) => console.error("Lỗi xóa khỏi wishlist:", error) },
       );
     } else {
-      addToWishlistMutation.mutate(
-        { productId: productIdToToggle, variantId: variantIdToToggle },
-        {
-          onError: (error) => {
-            console.error("Lỗi thêm vào wishlist trên card:", error);
+      // Chỉ cho phép thêm nếu có activeVariant hoặc sản phẩm không có variant
+      if (
+        variantIdToToggle ||
+        !product.variants ||
+        product.variants.length === 0
+      ) {
+        addToWishlistMutation.mutate(
+          { productId: productIdToToggle, variantId: variantIdToToggle },
+          {
+            onError: (error) => console.error("Lỗi thêm vào wishlist:", error),
           },
-        },
-      );
+        );
+      } else {
+        // Trường hợp này không nên xảy ra nếu logic ở trên đúng
+        console.warn(
+          "Attempted to add to wishlist without variant for a product with variants.",
+        );
+      }
     }
   };
 
@@ -284,6 +337,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               : undefined,
             sku: "",
             lineTotal: 0,
+            category: {
+              name: "",
+              slug: "",
+              _id: "",
+            },
           };
           if (updatedCartData.items.length > 0) {
             // Nếu có item trong giỏ hàng, dùng item cuối cùng
@@ -314,7 +372,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="relative">
           <Link
             href={`/products/${product.slug}${activeVariant ? `?variant=${activeVariant._id}` : ""}`}
-            className="block aspect-[4/5] w-full overflow-hidden bg-gray-100 sm:aspect-[9/10]"
+            className="block aspect-[4/5] w-full overflow-hidden bg-gray-100"
           >
             <Image
               src={imageToDisplay}
@@ -325,8 +383,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                   : "")
               }
               fill
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 33vw, 25vw"
-              className="object-cover object-center transition-transform duration-300 ease-in-out"
+              sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 22vw"
+              className="object-cover object-center transition-transform duration-300"
               priority={false} // Đặt thành true cho các sản phẩm quan trọng ở màn hình đầu (LCP)
               onError={(e) => {
                 if (e.currentTarget.src !== "/placeholder-image.jpg") {
@@ -335,250 +393,287 @@ export default function ProductCard({ product }: ProductCardProps) {
               }}
             />
           </Link>
-          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end space-y-1.5 sm:top-3 sm:right-3">
+          {/* Bangers */}
+          <div className="absolute top-2.5 left-2.5 z-10 flex flex-col items-start space-y-1.5 sm:top-3 sm:left-3">
             {product.isNew && (
-              <span className="rounded-md bg-green-100 px-2.5 py-1 text-xs font-semibold tracking-wider text-green-700 uppercase sm:text-sm">
+              <span className="rounded-md bg-green-100 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-green-700 uppercase sm:text-xs">
                 Mới
               </span>
             )}
             {isOnSaleToShow && percentageDiscount > 0 && (
-              <span className="rounded-md bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 sm:text-sm">
+              <span className="rounded-md bg-red-100 px-2.5 py-1 text-[10px] font-semibold text-red-700 sm:text-xs">
                 -{percentageDiscount}%
               </span>
             )}
             {product.totalSold != null &&
               product.totalSold > 30 &&
               !product.isNew && (
-                <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs font-semibold tracking-wider text-orange-700 uppercase sm:text-sm">
+                <span className="rounded-md bg-orange-100 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-orange-700 uppercase sm:text-xs">
                   Bán Chạy
                 </span>
               )}
           </div>
           {/* Action buttons */}
-          <div className="absolute right-0 bottom-0 left-0 z-10 hidden translate-y-full justify-center space-x-3 bg-gradient-to-t from-black/15 via-black/10 to-transparent pt-10 pb-4 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 lg:flex">
+          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end space-y-2 sm:top-3 sm:right-3">
+            {/* Nút Yêu thích - Luôn hiển thị */}
             <button
               onClick={handleToggleWishlist}
               disabled={isLoadingWishlist || isWishlistActionPending}
-              title={isFavorite ? "Xóa khỏi Yêu thích" : "Thêm vào Yêu thích"}
+              title={
+                // Title sẽ phức tạp hơn một chút
+                activeVariant && isFavorite
+                  ? "Xóa phiên bản này khỏi Yêu thích"
+                  : !activeVariant &&
+                      isFavorite &&
+                      product.variants &&
+                      product.variants.length > 0
+                    ? "Một phiên bản được yêu thích"
+                    : isFavorite
+                      ? "Xóa khỏi Yêu thích"
+                      : product.variants &&
+                          product.variants.length > 0 &&
+                          !activeVariant
+                        ? "Chọn phiên bản để yêu thích"
+                        : "Thêm vào Yêu thích"
+              }
               className={classNames(
-                "flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-11 sm:w-11",
+                "flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-9 sm:w-9",
                 {
                   "text-red-500 hover:bg-red-500 hover:text-white focus-visible:ring-red-500":
                     isFavorite,
-                  "text-gray-700 hover:bg-gray-200 focus-visible:ring-gray-400":
+                  "text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-400":
                     !isFavorite,
-                  "cursor-not-allowed opacity-70":
+                  "cursor-not-allowed opacity-60":
                     isLoadingWishlist || isWishlistActionPending,
                 },
               )}
               aria-label={
-                isFavorite ? "Xóa khỏi Yêu thích" : "Thêm vào Yêu thích"
+                isFavorite ? "Quản lý Yêu thích" : "Thêm vào Yêu thích"
               }
             >
               {isWishlistActionPending ? (
-                <FiLoader className="h-5 w-5 animate-spin sm:h-6 sm:w-6" />
+                <FiLoader className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
               ) : (
-                // Icon fill dựa trên isFavorite, không còn phụ thuộc canAddToWishlist
                 <FiHeart
-                  className={classNames("h-5 w-5 sm:h-6 sm:w-6", {
-                    "fill-current": isFavorite,
+                  className={classNames("h-4 w-4 sm:h-5 sm:w-5", {
+                    "fill-current": isFavorite, // Icon fill dựa trên isFavorite tổng hợp
                   })}
                 />
               )}
             </button>
+
+            {/* Nút Thêm vào giỏ hàng - Hiển thị khi hover card (trên desktop) */}
             <button
               onClick={handleAddToCart}
               disabled={addToCartMutation.isPending}
               title="Thêm vào giỏ hàng"
               className={classNames(
-                "flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-indigo-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 sm:h-11 sm:w-11", // Tăng kích thước button trên sm+
+                "flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-indigo-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 sm:h-9 sm:w-9",
+                "opacity-0 group-hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100", // Mặc định ẩn, hiện khi hover group (card) trên mọi kích thước, nhưng có thể làm phức tạp hơn cho mobile
+                // Để đơn giản cho mobile, có thể bỏ opacity-0 ở đây và dựa vào nút "Thêm vào giỏ" bên dưới
+                // Hoặc chỉ ẩn trên mobile: "hidden group-hover:flex lg:flex" (cần điều chỉnh)
                 {
-                  "cursor-not-allowed opacity-70": addToCartMutation.isPending,
+                  "cursor-not-allowed opacity-60": addToCartMutation.isPending,
                 },
               )}
               aria-label="Thêm vào giỏ hàng"
             >
               {addToCartMutation.isPending ? (
-                <FiLoader className="h-5 w-5 animate-spin sm:h-6 sm:w-6" />
+                <FiLoader className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
               ) : (
-                <FiShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" /> // Tăng kích thước icon
+                <FiShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
             </button>
           </div>
         </div>
 
-        <div className="flex flex-grow flex-col p-3 pt-4 sm:p-4 sm:pt-5">
+        <div className="flex flex-grow flex-col p-3 sm:p-4">
           {uniqueColorVariants.length > 0 && (
-            <div className="mb-3 flex h-8 items-center space-x-1.5 pb-1">
-              {uniqueColorVariants.map((variant) => {
-                const colorOpt = variant.optionValues.find(
-                  (opt) => opt.attributeName === colorAttributeName,
-                );
-                if (!colorOpt || !colorOpt.value) return null;
+            <div className="mb-2.5 flex h-auto min-h-[28px] flex-wrap items-center gap-x-1.5 gap-y-1">
+              {" "}
+              {/* Thêm gap-y-1 cho trường hợp wrap */}
+              {uniqueColorVariants
+                .slice(0, MAX_VISIBLE_COLORS)
+                .map((variant) => {
+                  const colorOpt = variant.optionValues.find(
+                    (opt) => opt.attributeName === colorAttributeName,
+                  );
+                  if (!colorOpt || !colorOpt.value) return null;
 
-                const colorValue = colorOpt.value.toLowerCase().trim();
-                let colorHex = "#E2E8F0";
-                // Ưu tiên khớp chính xác trước, sau đó là khớp một phần
-                const colorMappings: { [key: string]: string } = {
-                  // Đen & Xám
-                  đen: "#2D3748", // Black (gray-800)
-                  "xám đậm": "#4A5568", // Gray-700
-                  xám: "#A0AEC0", // Gray-500
-                  "xám nhạt": "#CBD5E0", // Gray-400
-                  ghi: "#A0AEC0", // Đồng nghĩa với xám
-                  than: "#36454F", // Charcoal
+                  const colorValue = colorOpt.value.toLowerCase().trim();
+                  let colorHex = "#E2E8F0";
+                  // Ưu tiên khớp chính xác trước, sau đó là khớp một phần
+                  const colorMappings: { [key: string]: string } = {
+                    // Đen & Xám
+                    đen: "#000000", // Black
+                    "đen xám": "#2D3748", // Dark Gray (gần black)
+                    "xám đậm": "#4A5568", // Gray-700
+                    xám: "#A0AEC0", // Gray-400
+                    "xám nhạt": "#CBD5E0", // Gray-300
+                    ghi: "#A0AEC0", // Đồng nghĩa với xám
+                    than: "#36454F", // Charcoal
 
-                  // Trắng & Be
-                  trắng: "#FFFFFF", // White
-                  kem: "#FFFDD0", // Cream
-                  be: "#F5F5DC", // Beige
-                  ngà: "#FFFFF0", // Ivory
-                  "vàng kem": "#F0E68C", // Khaki (có thể coi là một loại be/kem)
+                    // Trắng & Be
+                    trắng: "#FFFFFF",
+                    kem: "#FFFDD0", // Cream
+                    be: "#F5F5DC", // Beige
+                    ngà: "#FFFFF0", // Ivory
+                    "vàng kem": "#F0E68C", // Khaki
 
-                  // Xanh dương (Blue)
-                  "xanh navy": "#2c5282", // Navy (blue-800)
-                  "xanh dương đậm": "#2b6cb0", // Blue-700
-                  "xanh dương": "#4299e1", // Blue-500
-                  "xanh da trời": "#63B3ED", // Sky Blue (blue-400)
-                  "xanh dương nhạt": "#BEE3F8", // Light Blue (blue-200)
-                  "xanh coban": "#0047AB", // Cobalt Blue
-                  "xanh lam": "#4299e1", // Đồng nghĩa với xanh dương
-                  "xanh biển": "#0077BE", // Sea Blue
+                    // Xanh dương
+                    "xanh navy": "#2C5282",
+                    "xanh dương đậm": "#2B6CB0",
+                    "xanh dương": "#4299E1",
+                    "xanh da trời": "#63B3ED",
+                    "xanh dương nhạt": "#BEE3F8",
+                    "xanh coban": "#0047AB",
+                    "xanh lam": "#4299E1",
+                    "xanh biển": "#0077BE",
 
-                  // Xanh lá (Green)
-                  "xanh lá đậm": "#2F855A", // Green-700
-                  "xanh lá cây": "#48BB78", // Green-500
-                  "xanh lá": "#48BB78", // Đồng nghĩa
-                  "xanh rêu": "#8FBC8F", // Dark Sea Green / Moss Green
-                  "xanh bạc hà": "#98FF98", // Mint Green
-                  "xanh olive": "#808000", // Olive
-                  "xanh lá mạ": "#C1FFC1", // Lime Green (nhạt)
-                  "xanh ngọc": "#AFEEEE", // PaleTurquoise (có thể coi là xanh ngọc nhạt)
-                  "xanh cổ vịt": "#008080", // Teal
+                    // Xanh lá
+                    "xanh lá đậm": "#2F855A",
+                    "xanh lá cây": "#48BB78",
+                    "xanh lá": "#48BB78",
+                    "xanh rêu": "#556B2F",
+                    "xanh bạc hà": "#98FF98",
+                    "xanh olive": "#808000",
+                    "xanh lá mạ": "#C1FFC1",
+                    "xanh ngọc": "#AFEEEE",
+                    "xanh cổ vịt": "#008080",
 
-                  // Đỏ
-                  "đỏ đô": "#8B0000", // Dark Red / Maroon
-                  "đỏ tươi": "#FF0000", // Red
-                  đỏ: "#E53E3E", // Red-600 (Tailwind)
-                  "đỏ cam": "#FF4500", // OrangeRed
-                  "đỏ gạch": "#B22222", // Firebrick
-                  "đỏ rượu": "#722F37", // Wine Red
+                    // Đỏ
+                    "đỏ tươi": "#FF0000",
+                    đỏ: "#E53E3E",
+                    "đỏ đô": "#8B0000",
+                    "đỏ cam": "#FF4500",
+                    "đỏ gạch": "#B22222",
+                    "đỏ rượu": "#722F37",
 
-                  // Hồng
-                  "hồng đậm": "#DB2777", // Pink-600 (Tailwind)
-                  "hồng cánh sen": "#FF69B4", // Hot Pink
-                  "hồng phấn": "#FFD1DC", // Pink (light)
-                  hồng: "#FBB6CE", // Pink-300 (Tailwind)
-                  "hồng đất": "#E75480", // Dark Pink (có thể gần hồng đất)
-                  "hồng cam": "#FFB3A7", // Light Salmon / Pink-Orange
+                    // Hồng
+                    "hồng đậm": "#DB2777",
+                    "hồng cánh sen": "#FF69B4",
+                    "hồng phấn": "#FFD1DC",
+                    hồng: "#FBB6CE",
+                    "hồng đất": "#E75480",
+                    "hồng cam": "#FFB3A7",
 
-                  // Vàng
-                  "vàng đậm": "#D69E2E", // Yellow-600 (Tailwind)
-                  "vàng tươi": "#FFFF00", // Yellow
-                  vàng: "#ECC94B", // Yellow-500 (Tailwind)
-                  "vàng nghệ": "#FFBF00", // Amber / Turmeric Yellow
-                  "vàng chanh": "#FFFACD", // LemonChiffon (vàng nhạt)
-                  "vàng đồng": "#B87333", // Copper (có thể coi là vàng đồng)
-                  "vàng bò": "#DAA520", // Goldenrod (có thể coi là vàng bò)
+                    // Vàng
+                    "vàng tươi": "#FFFF00",
+                    vàng: "#ECC94B",
+                    "vàng đậm": "#D69E2E",
+                    "vàng nghệ": "#FFBF00",
+                    "vàng chanh": "#FFFACD",
+                    "vàng đồng": "#B87333",
+                    "vàng bò": "#DAA520",
 
-                  // Cam
-                  "cam đậm": "#DD6B20", // Orange-600 (Tailwind)
-                  cam: "#F59E0B", // Orange-500 (Tailwind)
-                  "cam đất": "#CC5500", // Burnt Orange
-                  "cam nhạt": "#FED7AA", // Orange-200 (Tailwind)
+                    // Cam
+                    "cam đậm": "#DD6B20",
+                    cam: "#F59E0B",
+                    "cam đất": "#CC5500",
+                    "cam nhạt": "#FED7AA",
 
-                  // Tím
-                  "tím đậm": "#6B46C1", // Purple-700 (Tailwind)
-                  tím: "#805AD5", // Purple-600 (Tailwind)
-                  "tím than": "#581C87", // Purple-900 (Tailwind, gần giống tím than)
-                  "tím nhạt": "#D6BCFA", // Purple-300 (Tailwind)
-                  "tím lavender": "#E6E6FA", // Lavender
-                  "tím cà": "#6A0DAD", // Purple (chuẩn)
+                    // Tím
+                    tím: "#805AD5",
+                    "tím đậm": "#6B46C1",
+                    "tím than": "#581C87",
+                    "tím nhạt": "#D6BCFA",
+                    "tím lavender": "#E6E6FA",
+                    "tím cà": "#6A0DAD",
 
-                  // Nâu
-                  "nâu đậm": "#7B341E", // Amber-900 (gần nâu đậm) / Brown-700
-                  nâu: "#A16207", // Amber-700 (gần nâu) / Brown-500
-                  "nâu nhạt": "#D69E2E", // Amber-600 (gần nâu nhạt) / Brown-300
-                  "nâu đất": "#A0522D", // Sienna (nâu đất)
-                  "nâu cà phê": "#4A2C2A", // Dark Brown (coffee)
-                  "nâu socola": "#7B3F00", // Chocolate
+                    // Nâu
+                    nâu: "#A16207",
+                    "nâu đậm": "#7B341E",
+                    "nâu nhạt": "#D69E2E",
+                    "nâu đất": "#A0522D",
+                    "nâu cà phê": "#4A2C2A",
+                    "nâu socola": "#7B3F00",
 
-                  // Kim loại & Đặc biệt
-                  bạc: "#C0C0C0", // Silver
-                  "vàng gold": "#FFD700", // Gold
-                  đồng: "#B87333", // Copper
-                  "đa sắc":
-                    "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)", // Ví dụ cho đa sắc
-                  "họa tiết": "#CCCCCC", // Placeholder cho họa tiết, có thể hiển thị xám
-                };
-                if (colorMappings[colorValue]) {
-                  colorHex = colorMappings[colorValue];
-                } else {
-                  for (const key in colorMappings) {
-                    if (colorValue.includes(key)) {
-                      colorHex = colorMappings[key];
-                      break;
+                    // Kim loại & đặc biệt
+                    bạc: "#C0C0C0",
+                    "vàng gold": "#FFD700",
+                    đồng: "#B87333",
+                    "đa sắc":
+                      "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)",
+                    "họa tiết": "#CCCCCC", // Placeholder màu họa tiết
+                  };
+
+                  if (colorMappings[colorValue]) {
+                    colorHex = colorMappings[colorValue];
+                  } else {
+                    for (const key in colorMappings) {
+                      if (colorValue.includes(key)) {
+                        colorHex = colorMappings[key];
+                        break;
+                      }
                     }
                   }
-                }
-                const isCurrentlyActive = activeVariant?._id === variant._id;
-                return (
-                  <button
-                    type="button"
-                    key={variant._id}
-                    title={colorOpt.value}
-                    onMouseEnter={() =>
-                      handleColorInteraction(variant, "enter")
-                    }
-                    onMouseLeave={() => handleColorInteraction(null, "leave")}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleColorInteraction(variant, "click");
-                    }}
-                    // Tăng kích thước color swatch
-                    className={classNames(
-                      "h-6 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 shadow-sm transition-all duration-150 focus:outline-none sm:h-7 sm:w-7",
-                      isCurrentlyActive
-                        ? "scale-110 border-indigo-500 ring-2 ring-indigo-500 ring-offset-1" // Tăng ring
-                        : "border-gray-300 hover:border-gray-500", // Hover đậm hơn
-                      {
-                        "border-black":
-                          (colorHex === "#FFFFFF" ||
-                            colorHex === "#FFFFF0" ||
-                            colorHex === "#FFFDD0") &&
-                          !isCurrentlyActive,
-                      },
-                    )}
-                    style={{
-                      ...(colorHex.startsWith("linear-gradient")
-                        ? { background: colorHex }
-                        : { backgroundColor: colorHex }),
-                    }}
-                    aria-label={`Chọn màu ${colorOpt.value}`}
-                  />
-                );
-              })}
+                  const isCurrentlyActive = activeVariant?._id === variant._id;
+                  return (
+                    <button
+                      type="button"
+                      key={variant._id}
+                      title={colorOpt.value}
+                      onMouseEnter={() =>
+                        handleColorInteraction(variant, "enter")
+                      }
+                      onMouseLeave={() => handleColorInteraction(null, "leave")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleColorInteraction(variant, "click");
+                      }}
+                      // Tăng kích thước color swatch
+                      className={classNames(
+                        "h-5 w-5 flex-shrink-0 cursor-pointer rounded-full border shadow-sm transition-all duration-150 focus:outline-none sm:h-6 sm:w-6", // Kích thước nhỏ hơn một chút
+                        isCurrentlyActive
+                          ? "scale-110 border-2 border-slate-700 ring-1 ring-slate-700 ring-offset-1" // Active state rõ ràng hơn
+                          : "border-gray-300 hover:border-gray-500", // Hover đậm hơn
+                        {
+                          "border-black":
+                            (colorHex === "#FFFFFF" ||
+                              colorHex === "#FFFFF0" ||
+                              colorHex === "#FFFDD0") &&
+                            !isCurrentlyActive,
+                        },
+                      )}
+                      style={{
+                        ...(colorHex.startsWith("linear-gradient")
+                          ? { background: colorHex }
+                          : { backgroundColor: colorHex }),
+                      }}
+                      aria-label={`Chọn màu ${colorOpt.value}`}
+                    />
+                  );
+                })}
+              {uniqueColorVariants.length > MAX_VISIBLE_COLORS && (
+                <div className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-gray-100 text-xs font-medium text-gray-600 sm:h-6 sm:w-6">
+                  +{uniqueColorVariants.length - MAX_VISIBLE_COLORS}
+                </div>
+              )}
             </div>
           )}
-          {/* Tăng kích thước chữ và min-height cho tên sản phẩm */}
-          <h3 className="line-clamp-2 min-h-[3em] flex-grow text-base font-medium text-gray-800 transition-colors group-hover:text-indigo-600 sm:min-h-[3.25em] sm:text-lg">
+          <h3 className="line-clamp-2 text-sm font-medium text-gray-800 transition-colors group-hover:text-indigo-600 sm:text-base">
             <Link
               href={`/products/${product.slug}${activeVariant ? `?variant=${activeVariant._id}` : ""}`}
             >
               {product.name}
             </Link>
           </h3>
-          {/* Tăng kích thước chữ cho giá */}
-          <div className="mt-2.5 flex flex-wrap items-baseline justify-start sm:mt-3">
-            <span className="mr-2 text-base font-bold text-indigo-600 sm:text-xl">
-              {formatCurrency(displayPriceToShow)}
-            </span>
-            {isOnSaleToShow && originalPriceToShow > displayPriceToShow && (
-              <span className="text-sm text-gray-500 line-through sm:text-base">
-                {formatCurrency(originalPriceToShow)}
+          <div className="mt-auto pt-2">
+            {" "}
+            {/* Đẩy giá xuống dưới cùng của flex-grow */}
+            <div className="flex flex-wrap items-baseline justify-start">
+              <span className="mr-2 text-base font-bold text-gray-900 sm:text-lg">
+                {formatCurrency(displayPriceToShow)}
               </span>
-            )}
+              {isOnSaleToShow && originalPriceToShow > displayPriceToShow && (
+                <>
+                  <span className="text-xs text-gray-500 line-through sm:text-sm">
+                    {formatCurrency(originalPriceToShow)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

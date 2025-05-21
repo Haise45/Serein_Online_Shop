@@ -138,13 +138,13 @@ export default function WishlistItemCard({
       onMouseLeave={handleMouseLeaveCard} // Thêm sự kiện rời hover
     >
       <Link href={linkToProduct} className="block">
-        <div className="relative aspect-[1/1] w-full overflow-hidden bg-gray-100 sm:aspect-[9/10]">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
           <Image
             src={currentImage}
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            className="object-cover object-center transition-transform duration-300"
             priority={false}
           />
         </div>
