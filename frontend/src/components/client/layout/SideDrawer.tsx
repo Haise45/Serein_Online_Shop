@@ -1,7 +1,5 @@
 "use client";
-import { logoutUserApi } from "@/services/authService";
-import { AppDispatch, RootState } from "@/store";
-import { logout } from "@/store/slices/authSlice";
+
 import { Category } from "@/types";
 import {
   Dialog,
@@ -10,10 +8,10 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import Link from "next/link";
-import { Fragment } from "react";
-import { FiHome, FiLogIn, FiUserPlus, FiX } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link"; // Đã thêm Link
+import { useRouter } from "next/navigation";
+import { Fragment, useEffect, useState } from "react";
+import { FiX } from "react-icons/fi";
 import CategoryMenu from "../category/CategoryMenu";
 
 interface SideDrawerProps {
@@ -27,25 +25,38 @@ export default function SideDrawer({
   setIsOpen,
   categories,
 }: SideDrawerProps) {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth,
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const [activeTopLevelCategory, setActiveTopLevelCategory] = useState<
+    (Category & { children?: Category[] }) | null
+  >(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isOpen && categories.length > 0) {
+      if (
+        !activeTopLevelCategory ||
+        !categories.find((cat) => cat._id === activeTopLevelCategory._id)
+      ) {
+        setActiveTopLevelCategory(categories[0]);
+      }
+    }
+  }, [isOpen, categories, activeTopLevelCategory]);
 
   const closeDrawer = () => setIsOpen(false);
 
-  const handleLogoutMobile = async () => {
-    closeDrawer();
-    try {
-      await logoutUserApi();
-    } catch (error) {
-      console.error("Lỗi logout backend (mobile):", error);
+  const handleTopLevelCategoryClick = (
+    category: Category & { children?: Category[] },
+  ) => {
+    setActiveTopLevelCategory(category);
+  };
+
+  const handleDiscoverClick = () => {
+    if (activeTopLevelCategory) {
+      router.push(`/products?category=${activeTopLevelCategory.slug}`);
+      closeDrawer();
     }
-    dispatch(logout());
   };
 
   return (
-    // Thay thế Transition.Root bằng Transition, thêm `appear` cho animation lần đầu
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
@@ -53,7 +64,6 @@ export default function SideDrawer({
         className="relative z-40 md:hidden"
         onClose={setIsOpen}
       >
-        {/* Sử dụng DialogBackdrop thay vì div tự tạo */}
         <TransitionChild
           as={Fragment}
           enter="transition-opacity ease-linear duration-300"
@@ -63,12 +73,10 @@ export default function SideDrawer({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <DialogBackdrop className="fixed inset-0 bg-gray-600/75" />
+          <DialogBackdrop className="fixed inset-0 bg-black/30" />
         </TransitionChild>
 
-        {/* Panel */}
         <div className="fixed inset-0 z-40 flex">
-          {/* Thay thế Transition.Child bằng TransitionChild */}
           <TransitionChild
             as={Fragment}
             enter="transition ease-in-out duration-300 transform"
@@ -78,96 +86,89 @@ export default function SideDrawer({
             leaveFrom="translate-x-0"
             leaveTo="-translate-x-full"
           >
-            {/* Thay thế Dialog.Panel bằng DialogPanel */}
-            <DialogPanel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 shadow-xl">
-              <div className="flex px-4 pt-5 pb-2">
+            <DialogPanel className="relative flex w-full max-w-xs flex-col overflow-y-hidden rounded-r-lg bg-white shadow-xl">
+              {/* Header: Logo and Close Button */}
+              <div className="flex items-center justify-between border-b border-gray-300 px-4 py-6">
+                <Link href="/" onClick={closeDrawer} className="inline-block">
+                  <span className="text-xl font-bold text-gray-900 italic hover:text-gray-700">
+                    SEREIN
+                  </span>
+                </Link>
                 <button
                   type="button"
                   className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeDrawer}
                 >
                   <span className="sr-only">Đóng menu</span>
                   <FiX className="h-6 w-6" aria-hidden="true" />
                 </button>
               </div>
 
-              {/* Links */}
-              <div className="mt-2 space-y-6 border-t border-gray-200 px-4 py-6">
-                <div className="flow-root">
-                  <Link
-                    href="/"
-                    className="-m-2 block p-2 font-medium text-gray-900"
-                    onClick={closeDrawer}
-                  >
-                    <FiHome className="mr-2 inline h-5 w-5" /> Trang chủ
-                  </Link>
+              {/* Top-Level Category Tabs */}
+              {categories && categories.length > 0 && (
+                <div className="flex border-b border-gray-200 bg-white">
+                  {categories.map((category) => (
+                    <button
+                      key={category._id}
+                      onClick={() => handleTopLevelCategoryClick(category)}
+                      className={`flex-1 px-1 py-3 text-center text-sm font-semibold whitespace-nowrap focus:outline-none ${
+                        activeTopLevelCategory?._id === category._id
+                          ? "border-b-2 border-gray-800 text-gray-900"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      {category.name.toUpperCase()}
+                    </button>
+                  ))}
                 </div>
-                {/* Danh mục sản phẩm */}
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="mb-2 text-base font-semibold text-gray-900">
-                    Danh mục sản phẩm
-                  </h3>
-                  <CategoryMenu
-                    categories={categories}
-                    isMobile={true}
-                    onLinkClick={closeDrawer}
-                  />
-                </div>
-              </div>
+              )}
 
-              {/* Auth Links */}
-              <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-                {isAuthenticated && user ? (
-                  <>
-                    <div className="flow-root">
-                      <Link
-                        href="/profile"
-                        className="-m-2 block p-2 font-medium text-gray-900"
-                        onClick={closeDrawer}
-                      >
-                        Thông tin cá nhân ({user.name})
-                      </Link>
-                    </div>
-                    <div className="flow-root">
-                      <Link
-                        href="/profile/orders"
-                        className="-m-2 block p-2 font-medium text-gray-900"
-                        onClick={closeDrawer}
-                      >
-                        Đơn hàng của tôi
-                      </Link>
-                    </div>
-                    <div className="flow-root">
-                      <button
-                        onClick={handleLogoutMobile}
-                        className="-m-2 block w-full p-2 text-left font-medium text-gray-900"
-                      >
-                        Đăng xuất
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flow-root">
-                      <Link
-                        href="/login"
-                        className="-m-2 block p-2 font-medium text-gray-900"
-                        onClick={closeDrawer}
-                      >
-                        <FiLogIn className="mr-2 inline h-5 w-5" /> Đăng nhập
-                      </Link>
-                    </div>
-                    <div className="flow-root">
-                      <Link
-                        href="/register"
-                        className="-m-2 block p-2 font-medium text-gray-900"
-                        onClick={closeDrawer}
-                      >
-                        <FiUserPlus className="mr-2 inline h-5 w-5" /> Đăng ký
-                      </Link>
-                    </div>
-                  </>
+              {/* Content for Active Top-Level Category - Scrollable */}
+              <div className="flex-grow overflow-y-auto bg-gray-100 p-4">
+                {/* Nền xám cho khu vực cuộn */}
+                {activeTopLevelCategory && (
+                  <div className="space-y-4 rounded-lg bg-white p-4 shadow">
+                    {/* Card trắng bên trong */}
+                    {/* "KHÁM PHÁ" Button */}
+                    <button
+                      onClick={handleDiscoverClick}
+                      className="w-full rounded-md bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 focus:outline-none"
+                    >
+                      KHÁM PHÁ TẤT CẢ{" "}
+                      {activeTopLevelCategory.name.toUpperCase()}
+                    </button>
+                    {/* Sub-Category List */}
+                    {activeTopLevelCategory.children &&
+                    activeTopLevelCategory.children.length > 0 ? (
+                      <div className="pt-2">
+                        {/* Thêm khoảng cách nhỏ trên danh sách con */}
+                        <CategoryMenu
+                          categories={activeTopLevelCategory.children}
+                          isMobile={true}
+                          onLinkClick={closeDrawer}
+                        />
+                      </div>
+                    ) : (
+                      <p className="py-4 text-center text-sm text-gray-500">
+                        Không có danh mục con.
+                      </p>
+                    )}
+                  </div>
                 )}
+                {/* Fallback if no top-level categories or no active category with content */}
+                {(!categories ||
+                  categories.length === 0 ||
+                  !activeTopLevelCategory) &&
+                  !(
+                    activeTopLevelCategory?.children &&
+                    activeTopLevelCategory.children.length > 0
+                  ) && (
+                    <div className="mt-4 rounded-lg bg-white p-4 shadow">
+                      <p className="text-center text-sm text-gray-500">
+                        Không có danh mục nào để hiển thị.
+                      </p>
+                    </div>
+                  )}
               </div>
             </DialogPanel>
           </TransitionChild>

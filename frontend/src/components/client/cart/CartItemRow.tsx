@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useGetCart,
   useRemoveCartItem,
   useUpdateCartItem,
 } from "@/lib/react-query/cartQueries";
@@ -40,7 +41,7 @@ export default function CartItemRow({
   const queryClient = useQueryClient();
   const updateCartItemMutation = useUpdateCartItem();
   const removeCartItemMutation = useRemoveCartItem();
-
+  const { data: currentCart } = useGetCart(); // Lấy giỏ hàng hiện tại từ cache
   const [quantity, setQuantity] = useState(item.quantity);
   // selectedOptions sẽ lưu trữ giá trị (value) của option được chọn cho mỗi thuộc tính
   const [selectedOptions, setSelectedOptions] = useState<{
@@ -121,7 +122,7 @@ export default function CartItemRow({
     attributeName: string,
     newValue: string,
   ) => {
-    if (isUpdating || !productDetails) return;
+    if (isUpdating || !productDetails || !currentCart) return;
 
     const newSelectedOptionsAttempt = {
       ...selectedOptions,
@@ -149,38 +150,83 @@ export default function CartItemRow({
       );
 
       if (newVariant && newVariant._id !== item.variantInfo?._id) {
-        setIsUpdating(true);
-        updateCartItemMutation.mutate(
-          {
-            itemId: item._id,
-            payload: {
-              newVariantId: newVariant._id,
-              quantity: quantity, // Gửi số lượng hiện tại
-            },
-          },
-          {
-            onSuccess: (updatedCart) => {
-              queryClient.setQueryData(["cart"], updatedCart);
-            },
-            onError: (error: Error) => {
-              const axiosError = error as AxiosError<{ message: string }>;
-              toast.error(
-                axiosError?.response?.data?.message ||
-                  "Lỗi khi cập nhật phiên bản.",
-              );
-
-              // Rollback selectedOptions về giá trị cũ của item hiện tại
-              const oldOptions: { [attributeName: string]: string } = {};
-              item.variantInfo?.options.forEach((opt) => {
-                oldOptions[opt.attributeName] = opt.value;
-              });
-              setSelectedOptions(oldOptions);
-            },
-            onSettled: () => {
-              setIsUpdating(false);
-            },
-          },
+        // ---- BẮT ĐẦU LOGIC KIỂM TRA VÀ GỘP ----
+        const existingItemToMergeWith = currentCart.items.find(
+          (cartItem) =>
+            cartItem._id !== item._id && // Phải là một item khác
+            (typeof cartItem.productId === "string"
+              ? cartItem.productId
+              : cartItem.productId._id.toString()) === productIdOrSlug &&
+            cartItem.variantInfo?._id === newVariant._id,
         );
+        setIsUpdating(true);
+        if (existingItemToMergeWith) {
+          // Trường hợp: Tìm thấy item khác trong giỏ hàng giống hệt variant mới -> Gộp
+          try {
+            // 1. Cập nhật số lượng của item đã tồn tại
+            await updateCartItemMutation.mutateAsync({
+              itemId: existingItemToMergeWith._id,
+              payload: {
+                quantity: existingItemToMergeWith.quantity + quantity, // Cộng dồn số lượng
+              },
+            });
+            // 2. Xóa item hiện tại (item vừa được người dùng thay đổi variant)
+            await removeCartItemMutation.mutateAsync(item._id);
+
+            toast.success("Sản phẩm đã được gộp và cập nhật số lượng.");
+            queryClient.invalidateQueries({ queryKey: ["cart"] });
+          } catch (error: unknown) {
+            const axiosError = error as AxiosError<{ message: string }>;
+            toast.error(
+              axiosError?.response?.data?.message || "Lỗi khi gộp sản phẩm.",
+            );
+            // Rollback selectedOptions nếu gộp lỗi
+            const oldOptions: { [attributeName: string]: string } = {};
+            item.variantInfo?.options.forEach((opt) => {
+              oldOptions[opt.attributeName] = opt.value;
+            });
+            setSelectedOptions(oldOptions);
+          } finally {
+            setIsUpdating(false);
+          }
+        } else {
+          // Trường hợp: Không tìm thấy item nào để gộp -> Chỉ cập nhật variant cho item hiện tại
+          updateCartItemMutation.mutate(
+            {
+              itemId: item._id,
+              payload: {
+                newVariantId: newVariant._id,
+                quantity: quantity, // Gửi số lượng hiện tại
+              },
+            },
+            {
+              onSuccess: (updatedCart) => {
+                queryClient.setQueryData(["cart"], updatedCart);
+              },
+              onError: (error: Error) => {
+                const axiosError = error as AxiosError<{ message: string }>;
+                toast.error(
+                  axiosError?.response?.data?.message ||
+                    "Lỗi khi cập nhật phiên bản.",
+                );
+
+                // Rollback selectedOptions về giá trị cũ của item hiện tại
+                const oldOptions: { [attributeName: string]: string } = {};
+                item.variantInfo?.options.forEach((opt) => {
+                  oldOptions[opt.attributeName] = opt.value;
+                });
+                setSelectedOptions(oldOptions);
+              },
+              onSettled: () => {
+                setIsUpdating(false);
+              },
+            },
+          );
+        }
+        // ---- KẾT THÚC LOGIC KIỂM TRA VÀ GỘP ----
+      } else if (newVariant && newVariant._id === item.variantInfo?._id) {
+        // Người dùng chọn lại chính variant đó, không làm gì hoặc chỉ cập nhật selectedOptions
+        setSelectedOptions(newSelectedOptionsAttempt);
       } else if (!newVariant) {
         // Đã chọn đủ options nhưng không tìm thấy variant -> không hợp lệ
         toast.error(`Phiên bản với lựa chọn này không tồn tại.`);
@@ -191,7 +237,6 @@ export default function CartItemRow({
         });
         setSelectedOptions(oldOptions);
       }
-      // Nếu newVariant._id === item.variantInfo?._id, không làm gì vì người dùng chọn lại chính nó
     }
     // Nếu chưa chọn đủ attributes, selectedOptions đã được cập nhật ở trên, chờ người dùng chọn tiếp
   };

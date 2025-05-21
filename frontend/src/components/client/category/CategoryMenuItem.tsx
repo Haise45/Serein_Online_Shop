@@ -1,18 +1,19 @@
-// components/Layout/CategoryMenuItem.tsx
 "use client";
 
 import { Category } from "@/types";
 import classNames from "classnames";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react"; // Thêm useEffect
+import { useState } from "react";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 
 interface CategoryMenuItemProps {
   category: Category & { children?: Category[] };
   level?: number;
   isMobile?: boolean;
-  onNavigate?: () => void;
+  onNavigate?: () => void; // Để đóng SideDrawer trên mobile
+  onShowOverlay?: () => void;
+  onHideOverlay?: () => void;
 }
 
 const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
@@ -20,133 +21,211 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
   level = 0,
   isMobile = false,
   onNavigate,
+  onShowOverlay,
+  onHideOverlay,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  // State mới để theo dõi xem submenu đã được mở ít nhất một lần kể từ khi menu cha được hiển thị
-  // hoặc kể từ khi menu này được render lại (ví dụ, khi isMobile thay đổi)
-  const [hasBeenOpenedOnce, setHasBeenOpenedOnce] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Cho hover trên desktop và click trên mobile
   const hasChildren = category.children && category.children.length > 0;
   const router = useRouter();
 
   const categoryLinkHref = `/products?category=${category.slug}`;
 
-  // Reset hasBeenOpenedOnce nếu item bị đóng từ bên ngoài hoặc component re-render
-  // mà không phải do người dùng chủ động đóng.
-  // Quan trọng: khi isOpen trở thành false, reset hasBeenOpenedOnce để lần mở tiếp theo là "lần 1"
-  useEffect(() => {
-    if (!isOpen) {
-      setHasBeenOpenedOnce(false);
-    }
-  }, [isOpen]);
-
-  const handleItemClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault(); // Ngăn chặn hành vi mặc định của Link ở mọi trường hợp ban đầu
-
+  // --- LOGIC CHO MOBILE HOẶC DESKTOP SUB-MENU (dropdown thường) ---
+  const handleSimpleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
     if (hasChildren) {
-      // Logic cho item CÓ CON
-      if (isMobile || (!isMobile && level > 0)) {
-        // Áp dụng cho Mobile và Desktop Submenu
-        if (!isOpen) {
-          // Click lần 1 (hoặc click khi đang đóng): Mở submenu
-          setIsOpen(true);
-          setHasBeenOpenedOnce(true); // Đánh dấu đã mở 1 lần
-        } else {
-          // Submenu đang mở
-          if (hasBeenOpenedOnce) {
-            // Click lần 2 (hoặc click tiếp theo khi submenu đã từng được mở): Điều hướng
-            router.push(categoryLinkHref);
-            if (onNavigate) {
-              onNavigate();
-            }
-            // Tùy chọn: đóng lại submenu sau khi điều hướng
-            // setIsOpen(false);
-            // setHasBeenOpenedOnce(false); // Reset để lần sau lại là click 1
-          } else {
-            // Trường hợp này ít xảy ra nếu useEffect ở trên hoạt động đúng,
-            // nhưng để an toàn, nếu đang mở mà chưa "opened once", thì chỉ mở và đánh dấu.
-            setHasBeenOpenedOnce(true);
-          }
-        }
-      } else if (!isMobile && level === 0) {
-        // Desktop Navbar, Cấp 1, CÓ CON:
-        // Logic này sẽ không được kích hoạt vì chúng ta dùng span và onMouseEnter/Leave
-        // Nếu bạn thay đổi thành click-to-toggle cho Desktop Cấp 1, bạn cần điều chỉnh ở đây
-        // Ví dụ:
-        // if (!isOpen) {
-        //   setIsOpen(true);
-        //   setHasBeenOpenedOnce(true);
-        // } else {
-        //   router.push(categoryLinkHref);
-        //   if (onNavigate) onNavigate();
-        // }
-      }
+      setIsOpen(!isOpen);
     } else {
-      // Logic cho item KHÔNG CÓ CON: Luôn điều hướng
       router.push(categoryLinkHref);
-      if (onNavigate) {
-        onNavigate();
-      }
+      if (onNavigate) onNavigate();
     }
   };
 
-  // --- RENDER LOGIC ---
+  const handleNavigateToParent = () => {
+    if (onNavigate) onNavigate();
+  };
 
-  // Case 1: Desktop Navbar - Mục Cấp 1 - CÓ CON (ví dụ: "ÁO", "QUẦN")
-  // Vẫn sử dụng hover để mở cho trường hợp này, không áp dụng logic click 1 / click 2.
-  // Nếu muốn áp dụng, bạn cần thay đổi span này thành button/Link và gọi handleItemClick.
+  // Case 1: DESKTOP - TOP LEVEL (level 0) - ITEM CÓ CON -> MEGA MENU
   if (!isMobile && level === 0 && hasChildren) {
+    const handleMouseEnter = () => {
+      setIsOpen(true);
+      if (onShowOverlay) {
+        onShowOverlay();
+      }
+    };
+
+    const handleMouseLeave = () => {
+      setIsOpen(false);
+      if (onHideOverlay) {
+        onHideOverlay();
+      }
+    };
+
     return (
-      <div
-        className="relative"
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => {
-          setIsOpen(false);
-          // setHasBeenOpenedOnce(false); // Reset khi chuột rời đi, để lần hover sau lại là mới
-        }}
+       <div
+        className="group h-full flex items-center"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
-        <span className="flex cursor-default items-center rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-white hover:bg-gray-700 hover:text-white">
-          {category.name}
-          <FiChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
-        </span>
+        <Link
+          href={categoryLinkHref}
+          className={classNames(
+            "flex items-center rounded-ss-md rounded-se-md px-3 py-2 text-sm font-medium whitespace-nowrap",
+            // Thay đổi màu cho navbar nền sáng
+            "text-gray-700 hover:bg-gray-100 focus:bg-gray-100",
+            { "bg-gray-100 text-gray-900": isOpen }, // Active state khi mega menu mở
+          )}
+        >
+          {category.name.toUpperCase()}
+          <FiChevronDown
+            className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </Link>
+
+        {/* Mega Menu Panel */}
         {isOpen && (
-          <div className="ring-opacity-5 absolute left-0 z-20 mt-0 w-56 origin-top-left rounded-md bg-white py-1 shadow-lg focus:outline-none">
-            {category.children?.map((child) => (
-              <CategoryMenuItem
-                key={child._id}
-                category={child}
-                level={level + 1}
-                isMobile={false}
-                onNavigate={onNavigate}
-              />
-            ))}
+          <div
+            className={classNames(
+              "absolute top-full right-0 left-0",
+              "z-30 bg-gray-100 text-gray-700 shadow-lg",
+              "scale-100 transform opacity-100 transition-all duration-150 ease-out",
+            )}
+          >
+            {/* Container nội dung của mega menu, căn giữa */}
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+              {/* Sử dụng Flexbox cho layout chính: Cột "Tất cả..." và khu vực các cột con */}
+              <div className="flex flex-col gap-x-8 gap-y-6 md:flex-row">
+                {/* Column 1: General links (Tất cả, Sản phẩm mới, Bán chạy nhất) */}
+                <div className="w-full flex-shrink-0 space-y-3 md:w-1/4 md:border-r md:border-gray-200 md:pr-6">
+                  <Link
+                    href={categoryLinkHref}
+                    onClick={() => setIsOpen(false)}
+                    className="group/link flex items-center text-base font-bold text-gray-800 hover:text-indigo-700"
+                  >
+                    Tất cả {category.name}
+                    <FiChevronRight className="ml-1.5 h-4 w-4 opacity-0 transition-opacity group-hover/link:opacity-100" />
+                  </Link>
+                  <Link
+                    href={`/products?category=${category.slug}&sortBy=createdAt&sortOrder=desc`}
+                    onClick={() => setIsOpen(false)}
+                    className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
+                  >
+                    Sản phẩm mới
+                  </Link>
+                  <Link
+                    href={`/products?category=${category.slug}&sortBy=totalSold&sortOrder=desc`}
+                    onClick={() => setIsOpen(false)}
+                    className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
+                  >
+                    Bán chạy nhất
+                  </Link>
+                </div>
+
+                {/* Container cho các cột danh mục con (Áo, Quần,...) */}
+                {/* Bên trong dùng grid để sắp xếp các cột con này */}
+                <div className="flex-grow">
+                  {category.children && category.children.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {/* Lặp qua các danh mục con cấp 1 (Áo, Quần,...) để tạo cột */}
+                      {category.children.map((subCategory1) => (
+                        <div key={subCategory1._id} className="space-y-2.5">
+                          <Link
+                            href={`/products?category=${subCategory1.slug}`}
+                            onClick={() => setIsOpen(false)}
+                            className="group/link flex items-center text-base font-bold text-gray-800 hover:text-indigo-700"
+                          >
+                            {subCategory1.name}
+                            <FiChevronRight className="ml-1.5 h-4 w-4 opacity-0 transition-opacity group-hover/link:opacity-100" />
+                          </Link>
+                          <ul className="space-y-1.5">
+                            {subCategory1.children?.map((subCategory2) => (
+                              <li key={subCategory2._id}>
+                                <Link
+                                  href={`/products?category=${subCategory2.slug}`}
+                                  onClick={() => setIsOpen(false)}
+                                  className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
+                                >
+                                  {subCategory2.name}
+                                </Link>
+                              </li>
+                            ))}
+                            {/* Link "Xem tất cả" cho subCategory1
+                            {subCategory1.children && subCategory1.children.length > 0 && (
+                               <li>
+                                  <Link
+                                    href={`/products?category=${subCategory1.slug}`}
+                                    onClick={() => setIsOpen(false)}
+                                    className="block text-sm text-gray-500 hover:text-indigo-700 hover:underline italic mt-1"
+                                  >
+                                    Xem tất cả {subCategory1.name.toLowerCase()}
+                                  </Link>
+                                </li>
+                            )} */}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      Không có danh mục con.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
     );
   }
 
-  // Case 2: Các trường hợp còn lại (Mobile, Desktop Submenu, Desktop Cấp 1 KHÔNG CON)
-  // Nơi logic click 1 / click 2 sẽ áp dụng (chủ yếu cho mobile và desktop submenu có con)
+  // Case 2: DESKTOP - TOP LEVEL (level 0) - KHÔNG CÓ CON -> Link thường
+  if (!isMobile && level === 0 && !hasChildren) {
+    return (
+      <Link
+        href={categoryLinkHref}
+        className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:bg-gray-100 whitespace-nowrap"
+      >
+        {category.name.toUpperCase()}
+      </Link>
+    );
+  }
+
+  // Case 2: DESKTOP - TOP LEVEL (level 0) - KHÔNG CÓ CON -> Link thường
+  if (!isMobile && level === 0 && !hasChildren) {
+    return (
+      <Link
+        href={categoryLinkHref}
+        className="rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-white hover:bg-gray-700 focus:bg-gray-700"
+      >
+        {category.name.toUpperCase()}
+      </Link>
+    );
+  }
+
+  // Case 3: MOBILE MENU ITEMS hoặc DESKTOP SUB-MENU ITEMS (dropdown thường trong mega menu, nếu có cấp 3+)
+  // Hoặc logic cũ của bạn cho mobile và submenu desktop
   return (
     <div className="w-full">
       <Link
-        href={categoryLinkHref} // href vẫn cần cho SEO và chuột phải mở tab mới
-        onClick={handleItemClick} // Logic click tùy chỉnh
+        href={categoryLinkHref}
+        onClick={handleSimpleClick} // Sử dụng logic click đơn giản cho mobile/submenu
         className={classNames(
-          "flex w-full items-center rounded-md px-3 py-2 text-left text-sm font-medium whitespace-nowrap",
+          "flex w-full items-center rounded-md px-3 py-2 text-left text-sm whitespace-nowrap",
           {
-            "text-gray-900 hover:bg-gray-100": isMobile,
-            "text-white hover:bg-gray-700 hover:text-white":
-              !isMobile && level === 0,
-            "text-gray-700 hover:bg-gray-100": !isMobile && level > 0,
-            "justify-between":
-              hasChildren && (isMobile || (!isMobile && level > 0)),
+            "font-semibold text-gray-900 hover:bg-gray-100": isMobile,
+            // Cho submenu desktop (nếu có cấp 3+)
+            "font-medium text-gray-700 hover:bg-gray-100":
+              !isMobile && level > 0,
+            "justify-between": hasChildren,
           },
         )}
       >
         <span>{category.name}</span>
         {hasChildren &&
-          (isMobile || (!isMobile && level > 0)) &&
           (isOpen ? (
             <FiChevronDown className="h-4 w-4" />
           ) : (
@@ -156,13 +235,29 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
 
       {hasChildren && isOpen && (isMobile || (!isMobile && level > 0)) && (
         <div className="mt-1 space-y-1 pl-4">
+          <Link
+            href={categoryLinkHref}
+            onClick={() => {
+              handleNavigateToParent();
+              setIsOpen(false); // Đóng submenu cha khi click "Tất cả"
+            }}
+            className={classNames(
+              "flex w-full items-center rounded-md px-3 py-2 text-left text-sm font-semibold",
+              {
+                "text-gray-900 hover:bg-gray-100": isMobile,
+                "text-gray-700 hover:bg-gray-100": !isMobile && level > 0,
+              },
+            )}
+          >
+            Tất cả {category.name}
+          </Link>
           {category.children?.map((child) => (
             <CategoryMenuItem
               key={child._id}
               category={child}
               level={level + 1}
               isMobile={isMobile}
-              onNavigate={onNavigate}
+              onNavigate={onNavigate} // Truyền onNavigate xuống
             />
           ))}
         </div>

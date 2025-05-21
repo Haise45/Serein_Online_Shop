@@ -53,6 +53,7 @@ export const flattenTreeForSelect = (
  */
 export const formatCurrency = (
   amount?: number | null,
+  includeCurrencySymbol: boolean = true, // Thêm tham số này
   defaultValue: string = "",
 ): string => {
   // Kiểm tra xem amount có phải là số hợp lệ không
@@ -61,11 +62,17 @@ export const formatCurrency = (
   }
   try {
     return amount.toLocaleString("vi-VN", {
-      style: "currency",
+      style: includeCurrencySymbol ? "currency" : "decimal", // Thay đổi style
       currency: "VND",
     });
   } catch (error) {
     console.error("Lỗi khi định dạng tiền tệ:", error, "Với giá trị:", amount);
     return defaultValue; // Trả về giá trị mặc định nếu có lỗi xảy ra
   }
+};
+
+export const parseCurrency = (formattedValue: string): number | undefined => {
+  if (!formattedValue) return undefined;
+  const numericValue = Number(formattedValue.replace(/\D/g, ""));
+  return isNaN(numericValue) ? undefined : numericValue;
 };

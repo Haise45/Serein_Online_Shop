@@ -86,8 +86,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 md:px-0">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
+    <div className="flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-xl bg-white py-8 px-6 shadow-xl sm:p-10">
         <h1 className="mb-8 text-center text-3xl font-bold text-gray-800">
           Đăng Ký Tài Khoản
         </h1>

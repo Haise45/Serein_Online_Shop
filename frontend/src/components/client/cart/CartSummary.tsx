@@ -41,104 +41,59 @@ export default function CartSummary({
       return 0;
     }
 
-    const coupon = originalCart.appliedCoupon;
+    const coupon = originalCart.appliedCoupon; // Giả sử đây là type Coupon đầy đủ
     let applicableSubtotalForSelectedItems = 0;
-    let foundApplicableItemSelected = false;
 
-    // Tạo Set các ID sản phẩm đã chọn
-    const selectedProductIds = new Set(
-      selectedItemsForSummary.map((item) =>
+    // Lọc ra những item trong selectedItemsForSummary thực sự được coupon này áp dụng
+    const trulyApplicableItems = selectedItemsForSummary.filter((item) => {
+      if (!coupon || !coupon.applicableIds)
+        return coupon.applicableTo === "all";
+
+      const itemProductIdStr =
         typeof item.productId === "string"
           ? item.productId
-          : item.productId._id.toString(),
-      ),
-    );
+          : item.productId._id.toString();
 
-    // Tạo Set các ID category (và tổ tiên) của các sản phẩm đã chọn
-    const selectedCategoryIdsAndAncestors = new Set<string>();
-    selectedItemsForSummary.forEach((item) => {
-      if (
-        item.category &&
-        typeof item.category !== "string" &&
-        item.category._id
-      ) {
-        const catIdStr = item.category._id.toString();
-        selectedCategoryIdsAndAncestors.add(catIdStr);
-        const ancestors = getAncestorsFn(catIdStr, categoryMap);
-        ancestors.forEach((ancId) =>
-          selectedCategoryIdsAndAncestors.add(ancId),
+      if (coupon.applicableTo === "all") {
+        return true;
+      }
+
+      if (coupon.applicableTo === "products") {
+        return coupon.applicableIds.some(
+          (appId) => appId.toString() === itemProductIdStr,
         );
       }
-    });
 
-    if (coupon.applicableTo === "all") {
-      applicableSubtotalForSelectedItems = selectedSubtotal; // Tính trên tổng của các sản phẩm đã chọn
-      foundApplicableItemSelected = selectedItemsForSummary.length > 0;
-    } else if (
-      coupon.applicableTo === "products" &&
-      coupon.applicableIds &&
-      coupon.applicableIds.length > 0
-    ) {
-      const applicableItems = selectedItemsForSummary.filter(
-        (item) =>
-          coupon.applicableIds.some((appId) =>
-            selectedProductIds.has(appId.toString()),
-          ) && // Kiểm tra xem coupon có áp dụng cho bất kỳ SP đã chọn nào không
-          coupon.applicableIds.includes(
-            typeof item.productId === "string"
-              ? item.productId
-              : item.productId._id.toString(),
-          ), // Và item hiện tại phải nằm trong danh sách đó
-      );
-      if (applicableItems.length > 0) {
-        foundApplicableItemSelected = true;
-        applicableSubtotalForSelectedItems = applicableItems.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        );
-      }
-    } else if (
-      coupon.applicableTo === "categories" &&
-      coupon.applicableIds &&
-      coupon.applicableIds.length > 0
-    ) {
-      const applicableItems = selectedItemsForSummary.filter((item) => {
+      if (coupon.applicableTo === "categories") {
         if (
           item.category &&
           typeof item.category !== "string" &&
           item.category._id
         ) {
-          const itemCategoryId = item.category._id.toString();
+          const itemCategoryIdStr = item.category._id.toString();
           const itemCategoryAndItsAncestors = new Set([
-            itemCategoryId,
-            ...getAncestorsFn(itemCategoryId, categoryMap),
+            itemCategoryIdStr,
+            ...getAncestorsFn(itemCategoryIdStr, categoryMap),
           ]);
-          // Kiểm tra xem coupon có áp dụng cho bất kỳ category/ancestor nào của các SP đã chọn không
-          // VÀ category (hoặc tổ tiên) của item hiện tại có nằm trong danh sách applicableIds của coupon không
-          return (
-            coupon.applicableIds.some((appId) =>
-              selectedCategoryIdsAndAncestors.has(appId.toString()),
-            ) &&
-            coupon.applicableIds.some((appId) =>
-              itemCategoryAndItsAncestors.has(appId.toString()),
-            )
+          return coupon.applicableIds.some((appId) =>
+            itemCategoryAndItsAncestors.has(appId.toString()),
           );
         }
-        return false;
-      });
-      if (applicableItems.length > 0) {
-        foundApplicableItemSelected = true;
-        applicableSubtotalForSelectedItems = applicableItems.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        );
+        return false; // Item không có category hợp lệ
       }
+      return false; // Mặc định không áp dụng nếu applicableTo không khớp
+    });
+
+    if (trulyApplicableItems.length === 0) {
+      return 0; // Không có sản phẩm nào được chọn phù hợp với coupon này
     }
 
-    if (!foundApplicableItemSelected) {
-      return 0;
-    }
+    applicableSubtotalForSelectedItems = trulyApplicableItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
 
+    // Kiểm tra minOrderValue với applicableSubtotalForSelectedItems (tổng tiền của các sản phẩm thực sự được coupon áp dụng)
     if (
       coupon.minOrderValue > 0 &&
       applicableSubtotalForSelectedItems < coupon.minOrderValue
@@ -156,12 +111,11 @@ export default function CartSummary({
 
     return Math.min(
       Math.round(calculatedDiscount),
-      applicableSubtotalForSelectedItems,
+      applicableSubtotalForSelectedItems, // Giảm giá không thể lớn hơn tổng tiền của các sản phẩm được áp dụng
     );
   }, [
     originalCart.appliedCoupon,
     selectedItemsForSummary,
-    selectedSubtotal,
     categoryMap,
     getAncestorsFn,
   ]);

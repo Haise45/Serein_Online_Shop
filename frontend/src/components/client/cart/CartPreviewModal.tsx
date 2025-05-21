@@ -279,7 +279,7 @@ export default function CartPreviewModal({
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-40" onClose={closeModal}>
+      <Dialog as="div" className="relative z-60" onClose={closeModal}>
         <TransitionChild
           enter="ease-out duration-300"
           enterFrom="opacity-0"

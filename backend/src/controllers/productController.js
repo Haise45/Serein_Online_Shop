@@ -138,37 +138,80 @@ const buildFilter = async (query, isAdmin = false) => {
   }
 
   // 4. Filter theo Thuộc tính của Biến thể
-  // Định dạng query param: ?attributes[Tên Thuộc Tính]=Giá trị 1,Giá trị 2
-  // Ví dụ: ?attributes[Màu sắc]=Đỏ,Xanh&attributes[Size]=L
   if (query.attributes && typeof query.attributes === "object") {
+    // Danh sách các từ khóa chỉ sắc thái, sẽ không dùng regex "chứa" cho chúng
+    // Bạn có thể mở rộng danh sách này
+    const shadeKeywords = [
+      "đất",
+      "đậm",
+      "nhạt",
+      "pastel",
+      "sáng",
+      "tối",
+      "light",
+      "dark",
+      "neon",
+      "baby",
+    ];
+
     for (const attrName in query.attributes) {
       if (Object.prototype.hasOwnProperty.call(query.attributes, attrName)) {
-        const attrValues = query.attributes[attrName]; // Lấy chuỗi giá trị (vd: "Đỏ,Xanh")
+        const attrValuesQuery = query.attributes[attrName]; // Chuỗi giá trị từ query (vd: "Đỏ,Xanh")
 
-        // Tách các giá trị bằng dấu phẩy, làm sạch và loại bỏ giá trị rỗng
-        const valuesArray = String(attrValues)
+        const queryValuesArray = String(attrValuesQuery)
           .split(",")
-          .map((v) => v.trim())
+          .map((v) => v.trim().toLowerCase()) // Chuyển sang chữ thường để so sánh và regex
           .filter((v) => v);
 
-        if (valuesArray.length > 0) {
-          // Tìm sản phẩm mà có ÍT NHẤT MỘT variant ($elemMatch ngoài)
-          // mà trong mảng optionValues của variant đó ($elemMatch trong)
-          // có MỘT phần tử khớp tên thuộc tính VÀ giá trị nằm trong danh sách yêu cầu ($in)
+        if (queryValuesArray.length > 0) {
+          // Tạo điều kiện $or cho các giá trị được tìm kiếm
+          // Ví dụ: attributes[Màu sắc]=Đỏ,Trắng -> tìm variant có màu chứa "đỏ" HOẶC màu chứa "trắng"
+          const attributeOrConditions = queryValuesArray.map((queryValue) => {
+            // Kiểm tra xem queryValue có phải là một từ khóa sắc thái không
+            const isShadeQuery = shadeKeywords.some((keyword) =>
+              queryValue.includes(keyword)
+            );
+
+            if (attrName.toLowerCase().includes("màu") && !isShadeQuery) {
+              // Nếu là thuộc tính "Màu" và không phải là từ khóa sắc thái -> dùng regex
+              // Tạo regex để tìm kiếm giá trị chứa queryValue, không phân biệt hoa thường
+              // Ví dụ: queryValue = "đỏ" -> regex tìm "Đỏ", "đỏ", "Caro Đỏ Đen"
+              // Chúng ta cần đảm bảo rằng từ được tìm là một từ hoàn chỉnh hoặc một phần của từ ghép
+              // Ví dụ: tìm "đỏ" sẽ không khớp với "đông"
+              // Sử dụng word boundaries (\b) nếu có thể, hoặc kiểm tra khoảng trắng/đầu/cuối chuỗi
+              // Cách đơn giản hơn là không dùng word boundaries để "đỏ" khớp "đỏ đậm"
+              return {
+                attributeName: attrName,
+                value: { $regex: new RegExp(queryValue, "i") }, // 'i' for case-insensitive
+              };
+            } else {
+              // Các thuộc tính khác (Size, Chất liệu, ...) hoặc là từ khóa sắc thái -> khớp chính xác (case-insensitive)
+              return {
+                attributeName: attrName,
+                // Khớp chính xác giá trị, không phân biệt hoa thường
+                value: { $regex: new RegExp(`^${queryValue}$`, "i") },
+              };
+            }
+          });
+
           andConditions.push({
             variants: {
               $elemMatch: {
+                // Ít nhất một variant phải khớp
                 optionValues: {
+                  // Trong optionValues của variant đó
                   $elemMatch: {
-                    attributeName: attrName,
-                    value: { $in: valuesArray },
+                    // Ít nhất một optionValue phải khớp với một trong các điều kiện
+                    $or: attributeOrConditions,
                   },
                 },
               },
             },
           });
           console.log(
-            `[Filter Debug] Đã thêm điều kiện lọc cho thuộc tính "${attrName}"`
+            `[Filter Debug] Đã thêm điều kiện lọc cho thuộc tính "${attrName}" với giá trị (hoặc chứa): "${queryValuesArray.join(
+              ", "
+            )}"`
           );
         }
       }

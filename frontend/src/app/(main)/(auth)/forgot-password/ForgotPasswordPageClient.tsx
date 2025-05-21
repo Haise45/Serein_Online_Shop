@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 px-4 md:px-0">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
+    <div className="flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
         <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
           Quên Mật Khẩu
         </h1>

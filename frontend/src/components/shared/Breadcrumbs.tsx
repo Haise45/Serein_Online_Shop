@@ -23,40 +23,56 @@ export default function Breadcrumbs({
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-6 text-sm text-gray-600">
-      <ol role="list" className="flex items-center space-x-1.5 sm:space-x-2">
-        {breadcrumbItems.map((item, index) => (
-          <li key={item.href || item.label}>
-            <div className="flex items-center">
-              {index > 0 && ( // Chỉ hiển thị dấu phân cách từ item thứ hai
-                <FiChevronRight
-                  className="h-4 w-4 flex-shrink-0 text-gray-400"
-                  aria-hidden="true"
-                />
-              )}
-              {item.href && !item.isCurrent ? (
-                <Link
-                  href={item.href}
-                  className={`ml-1.5 font-medium text-gray-500 transition-colors hover:text-indigo-600 sm:ml-2 ${index === 0 && showHomeIcon ? "flex items-center" : ""}`}
-                >
-                  {index === 0 && showHomeIcon && (
-                    <FiHome className="mr-1.5 h-4 w-4 flex-shrink-0" />
-                  )}
-                  {item.label}
-                </Link>
-              ) : (
-                <span
-                  className={`ml-1.5 font-medium sm:ml-2 ${item.isCurrent ? "font-semibold text-gray-800" : "text-gray-500"} ${index === 0 && showHomeIcon ? "flex items-center" : ""}`}
-                >
-                  {index === 0 && showHomeIcon && (
-                    <FiHome className="mr-1.5 h-4 w-4 flex-shrink-0" />
-                  )}
-                  {item.label}
-                </span>
-              )}
-            </div>
-          </li>
-        ))}
+    <nav
+      aria-label="Breadcrumb"
+      className="mb-4 text-gray-600 text-sm"
+    >
+      <ol
+        role="list"
+        className="flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2"
+      >
+        {breadcrumbItems.map((item, index) => {
+          const isHiddenOnMobile =
+            breadcrumbItems.length > 2 &&
+            index > 0 &&
+            index < breadcrumbItems.length - 1;
+
+          return (
+            <li
+              key={item.href || item.label}
+              className={`${isHiddenOnMobile ? "hidden sm:inline-flex" : ""}`}
+            >
+              <div className="flex items-center">
+                {index > 0 && (
+                  <FiChevronRight
+                    className="h-4 w-4 text-gray-400"
+                    aria-hidden="true"
+                  />
+                )}
+                {item.href && !item.isCurrent ? (
+                  <Link
+                    href={item.href}
+                    className={`ml-1.5 rounded font-medium text-gray-500 transition hover:text-indigo-600 sm:ml-2 ${index === 0 && showHomeIcon ? "flex items-center" : ""}`}
+                  >
+                    {index === 0 && showHomeIcon && (
+                      <FiHome className="mr-1.5 h-4 w-4" />
+                    )}
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span
+                    className={`ml-1.5 font-medium sm:ml-2 ${item.isCurrent ? "font-semibold text-gray-800" : "text-gray-500"} ${index === 0 && showHomeIcon ? "flex items-center" : ""}`}
+                  >
+                    {index === 0 && showHomeIcon && (
+                      <FiHome className="mr-1.5 h-4 w-4" />
+                    )}
+                    {item.label}
+                  </span>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

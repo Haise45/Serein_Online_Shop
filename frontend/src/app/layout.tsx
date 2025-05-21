@@ -1,12 +1,17 @@
-import { ReduxProvider } from "@/store/Provider";
-import { Inter } from "next/font/google";
-import AuthInitializerWrapper from "./AuthInitializerWrapper";
 import AddedToCartPopupManager from "@/components/client/cart/AddedToCartPopupManager";
+import { ReduxProvider } from "@/store/Provider";
+import { Montserrat } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import AuthInitializerWrapper from "./AuthInitializerWrapper";
 import "./globals.css";
 import QueryProvider from "./QueryProvider";
-import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
 
 export const metadata = {
   title: "Trang chủ chính thức | Serein Shop",
@@ -20,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className={inter.className}>
+      <body className={montserrat.className}>
         <ReduxProvider>
           <QueryProvider>
             <div>
