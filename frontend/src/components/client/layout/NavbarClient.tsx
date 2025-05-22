@@ -1,4 +1,3 @@
-// NavbarClient.tsx
 "use client";
 
 import { buildCategoryTree } from "@/lib/utils";
@@ -12,9 +11,9 @@ import { useGetCart } from "@/lib/react-query/cartQueries";
 import { useGetWishlist } from "@/lib/react-query/wishlistQueries";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import CartPreviewModal from "../cart/CartPreviewModal";
-import CategoryMenu from "../category/CategoryMenu"; // CategoryMenu đã được cập nhật cho Mega Menu
+import CategoryMenu from "../category/CategoryMenu";
 import SideDrawer from "./SideDrawer";
-import UserMenu from "./UserMenu"; // Import UserMenu
+import UserMenu from "./UserMenu";
 
 export default function NavbarClient() {
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
@@ -103,7 +102,7 @@ export default function NavbarClient() {
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className={`rounded-md p-1.5 ${navIconColor} ${navHoverBgColor} ${navHoverTextColor} mr-2 focus:ring-2 focus:ring-gray-500 focus:outline-none focus:ring-inset md:hidden`}
+                className={`rounded-md p-1.5 ${navIconColor} ${navHoverBgColor} ${navHoverTextColor} focus:outline-none md:hidden`}
                 aria-controls="mobile-menu"
                 aria-expanded={isDrawerOpen ? "true" : "false"}
               >
@@ -145,9 +144,7 @@ export default function NavbarClient() {
               )}
             </div>
             {/* Right Section: Icons */}
-            <div className="flex items-center space-x-2 md:space-x-3">
-              {" "}
-              {/* Giảm space-x một chút nếu cần */}
+            <div className="flex items-center space-x-1 md:space-x-3">
               {/* Search Icon & Form */}
               <div className="relative">
                 <button
@@ -162,7 +159,7 @@ export default function NavbarClient() {
                   <form
                     onSubmit={handleSearchSubmit}
                     // Nền search bar có thể là màu sáng hơn hoặc xám nhạt
-                    className="ring-opacity-5 absolute top-full right-0 z-20 mt-2 w-64 rounded-md bg-white p-2 shadow-lg ring-1 ring-black sm:w-80"
+                    className="absolute top-full right-0 z-20 mt-2 w-64 rounded-md bg-white p-2 shadow-lg sm:w-80"
                   >
                     <input
                       type="text"
@@ -184,7 +181,6 @@ export default function NavbarClient() {
                 <FiHeart className="h-5 w-5 md:h-6 md:w-6" />
                 {wishlistCount > 0 && (
                   <span className="absolute top-0 right-0 inline-flex translate-x-1/3 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-bold text-red-100">
-                    {" "}
                     {/* Điều chỉnh padding cho badge */}
                     {wishlistCount}
                   </span>
@@ -202,13 +198,11 @@ export default function NavbarClient() {
                   </span>
                 )}
               </button>
-              {/* UserMenu sẽ tự xử lý màu sắc bên trong nó dựa trên MenuItems props */}
               <UserMenu />
             </div>
           </div>
         </div>
       </header>
-      {/* Side Drawer và CartPreviewModal không thay đổi */}
       <SideDrawer
         isOpen={isDrawerOpen}
         setIsOpen={setIsDrawerOpen}

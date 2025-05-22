@@ -2,7 +2,9 @@ const { v4: uuidv4 } = require("uuid");
 const asyncHandler = require("./asyncHandler");
 
 const identifyWishlistUser = asyncHandler(async (req, res, next) => {
-  console.log(`[Identify Wishlist User] Method: ${req.method}, URL: ${req.originalUrl}`);
+  console.log(
+    `[Identify Wishlist User] Method: ${req.method}, URL: ${req.originalUrl}`
+  );
   // Ưu tiên user đã đăng nhập (middleware protectOptional đã chạy trước)
   if (req.user) {
     console.log("[Wishlist Identifier] User identified:", req.user._id);
@@ -26,8 +28,8 @@ const identifyWishlistUser = asyncHandler(async (req, res, next) => {
     const cookieOptions = {
       expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Lưu 1 năm
       httpOnly: false, // Để JS client có thể đọc nếu cần (thường không cần)
-      secure: req.secure,
-      sameSite: "Lax",
+      secure: req.secure || process.env.NODE_ENV === "production",
+      sameSite: req.secure ? "None" : "Lax",
       path: "/",
     };
     res.cookie("wishlistGuestId", guestId, cookieOptions);

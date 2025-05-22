@@ -24,7 +24,7 @@ const setRefreshTokenCookie = (res, token) => {
   const cookieOptions = {
     httpOnly: true, // Ngăn JavaScript phía client truy cập cookie
     secure: process.env.NODE_ENV === "production", // Chỉ gửi qua HTTPS ở môi trường production
-    sameSite: "strict",
+    sameSite: "None",
     maxAge:
       parseInt(process.env.JWT_REFRESH_EXPIRES_IN_SECONDS || "604800", 10) *
       1000, // 7 days * 24 * 60 * 60 * 1000
@@ -373,13 +373,16 @@ const refreshToken = asyncHandler(async (req, res) => {
 // @route   POST /api/v1/auth/logout
 // @access  Public (nhưng thường gọi khi đã đăng nhập)
 const logoutUser = asyncHandler(async (req, res) => {
+  // Xác định isSecureConnection giống như khi bạn set cookie
+  const isSecureConnection = req.secure;
   // Xóa cookie bằng cách gửi lại cookie với tên giống hệt,
   // giá trị rỗng và ngày hết hạn trong quá khứ.
   res.cookie("refreshToken", "", {
     httpOnly: true,
     expires: new Date(0), // Đặt thời gian hết hạn về quá khứ
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: isSecureConnection,
+    sameSite: isSecureConnection ? "None" : "Lax",
+    path: "/",
   });
   res.status(200).json({ message: "Đăng xuất thành công." });
 });
