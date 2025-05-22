@@ -41,7 +41,7 @@ app.use(
 );
 
 if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
+  app.set("trust proxy", true);
 }
 app.use(httpLoggerMiddleware);
 app.use(express.json()); // Parse JSON request bodies
