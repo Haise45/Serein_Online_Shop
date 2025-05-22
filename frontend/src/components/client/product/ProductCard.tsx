@@ -2,13 +2,15 @@
 import { useAddToCart } from "@/lib/react-query/cartQueries";
 import {
   useAddToWishlist,
-  useGetWishlist,
   useRemoveFromWishlist,
+  wishlistKeys,
 } from "@/lib/react-query/wishlistQueries";
-import { AppDispatch } from "@/store"; // Thêm AppDispatch
+import { getWishlist as getWishlistApi } from "@/services/wishlistService";
+import { AppDispatch } from "@/store";
 import { addPopup } from "@/store/slices/notificationPopupSlice";
-import { Product, Variant } from "@/types";
+import { Product, Variant, WishlistItem } from "@/types";
 import { CartItem } from "@/types/cart";
+import { useQuery } from "@tanstack/react-query";
 import classNames from "classnames";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,11 +46,21 @@ export default function ProductCard({ product }: ProductCardProps) {
   const dispatch: AppDispatch = useDispatch(); // Khởi tạo dispatch
   const addToCartMutation = useAddToCart();
 
-  const { data: wishlistData, isLoading: isLoadingWishlist } = useGetWishlist();
   const addToWishlistMutation = useAddToWishlist();
   const removeFromWishlistMutation = useRemoveFromWishlist();
 
   const [activeVariant, setActiveVariant] = useState<Variant | null>(null);
+
+  // Lấy dữ liệu wishlist từ cache mà không tự động fetch nếu không cần thiết
+  // Chỉ fetch nếu dữ liệu là stale và không có fetch nào khác đang diễn ra cho key này
+  const { data: wishlistData, isLoading: isLoadingWishlist } = useQuery<
+    WishlistItem[],
+    Error
+  >({
+    queryKey: wishlistKeys.wishlist,
+    queryFn: getWishlistApi,
+    staleTime: 5 * 60 * 1000, // Giữ dữ liệu fresh trong 5 phút, ví dụ
+  });
 
   const isFavorite = useMemo(() => {
     if (!wishlistData || !product) return false;
@@ -142,7 +154,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (isCurrentlyFavoriteForAction) {
       removeFromWishlistMutation.mutate(
         { productId: productIdToToggle, variantId: variantIdToToggle },
-        { onError: (error) => console.error("Lỗi xóa khỏi wishlist:", error) },
+        {
+          onError: (error) => {
+            console.error("Lỗi xóa khỏi wishlist:", error);
+            toast.error("Lỗi khi xóa khỏi yêu thích.");
+          },
+        },
       );
     } else {
       // Chỉ cho phép thêm nếu có activeVariant hoặc sản phẩm không có variant
@@ -154,7 +171,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         addToWishlistMutation.mutate(
           { productId: productIdToToggle, variantId: variantIdToToggle },
           {
-            onError: (error) => console.error("Lỗi thêm vào wishlist:", error),
+            onError: (error) => {
+              console.error("Lỗi thêm vào wishlist:", error);
+              toast.error("Lỗi khi thêm vào yêu thích.");
+            },
           },
         );
       } else {
