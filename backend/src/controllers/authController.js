@@ -20,14 +20,11 @@ const {
 const { createAdminNotification } = require("../utils/notificationUtils");
 
 // --- Tiện ích thiết lập Cookie ---
-const setRefreshTokenCookie = (req, res, token) => {
-  // Xác định isSecureConnection giống như khi bạn set cookie
-  const isSecureConnection = req.secure;
+const setRefreshTokenCookie = (res, token) => {
   const cookieOptions = {
     httpOnly: true, // Ngăn JavaScript phía client truy cập cookie
-    secure: isSecureConnection,
-    sameSite: isSecureConnection ? 'None' : 'Lax',
-    path: "/",
+    secure: process.env.NODE_ENV === "production", // Chỉ gửi qua HTTPS ở môi trường production
+    sameSite: "None",
     maxAge:
       parseInt(process.env.JWT_REFRESH_EXPIRES_IN_SECONDS || "604800", 10) *
       1000, // 7 days * 24 * 60 * 60 * 1000
