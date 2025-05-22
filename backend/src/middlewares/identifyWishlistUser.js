@@ -27,8 +27,8 @@ const identifyWishlistUser = asyncHandler(async (req, res, next) => {
       expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Lưu 1 năm
       httpOnly: false, // Để JS client có thể đọc nếu cần (thường không cần)
       // secure: req.secure || process.env.NODE_ENV === "production",
-      secure: false,
-      sameSite: "Lax",
+      secure: true,
+      sameSite: 'None',
       path: "/",
     };
     res.cookie("wishlistGuestId", guestId, cookieOptions);
