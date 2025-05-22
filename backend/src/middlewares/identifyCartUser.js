@@ -24,9 +24,8 @@ const identifyCartUser = asyncHandler(async (req, res, next) => {
     const cookieOptions = {
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Lưu 30 ngày
       httpOnly: false, // Cho phép JS phía client đọc
-      // secure: req.secure || process.env.NODE_ENV === "production",
-      secure: false,
-      sameSite: "Lax",
+      secure: req.secure || process.env.NODE_ENV === "production",
+      sameSite: req.secure ? "None" : "Lax",
       path: "/",
     };
     res.cookie("cartGuestId", guestId, cookieOptions);

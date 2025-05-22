@@ -1,4 +1,3 @@
-// src/services/wishlistService.ts
 import axiosInstance from "@/lib/axiosInstance";
 import { WishlistItem } from "@/types";
 

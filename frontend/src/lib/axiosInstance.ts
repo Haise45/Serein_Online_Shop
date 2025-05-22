@@ -1,4 +1,4 @@
-import { logout, setAccessToken, store } from "@/store"; // Đảm bảo store được import đúng
+import { logout, setAccessToken, store } from "@/store"; 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const API_BASE_URL =
@@ -92,7 +92,7 @@ axiosInstance.interceptors.response.use(
           withCredentials: true,
         });
         const { data } = await refreshAxiosInstance.post<{ accessToken: string }>(
-          `/auth/refresh`, // Không cần API_BASE_URL vì đã có trong baseURL của refreshAxiosInstance
+          `/auth/refresh`,
           {}, // Không cần body cho refresh token nếu backend đọc từ cookie
         );
         const newAccessToken = data.accessToken;
