@@ -135,6 +135,7 @@ const getWishlist = asyncHandler(async (req, res) => {
 // @route   POST /api/v1/wishlist
 // @access  Private (hoặc public nếu cho phép guest thêm)
 const addToWishlist = asyncHandler(async (req, res) => {
+  console.log(`[Wishlist Controller - addToWishlist] Method: ${req.method}, URL: ${req.originalUrl}`);
   const identifier = req.wishlistIdentifier;
   const { productId, variantId } = req.body;
 

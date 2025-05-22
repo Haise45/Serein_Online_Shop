@@ -1,11 +1,12 @@
 const express = require("express");
 const cors = require("cors");
-const morgan = require("morgan");
 const path = require("path");
+const { httpLoggerMiddleware } = require("./utils/logger");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const { protectOptional } = require("./middlewares/authMiddleware");
 const identifyCartUser = require("./middlewares/identifyCartUser");
+const identifyWishlistUser = require("./middlewares/identifyWishlistUser");
 
 // Import routes
 const authRoutes = require("./routes/authRoutes");
@@ -39,9 +40,10 @@ app.use(
   })
 );
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev")); // Logging HTTP requests ở chế độ dev
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", true);
 }
+app.use(httpLoggerMiddleware);
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser());
@@ -57,6 +59,7 @@ app.get("/api/v1", (req, res) => {
 });
 
 app.use("/api/v1/cart", protectOptional, identifyCartUser);
+app.use("/api/v1/wishlist", protectOptional, identifyWishlistUser);
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
