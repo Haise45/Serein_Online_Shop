@@ -68,6 +68,7 @@ const isAdmin = (req, res, next) => {
 // --- Hàm protectOptional ---
 // Mục đích: Cố gắng xác thực token nếu có, nhưng không báo lỗi nếu thiếu/sai. Luôn gọi next().
 const protectOptional = asyncHandler(async (req, res, next) => {
+  console.log(`[Protect Optional] Method: ${req.method}, URL: ${req.originalUrl}`);
   let token;
   req.user = null;
 

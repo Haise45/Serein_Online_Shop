@@ -61,7 +61,7 @@ export default function SideDrawer({
       <Dialog
         as="div"
         id="mobile-menu"
-        className="relative z-40 md:hidden"
+        className="relative z-50 md:hidden"
         onClose={setIsOpen}
       >
         <TransitionChild
