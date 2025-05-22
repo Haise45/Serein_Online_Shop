@@ -169,8 +169,8 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 px-4 md:px-0">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
+    <div className="flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
         <h1 className="mb-4 text-center text-3xl font-bold text-gray-800">
           Xác Thực Email
         </h1>
@@ -196,7 +196,7 @@ export default function VerifyEmailPage() {
             </p>
           )}
 
-          <div className="flex justify-center space-x-2" onPaste={handlePaste}>
+          <div className="flex justify-center space-x-1.5 sm:space-x-2" onPaste={handlePaste}>
             {otp.map((digit, index) => (
               <input
                 key={index}
@@ -205,7 +205,7 @@ export default function VerifyEmailPage() {
                 value={digit}
                 onChange={(e) => handleOtpChange(e, index)}
                 onFocus={(e) => e.target.select()} // Chọn toàn bộ text khi focus
-                className="h-14 w-12 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="h-12 w-9 sm:h-14 sm:w-12 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 disabled={loading}
                 aria-label={`Ký tự OTP thứ ${index + 1}`}
               />

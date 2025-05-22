@@ -61,6 +61,14 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
       }
     };
 
+    // Hàm để xử lý click vào link trong mega menu
+    const handleMegaMenuLinkClick = () => {
+      setIsOpen(false); // Đóng panel mega menu của mục cha này
+      if (onHideOverlay) {
+        onHideOverlay(); // Đóng lớp overlay toàn cục
+      }
+    };
+
     return (
        <div
         className="group h-full flex items-center"
@@ -69,6 +77,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
       >
         <Link
           href={categoryLinkHref}
+          onClick={handleMegaMenuLinkClick}
           className={classNames(
             "flex items-center rounded-ss-md rounded-se-md px-3 py-2 text-sm font-medium whitespace-nowrap",
             // Thay đổi màu cho navbar nền sáng
@@ -102,7 +111,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                 <div className="w-full flex-shrink-0 space-y-3 md:w-1/4 md:border-r md:border-gray-200 md:pr-6">
                   <Link
                     href={categoryLinkHref}
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleMegaMenuLinkClick}
                     className="group/link flex items-center text-base font-bold text-gray-800 hover:text-indigo-700"
                   >
                     Tất cả {category.name}
@@ -110,14 +119,14 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                   </Link>
                   <Link
                     href={`/products?category=${category.slug}&sortBy=createdAt&sortOrder=desc`}
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleMegaMenuLinkClick}
                     className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
                   >
                     Sản phẩm mới
                   </Link>
                   <Link
                     href={`/products?category=${category.slug}&sortBy=totalSold&sortOrder=desc`}
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleMegaMenuLinkClick}
                     className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
                   >
                     Bán chạy nhất
@@ -134,7 +143,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                         <div key={subCategory1._id} className="space-y-2.5">
                           <Link
                             href={`/products?category=${subCategory1.slug}`}
-                            onClick={() => setIsOpen(false)}
+                            onClick={handleMegaMenuLinkClick}
                             className="group/link flex items-center text-base font-bold text-gray-800 hover:text-indigo-700"
                           >
                             {subCategory1.name}
@@ -145,7 +154,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                               <li key={subCategory2._id}>
                                 <Link
                                   href={`/products?category=${subCategory2.slug}`}
-                                  onClick={() => setIsOpen(false)}
+                                  onClick={handleMegaMenuLinkClick}
                                   className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
                                 >
                                   {subCategory2.name}

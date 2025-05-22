@@ -14,9 +14,9 @@ export default function VerifyEmailPageContainer() {
   ]
   // Truyền searchParams xuống client component nếu cần dùng ở server để tạo metadata động hơn
   return (
-    <>
+    <div className="mx-auto px-0 lg:px-10">
       <Breadcrumbs items={breadcrumbItems} />
       <VerifyEmailPageClient />
-    </>
+    </div>
   );
 }
