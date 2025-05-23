@@ -93,21 +93,31 @@ const updateStockAndCouponUsage = async (
   );
 };
 
-// @desc    Tạo đơn hàng mới từ giỏ hàng
+// @desc    Tạo đơn hàng mới từ giỏ hàng (cho User hoặc Guest)
 // @route   POST /api/v1/orders
-// @access  Private (Yêu cầu đăng nhập)
+// @access  Public
 const createOrder = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  // --- Xác định User hoặc Guest ---
+  const loggedInUser = req.user; // Sẽ là object User nếu đăng nhập, hoặc null nếu là guest
+  let userIdForOrder = loggedInUser ? loggedInUser._id : null;
+  let userEmailForOrder = loggedInUser ? loggedInUser.email : null;
+  let userNameForOrder = loggedInUser ? loggedInUser.name : null;
+
   const {
     shippingAddressId,
     shippingAddress: newShippingAddressData,
     paymentMethod,
     shippingMethod,
     notes,
+    // Các trường CHỈ DÀNH CHO GUEST (nếu không có loggedInUser)
+    email: guestEmailFromBody,
   } = req.body;
 
+  // --- Lấy Guest Identifier (từ cart cookie) ---
+  const cartGuestId = req.cookies.cartGuestId;
+
   // --- Xác định các phương thức thanh toán trả trước ---
-  const prepaidPaymentMethods = ["BANK_TRANSFER", "PAYPAL", "VNPAY", "MOMO"];
+  const prepaidPaymentMethods = ["BANK_TRANSFER", "PAYPAL"];
 
   // --- Bắt đầu Transaction ---
   const session = await mongoose.startSession();
@@ -115,10 +125,105 @@ const createOrder = asyncHandler(async (req, res) => {
   console.log("[Transaction] Bắt đầu Transaction tạo đơn hàng.");
 
   let createdOrder;
+  let customerEmailForNotification = null; // Email để gửi xác nhận
+  let customerNameForNotification = null; // Tên để cá nhân hóa email
 
   try {
-    // --- 1. Tìm giỏ hàng và populate thông tin cần thiết ---
-    const cart = await Cart.findOne({ userId: userId }).session(session);
+    // --- 1. Xử lý thông tin người đặt hàng (User vs Guest) ---
+    let finalShippingAddress = null;
+
+    if (loggedInUser) {
+      // --- 1.1. XỬ LÝ CHO USER ĐÃ ĐĂNG NHẬP ---
+      console.log(`[Order Create] Người dùng đăng nhập: ${loggedInUser.email}`);
+      customerEmailForNotification = loggedInUser.email;
+      customerNameForNotification = loggedInUser.name;
+
+      if (shippingAddressId) {
+        if (!mongoose.Types.ObjectId.isValid(shippingAddressId)) {
+          res.status(400);
+          throw new Error("ID địa chỉ giao hàng không hợp lệ.");
+        }
+        const userWithAddresses = await User.findById(userIdForOrder)
+          .select("addresses")
+          .session(session);
+        const address = userWithAddresses?.addresses?.id(shippingAddressId);
+        if (!address) {
+          res.status(404);
+          throw new Error(
+            "Không tìm thấy địa chỉ giao hàng này trong tài khoản của bạn."
+          );
+        }
+        // Tạo snapshot từ địa chỉ tìm được
+        finalShippingAddress = {
+          fullName: address.fullName,
+          phone: address.phone,
+          street: address.street,
+          communeCode: address.communeCode,
+          communeName: address.communeName,
+          districtCode: address.districtCode,
+          districtName: address.districtName,
+          provinceCode: address.provinceCode,
+          provinceName: address.provinceName,
+          countryCode: address.countryCode,
+        };
+      } else if (newShippingAddressData) {
+        // User đăng nhập nhưng nhập địa chỉ mới
+        const userToUpdateAddress = await User.findById(userIdForOrder).session(
+          session
+        );
+        if (!userToUpdateAddress) {
+          res.status(404);
+          throw new Error("Không tìm thấy thông tin người dùng.");
+        }
+        // Kiểm tra xem có nên đặt làm mặc định không
+        const isDefaultAddress =
+          !userToUpdateAddress.addresses ||
+          userToUpdateAddress.addresses.length === 0;
+
+        // Thêm địa chỉ mới vào danh sách của user
+        userToUpdateAddress.addresses.push({
+          ...newShippingAddressData,
+          isDefault: isDefaultAddress,
+        });
+        await userToUpdateAddress.save({ session }); // <<< Lưu user trong transaction >>>
+        console.log("[Address] Đã lưu địa chỉ mới vào user.");
+
+        // Sử dụng địa chỉ mới này cho đơn hàng
+        finalShippingAddress = { ...newShippingAddressData };
+      } else {
+        res.status(400);
+        throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
+      }
+    } else {
+      // --- 1.2. XỬ LÝ CHO GUEST ---
+      console.log("[Order Create] Khách đặt hàng.");
+
+      userIdForOrder = null; // Không có user ID cho guest
+      userEmailForOrder = guestEmailFromBody.toLowerCase().trim(); // Email của guest
+      userNameForOrder = newShippingAddressData.fullName; // Tên của guest
+
+      customerEmailForNotification = userEmailForOrder;
+      customerNameForNotification = userNameForOrder;
+      finalShippingAddress = { ...newShippingAddressData }; // Địa chỉ của guest
+    }
+
+    if (!finalShippingAddress) {
+      res.status(400);
+      throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
+    }
+
+    // --- 2. Tìm giỏ hàng và populate thông tin cần thiết ---
+    let cartIdentifier;
+    if (loggedInUser) {
+      cartIdentifier = { userId: loggedInUser._id };
+    } else if (cartGuestId) {
+      cartIdentifier = { guestId: cartGuestId };
+    } else {
+      res.status(400);
+      throw new Error("Không tìm thấy giỏ hàng.");
+    }
+
+    const cart = await Cart.findOne(cartIdentifier).session(session);
     if (!cart || cart.items.length === 0) {
       res.status(404);
       throw new Error("Giỏ hàng của bạn đang trống.");
@@ -129,64 +234,6 @@ const createOrder = asyncHandler(async (req, res) => {
     if (!populatedCart || populatedCart.items.length === 0) {
       res.status(404);
       throw new Error("Giỏ hàng không có sản phẩm hợp lệ.");
-    }
-
-    // --- 2. Lấy và xác thực địa chỉ giao hàng ---
-    let finalShippingAddress = null;
-    if (shippingAddressId) {
-      if (!mongoose.Types.ObjectId.isValid(shippingAddressId)) {
-        res.status(400);
-        throw new Error("ID địa chỉ giao hàng không hợp lệ.");
-      }
-      // Tìm user đầy đủ để lấy addresses
-      const userWithAddresses = await User.findById(userId)
-        .select("addresses")
-        .session(session);
-      const address = userWithAddresses?.addresses?.id(shippingAddressId);
-      if (!address) {
-        res.status(404);
-        throw new Error(
-          "Không tìm thấy địa chỉ giao hàng này trong tài khoản của bạn."
-        );
-      }
-      // Tạo snapshot từ địa chỉ tìm được
-      finalShippingAddress = {
-        fullName: address.fullName,
-        phone: address.phone,
-        street: address.street,
-        communeCode: address.communeCode,
-        communeName: address.communeName,
-        districtCode: address.districtCode,
-        districtName: address.districtName,
-        provinceCode: address.provinceCode,
-        provinceName: address.provinceName,
-        countryCode: address.countryCode,
-      };
-    } else if (newShippingAddressData) {
-      // Lấy lại user đầy đủ để cập nhật địa chỉ
-      const userWithAddresses = await User.findById(userId)
-        .select("addresses")
-        .session(session);
-      if (!userWithAddresses) {
-        res.status(404);
-        throw new Error("Lỗi không tìm thấy thông tin người dùng.");
-      }
-
-      // Kiểm tra xem có nên đặt làm mặc định không
-      const isDefaultAddress =
-        !userWithAddresses.addresses ||
-        userWithAddresses.addresses.length === 0;
-
-      // Thêm địa chỉ mới vào danh sách của user
-      userWithAddresses.addresses.push({
-        ...newShippingAddressData,
-        isDefault: isDefaultAddress,
-      });
-      await userWithAddresses.save({ session }); // <<< Lưu user trong transaction >>>
-      console.log("[Address] Đã lưu địa chỉ mới vào user.");
-
-      // Sử dụng địa chỉ mới này cho đơn hàng
-      finalShippingAddress = { ...newShippingAddressData };
     }
 
     // --- 3. Re-validate Tồn kho lần cuối ---
@@ -264,8 +311,10 @@ const createOrder = asyncHandler(async (req, res) => {
         `[Order Create] Thanh toán trả trước (${paymentMethod}). Đặt trạng thái Processing, isPaid=true.`
       );
     }
-    const order = new Order({
-      user: userId,
+    const orderDataToCreate = {
+      user: userIdForOrder, // Sẽ là null nếu là guest
+      guestOrderEmail: loggedInUser ? null : userEmailForOrder, // Chỉ set cho guest
+      guestSessionId: loggedInUser ? null : cartGuestId, // Chỉ set cho guest (lưu lại cartGuestId)
       orderItems: orderItemsData,
       shippingAddress: finalShippingAddress,
       paymentMethod: paymentMethod || "COD",
@@ -281,11 +330,27 @@ const createOrder = asyncHandler(async (req, res) => {
       isPaid: initialIsPaid,
       paidAt: initialPaidAt,
       isDelivered: false,
-    });
+    };
+
+    const order = new Order(orderDataToCreate);
+
+    // --- TẠO VÀ GÁN TRACKING TOKEN NẾU LÀ GUEST ---
+    let guestTrackingTokenValue = null;
+    if (!loggedInUser) {
+      // Chỉ tạo token cho guest
+      guestTrackingTokenValue = order.createGuestOrderTrackingToken(); // Gọi method từ model
+      console.log(`[Guest Order] Created tracking token for guest order.`);
+    }
 
     // --- 6. Lưu Order ---
     createdOrder = await order.save({ session });
-    console.log(`[Transaction] Đã lưu Order: ${createdOrder._id}`);
+    console.log(
+      `[Transaction] Đã lưu Order: ${createdOrder._id} cho ${
+        loggedInUser
+          ? "User: " + loggedInUser.email
+          : "Guest: " + userEmailForOrder
+      }`
+    );
     console.log(
       "[Debug] Dữ liệu createdOrder.orderItems SAU KHI lưu:",
       JSON.stringify(createdOrder.orderItems, null, 2)
@@ -315,12 +380,25 @@ const createOrder = asyncHandler(async (req, res) => {
     console.log("[Transaction] Đã cập nhật stock và coupon.");
 
     // --- 8. Xóa giỏ hàng ---
-    cart.items = [];
+    // Tạo danh sách key của các item đã đặt hàng (để xóa khỏi giỏ)
+    const orderedKeys = new Set(
+      createdOrder.orderItems.map((item) =>
+        item.variant?.variantId
+          ? `${item.product}_${item.variant.variantId}`
+          : `${item.product}`
+      )
+    );
+
+    // Lọc lại các item trong giỏ, giữ lại những item CHƯA được đặt hàng
+    cart.items = cart.items.filter((item) => {
+      const key = item.variantId
+        ? `${item.productId}_${item.variantId}`
+        : `${item.productId}`;
+      return !orderedKeys.has(key);
+    });
+
     cart.appliedCoupon = null;
     await cart.save({ session });
-    console.log(
-      `[Cart] Đã xóa giỏ hàng cho User ${userId} sau khi tạo Order ${createdOrder._id}`
-    );
 
     // --- 9. Commit Transaction ---
     await session.commitTransaction();
@@ -348,16 +426,36 @@ const createOrder = asyncHandler(async (req, res) => {
         .populate("user", "name email")
         .lean();
       if (orderForEmail) {
+        const nameForEmail = orderForEmail.user
+          ? orderForEmail.user.name
+          : customerNameForNotification;
+        const emailForNotification = orderForEmail.user
+          ? orderForEmail.user.email
+          : customerEmailForNotification;
+
+        // Tạo tracking URL nếu là guest và có token
+        let guestTrackingUrl = null;
+        if (!orderForEmail.user && orderForEmail.guestOrderTrackingToken) {
+          guestTrackingUrl = `${process.env.FRONTEND_URL}/track-order/${orderForEmail._id}/${orderForEmail.guestOrderTrackingToken}`;
+        }
+
         const emailHtml = orderConfirmationTemplate(
-          orderForEmail.user.name,
-          orderForEmail
+          nameForEmail,
+          orderForEmail,
+          guestTrackingUrl
         );
         await sendEmail({
-          email: orderForEmail.user.email,
+          email: emailForNotification,
           subject: `Xác nhận đơn hàng #${orderForEmail._id
             .toString()
             .slice(-6)} tại ${process.env.SHOP_NAME || "Shop"}`,
-          message: `Cảm ơn bạn đã đặt hàng! Mã đơn hàng của bạn là ${orderForEmail._id}.`,
+          message: `Cảm ơn bạn đã đặt hàng! Mã đơn hàng của bạn là ${
+            orderForEmail._id
+          }. ${
+            guestTrackingUrl
+              ? "Bạn có thể theo dõi đơn hàng tại: " + guestTrackingUrl
+              : ""
+          }`,
           html: emailHtml,
         });
       }
@@ -369,21 +467,35 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 
     // --- Gửi thông báo cho Admin ---
+    const adminNotifierName = loggedInUser
+      ? loggedInUser.name
+      : `Khách (Email: ${userEmailForOrder})`;
     await createAdminNotification(
       "Đơn hàng mới được đặt",
-      `Đơn hàng #${createdOrder._id.toString().slice(-6)} bởi "${
-        req.user.name
-      }" vừa được đặt. Tổng tiền: ${createdOrder.totalPrice.toLocaleString(
+      `Đơn hàng #${createdOrder._id
+        .toString()
+        .slice(
+          -6
+        )} bởi "${adminNotifierName}" vừa được đặt. Tổng tiền: ${createdOrder.totalPrice.toLocaleString(
         "vi-VN"
       )}đ.`,
       "NEW_ORDER_PLACED",
       `/admin/orders/${createdOrder._id}`,
-      { orderId: createdOrder._id, userId: req.user._id }
+      { orderId: createdOrder._id, userId: userIdForOrder } // userIdForOrder sẽ là null cho guest
     );
 
     // --- Trả về đơn hàng đã tạo ---
-    await createdOrder.populate("user", "name email");
-    res.status(201).json(createdOrder);
+    // Populate lại user lần nữa cho response cuối cùng nếu cần
+    const finalResponseOrder = await Order.findById(createdOrder._id)
+      .populate("user", "name email")
+      .lean();
+    res.status(201).json(finalResponseOrder || createdOrder.toObject());
+  } else {
+    // Trường hợp hiếm hoi transaction thành công nhưng createdOrder không có giá trị
+    res.status(500).json({
+      message:
+        "Tạo đơn hàng thành công nhưng có lỗi khi lấy lại thông tin đơn hàng.",
+    });
   }
 });
 
@@ -423,6 +535,39 @@ const getMyOrders = asyncHandler(async (req, res) => {
     limit: limit,
     orders: orders,
   });
+});
+
+// @desc    Guest lấy chi tiết đơn hàng bằng tracking token
+// @route   GET /api/v1/orders/guest-track/:orderId/:token
+// @access  Public
+const getGuestOrderByTrackingToken = asyncHandler(async (req, res) => {
+  const { orderId, token } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    res.status(400);
+    throw new Error("Mã đơn hàng không hợp lệ.");
+  }
+  if (!token || token.length < 30) {
+    // Kiểm tra token có vẻ hợp lệ
+    res.status(400);
+    throw new Error("Token theo dõi không hợp lệ.");
+  }
+
+  const order = await Order.findOne({
+    _id: orderId,
+    guestOrderTrackingToken: token,
+    guestOrderTrackingTokenExpires: { $gt: Date.now() }, // Token còn hạn
+    user: null, // Đảm bảo đây là đơn hàng guest chưa được liên kết
+  }).populate("user", "name email"); // Populate vẫn có thể dùng, user sẽ là null
+
+  if (!order) {
+    res.status(404);
+    throw new Error(
+      "Không tìm thấy đơn hàng hoặc link theo dõi đã hết hạn/không hợp lệ."
+    );
+  }
+
+  res.status(200).json(order);
 });
 
 // @desc    Lấy chi tiết đơn hàng (cho User hoặc Admin)
@@ -691,24 +836,36 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
   await updatedOrder.populate("user", "name email");
 
   // --- Gửi Email xác nhận đã giao ---
-  try {
-    const userEmailHtml = orderDeliveredTemplate(
-      updatedOrder.user.name,
-      updatedOrder
-    );
-    await sendEmail({
-      email: updatedOrder.user.email,
-      subject: `Đơn hàng #${updatedOrder._id
-        .toString()
-        .slice(-6)} đã giao thành công!`,
-      message: `Đơn hàng ${updatedOrder._id} đã giao thành công.`,
-      html: userEmailHtml,
-    });
-  } catch (emailError) {
-    console.error(
-      `Lỗi gửi mail delivered cho order ${updatedOrder._id}:`,
-      emailError
-    );
+  if (updatedOrder && updatedOrder.user) {
+    // Đảm bảo có user để lấy email và tên
+    try {
+      // --- LOGIC XÁC ĐỊNH guestTrackingUrl (SẼ LUÔN LÀ NULL VÌ ROUTE NÀY YÊU CẦU LOGIN) ---
+      const guestTrackingUrl = null; // Vì route này yêu cầu user đã đăng nhập
+
+      console.log(
+        `[Email Send][Delivered] Name: ${updatedOrder.user.name}, Email: ${updatedOrder.user.email}, GuestURL: ${guestTrackingUrl}`
+      );
+      const userEmailHtml = orderDeliveredTemplate(
+        updatedOrder.user.name,
+        updatedOrder,
+        guestTrackingUrl
+      );
+      await sendEmail({
+        email: updatedOrder.user.email,
+        subject: `Đơn hàng #${updatedOrder._id
+          .toString()
+          .slice(-6)} đã giao thành công!`,
+        html: userEmailHtml,
+      });
+      console.log(
+        `[Email Send][Delivered] Successfully sent to ${updatedOrder.user.email}`
+      );
+    } catch (emailError) {
+      console.error(
+        `Lỗi gửi mail delivered cho order ${updatedOrder._id}:`,
+        emailError
+      );
+    }
   }
 
   // --- Gửi thông báo cho Admin ---
@@ -894,24 +1051,47 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   // --- Gửi Email khi chuyển sang 'Shipped' ---
   if (updatedOrder.status === "Shipped" && currentStatus !== "Shipped") {
     // Chỉ gửi nếu status thực sự thay đổi thành Shipped
-    try {
-      const userEmailHtml = orderShippedTemplate(
-        updatedOrder.user.name,
-        updatedOrder
-      );
-      await sendEmail({
-        email: updatedOrder.user.email,
-        subject: `Đơn hàng #${updatedOrder._id
-          .toString()
-          .slice(-6)} của bạn đã được giao đi!`,
-        message: `Đơn hàng ${updatedOrder._id} đã được giao đi.`,
-        html: userEmailHtml,
-      });
-    } catch (emailError) {
-      console.error(
-        `Lỗi gửi mail shipped cho order ${updatedOrder._id}:`,
-        emailError
-      );
+    if (updatedOrder.user || updatedOrder.guestOrderEmail) {
+      // Phải có thông tin người nhận email
+      try {
+        const nameForEmail = updatedOrder.user
+          ? updatedOrder.user.name
+          : updatedOrder.shippingAddress.fullName || "Quý khách";
+        const emailForNotification = updatedOrder.user
+          ? updatedOrder.user.email
+          : updatedOrder.guestOrderEmail;
+
+        // --- LOGIC XÁC ĐỊNH guestTrackingUrl ---
+        let guestTrackingUrl = null;
+        if (!updatedOrder.user && updatedOrder.guestOrderTrackingToken) {
+          guestTrackingUrl = `${process.env.FRONTEND_URL}/track-order/${updatedOrder._id}/${updatedOrder.guestOrderTrackingToken}`;
+        }
+        // -------------------------------------
+
+        console.log(
+          `[Email Send][Shipped] Name: ${nameForEmail}, Email: ${emailForNotification}, GuestURL: ${guestTrackingUrl}`
+        );
+        const userEmailHtml = orderShippedTemplate(
+          nameForEmail,
+          updatedOrder,
+          guestTrackingUrl
+        );
+        await sendEmail({
+          email: emailForNotification,
+          subject: `Đơn hàng #${updatedOrder._id
+            .toString()
+            .slice(-6)} của bạn đã được giao đi!`,
+          html: userEmailHtml,
+        });
+        console.log(
+          `[Email Send][Shipped] Successfully sent to ${emailForNotification}`
+        );
+      } catch (emailError) {
+        console.error(
+          `Lỗi gửi mail shipped cho order ${updatedOrder._id}:`,
+          emailError
+        );
+      }
     }
   }
   res.json(updatedOrder);
@@ -1254,6 +1434,7 @@ const restockOrderItems = asyncHandler(async (req, res) => {
 module.exports = {
   createOrder,
   getMyOrders,
+  getGuestOrderByTrackingToken,
   getOrderById,
   getAllOrders,
   updateOrderStatus,
