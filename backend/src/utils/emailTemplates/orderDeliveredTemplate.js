@@ -1,14 +1,20 @@
 require("dotenv").config();
 
-const orderDeliveredTemplate = (userName, order) => {
+const orderDeliveredTemplate = (userName, order, guestTrackingUrl = null) => {
   const shopName = process.env.SHOP_NAME || "Cửa Hàng Của Bạn";
   const logoUrl = process.env.SHOP_LOGO_URL || null;
-  const frontendOrderUrl = `${
-    process.env.FRONTEND_URL || "http://localhost:3000"
-  }/my-orders/${order._id}`;
+  let orderDetailUrl = `${process.env.FRONTEND_URL}/my-account/orders/${order._id}`;
+  let buttonText = "Xem lại đơn hàng";
   const refundPolicyUrl = `${
     process.env.FRONTEND_URL || "http://localhost:3000"
   }/policy`; // Cần có trang này trên frontend
+
+  if (guestTrackingUrl) {
+    orderDetailUrl = guestTrackingUrl;
+  } else if (!order.user && !guestTrackingUrl) {
+    orderDetailUrl = `${process.env.FRONTEND_URL}`;
+    buttonText = "Về trang chủ";
+  }
 
   return `
 <!DOCTYPE html>
@@ -58,11 +64,11 @@ const orderDeliveredTemplate = (userName, order) => {
                               )}</strong> của bạn đã được giao thành công đến địa chỉ nhận hàng.</p>
                             <p style="margin-bottom:25px; font-size: 15px;">${shopName} hy vọng bạn hài lòng với sản phẩm và trải nghiệm mua sắm lần này!</p>
 
-                            <p style="text-align:center; margin-top: 30px;">
-                                <a href="${frontendOrderUrl}" class="button" target="_blank" style="background-color:#6c757d; color:#ffffff !important;">Xem lại đơn hàng</a>
-                                <!-- Thêm nút đánh giá nếu muốn -->
-                                <!-- <a href="..." class="button" target="_blank" style="margin-left: 10px;">Đánh giá sản phẩm</a> -->
-                            </p>
+                            ${ (guestTrackingUrl || order.user) ?
+                            `<p style="text-align:center; margin-top: 30px;">
+                                <a href="${orderDetailUrl}" class="button" target="_blank" style="background-color:#6c757d; color:#ffffff !important;">${buttonText}</a>
+                            </p>` : ''
+                            }
                             <p style="margin-top: 25px; font-size: 13px; color: #6c757d;">Nếu có bất kỳ vấn đề gì với sản phẩm hoặc bạn có nhu cầu đổi/trả, vui lòng tham khảo <a href="${refundPolicyUrl}" target="_blank" style="color:#0d6efd;">Chính sách đổi trả</a> của chúng tôi hoặc liên hệ bộ phận Chăm sóc khách hàng để được hỗ trợ.</p>
                         </td>
                     </tr>

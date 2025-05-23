@@ -18,6 +18,7 @@ const {
   clearGuestWishlistCookie,
 } = require("../utils/wishlistUtils");
 const { createAdminNotification } = require("../utils/notificationUtils");
+const Order = require("../models/Order");
 
 // --- Tiện ích thiết lập Cookie ---
 const setRefreshTokenCookie = (res, token) => {
@@ -149,6 +150,32 @@ const verifyEmailOTP = asyncHandler(async (req, res) => {
   user.emailVerificationExpires = undefined; // Xóa thời gian hết hạn
   await user.save();
 
+  // Liên kết các đơn hàng guest cũ (nếu có)
+  try {
+    const updatedOrders = await Order.updateMany(
+      { guestOrderEmail: user.email, user: null }, // Điều kiện tìm kiếm
+      {
+        $set: { user: user._id },
+        $unset: {
+          guestOrderEmail: "",
+          guestSessionId: "",
+          guestOrderTrackingToken: "",
+          guestOrderTrackingTokenExpires: "",
+        },
+      } // Cập nhật
+    );
+    if (updatedOrders.modifiedCount > 0) {
+      console.log(
+        `[Auth][VerifyOTP] Đã liên kết ${updatedOrders.modifiedCount} đơn hàng guest với user ${user.email}`
+      );
+    }
+  } catch (linkOrderError) {
+    console.error(
+      `[Auth][VerifyOTP] Lỗi khi liên kết đơn hàng guest cho user ${user.email}:`,
+      linkOrderError
+    );
+  }
+
   // --- Tự động đăng nhập user và gộp giỏ hàng ---
   const accessToken = generateAccessToken(user._id);
   const refreshTokenVal = generateRefreshToken(user._id); // Đổi tên để không trùng
@@ -245,6 +272,33 @@ const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
   if (user && (await user.matchPassword(password))) {
     const accessToken = generateAccessToken(user._id);
 
+    // Liên kết các đơn hàng guest cũ (nếu có)
+    try {
+      const updatedOrders = await Order.updateMany(
+        { guestOrderEmail: user.email, user: null },
+        {
+          $set: { user: user._id },
+          $unset: {
+            guestOrderEmail: "",
+            guestSessionId: "",
+            guestOrderTrackingToken: "",
+            guestOrderTrackingTokenExpires: "",
+          },
+        }
+      );
+      if (updatedOrders.modifiedCount > 0) {
+        console.log(
+          `[Auth][Login] Đã liên kết ${updatedOrders.modifiedCount} đơn hàng guest với user ${user.email}`
+        );
+      }
+    } catch (linkOrderError) {
+      console.error(
+        `[Auth][Login] Lỗi khi liên kết đơn hàng guest cho user ${user.email}:`,
+        linkOrderError
+      );
+      // Chỉ log lỗi, không làm gián đoạn quá trình đăng nhập
+    }
+
     // --- GỌI HÀM GỘP GIỎ HÀNG SAU KHI TẠO USER ---
     if (guestCartId) {
       await mergeGuestCartToUserCart(guestCartId, user._id, res);
@@ -293,6 +347,33 @@ const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
 
     // Gửi refresh token qua httpOnly cookie
     setRefreshTokenCookie(res, refreshToken);
+
+    // Liên kết các đơn hàng guest cũ (nếu có)
+    try {
+      const updatedOrders = await Order.updateMany(
+        { guestOrderEmail: user.email, user: null },
+        {
+          $set: { user: user._id },
+          $unset: {
+            guestOrderEmail: "",
+            guestSessionId: "",
+            guestOrderTrackingToken: "",
+            guestOrderTrackingTokenExpires: "",
+          },
+        }
+      );
+      if (updatedOrders.modifiedCount > 0) {
+        console.log(
+          `[Auth][Login] Đã liên kết ${updatedOrders.modifiedCount} đơn hàng guest với user ${user.email}`
+        );
+      }
+    } catch (linkOrderError) {
+      console.error(
+        `[Auth][Login] Lỗi khi liên kết đơn hàng guest cho user ${user.email}:`,
+        linkOrderError
+      );
+      // Chỉ log lỗi, không làm gián đoạn quá trình đăng nhập
+    }
 
     // --- GỌI HÀM GỘP GIỎ HÀNG, WISHLIST SAU KHI TẠO USER ---
     if (guestCartId) {

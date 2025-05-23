@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createOrder,
   getMyOrders,
+  getGuestOrderByTrackingToken,
   getOrderById,
   getAllOrders,
   updateOrderStatus,
@@ -17,7 +18,7 @@ const {
 const {
   protect,
   isAdmin,
-  isVerifiedUser,
+  protectOptional,
 } = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validationMiddleware");
 const { createOrderSchema } = require("../validations/validationSchemas");
@@ -28,8 +29,7 @@ const router = express.Router();
 // Đặt hàng mới (yêu cầu đăng nhập)
 router.post(
   "/",
-  protect,
-  isVerifiedUser,
+  protectOptional,
   validateRequest(createOrderSchema),
   createOrder
 );
@@ -39,6 +39,9 @@ router.get("/my", protect, getMyOrders); // Hỗ trợ query params: page, limit
 
 // User xác nhận đã nhận hàng (yêu cầu đăng nhập)
 router.put("/:id/deliver", protect, markOrderAsDelivered);
+
+// Guest Order Tracking
+router.get("/guest-track/:orderId/:token", getGuestOrderByTrackingToken);
 
 // Lấy chi tiết đơn hàng (yêu cầu đăng nhập, controller sẽ kiểm tra ownership hoặc admin)
 router.get("/:id", protect, getOrderById);

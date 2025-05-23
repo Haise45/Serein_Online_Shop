@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 
 // Sub-schema cho địa chỉ giao hàng (snapshot)
 const shippingAddressSchema = new mongoose.Schema(
@@ -69,9 +70,33 @@ const orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "User",
       index: true,
+    },
+    guestOrderEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      index: true,
+      validate: {
+        // Validation cơ bản cho email
+        validator: function (v) {
+          return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+        },
+        message: (props) =>
+          `${props.value} không phải là một địa chỉ email hợp lệ!`,
+      },
+    },
+    guestSessionId: {
+      type: String,
+      index: true,
+    },
+    guestOrderTrackingToken: {
+      type: String,
+      index: true, // Để tìm kiếm nhanh
+    },
+    guestOrderTrackingTokenExpires: {
+      type: Date,
     },
     orderItems: [orderItemSchema],
     shippingAddress: {
@@ -191,6 +216,33 @@ const orderSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Method để tạo token Guest tracking
+orderSchema.methods.createGuestOrderTrackingToken = function () {
+  const token = crypto.randomBytes(20).toString("hex"); // Tạo token ngẫu nhiên
+
+  this.guestOrderTrackingToken = token;
+
+  // Đặt thời gian hết hạn cho token
+  this.guestOrderTrackingTokenExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 ngày
+
+  return token; // Trả về token gốc để gửi trong email
+};
+
+// --- LOGIC VALIDATE TRƯỚC KHI LƯU ---
+orderSchema.pre("save", async function (next) {
+  // Nếu là đơn hàng của user đã đăng nhập, đảm bảo không có guestOrderEmail
+  if (this.user && this.guestOrderEmail) {
+    this.guestOrderEmail = undefined;
+    this.guestSessionId = undefined;
+  }
+  // Nếu là đơn hàng của guest, đảm bảo có guestOrderEmail
+  else if (!this.user && !this.guestOrderEmail) {
+    return next(new Error("Đơn hàng của khách phải có Guest Email."));
+  }
+
+  next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 
