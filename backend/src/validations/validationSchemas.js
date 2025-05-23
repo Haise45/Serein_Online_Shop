@@ -462,6 +462,9 @@ const updateCouponSchema = Joi.object({
 
 // Schema cho Tạo Đơn Hàng Mới
 const createOrderSchema = Joi.object({
+  email: Joi.string().email().lowercase().trim().optional().messages({
+    "string.email": "Email không hợp lệ.",
+  }),
   // Chỉ được phép chọn MỘT trong hai: địa chỉ đã lưu hoặc địa chỉ mới
   shippingAddressId: Joi.string()
     .hex()
@@ -473,10 +476,13 @@ const createOrderSchema = Joi.object({
       "string.hex": "ID Địa chỉ đã lưu không hợp lệ.",
     }),
   shippingAddress: addressSchemaValidation.optional().allow(null),
-  paymentMethod: Joi.string().required().messages({
-    "any.required": "Phương thức thanh toán là bắt buộc.",
-    "string.empty": "Phương thức thanh toán không được để trống.",
-  }),
+  paymentMethod: Joi.string()
+    .valid("COD", "BANK_TRANSFER", "PAYPAL")
+    .required()
+    .messages({
+      "any.only": "Phương thức thanh toán không hợp lệ.",
+      "any.required": "Vui lòng chọn phương thức thanh toán.",
+    }),
   shippingMethod: Joi.string().optional().allow("").default("Standard"),
   notes: Joi.string().trim().optional().allow(""),
 })

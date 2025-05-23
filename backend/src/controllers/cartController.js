@@ -161,16 +161,6 @@ const populateAndCalculateCart = async (cart) => {
     }
   }
 
-  // Cập nhật lại items trong cart nếu có item bị loại bỏ (do sản phẩm/variant không hợp lệ)
-  if (populatedItems.length !== cart.items.length) {
-    console.log(
-      "[Cart] Có sự thay đổi item sau khi populate, cập nhật lại cart..."
-    );
-    cart.items = cart.items.filter((originalItem) =>
-      populatedItems.some((popItem) => popItem._id.equals(originalItem._id))
-    );
-  }
-
   // --- Tính toán giảm giá nếu có coupon ---
   let discountAmount = 0;
   let appliedCouponInfo = null;

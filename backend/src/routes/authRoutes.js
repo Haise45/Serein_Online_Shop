@@ -29,7 +29,11 @@ router.post(
   validateRequest(emailSchema),
   resendVerificationEmail
 );
-router.post("/login", validateRequest(loginSchema), loginUserAccessTokenOnly);
+router.post(
+  "/login",
+  validateRequest(loginSchema),
+  loginUserAccessTokenOnly
+);
 router.post(
   "/login-refresh",
   validateRequest(loginSchema),

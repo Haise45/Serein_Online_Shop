@@ -1,15 +1,22 @@
 require("dotenv").config();
 
-const orderShippedTemplate = (userName, order) => {
+const orderShippedTemplate = (userName, order, guestTrackingUrl = null) => {
   const shopName = process.env.SHOP_NAME || "Cửa Hàng Của Bạn";
   const logoUrl = process.env.SHOP_LOGO_URL || null;
-  const frontendOrderUrl = `${
-    process.env.FRONTEND_URL || "http://localhost:3000"
-  }/my-orders/${order._id}`;
+  let orderDetailUrl = `${process.env.FRONTEND_URL}/my-account/orders/${order._id}`;
+  let buttonText = "Xem lại đơn hàng";
   // Giả sử bạn có thể thêm mã vận đơn vào đơn hàng sau này
   // const trackingNumber = order.trackingNumber || null;
   // const shippingCarrier = order.shippingCarrier || null;
   // const trackingLink = order.trackingLink || null; // Link tra cứu vận đơn
+
+  if (guestTrackingUrl) {
+    orderDetailUrl = guestTrackingUrl;
+    buttonText = "Theo dõi đơn hàng của bạn";
+  } else if (!order.user && !guestTrackingUrl) {
+    orderDetailUrl = `${process.env.FRONTEND_URL}`;
+    buttonText = "Về trang chủ";
+  }
 
   return `
 <!DOCTYPE html>
@@ -57,9 +64,11 @@ const orderShippedTemplate = (userName, order) => {
                               )}</strong> của bạn tại ${shopName} đã được bàn giao cho đơn vị vận chuyển.</p>
                             <p style="margin-bottom:25px; font-size: 15px;">Dự kiến thời gian giao hàng là trong vài ngày tới. Xin vui lòng chờ đợi.</p>
 
-                            <p style="text-align:center; margin-top: 30px;">
-                                <a href="${frontendOrderUrl}" class="button" target="_blank" style="color:#ffffff !important;">Xem lại đơn hàng</a>
-                            </p>
+                            ${ (guestTrackingUrl || order.user) ?
+                            `<p style="text-align:center; margin-top: 30px;">
+                                <a href="${orderDetailUrl}" class="button" target="_blank" style="color:#ffffff !important;">${buttonText}</a>
+                            </p>` : ''
+                            }
                             <p style="margin-top: 25px; font-size: 15px;">Cảm ơn bạn đã mua sắm!</p>
                         </td>
                     </tr>

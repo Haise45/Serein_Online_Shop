@@ -1,10 +1,11 @@
 require("dotenv").config();
 
 // Hàm này nhận tên người dùng và chi tiết đơn hàng
-const orderConfirmationTemplate = (userName, order) => {
+const orderConfirmationTemplate = (userName, order, guestTrackingUrl = null) => {
   const shopName = process.env.SHOP_NAME || "Cửa Hàng Của Bạn";
   const logoUrl = process.env.SHOP_LOGO_URL || null;
-  const frontendOrderUrl = `${process.env.FRONTEND_URL}/my-orders/${order._id}`;
+  // URL mặc định nếu là user đăng nhập
+  let orderDetailUrl = `${process.env.FRONTEND_URL}/my-account/orders/${order._id}`;
 
   // Định dạng tiền tệ Việt Nam
   const formatCurrency = (amount) => {
@@ -56,6 +57,33 @@ const orderConfirmationTemplate = (userName, order) => {
     return itemsHtml;
   };
 
+  // --- CẬP NHẬT PHẦN TRACKING ---
+  let trackingSection = "";
+  if (guestTrackingUrl) {
+    trackingSection = `
+      <p style="font-size: 16px; line-height: 1.5; color: #333333; margin-bottom: 15px;">
+        Bạn có thể theo dõi tình trạng đơn hàng của mình bằng cách nhấp vào liên kết sau:
+      </p>
+      <p style="text-align: center; margin-bottom: 25px;">
+        <a href="${guestTrackingUrl}" target="_blank" style="background-color: #007bff; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+          Theo dõi đơn hàng của bạn
+        </a>
+      </p>
+    `;
+  } else if (order.user) {
+    // Nếu là user đã đăng nhập, hướng dẫn họ vào tài khoản
+    trackingSection = `
+      <p style="font-size: 16px; line-height: 1.5; color: #333333; margin-bottom: 15px;">
+        Bạn có thể xem chi tiết và theo dõi đơn hàng này trong mục "Đơn hàng của tôi" khi đăng nhập vào tài khoản.
+      </p>
+      <p style="text-align: center; margin-bottom: 25px;">
+        <a href="${orderDetailUrl}" target="_blank" style="background-color: #007bff; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+          Xem đơn hàng của tôi
+        </a>
+      </p>
+    `;
+  }
+
   return `
 <!DOCTYPE html>
 <html lang="vi">
@@ -103,14 +131,24 @@ const orderConfirmationTemplate = (userName, order) => {
                   </tr>
                   <!-- Body -->
                   <tr>
-                      <td style="padding-left: 20px; padding-right: 20px;">
-                          <p style="margin-bottom:15px;">Xin chào ${
-                            userName || "quý khách"
-                          },</p>
-                          <p style="margin-bottom:15px;">Cảm ơn bạn đã đặt hàng tại ${shopName}! Đơn hàng của bạn đã được ghi nhận và đang chờ xử lý.</p>
-                          <p style="margin-bottom:25px;">Dưới đây là chi tiết đơn hàng của bạn:</p>
-
-                          <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px;">Chi tiết sản phẩm</h3>
+                        <td style="padding-left: 20px; padding-right: 20px;">
+                            <p style="margin-bottom:15px;">Xin chào ${
+                              userName || "quý khách"
+                            },</p>
+                            <p style="margin-bottom:15px;">Cảm ơn bạn đã đặt hàng tại ${shopName}! Đơn hàng của bạn đã được ghi nhận và đang chờ xử lý.</p>
+                            
+                            <!-- NẾU LÀ GUEST VÀ KHÔNG CÓ URL TRACKING (DỰ PHÒNG) THÌ THÔNG BÁO MÃ ĐƠN HÀNG -->
+                            ${
+                              !order.user && !guestTrackingUrl
+                                ? `<p style="margin-bottom:25px;">Mã đơn hàng của bạn là: <strong>#${order._id
+                                    .toString()
+                                    .slice(
+                                      -6
+                                    )}</strong>. Vui lòng lưu lại mã này để tra cứu khi cần thiết.</p>`
+                                : '<p style="margin-bottom:25px;">Dưới đây là chi tiết đơn hàng của bạn:</p>'
+                            }
+                            
+                            <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px;">Chi tiết sản phẩm</h3>
                           <table style="width: 100%; margin-bottom: 20px;">
                               <thead>
                                   <tr>
@@ -190,10 +228,8 @@ const orderConfirmationTemplate = (userName, order) => {
                                    : "Phương thức thanh toán không xác định"
                                }
                            </p>
-
-                          <p style="text-align:center; margin-top: 30px;">
-                              <a href="${frontendOrderUrl}" class="button" target="_blank">Xem chi tiết đơn hàng</a>
-                          </p>
+                            ${trackingSection} <!-- HIỂN THỊ trackingSection ĐÃ TẠO Ở TRÊN -->
+                            
                           <p style="margin-top: 25px;">Chúng tôi sẽ thông báo cho bạn khi đơn hàng được vận chuyển.</p>
                       </td>
                   </tr>
