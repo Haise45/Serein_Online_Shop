@@ -14,6 +14,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return process.env.NODE_ENV === "development"
+      ? [
+          {
+            source: "/api/:path*",
+            destination: "http://localhost:8080/api/v1/:path*",
+          },
+        ]
+      : [
+          {
+            source: "/api/:path*",
+            destination: "https://online-store-pb1l.onrender.com/api/v1/:path*",
+          },
+        ];
+  },
 };
 
 export default nextConfig;

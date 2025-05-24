@@ -1,11 +1,7 @@
-import { logout, setAccessToken, store } from "@/store"; 
+import { logout, setAccessToken, store } from "@/store";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
-
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,7 +14,7 @@ axiosInstance.interceptors.request.use(
     const token = store.getState().auth.accessToken;
     // Chỉ thêm Authorization header nếu token tồn tại VÀ request không phải là đến endpoint refresh
     // Các endpoint như login, register thường không cần token này
-    if (token && config.headers && !config.url?.endsWith('/auth/refresh')) {
+    if (token && config.headers && !config.url?.endsWith("api/auth/refresh")) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -61,11 +57,14 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       originalRequest &&
-      !originalRequest.url?.endsWith("/auth/refresh") &&
+      !originalRequest.url?.endsWith("api/auth/refresh") &&
       !originalRequest._retry &&
       originalRequest.headers?.Authorization
     ) {
-      console.log("[Axios Interceptor] Detected 401 on a protected route. Attempting token refresh for:", originalRequest.url);
+      console.log(
+        "[Axios Interceptor] Detected 401 on a protected route. Attempting token refresh for:",
+        originalRequest.url,
+      );
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -88,11 +87,12 @@ axiosInstance.interceptors.response.use(
         // Tạo một instance axios mới cho việc refresh token để tránh interceptor của chính nó
         // gây ra vòng lặp nếu endpoint /auth/refresh cũng yêu cầu Authorization header (dù không nên)
         const refreshAxiosInstance = axios.create({
-          baseURL: API_BASE_URL,
           withCredentials: true,
         });
-        const { data } = await refreshAxiosInstance.post<{ accessToken: string }>(
-          `/auth/refresh`,
+        const { data } = await refreshAxiosInstance.post<{
+          accessToken: string;
+        }>(
+          `api/auth/refresh`,
           {}, // Không cần body cho refresh token nếu backend đọc từ cookie
         );
         const newAccessToken = data.accessToken;
@@ -110,8 +110,8 @@ axiosInstance.interceptors.response.use(
           axiosRefreshError.response?.data || axiosRefreshError.message,
         );
         // Chỉ logout nếu lỗi thực sự từ endpoint refresh
-        if (axiosRefreshError.config?.url?.endsWith('/auth/refresh')) {
-            store.dispatch(logout());
+        if (axiosRefreshError.config?.url?.endsWith("api/auth/refresh")) {
+          store.dispatch(logout());
         }
         processQueue(axiosRefreshError, null);
         // Không nên tự động chuyển hướng ở đây, để component cha xử lý
@@ -123,8 +123,14 @@ axiosInstance.interceptors.response.use(
 
     // Nếu là lỗi 401 từ /auth/login hoặc /auth/register, hoặc các lỗi khác, thì không refresh.
     // Chỉ trả về lỗi gốc.
-    if (error.response?.status === 401 && (originalRequest.url?.endsWith("/auth/login") || originalRequest.url?.endsWith("/auth/register"))) {
-        console.log(`[Axios Interceptor] 401 error from ${originalRequest.url}, not attempting refresh.`);
+    if (
+      error.response?.status === 401 &&
+      (originalRequest.url?.endsWith("api/auth/login") ||
+        originalRequest.url?.endsWith("api/auth/register"))
+    ) {
+      console.log(
+        `[Axios Interceptor] 401 error from ${originalRequest.url}, not attempting refresh.`,
+      );
     }
 
     return Promise.reject(error);
