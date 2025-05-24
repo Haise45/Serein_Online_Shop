@@ -15,7 +15,7 @@ export const getAllCategories = async (
   params?: GetCategoriesParams,
 ): Promise<Category[]> => {
   try {
-    const response = await axiosInstance.get<Category[]>("/categories", {
+    const response = await axiosInstance.get<Category[]>("api/categories", {
       params,
     });
     return response.data;
@@ -33,7 +33,7 @@ export const getCategoryBySlug = async (
   slug: string,
 ): Promise<Category | null> => {
   try {
-    const { data } = await axiosInstance.get<Category>(`/categories/${slug}`);
+    const { data } = await axiosInstance.get<Category>(`api/categories/${slug}`);
     return data;
   } catch (error: unknown) {
     const err = error as AxiosError<{ message?: string }>;

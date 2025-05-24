@@ -17,7 +17,7 @@ export const getApplicableCoupons = async (
 ): Promise<Coupon[]> => {
   // Gọi API GET /api/v1/coupons với params
   // API getCoupons của bạn trả về object có key là 'coupons'
-  const { data } = await axiosInstance.get<PaginatedCoupons>("/coupons", {
+  const { data } = await axiosInstance.get<PaginatedCoupons>("api/coupons", {
     params,
   });
   return data.coupons;

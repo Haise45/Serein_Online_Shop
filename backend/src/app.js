@@ -31,10 +31,21 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const app = express();
 
 // Middlewares
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:3000", // Nếu bạn dev local frontend
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      callback(null, origin); // Cho phép tất cả origin được gửi credentials
+      // origin có thể là undefined (Postman hoặc server to server request)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+      return callback(null, true);
     },
     credentials: true,
   })

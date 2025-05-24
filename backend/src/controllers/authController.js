@@ -22,14 +22,18 @@ const Order = require("../models/Order");
 
 // --- Tiện ích thiết lập Cookie ---
 const setRefreshTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === "production";
+
   const cookieOptions = {
-    httpOnly: true, // Ngăn JavaScript phía client truy cập cookie
-    secure: process.env.NODE_ENV === "production", // Chỉ gửi qua HTTPS ở môi trường production
-    sameSite: "None",
+    httpOnly: true, // Không cho JS frontend truy cập
+    secure: isProduction, // Chỉ dùng HTTPS ở production
+    sameSite: isProduction ? "Strict" : "Lax", // Strict nsếu bạn chỉ dùng trong cùng domain
+    path: "/", // Cho phép truy cập toàn trang
     maxAge:
       parseInt(process.env.JWT_REFRESH_EXPIRES_IN_SECONDS || "604800", 10) *
-      1000, // 7 days * 24 * 60 * 60 * 1000
+      1000, // 7 ngày mặc định
   };
+
   res.cookie("refreshToken", token, cookieOptions);
 };
 
