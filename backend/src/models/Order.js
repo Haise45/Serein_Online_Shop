@@ -79,12 +79,17 @@ const orderSchema = new mongoose.Schema(
       lowercase: true,
       index: true,
       validate: {
-        // Validation cơ bản cho email
         validator: function (v) {
-          return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+          // Chỉ validate nếu đây là đơn hàng của guest (this.user không có giá trị)
+          if (!this.user) {
+            // Nếu là guest, email là bắt buộc và phải hợp lệ
+            if (!v) return false; // Phải có giá trị
+            return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+          }
+          return true;
         },
         message: (props) =>
-          `${props.value} không phải là một địa chỉ email hợp lệ!`,
+          `Giá trị '${props.value}' cho guestOrderEmail không hợp lệ. Email là bắt buộc và phải đúng định dạng cho đơn hàng của khách.`,
       },
     },
     guestSessionId: {
@@ -231,16 +236,15 @@ orderSchema.methods.createGuestOrderTrackingToken = function () {
 
 // --- LOGIC VALIDATE TRƯỚC KHI LƯU ---
 orderSchema.pre("save", async function (next) {
-  // Nếu là đơn hàng của user đã đăng nhập, đảm bảo không có guestOrderEmail
-  if (this.user && this.guestOrderEmail) {
-    this.guestOrderEmail = undefined;
+  if (this.user) {
+    // Nếu là đơn hàng của user
+    this.guestOrderEmail = undefined; // Đảm bảo các trường guest bị xóa
     this.guestSessionId = undefined;
-  }
-  // Nếu là đơn hàng của guest, đảm bảo có guestOrderEmail
-  else if (!this.user && !this.guestOrderEmail) {
+    // Không cần kiểm tra guestOrderEmail nữa nếu đã unset ở đây
+  } else if (!this.user && !this.guestOrderEmail) {
+    // Nếu là guest và không có email
     return next(new Error("Đơn hàng của khách phải có Guest Email."));
   }
-
   next();
 });
 
