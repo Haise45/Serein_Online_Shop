@@ -61,11 +61,11 @@ const orderConfirmationTemplate = (userName, order, guestTrackingUrl = null) => 
   let trackingSection = "";
   if (guestTrackingUrl) {
     trackingSection = `
-      <p style="font-size: 16px; line-height: 1.5; color: #333333; margin-bottom: 15px;">
+      <p style="font-size: 13px; line-height: 1.5; color: #333333; margin-bottom: 15px;">
         Bạn có thể theo dõi tình trạng đơn hàng của mình bằng cách nhấp vào liên kết sau:
       </p>
       <p style="text-align: center; margin-bottom: 25px;">
-        <a href="${guestTrackingUrl}" target="_blank" style="background-color: #007bff; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+        <a href="${guestTrackingUrl}" target="_blank" style="background-color: #007bff; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 13px; display: inline-block;">
           Theo dõi đơn hàng của bạn
         </a>
       </p>
@@ -73,11 +73,11 @@ const orderConfirmationTemplate = (userName, order, guestTrackingUrl = null) => 
   } else if (order.user) {
     // Nếu là user đã đăng nhập, hướng dẫn họ vào tài khoản
     trackingSection = `
-      <p style="font-size: 16px; line-height: 1.5; color: #333333; margin-bottom: 15px;">
+      <p style="font-size: 13px; line-height: 1.5; color: #333333; margin-bottom: 15px;">
         Bạn có thể xem chi tiết và theo dõi đơn hàng này trong mục "Đơn hàng của tôi" khi đăng nhập vào tài khoản.
       </p>
       <p style="text-align: center; margin-bottom: 25px;">
-        <a href="${orderDetailUrl}" target="_blank" style="background-color: #007bff; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+        <a href="${orderDetailUrl}" target="_blank" style="background-color: #007bff; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 13px; display: inline-block;">
           Xem đơn hàng của tôi
         </a>
       </p>
