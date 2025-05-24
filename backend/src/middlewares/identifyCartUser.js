@@ -21,13 +21,17 @@ const identifyCartUser = asyncHandler(async (req, res, next) => {
     console.log("[Cart Identifier] New guest, generating ID:", guestId);
 
     // Thiết lập cookie cho client
+    const isProduction = process.env.NODE_ENV === "production";
+    const isSecure = req.secure || isProduction;
+
     const cookieOptions = {
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Lưu 30 ngày
-      httpOnly: false, // Cho phép JS phía client đọc
-      secure: req.secure || process.env.NODE_ENV === "production",
-      sameSite: req.secure ? "None" : "Lax",
-      path: "/",
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 ngày
+      httpOnly: false, // Cho phép JS đọc, nhưng đảm bảo không chứa thông tin nhạy cảm
+      secure: isSecure, // Chỉ gửi qua HTTPS ở production
+      sameSite: isSecure ? "None" : "Lax", // "None" yêu cầu Secure (hợp lệ cho cross-site)
+      path: "/", // Có hiệu lực toàn site
     };
+    
     res.cookie("cartGuestId", guestId, cookieOptions);
     console.log("[Cart Identifier] Set new guest cookie.");
 
