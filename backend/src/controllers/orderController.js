@@ -111,7 +111,27 @@ const createOrder = asyncHandler(async (req, res) => {
     notes,
     // Các trường CHỈ DÀNH CHO GUEST (nếu không có loggedInUser)
     email: guestEmailFromBody,
+    selectedCartItemIds,
   } = req.body;
+
+  // --- Validate selectedCartItemIds ---
+  if (
+    !selectedCartItemIds ||
+    !Array.isArray(selectedCartItemIds) ||
+    selectedCartItemIds.length === 0
+  ) {
+    res.status(400);
+    throw new Error("Vui lòng chọn ít nhất một sản phẩm để đặt hàng.");
+  }
+  for (const itemId of selectedCartItemIds) {
+    if (!mongoose.Types.ObjectId.isValid(itemId)) {
+      res.status(400);
+      throw new Error(`ID sản phẩm trong giỏ hàng không hợp lệ: ${itemId}`);
+    }
+  }
+  const objectIdSelectedCartItemIds = selectedCartItemIds.map(
+    (id) => new mongoose.Types.ObjectId(id)
+  );
 
   // --- Lấy Guest Identifier (từ cart cookie) ---
   const cartGuestId = req.cookies.cartGuestId;
@@ -212,90 +232,125 @@ const createOrder = asyncHandler(async (req, res) => {
       throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
     }
 
-    // --- 2. Tìm giỏ hàng và populate thông tin cần thiết ---
+    // --- 2. Tìm giỏ hàng gốc của user/guest ---
     let cartIdentifier;
-    if (loggedInUser) {
-      cartIdentifier = { userId: loggedInUser._id };
-    } else if (cartGuestId) {
-      cartIdentifier = { guestId: cartGuestId };
-    } else {
+    if (loggedInUser) cartIdentifier = { userId: loggedInUser._id };
+    else if (cartGuestId) cartIdentifier = { guestId: cartGuestId };
+    else {
       res.status(400);
-      throw new Error("Không tìm thấy giỏ hàng.");
+      throw new Error("Không tìm thấy thông tin giỏ hàng (thiếu identifier).");
     }
 
-    const cart = await Cart.findOne(cartIdentifier).session(session);
-    if (!cart || cart.items.length === 0) {
+    const originalCart = await Cart.findOne(cartIdentifier).session(session);
+    if (!originalCart || originalCart.items.length === 0) {
       res.status(404);
-      throw new Error("Giỏ hàng của bạn đang trống.");
+      throw new Error("Giỏ hàng của bạn đang trống hoặc không tồn tại.");
     }
 
-    // Populate đầy đủ để lấy thông tin mới nhất và re-validate
-    const populatedCart = await populateAndCalculateCart(cart);
-    if (!populatedCart || populatedCart.items.length === 0) {
-      res.status(404);
-      throw new Error("Giỏ hàng không có sản phẩm hợp lệ.");
-    }
-
-    // --- 3. Re-validate Tồn kho lần cuối ---
-    const productIds = populatedCart.items.map((item) => item.productId);
-    // Fetch lại thông tin stock mới nhất
-    const productsInCart = await Product.find({ _id: { $in: productIds } })
-      .select("variants stockQuantity")
-      .session(session);
-    const productMap = new Map(
-      productsInCart.map((product) => [product._id.toString(), product])
+    // --- 3. Lọc ra các items được chọn từ giỏ hàng gốc ---
+    const itemsToProcessInOrder = originalCart.items.filter((item) =>
+      objectIdSelectedCartItemIds.some((selectedId) =>
+        selectedId.equals(item._id)
+      )
     );
 
-    for (const item of populatedCart.items) {
-      const productData = productMap.get(item.productId.toString());
+    if (itemsToProcessInOrder.length !== objectIdSelectedCartItemIds.length) {
+      res.status(400);
+      throw new Error(
+        "Một số sản phẩm bạn chọn không còn tồn tại trong giỏ hàng. Vui lòng làm mới trang."
+      );
+    }
+    if (itemsToProcessInOrder.length === 0) {
+      // Double check
+      res.status(400);
+      throw new Error("Không có sản phẩm nào được chọn hợp lệ để đặt hàng.");
+    }
+
+    // --- 4. Tạo một "cart object tạm thời" chỉ chứa các items được chọn để tính toán ---
+    // Điều này quan trọng để populateAndCalculateCart chỉ làm việc trên các item được chọn
+    const cartForCalculation = {
+      _id: originalCart._id, // Vẫn là ID của cart gốc
+      items: itemsToProcessInOrder,
+      appliedCoupon: originalCart.appliedCoupon, // Coupon sẽ được re-validate với items đã chọn
+      userId: originalCart.userId,
+      guestId: originalCart.guestId,
+    };
+
+    // --- 5. Populate và Tính toán cho các items đã chọn ---
+    const cartInstanceForCalculation = await Cart.findById(
+      originalCart._id
+    ).session(session); // Lấy lại instance
+    if (!cartInstanceForCalculation) {
+      throw new Error("Không thể tải lại giỏ hàng để tính toán.");
+    }
+    cartInstanceForCalculation.items = itemsToProcessInOrder; // Gán các item đã chọn
+    cartInstanceForCalculation.appliedCoupon = originalCart.appliedCoupon; // Giữ lại coupon nếu có
+
+    // Bây giờ populateAndCalculateCart sẽ nhận một Mongoose Document đã được sửa đổi items
+    const calculatedDataForOrder = await populateAndCalculateCart(
+      cartInstanceForCalculation
+    );
+
+    if (
+      !calculatedDataForOrder ||
+      !calculatedDataForOrder.items ||
+      calculatedDataForOrder.items.length === 0
+    ) {
+      res.status(400);
+      throw new Error("Không thể xử lý các sản phẩm đã chọn trong giỏ hàng.");
+    }
+
+    // --- 6. Re-validate Tồn kho lần cuối ---
+    const productIdsForStockCheck = calculatedDataForOrder.items.map(
+      (item) => item.productId
+    );
+    const productsDataForStock = await Product.find({
+      _id: { $in: productIdsForStockCheck },
+    })
+      .select("name sku variants stockQuantity")
+      .session(session);
+    const productMapStock = new Map(
+      productsDataForStock.map((p) => [p._id.toString(), p])
+    );
+
+    for (const item of calculatedDataForOrder.items) {
+      const productStockInfo = productMapStock.get(item.productId.toString());
       let availableStock = 0;
-      if (productData) {
+      if (productStockInfo) {
         if (item.variantId) {
-          const variant = productData.variants.id(item.variantId);
+          const variant = productStockInfo.variants.id(item.variantId);
           availableStock = variant ? variant.stockQuantity : 0;
         } else {
-          availableStock = productData.stockQuantity;
+          availableStock = productStockInfo.stockQuantity;
         }
       }
       if (item.quantity > availableStock) {
-        res.status(400);
         throw new Error(
-          `Sản phẩm "${item.name}" (SKU: ${item.sku}) không đủ số lượng tồn kho (Còn ${availableStock}, cần ${item.quantity}).`
+          `Sản phẩm "${item.name}" (SKU: ${
+            item.sku || "N/A"
+          }) không đủ tồn kho (Còn ${availableStock}, cần ${item.quantity}).`
         );
       }
     }
-    console.log("[Transaction] Kiểm tra tồn kho thành công.");
+    console.log(
+      "[Transaction] Kiểm tra tồn kho cho các sản phẩm đã chọn thành công."
+    );
 
     // --- 4. Tạo mảng orderItems (snapshot) ---
-    const populatedCartResult = await populateAndCalculateCart(cart);
-
-    if (!populatedCartResult || !Array.isArray(populatedCartResult.items)) {
-      console.error(
-        "[Debug] LỖI: populatedCartResult.items không phải là mảng!",
-        populatedCartResult
-      );
-      throw new Error("Dữ liệu giỏ hàng sau khi populate không hợp lệ.");
-    }
-
-    const orderItemsData = populatedCartResult.items.map((item) => ({
+    const orderItemsData = calculatedDataForOrder.items.map((item) => ({
       name: item.name,
       quantity: item.quantity,
-      price: item.price, // Giá tại thời điểm đặt hàng
+      price: item.price,
       image: item.image,
-      product: item.productId, // Chỉ lưu ID sản phẩm gốc
+      product: item.productId,
       variant: item.variantId
         ? {
-            // Chỉ lưu nếu có variant
             variantId: item.variantId,
-            sku: item.sku, // SKU của variant
-            options: item.variantInfo?.options || [], // Các lựa chọn của variant
+            sku: item.sku,
+            options: item.variantInfo?.options || [],
           }
         : null,
     }));
-    console.log(
-      "[Debug] Dữ liệu orderItemsData TRƯỚC KHI tạo Order:",
-      JSON.stringify(orderItemsData, null, 2)
-    );
 
     // --- 5. Tạo đối tượng Order ---
     let initialStatus = "Pending";
@@ -319,12 +374,13 @@ const createOrder = asyncHandler(async (req, res) => {
       shippingAddress: finalShippingAddress,
       paymentMethod: paymentMethod || "COD",
       shippingMethod: shippingMethod || "Standard",
-      itemsPrice: populatedCart.subtotal,
+      itemsPrice: calculatedDataForOrder.subtotal,
       shippingPrice: 0,
       taxPrice: 0, // Tạm thời
-      discountAmount: populatedCart.discountAmount || 0,
-      totalPrice: populatedCart.finalTotal || populatedCart.subtotal,
-      appliedCouponCode: populatedCart.appliedCoupon?.code || null,
+      discountAmount: calculatedDataForOrder.discountAmount || 0,
+      totalPrice:
+        calculatedDataForOrder.finalTotal || calculatedDataForOrder.subtotal,
+      appliedCouponCode: calculatedDataForOrder.appliedCoupon?.code || null,
       status: initialStatus,
       notes: notes || "",
       isPaid: initialIsPaid,
@@ -380,25 +436,32 @@ const createOrder = asyncHandler(async (req, res) => {
     console.log("[Transaction] Đã cập nhật stock và coupon.");
 
     // --- 8. Xóa giỏ hàng ---
-    // Tạo danh sách key của các item đã đặt hàng (để xóa khỏi giỏ)
-    const orderedKeys = new Set(
-      createdOrder.orderItems.map((item) =>
-        item.variant?.variantId
-          ? `${item.product}_${item.variant.variantId}`
-          : `${item.product}`
-      )
+    await Cart.updateOne(
+      { _id: originalCart._id },
+      { $pull: { items: { _id: { $in: objectIdSelectedCartItemIds } } } }, // Sử dụng ID của các cart item đã chọn
+      { session }
+    );
+    console.log(
+      `[Cart] Đã xóa ${objectIdSelectedCartItemIds.length} items đã đặt khỏi giỏ hàng ${originalCart._id}.`
     );
 
-    // Lọc lại các item trong giỏ, giữ lại những item CHƯA được đặt hàng
-    cart.items = cart.items.filter((item) => {
-      const key = item.variantId
-        ? `${item.productId}_${item.variantId}`
-        : `${item.productId}`;
-      return !orderedKeys.has(key);
-    });
-
-    cart.appliedCoupon = null;
-    await cart.save({ session });
+    // Kiểm tra lại giỏ hàng sau khi xóa items
+    const cartAfterUpdate = await Cart.findById(originalCart._id)
+      .session(session)
+      .lean(); // Dùng lean để đọc
+    if (
+      cartAfterUpdate &&
+      cartAfterUpdate.items.length === 0 &&
+      cartAfterUpdate.appliedCoupon
+    ) {
+      // Nếu giỏ hàng rỗng và vẫn còn coupon, xóa coupon
+      await Cart.updateOne(
+        { _id: originalCart._id },
+        { $set: { appliedCoupon: null } },
+        { session }
+      );
+      console.log(`[Cart] Giỏ hàng rỗng sau khi đặt hàng, đã xóa coupon.`);
+    }
 
     // --- 9. Commit Transaction ---
     await session.commitTransaction();
@@ -423,7 +486,7 @@ const createOrder = asyncHandler(async (req, res) => {
   if (createdOrder) {
     try {
       const orderForEmail = await Order.findById(createdOrder._id)
-        .populate("user", "name email")
+        .populate("user", "name email phone")
         .lean();
       if (orderForEmail) {
         const nameForEmail = orderForEmail.user
@@ -487,7 +550,7 @@ const createOrder = asyncHandler(async (req, res) => {
     // --- Trả về đơn hàng đã tạo ---
     // Populate lại user lần nữa cho response cuối cùng nếu cần
     const finalResponseOrder = await Order.findById(createdOrder._id)
-      .populate("user", "name email")
+      .populate("user", "name email phone")
       .lean();
     res.status(201).json(finalResponseOrder || createdOrder.toObject());
   } else {
@@ -558,7 +621,7 @@ const getGuestOrderByTrackingToken = asyncHandler(async (req, res) => {
     guestOrderTrackingToken: token,
     guestOrderTrackingTokenExpires: { $gt: Date.now() }, // Token còn hạn
     user: null, // Đảm bảo đây là đơn hàng guest chưa được liên kết
-  }).populate("user", "name email"); // Populate vẫn có thể dùng, user sẽ là null
+  }).populate("user", "name email phone"); // Populate vẫn có thể dùng, user sẽ là null
 
   if (!order) {
     res.status(404);
@@ -581,7 +644,7 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 
   // Populate thêm thông tin user (tên, email)
-  const order = await Order.findById(orderId).populate("user", "name email");
+  const order = await Order.findById(orderId).populate("user", "name email phone ");
 
   if (!order) {
     res.status(404);
@@ -653,7 +716,7 @@ const requestCancellation = asyncHandler(async (req, res) => {
     requestedAt: new Date(),
   };
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   if (process.env.ADMIN_EMAIL_NOTIFICATIONS && updatedOrder.user) {
     // Kiểm tra có user không
@@ -747,7 +810,7 @@ const requestRefund = asyncHandler(async (req, res) => {
   };
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email cho Admin ---
   if (process.env.ADMIN_EMAIL_NOTIFICATIONS && updatedOrder.user) {
@@ -833,7 +896,7 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
   }
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi Email xác nhận đã giao ---
   if (updatedOrder && updatedOrder.user) {
@@ -941,7 +1004,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const sort = buildOrderSort(req.query);
 
   const ordersQuery = Order.find(filter)
-    .populate("user", "name email")
+    .populate("user", "name email phone")
     .sort(sort)
     .skip(skip)
     .limit(limit)
@@ -1046,7 +1109,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   order.status = status;
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi Email khi chuyển sang 'Shipped' ---
   if (updatedOrder.status === "Shipped" && currentStatus !== "Shipped") {
@@ -1124,7 +1187,7 @@ const approveCancellation = asyncHandler(async (req, res) => {
   order.adminNotes = "Yêu cầu hủy được chấp nhận.";
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email thông báo cho User ---
   try {
@@ -1191,7 +1254,7 @@ const rejectCancellation = asyncHandler(async (req, res) => {
   }`;
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email thông báo cho User ---
   try {
@@ -1252,7 +1315,7 @@ const approveRefund = asyncHandler(async (req, res) => {
   order.adminNotes = "Yêu cầu hoàn tiền được chấp nhận.";
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email thông báo cho User ---
   try {
@@ -1324,7 +1387,7 @@ const rejectRefund = asyncHandler(async (req, res) => {
   }`;
 
   const updatedOrder = await order.save();
-  await updatedOrder.populate("user", "name email");
+  await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email thông báo cho User ---
   try {

@@ -15,9 +15,9 @@ interface PaginatedCoupons {
 export const getApplicableCoupons = async (
   params?: GetCouponsParams,
 ): Promise<Coupon[]> => {
-  // Gọi API GET /api/v1/coupons với params
+  // Gọi API GET /v1/coupons với params
   // API getCoupons của bạn trả về object có key là 'coupons'
-  const { data } = await axiosInstance.get<PaginatedCoupons>("api/coupons", {
+  const { data } = await axiosInstance.get<PaginatedCoupons>("coupons", {
     params,
   });
   return data.coupons;

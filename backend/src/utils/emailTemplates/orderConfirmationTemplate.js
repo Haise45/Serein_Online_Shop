@@ -5,7 +5,7 @@ const orderConfirmationTemplate = (userName, order, guestTrackingUrl = null) => 
   const shopName = process.env.SHOP_NAME || "Cửa Hàng Của Bạn";
   const logoUrl = process.env.SHOP_LOGO_URL || null;
   // URL mặc định nếu là user đăng nhập
-  let orderDetailUrl = `${process.env.FRONTEND_URL}/my-account/orders/${order._id}`;
+  let orderDetailUrl = `${process.env.FRONTEND_URL}/profile/orders/${order._id}`;
 
   // Định dạng tiền tệ Việt Nam
   const formatCurrency = (amount) => {
