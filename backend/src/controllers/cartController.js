@@ -20,6 +20,7 @@ const findOrCreateCart = async (identifier) => {
 
 // Hàm helper populate và tính toán giỏ hàng
 const populateAndCalculateCart = async (cart) => {
+  const isMongooseDocument = cart && typeof cart.populate === "function";
   if (!cart || !cart.items || cart.items.length === 0) {
     // Nếu không có cart hoặc cart rỗng, kiểm tra xem có coupon nào được áp dụng không (trường hợp cart bị xóa item cuối)
     const appliedCouponInfo = cart?.appliedCoupon
@@ -40,14 +41,53 @@ const populateAndCalculateCart = async (cart) => {
     }; // Trả về cấu trúc giỏ hàng rỗng
   }
 
-  // Populate thông tin sản phẩm cha cho tất cả các item
-  await cart.populate({
-    path: "items.productId",
-    select:
-      "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category", // Chọn các trường cần thiết
-    match: { isActive: true, isPublished: true }, // Chỉ populate sản phẩm active/published?
-    populate: { path: "category", select: "name slug _id isActive parent" }, // Populate thêm category
-  });
+  let itemsToProcess = cart.items;
+
+  // Nếu cartInput LÀ Mongoose document, chúng ta có thể dùng populate() của nó
+  if (isMongooseDocument) {
+    await cart.populate({
+      path: "items.productId",
+      select:
+        "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category",
+      match: { isActive: true, isPublished: true },
+      populate: { path: "category", select: "name slug _id isActive parent" },
+    });
+    itemsToProcess = cart.items.filter((item) => item.productId); // Lấy items đã populate và hợp lệ
+  } else {
+    // Nếu cartInput KHÔNG PHẢI là Mongoose document (ví dụ: cartForCalculation từ orderController)
+    // Chúng ta cần populate productId cho từng item một cách thủ công.
+    console.log(
+      "[populateAndCalculateCart] Input is not a Mongoose document. Populating items manually."
+    );
+    const populatedManualItems = [];
+    for (const item of cart.items) {
+      if (item.productId) {
+        // Giả sử item.productId là ID string hoặc ObjectId
+        const productDoc = await Product.findById(item.productId)
+          .select(
+            "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category"
+          )
+          .populate({
+            path: "category",
+            select: "name slug _id isActive parent",
+          })
+          .lean({ virtuals: true }); // Dùng lean ở đây vì chúng ta đang xây dựng object mới
+
+        if (productDoc && productDoc.isActive && productDoc.isPublished) {
+          // Tạo lại cấu trúc item với productDoc đã populate
+          populatedManualItems.push({
+            ...item, // Giữ lại các trường của item gốc (_id, quantity, variantId)
+            productId: productDoc, // Gán product đã populate
+          });
+        } else {
+          console.warn(
+            `[Cart Manual Populate] Product ${item.productId} not found or not active/published.`
+          );
+        }
+      }
+    }
+    itemsToProcess = populatedManualItems;
+  }
 
   // --- Fetch tất cả category active một lần để tra cứu ---
   const activeCategoryMap = await fetchAndMapCategories({ isActive: true });
@@ -678,12 +718,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
       `[Cart Update] Sản phẩm ${itemToUpdate.productId} không còn hợp lệ, đã xóa item ${itemId} khỏi giỏ.`
     );
     // Trả về lỗi hoặc giỏ hàng đã cập nhật với thông báo
-    res
-      .status(404)
-      .json({
-        message: "Sản phẩm không còn tồn tại hoặc không hoạt động.",
-        cart: populatedCart,
-      });
+    res.status(404).json({
+      message: "Sản phẩm không còn tồn tại hoặc không hoạt động.",
+      cart: populatedCart,
+    });
     return;
   }
 
@@ -754,12 +792,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
         console.warn(
           `[Cart Update] Variant hiện tại ${itemToUpdate.variantId} của item ${itemId} không tồn tại, đã xóa item.`
         );
-        res
-          .status(404)
-          .json({
-            message: "Biến thể sản phẩm hiện tại không còn tồn tại.",
-            cart: populatedCart,
-          });
+        res.status(404).json({
+          message: "Biến thể sản phẩm hiện tại không còn tồn tại.",
+          cart: populatedCart,
+        });
         return;
       }
       availableStock = currentVariant.stockQuantity;
@@ -769,12 +805,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
         cart.items.pull({ _id: itemId });
         await cart.save();
         const populatedCart = await populateAndCalculateCart(cart);
-        res
-          .status(400)
-          .json({
-            message: "Lỗi dữ liệu: sản phẩm này yêu cầu biến thể.",
-            cart: populatedCart,
-          });
+        res.status(400).json({
+          message: "Lỗi dữ liệu: sản phẩm này yêu cầu biến thể.",
+          cart: populatedCart,
+        });
         return;
       }
       availableStock = product.stockQuantity;

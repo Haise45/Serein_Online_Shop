@@ -1,11 +1,15 @@
 "use client";
 import { formatCurrency } from "@/lib/utils";
+import { AppDispatch } from "@/store"; // Import AppDispatch
+import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
 import { CartData, CartItem as CartItemType } from "@/types/cart";
 import { Category } from "@/types/category";
 import classNames from "classnames";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux"; // Import useDispatch
 import CouponSection from "./CouponSection";
 
 interface CartSummaryProps {
@@ -24,6 +28,8 @@ export default function CartSummary({
   categoryMap,
   getAncestorsFn,
 }: CartSummaryProps) {
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   // Tính toán lại subtotal và totalQuantity DỰA TRÊN selectedItemsForSummary
   const selectedSubtotal = useMemo(() => {
     return selectedItemsForSummary.reduce(
@@ -32,7 +38,14 @@ export default function CartSummary({
     );
   }, [selectedItemsForSummary]);
 
-  const numberOfSelectedProductTypes = selectedItemsForSummary.length;
+  const numberOfSelectedProductLines = selectedItemsForSummary.length;
+  // Tính tổng số lượng sản phẩm thực tế được chọn
+  const totalSelectedQuantity = useMemo(() => {
+    return selectedItemsForSummary.reduce(
+      (acc, item) => acc + item.quantity,
+      0,
+    );
+  }, [selectedItemsForSummary]);
 
   // Tính toán discountAmount CHỈ cho các selectedItemsForSummary
   // dựa trên coupon đã được áp dụng cho originalCart.
@@ -124,6 +137,22 @@ export default function CartSummary({
 
   const canProceedToCheckout = selectedItemsForSummary.length > 0;
 
+  const handleProceedToCheckout = () => {
+    // Đổi thành hàm xử lý onClick
+    if (!canProceedToCheckout) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm để tiếp tục.");
+      return;
+    }
+
+    const selectedIds = selectedItemsForSummary.map((item) => item._id);
+    if (selectedIds.length > 0) {
+      dispatch(setSelectedItemsForCheckout(selectedIds));
+      router.push("/checkout"); // Điều hướng không cần query params
+    } else {
+      toast.error("Vui lòng chọn sản phẩm để thanh toán."); // Trường hợp này ít xảy ra nếu canProceedToCheckout đã check
+    }
+  };
+
   return (
     <section
       aria-labelledby="summary-heading"
@@ -136,7 +165,8 @@ export default function CartSummary({
       <dl className="mt-6 space-y-4">
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600">
-            Sản phẩm đã chọn ({numberOfSelectedProductTypes})
+            Sản phẩm đã chọn ({numberOfSelectedProductLines} loại -{" "}
+            {totalSelectedQuantity} chiếc)
           </dt>
           <dd className="text-sm font-medium text-gray-900">
             {formatCurrency(selectedSubtotal)}
@@ -175,14 +205,10 @@ export default function CartSummary({
       </dl>
 
       <div className="mt-8">
-        <Link
-          href={canProceedToCheckout ? "/checkout" : "#"} // Điều hướng đến checkout nếu có item được chọn
-          onClick={(e) => {
-            if (!canProceedToCheckout) {
-              e.preventDefault();
-              toast.error("Vui lòng chọn ít nhất một sản phẩm để tiếp tục.");
-            }
-          }}
+        <button
+          type="button"
+          onClick={handleProceedToCheckout} // Gọi hàm mới
+          disabled={!canProceedToCheckout}
           className={classNames(
             "block w-full rounded-md border border-transparent px-6 py-3 text-center text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",
             canProceedToCheckout
@@ -191,8 +217,8 @@ export default function CartSummary({
           )}
           aria-disabled={!canProceedToCheckout}
         >
-          Tiến hành đặt hàng ({numberOfSelectedProductTypes})
-        </Link>
+          Tiến hành đặt hàng ({totalSelectedQuantity})
+        </button>
       </div>
       <div className="mt-4 text-center">
         <Link

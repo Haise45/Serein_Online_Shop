@@ -3,7 +3,7 @@ require("dotenv").config();
 const orderShippedTemplate = (userName, order, guestTrackingUrl = null) => {
   const shopName = process.env.SHOP_NAME || "Cửa Hàng Của Bạn";
   const logoUrl = process.env.SHOP_LOGO_URL || null;
-  let orderDetailUrl = `${process.env.FRONTEND_URL}/my-account/orders/${order._id}`;
+  let orderDetailUrl = `${process.env.FRONTEND_URL}/profile/orders/${order._id}`;
   let buttonText = "Xem lại đơn hàng";
   // Giả sử bạn có thể thêm mã vận đơn vào đơn hàng sau này
   // const trackingNumber = order.trackingNumber || null;

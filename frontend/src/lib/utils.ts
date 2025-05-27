@@ -76,3 +76,16 @@ export const parseCurrency = (formattedValue: string): number | undefined => {
   const numericValue = Number(formattedValue.replace(/\D/g, ""));
   return isNaN(numericValue) ? undefined : numericValue;
 };
+
+export const formatDate = (dateInput?: string | Date | null): string => {
+  if (!dateInput) return "N/A";
+  try {
+    return new Date(dateInput).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return "N/A";
+  }
+};
