@@ -2,6 +2,7 @@ import { logout, setAccessToken, store } from "@/store";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const axiosInstance = axios.create({
+  baseURL: '/api',
   headers: {
     "Content-Type": "application/json",
   },
@@ -57,7 +58,7 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       originalRequest &&
-      !originalRequest.url?.endsWith("api/auth/refresh") &&
+      !originalRequest.url?.endsWith("auth/refresh") &&
       !originalRequest._retry &&
       originalRequest.headers?.Authorization
     ) {
@@ -92,7 +93,7 @@ axiosInstance.interceptors.response.use(
         const { data } = await refreshAxiosInstance.post<{
           accessToken: string;
         }>(
-          `api/auth/refresh`,
+          `auth/refresh`,
           {}, // Không cần body cho refresh token nếu backend đọc từ cookie
         );
         const newAccessToken = data.accessToken;
@@ -110,7 +111,7 @@ axiosInstance.interceptors.response.use(
           axiosRefreshError.response?.data || axiosRefreshError.message,
         );
         // Chỉ logout nếu lỗi thực sự từ endpoint refresh
-        if (axiosRefreshError.config?.url?.endsWith("api/auth/refresh")) {
+        if (axiosRefreshError.config?.url?.endsWith("auth/refresh")) {
           store.dispatch(logout());
         }
         processQueue(axiosRefreshError, null);
@@ -125,8 +126,8 @@ axiosInstance.interceptors.response.use(
     // Chỉ trả về lỗi gốc.
     if (
       error.response?.status === 401 &&
-      (originalRequest.url?.endsWith("api/auth/login") ||
-        originalRequest.url?.endsWith("api/auth/register"))
+      (originalRequest.url?.endsWith("auth/login") ||
+        originalRequest.url?.endsWith("auth/register"))
     ) {
       console.log(
         `[Axios Interceptor] 401 error from ${originalRequest.url}, not attempting refresh.`,

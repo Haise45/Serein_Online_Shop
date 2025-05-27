@@ -65,7 +65,7 @@ export const getProducts = async (
 ): Promise<PaginatedProductsResponse> => {
   try {
     const response = await axiosInstance.get<PaginatedProductsResponse>(
-      "api/products",
+      "products",
       { params },
     );
     return response.data;
@@ -79,7 +79,7 @@ export const getProductByIdOrSlug = async (
   idOrSlug: string,
 ): Promise<Product | null> => {
   try {
-    const response = await axiosInstance.get<Product>(`api/products/${idOrSlug}`);
+    const response = await axiosInstance.get<Product>(`products/${idOrSlug}`);
     return response.data;
   } catch (err: unknown) {
     const error = err as AxiosError;
@@ -96,7 +96,7 @@ export const createProduct = async (
 ): Promise<Product> => {
   try {
     const response = await axiosInstance.post<Product>(
-      "api/products",
+      "products",
       productData,
     );
     return response.data;
@@ -112,7 +112,7 @@ export const updateProduct = async (
 ): Promise<Product> => {
   try {
     const response = await axiosInstance.put<Product>(
-      `api/products/${productId}`,
+      `products/${productId}`,
       productData,
     );
     return response.data;
@@ -129,7 +129,7 @@ export const deleteProduct = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axiosInstance.delete<{ message: string }>(
-      `api/products/${productId}`,
+      `products/${productId}`,
     );
     return response.data;
   } catch (err: unknown) {

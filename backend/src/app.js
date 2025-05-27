@@ -33,6 +33,7 @@ const app = express();
 // Middlewares
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  "https://online-store-delta-seven.vercel.app",
   "http://localhost:3000", // Nếu bạn dev local frontend
 ];
 
