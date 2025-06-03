@@ -1,7 +1,12 @@
 const express = require("express");
 const {
+  // User actions
   createReview,
+  updateUserReview,
+  deleteMyReview,
+  getMyReviewForProduct,
   getProductReviews,
+  // Admin actions
   getAllReviews,
   approveReview,
   rejectReview,
@@ -12,45 +17,60 @@ const { protect, isAdmin } = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validationMiddleware");
 const {
   reviewSchemaValidation,
+  updateReviewSchemaValidation,
   adminReplySchemaValidation,
 } = require("../validations/validationSchemas");
 
 const router = express.Router({ mergeParams: true });
 
-// --- Public Route ---
-// GET /api/v1/products/:productId/reviews - Lấy review của sản phẩm
-router.get("/", getProductReviews);
+// --- Router cho các actions liên quan đến review của một sản phẩm cụ thể ---
+// Thường được mount với /api/v1/products/:productId/reviews
+const productReviewRouter = express.Router({ mergeParams: true });
 
-// --- User Routes (Cần đăng nhập) ---
+// GET /api/v1/products/:productId/reviews - Lấy review của sản phẩm
+productReviewRouter.get("/", getProductReviews);
+
 // POST /api/v1/products/:productId/reviews - User tạo review mới
-router.post(
+productReviewRouter.post(
   "/",
-  protect, // Yêu cầu đăng nhập
+  protect,
   validateRequest(reviewSchemaValidation),
   createReview
 );
-// (Tùy chọn thêm PUT/DELETE cho user sửa/xóa review CỦA HỌ)
-// router.put('/:reviewId', protect, ...)
-// router.delete('/:reviewId', protect, ...)
+
+// --- Router cho các actions chung về review (cần ID review hoặc query params) ---
+// Thường được mount với /api/v1/reviews
+const generalReviewRouter = express.Router();
+
+// GET /api/v1/reviews/my-review?productId=<productId> - User lấy review của mình cho sản phẩm
+generalReviewRouter.get("/my-review", protect, getMyReviewForProduct);
+
+// PUT /api/v1/reviews/:reviewId - User sửa review của mình
+generalReviewRouter.put(
+  "/:reviewId",
+  protect,
+  validateRequest(updateReviewSchemaValidation),
+  updateUserReview
+);
+
+// DELETE /api/v1/reviews/:reviewId/my - User xóa review của mình
+generalReviewRouter.delete("/:reviewId/my", protect, deleteMyReview);
 
 // --- Admin Routes (Cần quyền Admin) ---
-
-const adminRouter = express.Router(); // Tạo router riêng cho admin actions
-
-// GET /api/v1/reviews - Admin lấy tất cả reviews (có filter, sort, pagination)
-adminRouter.get("/", protect, isAdmin, getAllReviews);
+// GET /api/v1/reviews - Admin lấy tất cả reviews
+generalReviewRouter.get("/", protect, isAdmin, getAllReviews);
 
 // PUT /api/v1/reviews/:reviewId/approve - Admin duyệt review
-adminRouter.put("/:reviewId/approve", protect, isAdmin, approveReview);
+generalReviewRouter.put("/:reviewId/approve", protect, isAdmin, approveReview);
 
 // PUT /api/v1/reviews/:reviewId/reject - Admin từ chối/ẩn review
-adminRouter.put("/:reviewId/reject", protect, isAdmin, rejectReview);
+generalReviewRouter.put("/:reviewId/reject", protect, isAdmin, rejectReview);
 
 // DELETE /api/v1/reviews/:reviewId - Admin xóa hẳn review
-adminRouter.delete("/:reviewId", protect, isAdmin, deleteReview);
+generalReviewRouter.delete("/:reviewId", protect, isAdmin, deleteReview);
 
 // POST /api/v1/reviews/:reviewId/reply - Admin phản hồi review
-adminRouter.post(
+generalReviewRouter.post(
   "/:reviewId/reply",
   protect,
   isAdmin,
@@ -58,8 +78,7 @@ adminRouter.post(
   addAdminReply
 );
 
-// Xuất cả hai router
 module.exports = {
-  productReviewRouter: router,
-  adminReviewRouter: adminRouter,
+  productReviewRouter: productReviewRouter,
+  reviewRouter: generalReviewRouter,
 };

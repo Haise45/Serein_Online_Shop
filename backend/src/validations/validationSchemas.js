@@ -18,12 +18,18 @@ const registerSchema = Joi.object({
     "string.email": `"Email" không đúng định dạng`,
     "any.required": `"Email" là trường bắt buộc`,
   }),
-  password: Joi.string().min(6).required().messages({
-    "string.base": `"Mật khẩu" phải là chuỗi`,
-    "string.empty": `"Mật khẩu" không được để trống`,
-    "string.min": `"Mật khẩu" phải có ít nhất {#limit} ký tự`,
-    "any.required": `"Mật khẩu" là trường bắt buộc`,
-  }),
+  password: Joi.string()
+    .min(6)
+    .required()
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
+    .messages({
+      "string.base": `"Mật khẩu" phải là chuỗi`,
+      "string.empty": `"Mật khẩu" không được để trống`,
+      "string.min": `"Mật khẩu" phải có ít nhất {#limit} ký tự`,
+      "any.required": `"Mật khẩu" là trường bắt buộc`,
+      "string.pattern.base":
+        "Mật khẩu mới phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt.",
+    }),
   // confirmPassword: Joi.string().valid(Joi.ref('password')).required().messages({
   //    'any.only': '"Xác nhận mật khẩu" không khớp',
   //    'any.required': '"Xác nhận mật khẩu" là trường bắt buộc',
@@ -80,8 +86,26 @@ const updateProfileSchema = Joi.object({
     // Cho phép cập nhật SĐT
     "string.pattern.base": `"Số điện thoại" không đúng định dạng Việt Nam.`,
   }),
-  // Thêm các trường khác cho phép cập nhật nếu cần
-}).min(1); // Yêu cầu ít nhất một trường được cung cấp để cập nhật
+  // Cho phép password và currentPassword, nhưng chỉ yêu cầu currentPassword nếu password có mặt
+  currentPassword: Joi.string().when("password", {
+    // Chỉ yêu cầu/validate currentPassword KHI password (mới) tồn tại
+    is: Joi.exist(),
+    then: Joi.string().required().messages({
+      "any.required": "Mật khẩu hiện tại là bắt buộc khi đổi mật khẩu mới.",
+    }),
+    otherwise: Joi.string().optional().allow("", null), // Nếu không đổi mk thì không cần
+  }),
+  password: Joi.string()
+    .min(6)
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
+    .messages({
+      "string.min": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+      "string.pattern.base":
+        "Mật khẩu mới phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt.",
+    }),
+})
+  .min(1) // Yêu cầu ít nhất một trường được cung cấp để cập nhật
+  .or("name", "email", "phone", "password");
 
 const addressSchemaValidation = Joi.object({
   fullName: Joi.string().trim().min(2).max(100).required().messages({
@@ -520,6 +544,22 @@ const reviewSchemaValidation = Joi.object({
     }),
 });
 
+// Schema cho update review
+const updateReviewSchemaValidation = Joi.object({
+  rating: Joi.number().min(1).max(5).optional().messages({
+    "number.base": "Đánh giá phải là một số.",
+    "number.min": "Đánh giá phải từ 1 đến 5 sao.",
+    "number.max": "Đánh giá phải từ 1 đến 5 sao.",
+  }),
+  comment: Joi.string().trim().max(1000).allow("").optional().messages({
+    "string.max": "Bình luận không được vượt quá 1000 ký tự.",
+  }),
+  userImages: Joi.array().items(Joi.string().uri()).max(5).optional().messages({
+    "array.max": "Bạn chỉ có thể tải lên tối đa 5 hình ảnh.",
+    "string.uri": "URL hình ảnh không hợp lệ.",
+  }),
+});
+
 // Schema cho Admin phản hồi review
 const adminReplySchemaValidation = Joi.object({
   comment: Joi.string().trim().min(1).max(500).required().messages({
@@ -548,5 +588,6 @@ module.exports = {
   updateCouponSchema,
   createOrderSchema,
   reviewSchemaValidation,
+  updateReviewSchemaValidation,
   adminReplySchemaValidation,
 };

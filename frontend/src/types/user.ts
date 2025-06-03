@@ -36,5 +36,5 @@ export interface UpdateUserProfilePayload {
   email?: string; // Cần kiểm tra unique ở backend nếu thay đổi
   phone?: string; // Cần kiểm tra unique ở backend nếu thay đổi
   password?: string; // Mật khẩu mới (nếu muốn đổi)
-  // currentPassword?: string; // Có thể cần mật khẩu hiện tại để đổi email/password
+  currentPassword?: string; // Có thể cần mật khẩu hiện tại để đổi email/password
 }

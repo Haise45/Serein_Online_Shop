@@ -1,7 +1,6 @@
 const Review = require("../models/Review");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
-const User = require("../models/User");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 const { createAdminNotification } = require("../utils/notificationUtils");
@@ -221,6 +220,162 @@ const createReview = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    User chỉnh sửa review của mình (một lần duy nhất, nếu chưa có admin reply)
+// @route   PUT /api/v1/reviews/:reviewId
+// @access  Private
+const updateUserReview = asyncHandler(async (req, res) => {
+  // --- Bước 1: Lấy dữ liệu đầu vào ---
+  const reviewId = req.params.reviewId;
+  const { rating, comment, userImages } = req.body;
+  const userId = req.user._id;
+
+  // --- Bước 2: Validate ID của review ---
+  if (!mongoose.Types.ObjectId.isValid(reviewId)) {
+    res.status(400);
+    throw new Error("ID đánh giá không hợp lệ.");
+  }
+
+  // --- Bước 3: Tìm review và kiểm tra quyền sở hữu ---
+  // Tìm review dựa trên ID và đảm bảo nó thuộc về người dùng hiện tại.
+  const review = await Review.findOne({
+    _id: reviewId,
+    user: userId, // Chỉ user tạo ra review mới có quyền sửa
+  });
+
+  // Nếu không tìm thấy review (hoặc không thuộc về user này)
+  if (!review) {
+    res.status(404);
+    throw new Error(
+      "Không tìm thấy đánh giá của bạn hoặc bạn không có quyền sửa."
+    );
+  }
+
+  // --- Bước 4: Kiểm tra điều kiện cho phép sửa ---
+  // Điều kiện 4.1: Nếu admin đã phản hồi review, không cho phép user sửa nữa.
+  if (review.adminReply && review.adminReply.comment) {
+    res.status(403);
+    throw new Error(
+      "Đánh giá này đã có phản hồi từ quản trị viên và không thể chỉnh sửa thêm."
+    );
+  }
+
+  // Điều kiện 4.2: Kiểm tra xem review đã được chỉnh sửa trước đó chưa.
+  // User chỉ được phép chỉnh sửa review của mình một lần duy nhất.
+  if (review.isEdited) {
+    res.status(403);
+    throw new Error("Bạn chỉ có thể chỉnh sửa đánh giá này một lần.");
+  }
+
+  // --- Bước 5: Xác định và áp dụng các thay đổi ---
+  let hasChanges = false; // Biến cờ để theo dõi xem có sự thay đổi thực sự nào không
+
+  // Cập nhật rating nếu được cung cấp và khác với giá trị hiện tại
+  if (rating !== undefined && review.rating !== rating) {
+    review.rating = rating;
+    hasChanges = true;
+  }
+  // Cập nhật comment nếu được cung cấp và khác với giá trị hiện tại
+  if (comment !== undefined && review.comment !== comment) {
+    review.comment = comment;
+    hasChanges = true;
+  }
+  // Cập nhật userImages nếu được cung cấp
+  if (userImages !== undefined) {
+    review.userImages = userImages;
+    hasChanges = true;
+  }
+
+  // Nếu không có trường nào được thay đổi so với dữ liệu hiện tại
+  if (!hasChanges) {
+    await review.populate("user", "name");
+    return res.status(200).json({
+      message: "Không có thông tin nào được thay đổi.",
+      review: review,
+    });
+  }
+
+  // --- Bước 6: Cập nhật trạng thái của review sau khi chỉnh sửa ---
+  review.isEdited = true; // Đánh dấu là review này đã được chỉnh sửa
+  const wasApprovedBeforeEdit = review.isApproved; // Lưu lại trạng thái duyệt trước khi sửa
+
+  // Sau khi user sửa, review cần được duyệt lại bởi admin.
+  review.isApproved = false; // Đặt lại trạng thái duyệt
+  review.approvedBy = null; // Xóa thông tin người duyệt cũ
+  review.approvedAt = null; // Xóa thời gian duyệt cũ
+
+  // Xóa phản hồi cũ của admin nếu có, vì nội dung review đã thay đổi.
+  // review.adminReply = null;
+
+  // --- Bước 7: Lưu các thay đổi vào database ---
+  await review.save();
+
+  // --- Bước 8: Gửi thông báo cho Admin (nếu có) ---
+  try {
+    // Lấy tên sản phẩm để hiển thị trong thông báo
+    const productForNotification = await Product.findById(review.product)
+      .select("name")
+      .lean();
+
+    await createAdminNotification(
+      "Đánh giá sản phẩm đã được sửa",
+      `Đánh giá cho sản phẩm "${
+        productForNotification?.name || "Không rõ"
+      }" bởi "${req.user.name}" đã được chỉnh sửa và cần duyệt lại.`,
+      "REVIEW_EDITED",
+      `/admin/reviews?isApproved=false&reviewId=${review._id}`,
+      { reviewId: review._id, productId: review.product, userId: req.user._id }
+    );
+  } catch (notificationError) {
+    console.error(
+      "Lỗi khi gửi thông báo admin về review đã sửa:",
+      notificationError
+    );
+  }
+
+  // --- Bước 9: Tính toán lại rating trung bình cho sản phẩm ---
+  if (wasApprovedBeforeEdit) {
+    await calculateAndUpdateProductRating(review.product);
+  }
+
+  // --- Bước 10: Chuẩn bị và gửi phản hồi cho client ---
+  const populatedReview = await Review.findById(review._id)
+    .populate("user", "name")
+    .populate({ path: "adminReply.user", select: "name" })
+    .lean();
+
+  res.status(200).json({
+    message: "Đánh giá của bạn đã được cập nhật và đang chờ duyệt lại.",
+    review: populatedReview,
+  });
+});
+
+// @desc    Lấy review của người dùng hiện tại cho một sản phẩm cụ thể
+// @route   GET /api/v1/reviews/my-review?productId=<productId>
+// @access  Private
+const getMyReviewForProduct = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { productId } = req.query;
+
+  if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp ID sản phẩm hợp lệ.");
+  }
+
+  const review = await Review.findOne({
+    user: userId,
+    product: productId,
+  })
+    .populate("user", "name")
+    .populate({ path: "adminReply.user", select: "name" })
+    .lean();
+
+  if (!review) {
+    return res.status(200).json(null);
+  }
+
+  res.status(200).json(review);
+});
+
 // @desc    Lấy danh sách review đã duyệt của sản phẩm (có phân trang và lọc)
 // @route   GET /api/v1/products/:productId/reviews
 // @access  Public
@@ -274,6 +429,37 @@ const getProductReviews = asyncHandler(async (req, res) => {
     limit: limit,
     reviews: reviews,
   });
+});
+
+// @desc    User xóa review của mình
+// @route   DELETE /api/v1/reviews/:reviewId/my
+// @access  Private
+const deleteMyReview = asyncHandler(async (req, res) => {
+  const reviewId = req.params.reviewId;
+  const userId = req.user._id;
+
+  if (!mongoose.Types.ObjectId.isValid(reviewId)) {
+    res.status(400);
+    throw new Error("ID đánh giá không hợp lệ.");
+  }
+
+  const review = await Review.findOne({ _id: reviewId, user: userId });
+
+  if (!review) {
+    res.status(404);
+    throw new Error("Không tìm thấy đánh giá hoặc bạn không có quyền xóa.");
+  }
+
+  const productId = review.product;
+  const wasApproved = review.isApproved;
+
+  await Review.deleteOne({ _id: reviewId });
+
+  if (wasApproved) {
+    await calculateAndUpdateProductRating(productId);
+  }
+
+  res.status(200).json({ message: "Đánh giá của bạn đã được xóa thành công." });
 });
 
 // --- ADMIN APIs ---
@@ -460,6 +646,9 @@ module.exports = {
   // User
   createReview,
   getProductReviews,
+  getMyReviewForProduct,
+  updateUserReview,
+  deleteMyReview,
   // Admin
   getAllReviews,
   approveReview,

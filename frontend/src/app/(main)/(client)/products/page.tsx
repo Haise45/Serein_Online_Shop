@@ -1,5 +1,5 @@
-import Breadcrumbs from "@/components/shared/Breadcrumbs"; // Giả sử bạn có component này
-import { BreadcrumbItem } from "@/types"; // Giả sử bạn có type này
+import Breadcrumbs from "@/components/shared/Breadcrumbs";
+import { BreadcrumbItem } from "@/types";
 import { PageSearchParams } from "@/types/next";
 import type { Metadata } from "next";
 import { Suspense } from "react";

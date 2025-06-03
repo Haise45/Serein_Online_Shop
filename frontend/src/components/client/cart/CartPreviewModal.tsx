@@ -70,7 +70,7 @@ export default function CartPreviewModal({
       refetch();
     }
   };
-  
+
   let content;
   if (isLoading) {
     content = (
@@ -307,7 +307,7 @@ export default function CartPreviewModal({
                   <div className="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
                     {/* Header */}
                     <div className="flex min-h-0 flex-1 flex-col overflow-y-scroll">
-                      <div className="bg-indigo-700 px-4 py-5 sm:px-6">
+                      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-5 sm:px-6">
                         <div className="flex items-center justify-between">
                           <Dialog.Title className="text-lg font-semibold text-white">
                             Giỏ hàng của bạn

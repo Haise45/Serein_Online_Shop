@@ -1,106 +1,94 @@
-"use client";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import UserOrderDetailClient from "./UserOrderDetailClient";
 
-import { useParams, useRouter } from "next/navigation";
-import { useGetOrderById } from "@/lib/react-query/orderQueries";
-import OrderDetailsDisplay from "@/components/client/orders/OrderDetailsDisplay";
-import Breadcrumbs from "@/components/shared/Breadcrumbs";
-import { BreadcrumbItem } from "@/types";
-import { FiLoader, FiAlertCircle } from "react-icons/fi";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
-import Link from "next/link";
-import type { AxiosError } from "axios";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}): Promise<Metadata> {
+  const { orderId } = await params; // Await params trước khi sử dụng
+  const orderIdSuffix = orderId.toString().slice(-6).toUpperCase();
+  return {
+    title: `Chi tiết Đơn hàng #${orderIdSuffix} | Serein Shop`,
+    description: `Xem chi tiết đơn hàng #${orderIdSuffix} của bạn tại Serein Shop.`,
+  };
+}
 
-// export async function generateMetadata({ params }: { params: { orderId: string } }) {
-//   // TODO: Fetch order summary or use a generic title
-//   return {
-//     title: `Chi tiết Đơn hàng #${params.orderId.slice(-6)} | Serein Shop`,
-//   };
-// }
+interface UserOrderDetailPageProps {
+  params: Promise<{
+    orderId: string;
+  }>;
+}
 
-export default function UserOrderDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const orderId =
-    typeof params.orderId === "string" ? params.orderId : undefined;
-
-  const {
-    data: order,
-    isLoading,
-    isError,
-    error,
-  } = useGetOrderById(orderId, {
-    enabled: !!orderId, // Chỉ fetch khi có orderId
-  });
-
-  useEffect(() => {
-    if (!isLoading && isError) {
-      const axiosError = error as AxiosError<{ message?: string }>;
-      const errorMessage =
-        axiosError.response?.data?.message ||
-        axiosError.message ||
-        "Lỗi tải đơn hàng.";
-
-      toast.error(errorMessage);
-      // router.push('/profile/orders');
-    }
-  }, [isLoading, isError, error, router]);
-
-  const breadcrumbItems: BreadcrumbItem[] = [
-    { label: "Trang Chủ", href: "/" },
-    { label: "Tài khoản", href: "/profile" },
-    { label: "Đơn hàng của tôi", href: "/profile/orders" },
-    { label: `Đơn hàng #${orderId?.slice(-6).toUpperCase()}`, isCurrent: true },
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <FiLoader className="h-12 w-12 animate-spin text-indigo-600" />
+function OrderDetailLoadingSkeleton() {
+  return (
+    <div className="mt-6 animate-pulse rounded-lg bg-white p-6 shadow-xl sm:p-8 lg:p-10">
+      {/* Title Skeleton */}
+      <div className="mb-8 text-center">
+        <div className="mx-auto h-8 w-3/4 rounded bg-gray-300"></div>
+        <div className="mx-auto mt-2 h-4 w-1/2 rounded bg-gray-200"></div>
       </div>
-    );
-  }
-
-  if (isError && !order) {
-    // isError có thể true nhưng order vẫn có từ cache
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <FiAlertCircle className="mx-auto mb-4 h-16 w-16 text-red-400" />
-        <h1 className="mb-2 text-2xl font-semibold text-red-600">
-          Không thể tải đơn hàng
-        </h1>
-        <p className="text-gray-600">
-          Đã có lỗi xảy ra hoặc bạn không có quyền xem đơn hàng này.
-        </p>
-        <Link
-          href="/profile/orders"
-          className="mt-6 inline-block rounded-md bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
-        >
-          Quay lại danh sách đơn hàng
-        </Link>
+      {/* Stepper Skeleton */}
+      <div className="my-6 h-20 rounded bg-gray-200 sm:my-8"></div>
+      {/* Info Grid Skeleton */}
+      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="space-y-2 md:col-span-1">
+            <div className="mb-3 h-6 w-1/2 rounded bg-gray-300"></div>
+            <div className="h-4 w-full rounded bg-gray-200"></div>
+            <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+            <div className="h-4 w-full rounded bg-gray-200"></div>
+          </div>
+        ))}
       </div>
-    );
-  }
-
-  if (!order) {
-    // Trường hợp không loading, không error nhưng không có order
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <FiAlertCircle className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-        <h1 className="mb-2 text-2xl font-semibold text-gray-700">
-          Không tìm thấy đơn hàng
-        </h1>
-        <p className="text-gray-600">Đơn hàng bạn tìm kiếm không tồn tại.</p>
+      {/* Items Skeleton */}
+      <div className="mt-8 sm:mt-10">
+        <div className="mb-4 h-6 w-1/3 rounded bg-gray-300"></div>
+        <div className="space-y-4">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex border-t border-gray-200 py-4">
+              <div className="mr-4 h-20 w-20 rounded bg-gray-200 sm:h-24 sm:w-24"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-5 w-full rounded bg-gray-300"></div>
+                <div className="h-4 w-3/4 rounded bg-gray-300"></div>
+                <div className="h-4 w-1/2 rounded bg-gray-300"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    );
-  }
+      {/* Summary Skeleton */}
+      <div className="mt-8 sm:mt-10">
+        <div className="space-y-3 rounded-lg bg-gray-50 p-6">
+          <div className="flex h-5 justify-between">
+            <div className="w-1/3 rounded bg-gray-200"></div>
+            <div className="w-1/4 rounded bg-gray-200"></div>
+          </div>
+          <div className="flex h-5 justify-between">
+            <div className="w-1/3 rounded bg-gray-200"></div>
+            <div className="w-1/4 rounded bg-gray-200"></div>
+          </div>
+          <div className="flex h-6 justify-between border-t border-gray-200 pt-3">
+            <div className="w-1/3 rounded bg-gray-300"></div>
+            <div className="w-1/4 rounded bg-gray-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default async function UserOrderDetailPageContainer({
+  params,
+}: UserOrderDetailPageProps) {
+  const { orderId } = await params;
 
   return (
-    <div className="mx-auto px-0 lg:px-10">
-      <div className="mb-6">
-        <Breadcrumbs items={breadcrumbItems} />
-      </div>
-      <OrderDetailsDisplay order={order} title="Chi tiết đơn hàng" />
+    <div>
+      <Suspense fallback={<OrderDetailLoadingSkeleton />}>
+        <UserOrderDetailClient orderId={orderId} />
+      </Suspense>
     </div>
   );
 }

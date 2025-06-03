@@ -42,7 +42,7 @@ export default function ProductGrid({
         <div className="mb-6 flex justify-end">
           <div className="h-10 w-48 animate-pulse rounded bg-gray-200"></div>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(limit)].map(
             (
               _,

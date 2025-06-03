@@ -14,7 +14,7 @@ const adminReplySchema = new mongoose.Schema(
       required: true,
       maxlength: [500, "Phản hồi không được vượt quá 500 ký tự."],
     },
-    createAt: {
+    createdAt: {
       type: Date,
       default: Date.now,
     },
@@ -84,6 +84,10 @@ const reviewSchema = new mongoose.Schema(
       type: adminReplySchema,
       default: null,
     },
+    isEdited: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,
