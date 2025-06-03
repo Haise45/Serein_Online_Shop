@@ -17,7 +17,6 @@ import {
   FiCheck,
   FiCreditCard,
   FiEdit3,
-  FiLoader,
   FiPlusCircle,
   FiTruck,
 } from "react-icons/fi";
@@ -116,7 +115,7 @@ const AddressInputFields: React.FC<{
   };
 
   return (
-    <div className="mt-4 space-y-4 rounded-md border border-gray-200 bg-gray-50/50 p-4">
+    <div className="mt-4 space-y-4 rounded-md border border-gray-200 bg-white px-4 py-6">
       <div>
         <label htmlFor="fullName" className="form-label">
           Họ và tên người nhận <span className="text-red-500">*</span>
@@ -127,7 +126,7 @@ const AddressInputFields: React.FC<{
           id="fullName"
           value={addressData.fullName || ""}
           onChange={(e) => onDataChange("fullName", e.target.value)}
-          className="input-field"
+          className="input-field text-sm md:text-base"
           required
         />
       </div>
@@ -141,7 +140,7 @@ const AddressInputFields: React.FC<{
           id="phone"
           value={addressData.phone || ""}
           onChange={(e) => onDataChange("phone", e.target.value)}
-          className="input-field"
+          className="input-field text-sm md:text-base"
           required
         />
       </div>
@@ -162,7 +161,7 @@ const AddressInputFields: React.FC<{
                 "province",
               )
             }
-            className="input-field"
+            className="input-field text-sm md:text-base"
             required
             disabled={isLoadingProvinces}
           >
@@ -192,7 +191,7 @@ const AddressInputFields: React.FC<{
                 "district",
               )
             }
-            className="input-field"
+            className="input-field text-sm md:text-base"
             required
             disabled={!currentProvinceCode || isLoadingDistricts}
           >
@@ -225,7 +224,7 @@ const AddressInputFields: React.FC<{
               "commune",
             )
           }
-          className="input-field"
+          className="input-field text-sm md:text-base"
           required
           disabled={!currentDistrictCode || isLoadingCommunes}
         >
@@ -252,7 +251,7 @@ const AddressInputFields: React.FC<{
           id="street"
           value={addressData.street || ""}
           onChange={(e) => onDataChange("street", e.target.value)}
-          className="input-field"
+          className="input-field text-sm md:text-base"
           required
         />
       </div>
@@ -369,11 +368,21 @@ export default function CheckoutForm({
 
     toast.success("Địa chỉ đã được cập nhật.");
     setIsAddressModalOpen(false);
-    if (
-      (savedAddress._id && savedAddress._id.toString() === selectedAddressId) ||
-      (isEditingNewAddress && !selectedAddressId)
-    ) {
-      handleAddressSelect(savedAddress._id!.toString());
+    setAddressToEditInModal(null);
+    if (savedAddress._id) {
+      setSelectedAddressId(savedAddress._id.toString());
+      setIsEditingNewAddress(false);
+      setNewAddressData({
+        fullName: savedAddress.fullName,
+        phone: savedAddress.phone,
+        street: savedAddress.street,
+        provinceCode: savedAddress.provinceCode,
+        provinceName: savedAddress.provinceName,
+        districtCode: savedAddress.districtCode,
+        districtName: savedAddress.districtName,
+        communeCode: savedAddress.communeCode,
+        communeName: savedAddress.communeName,
+      });
     }
   };
 
@@ -461,7 +470,7 @@ export default function CheckoutForm({
           <div>
             <label
               htmlFor="email-checkout"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-base font-medium text-gray-700"
             >
               Địa chỉ Email <span className="text-red-500">*</span>
             </label>
@@ -474,7 +483,7 @@ export default function CheckoutForm({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="input-field w-full"
+                className="input-field w-full bg-white text-sm md:text-base"
                 placeholder="you@example.com"
               />
             </div>
@@ -538,6 +547,7 @@ export default function CheckoutForm({
                       <button
                         type="button"
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleEditSavedAddress(address);
                         }}
@@ -548,12 +558,6 @@ export default function CheckoutForm({
                       </button>
                     </div>
                   </div>
-                  {selectedAddressId === address._id!.toString() && (
-                    <div
-                      className="pointer-events-none absolute inset-0 rounded-lg border-2 border-indigo-600"
-                      aria-hidden="true"
-                    />
-                  )}
                 </div>
               ))}
             </div>
@@ -640,12 +644,6 @@ export default function CheckoutForm({
                     <span className="sr-only">{method.name}</span>
                   </label>
                 </div>
-                {paymentMethod === method.id && (
-                  <div
-                    className="pointer-events-none absolute inset-0 rounded-lg border-2 border-indigo-600"
-                    aria-hidden="true"
-                  />
-                )}
               </div>
             );
           })}
@@ -657,7 +655,7 @@ export default function CheckoutForm({
         <h2 className="mb-2 text-lg font-medium text-gray-900">
           Ghi chú đơn hàng
         </h2>
-        <div>
+        <div className="bg-white">
           <label htmlFor="order-notes" className="sr-only">
             Ghi chú
           </label>
@@ -665,7 +663,7 @@ export default function CheckoutForm({
             id="order-notes"
             name="order-notes"
             rows={3}
-            className="input-field w-full"
+            className="input-field h-30 w-full resize-none text-sm focus:outline-none md:text-base"
             placeholder="Thêm ghi chú cho đơn hàng của bạn (tùy chọn)..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -673,9 +671,17 @@ export default function CheckoutForm({
         </div>
       </section>
 
-      <div className="pt-4">
+      {/* <div className="pt-4">
         <button
           type="submit"
+          onClick={(e) => {
+            if (
+              isSubmittingOrder ||
+              (!selectedAddressId && !newAddressData.communeCode)
+            ) {
+              e.preventDefault();
+            }
+          }}
           disabled={
             isSubmittingOrder ||
             (!selectedAddressId && !newAddressData.communeCode)
@@ -687,7 +693,7 @@ export default function CheckoutForm({
           )}
           {isSubmittingOrder ? "Đang xử lý..." : "Hoàn tất đặt hàng"}
         </button>
-      </div>
+      </div> */}
 
       {/* Modal chỉ dùng để SỬA địa chỉ đã lưu */}
       {isAuthenticated && isAddressModalOpen && (

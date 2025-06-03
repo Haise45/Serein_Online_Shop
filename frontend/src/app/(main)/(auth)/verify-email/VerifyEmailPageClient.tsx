@@ -10,6 +10,7 @@ import { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -22,7 +23,7 @@ export default function VerifyEmailPage() {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]); // Mảng 6 ký tự
   const [emailFromQuery, setEmailFromQuery] = useState<string>("");
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
-
+  const [redirectUrl, setRedirectUrl] = useState<string>("/");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,6 +33,8 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const email = searchParams.get("email");
     const message = searchParams.get("message");
+    const redirect = searchParams.get("redirect");
+
     if (email) {
       setEmailFromQuery(email);
     } else {
@@ -42,7 +45,16 @@ export default function VerifyEmailPage() {
     if (message) {
       setInitialMessage(decodeURIComponent(message));
     }
-  }, [searchParams, router]);
+    if (redirect && redirect.startsWith("/")) {
+      try {
+        setRedirectUrl(decodeURIComponent(redirect));
+      } catch {
+        setRedirectUrl("/");
+      }
+    } else if (redirect) {
+      setRedirectUrl("/");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -55,7 +67,7 @@ export default function VerifyEmailPage() {
   const handleOtpChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const { value } = e.target;
     // Chỉ cho phép nhập số và chỉ 1 ký tự
-    if (/^[0-9]$/.test(value) || value === "") {
+    if (/^[0-9]*$/.test(value) && value.length <= 1) {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
@@ -75,6 +87,19 @@ export default function VerifyEmailPage() {
     }
   };
 
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+      // Nếu ô hiện tại rỗng và nhấn Backspace, chuyển về ô trước
+      const currentInput = e.target as HTMLInputElement;
+      const previousSibling =
+        currentInput.previousElementSibling as HTMLInputElement | null;
+      previousSibling?.focus();
+    }
+  };
+  
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData("text").replace(/[^0-9]/g, ""); // Chỉ lấy số
@@ -93,8 +118,15 @@ export default function VerifyEmailPage() {
     setError(null);
     setSuccessMessage(null);
     const enteredOtp = otp.join("");
-    if (enteredOtp.length !== 6 || !emailFromQuery) {
-      setError("Vui lòng nhập đủ 6 số OTP và đảm bảo có email.");
+
+    if (!emailFromQuery) {
+      setError(
+        "Không có thông tin email. Vui lòng thử lại từ trang đăng nhập/đăng ký.",
+      );
+      return;
+    }
+    if (enteredOtp.length !== 6) {
+      setError("Vui lòng nhập đủ 6 số OTP.");
       return;
     }
 
@@ -107,6 +139,7 @@ export default function VerifyEmailPage() {
       setSuccessMessage(
         data.message || "Xác thực email thành công! Đang chuyển hướng...",
       );
+      setOtp(["", "", "", "", "", ""]);
 
       // Tự động đăng nhập user
       dispatch(
@@ -122,13 +155,17 @@ export default function VerifyEmailPage() {
           accessToken: data.accessToken,
         }),
       );
+      toast.success("Xác thực thành công!");
 
       // Chuyển hướng sau khi thành công
       setTimeout(() => {
+        // Ưu tiên redirectUrl đã lấy từ query param
+        const finalRedirect =
+          redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
         if (data.role === "admin") {
           router.push("/admin/dashboard");
         } else {
-          router.push("/"); // Hoặc trang profile client
+          router.push(finalRedirect);
         }
       }, 2000); // Đợi 2s để user đọc message
     } catch (err: unknown) {
@@ -196,7 +233,10 @@ export default function VerifyEmailPage() {
             </p>
           )}
 
-          <div className="flex justify-center space-x-1.5 sm:space-x-2" onPaste={handlePaste}>
+          <div
+            className="flex justify-center space-x-1.5 sm:space-x-2"
+            onPaste={handlePaste}
+          >
             {otp.map((digit, index) => (
               <input
                 key={index}
@@ -204,8 +244,9 @@ export default function VerifyEmailPage() {
                 maxLength={1}
                 value={digit}
                 onChange={(e) => handleOtpChange(e, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
                 onFocus={(e) => e.target.select()} // Chọn toàn bộ text khi focus
-                className="h-12 w-9 sm:h-14 sm:w-12 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="h-12 w-9 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:h-14 sm:w-12"
                 disabled={loading}
                 aria-label={`Ký tự OTP thứ ${index + 1}`}
               />
