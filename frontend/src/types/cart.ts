@@ -39,7 +39,7 @@ export interface CartData {
   items: CartItem[];
   subtotal: number;
   totalQuantity: number;
-  appliedCoupon?: Coupon | null;
+  appliedCoupon?: Coupon | null | undefined;
   discountAmount: number;
   shippingFee?: number;
   finalTotal: number;

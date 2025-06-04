@@ -1,4 +1,6 @@
 const Coupon = require("../models/Coupon");
+const Product = require("../models/Product");
+const Category = require("../models/Category");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 
@@ -189,10 +191,43 @@ const getCoupons = asyncHandler(async (req, res) => {
   const totalCouponsQuery = Coupon.countDocuments(filter); // Đếm tổng số khớp filter
 
   // Chạy đồng thời 2 query
-  const [coupons, totalCoupons] = await Promise.all([
+  let [coupons, totalCoupons] = await Promise.all([
     couponsQuery.exec(),
     totalCouponsQuery.exec(),
   ]);
+
+  // --- Populate động cho applicableIds ---
+  const populatePromises = coupons.map(async (coupon) => {
+    if (coupon.applicableIds && coupon.applicableIds.length > 0) {
+      if (coupon.applicableTo === "products") {
+        // Populate thông tin sản phẩm
+        const populatedProducts = await Product.find({
+          _id: { $in: coupon.applicableIds },
+        })
+          .select("name slug _id") // Chỉ lấy name và slug
+          .lean();
+        // Gán lại applicableIds bằng mảng các object sản phẩm đã populate
+        return {
+          ...coupon,
+          applicableDetails: populatedProducts,
+        };
+      } else if (coupon.applicableTo === "categories") {
+        // Populate thông tin danh mục
+        const populatedCategories = await Category.find({
+          _id: { $in: coupon.applicableIds },
+        })
+          .select("name slug _id") // Chỉ lấy name và slug
+          .lean();
+        return {
+          ...coupon,
+          applicableDetails: populatedCategories,
+        };
+      }
+    }
+    return coupon; // Trả về coupon gốc nếu không cần populate
+  });
+
+  coupons = await Promise.all(populatePromises);
 
   // 4. Tính toán thông tin phân trang
   const totalPages = Math.ceil(totalCoupons / limit);
@@ -212,21 +247,40 @@ const getCoupons = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const getCouponByCodeOrId = asyncHandler(async (req, res) => {
   const idOrCode = req.params.idOrCode;
-  let coupon = null;
+  let couponQuery;
 
   // Ưu tiên tìm bằng ID nếu hợp lệ
   if (mongoose.Types.ObjectId.isValid(idOrCode)) {
-    coupon = await Coupon.findById(idOrCode);
+    couponQuery = Coupon.findById(idOrCode);
+  } else {
+    couponQuery = Coupon.findOne({ code: idOrCode.toUpperCase() });
   }
 
-  // Nếu không phải ID hoặc không tìm thấy bằng ID, thử tìm bằng Code (đã uppercase)
-  if (!coupon) {
-    coupon = await Coupon.findOne({ code: idOrCode.toUpperCase() });
-  }
+  let coupon = await couponQuery.lean();
 
   if (!coupon) {
     res.status(404);
     throw new Error("Không tìm thấy mã giảm giá.");
+  }
+
+  // --- Populate động cho applicableIds ---
+  if (coupon.applicableIds && coupon.applicableIds.length > 0) {
+    if (coupon.applicableTo === "products") {
+      const populatedProducts = await Product.find({
+        _id: { $in: coupon.applicableIds },
+      })
+        .select("name slug _id")
+        .lean();
+      // Gán vào một trường mới hoặc thay thế applicableIds nếu muốn
+      coupon.applicableDetails = populatedProducts;
+    } else if (coupon.applicableTo === "categories") {
+      const populatedCategories = await Category.find({
+        _id: { $in: coupon.applicableIds },
+      })
+        .select("name slug _id")
+        .lean();
+      coupon.applicableDetails = populatedCategories;
+    }
   }
 
   res.json(coupon);

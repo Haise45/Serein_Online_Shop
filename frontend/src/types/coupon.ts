@@ -1,6 +1,12 @@
 export type DiscountType = "percentage" | "fixed_amount";
 export type CouponApplicableTo = "all" | "categories" | "products";
 
+export interface ApplicableDetail {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
 export interface Coupon {
   _id: string;
   code: string;
@@ -16,6 +22,15 @@ export interface Coupon {
   isActive: boolean;
   applicableTo: CouponApplicableTo;
   applicableIds: string[]; // Mảng các ObjectId dưới dạng string
+  applicableDetails?: ApplicableDetail[];
   createdAt: Date | string;
   updatedAt: Date | string;
+}
+
+export interface PaginatedCouponsResponse {
+  currentPage: number;
+  totalPages: number;
+  totalCoupons: number;
+  limit: number;
+  coupons: Coupon[];
 }
