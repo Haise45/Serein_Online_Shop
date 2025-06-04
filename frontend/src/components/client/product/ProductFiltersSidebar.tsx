@@ -60,7 +60,7 @@ export default function ProductFiltersSidebar({
             value={localSearchTerm}
             onChange={(e) => setLocalSearchTerm(e.target.value)}
             placeholder="Tìm theo tên, SKU..."
-            className="input-field w-full pr-10" // Thêm pr-10 cho nút search
+            className="input-field w-full pr-10 bg-white"
           />
           <button
             type="submit"
