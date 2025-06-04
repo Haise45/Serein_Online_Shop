@@ -1,22 +1,25 @@
 "use client";
 import { useApplyCoupon, useRemoveCoupon } from "@/lib/react-query/cartQueries";
-import { useGetApplicableCoupons } from "@/lib/react-query/couponQueries";
+import {
+  useGetCoupons,
+} from "@/lib/react-query/couponQueries";
 import { formatCurrency } from "@/lib/utils";
+import { GetCouponsParams } from "@/services/couponService";
+import { CartItem as CartItemType } from "@/types/cart";
+import { Category } from "@/types/category";
 import { Coupon } from "@/types/coupon";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FiChevronDown,
   FiChevronUp,
   FiLoader,
   FiTag,
-  FiXCircle,
+  FiXCircle
 } from "react-icons/fi";
-import { CartItem as CartItemType } from "@/types/cart";
-import { Category } from "@/types/category";
 
 interface CouponSectionProps {
   cartSubtotal: number;
-  appliedCouponCode?: string | null;
+  appliedCouponFull?: Coupon | null;
   selectedItems: CartItemType[];
   categoryMap: Map<string, Category>;
   getAncestorsFn: (
@@ -27,7 +30,7 @@ interface CouponSectionProps {
 
 export default function CouponSection({
   cartSubtotal,
-  appliedCouponCode,
+  appliedCouponFull,
   selectedItems,
   categoryMap,
   getAncestorsFn,
@@ -35,10 +38,18 @@ export default function CouponSection({
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [showApplicableCoupons, setShowApplicableCoupons] = useState(true);
 
-  const { data: applicableCoupons, isLoading: isLoadingCoupons } =
-    useGetApplicableCoupons({
+  // Params để fetch các coupon có khả năng áp dụng từ server
+  const couponFetchParams: GetCouponsParams = useMemo(
+    () => ({
       validNow: true,
       isActive: true,
+    }),
+    [],
+  );
+
+  const { data: paginatedCouponsData, isLoading: isLoadingCoupons } =
+    useGetCoupons(couponFetchParams, {
+      staleTime: 1000 * 60 * 5, // Cache 5 phút
     });
 
   const applyCouponMutation = useApplyCoupon();
@@ -46,12 +57,12 @@ export default function CouponSection({
 
   useEffect(() => {
     // Nếu có coupon đã áp dụng, điền vào ô input
-    if (appliedCouponCode) {
-      setCouponCodeInput(appliedCouponCode);
+    if (appliedCouponFull) {
+      setCouponCodeInput(appliedCouponFull.code);
     } else {
       setCouponCodeInput(""); // Xóa input nếu coupon bị gỡ
     }
-  }, [appliedCouponCode]);
+  }, [appliedCouponFull]);
 
   const handleApplyManualCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,24 +181,32 @@ export default function CouponSection({
       });
   };
 
-  const displayableCoupons = filterAndSortDisplayCoupons(
-    applicableCoupons,
+  const displayableCoupons = useMemo(() => {
+    return filterAndSortDisplayCoupons(
+      paginatedCouponsData?.coupons, // Lấy mảng coupons từ data đã fetch
+      selectedItems,
+      cartSubtotal,
+      categoryMap,
+      getAncestorsFn,
+    );
+  }, [
+    paginatedCouponsData?.coupons,
     selectedItems,
     cartSubtotal,
     categoryMap,
     getAncestorsFn,
-  );
+  ]);
 
   return (
     <dl className="border-t border-gray-200 pt-4">
       <dt className="text-sm font-medium text-gray-900">Mã giảm giá</dt>
       <dd>
-        {appliedCouponCode ? (
+        {appliedCouponFull ? (
           <div className="mt-2 flex items-center justify-between rounded-md border border-green-300 bg-green-50 p-2.5">
             <div className="flex items-center">
               <FiTag className="mr-2 h-5 w-5 text-green-600" />
               <span className="text-sm font-semibold text-green-700">
-                {appliedCouponCode}
+                {appliedCouponFull.code}
               </span>
             </div>
             <button
@@ -260,10 +279,10 @@ export default function CouponSection({
                 )}
               </button>
               {showApplicableCoupons && (
-                <div className="mt-2 max-h-40 space-y-2 overflow-y-auto pr-1">
+                <div className="mt-2 max-h-40 space-y-2 overflow-y-auto pr-1 scrollbar-thin">
                   {displayableCoupons.map((coupon) => (
                     <div
-                      key={coupon._id}
+                      key={coupon._id.toString()}
                       className="rounded-md border border-dashed border-indigo-300 bg-indigo-50/50 p-2.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
@@ -277,7 +296,7 @@ export default function CouponSection({
                               `, cho đơn từ ${formatCurrency(coupon.minOrderValue)}`}
                           </p>
                         </div>
-                        {!appliedCouponCode && (
+                        {coupon.code !== appliedCouponFull?.code && (
                           <button
                             onClick={() => handleApplyListedCoupon(coupon.code)}
                             disabled={
