@@ -227,7 +227,22 @@ productSchema.pre("save", function (next) {
 
 // ---- Indexes ----
 // Index cho tìm kiếm text
-productSchema.index({ name: "text", description: "text", sku: "text" });
+productSchema.index(
+  {
+    name: "text", // Trường tên sản phẩm
+    sku: "text", // SKU
+    description: "text", // Mô tả
+  },
+  {
+    weights: {
+      name: 10, // Ưu tiên rất cao cho tên sản phẩm
+      sku: 7, // SKU cũng quan trọng
+      description: 2, // Mô tả ít quan trọng hơn
+      // ... các weights khác nếu bạn thêm trường
+    },
+    name: "ProductTextSearchIndex", // Đặt tên cụ thể cho index
+  }
+);
 
 // Index cho lọc và sắp xếp phổ biến
 productSchema.index({ price: 1 });

@@ -1,4 +1,3 @@
-// src/app/(main)/products/components/SortDropdown.tsx
 "use client";
 import { Listbox, Transition } from "@headlessui/react";
 import classNames from "classnames";

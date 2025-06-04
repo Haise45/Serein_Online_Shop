@@ -264,7 +264,7 @@ export default function NavbarClient() {
           leaveFrom="opacity-100 translate-y-0"
           leaveTo="opacity-0 -translate-y-4"
         >
-          <div className="absolute top-full right-0 left-0 z-30 border-t border-gray-200 bg-white shadow-lg">
+          <div className="absolute top-full right-0 left-0 z-20 border-t border-gray-200 bg-white shadow-lg">
             <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
               <form onSubmit={handleSearchSubmit} className="relative">
                 <input
