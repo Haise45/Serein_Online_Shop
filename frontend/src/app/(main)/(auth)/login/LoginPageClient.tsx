@@ -32,29 +32,14 @@ export default function LoginPage() {
   // Lấy URL redirect từ query params khi component mount
   useEffect(() => {
     const redirect = searchParams.get("redirect");
-    console.log("[LoginPage] Raw redirect param from URL:", redirect); // DEBUG
     if (redirect && redirect.startsWith("/")) {
       try {
         const decodedRedirect = decodeURIComponent(redirect);
         setRedirectUrl(decodedRedirect);
-        console.log(
-          "[LoginPage] Decoded and set redirectUrl to:",
-          decodedRedirect,
-        ); // DEBUG
-      } catch (e) {
-        console.error(
-          "[LoginPage] Error decoding redirect URL:",
-          e,
-          "Raw redirect:",
-          redirect,
-        );
+      } catch {
         setRedirectUrl("/"); // Fallback
       }
     } else if (redirect) {
-      console.warn(
-        "[LoginPage] Invalid or non-internal redirect parameter received:",
-        redirect,
-      );
       setRedirectUrl("/"); // Fallback cho redirect không hợp lệ
     }
     // Nếu không có redirect param, redirectUrl sẽ giữ giá trị mặc định là "/"
@@ -101,12 +86,6 @@ export default function LoginPage() {
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
       await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
 
-      console.log(
-        "[LoginPage] Login successful. Current redirectUrl state:",
-        redirectUrl,
-      ); // DEBUG
-      console.log("[LoginPage] User data from API:", data);
-
       if (!data.isEmailVerified) {
         // Nếu email chưa xác thực, chuyển đến trang xác thực và mang theo redirectUrl
         router.push(
@@ -117,7 +96,6 @@ export default function LoginPage() {
       } else {
         // Chuyển hướng về redirectUrl đã lưu (hoặc trang mặc định nếu redirectUrl không hợp lệ)
         const finalRedirect = redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
-        console.log("[LoginPage] User is customer, redirecting to finalRedirect:", finalRedirect); // DEBUG
         router.push(finalRedirect);
       }
     } catch (err) {

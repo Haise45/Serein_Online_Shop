@@ -569,11 +569,32 @@ const getMyOrders = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
+  const status = req.query.status;
   const skip = (page - 1) * limit;
 
   const filter = { user: userId };
 
-  const sort = { createAt: -1 };
+  // Thêm điều kiện lọc theo status nếu được cung cấp
+  if (status) {
+    const validOrderStatuses = [
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+      "Refunded",
+      "CancellationRequested",
+      "RefundRequested",
+    ];
+    if (validOrderStatuses.includes(status)) {
+      filter.status = status;
+    } else {
+      // Nếu status không hợp lệ, có thể bỏ qua hoặc trả lỗi
+      console.warn(`[getMyOrders] Trạng thái lọc không hợp lệ: ${status}`);
+    }
+  }
+
+  const sort = { createdAt: -1 };
 
   const ordersQuery = Order.find(filter)
     .sort(sort)
@@ -644,7 +665,13 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 
   // Populate thêm thông tin user (tên, email)
-  const order = await Order.findById(orderId).populate("user", "name email phone ");
+  const order = await Order.findById(orderId)
+    .populate("user", "name email phone") // Populate thông tin người dùng
+    .populate({
+      path: "orderItems.product",
+      select: "name slug",
+    })
+    .lean();
 
   if (!order) {
     res.status(404);
@@ -991,13 +1018,13 @@ const getAllOrders = asyncHandler(async (req, res) => {
     const startDate = new Date(req.query.startDate);
     startDate.setHours(0, 0, 0, 0); // Bắt đầu ngày
     if (!isNaN(startDate))
-      filter.createAt = { ...filter.createAt, $gte: startDate };
+      filter.createdAt = { ...filter.createdAt, $gte: startDate };
   }
   if (req.query.endDate) {
     const endDate = new Date(req.query.endDate);
     endDate.setHours(23, 59, 59, 999); // Kết thúc ngày
     if (!isNaN(endDate))
-      filter.createAt = { ...filter.createAt, $lte: endDate };
+      filter.createdAt = { ...filter.createdAt, $lte: endDate };
   }
 
   // Sắp xếp

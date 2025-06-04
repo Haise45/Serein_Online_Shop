@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
+const sendEmail = require("../utils/sendEmail");
+const emailVerificationOTPTemplate = require("../utils/emailTemplates/emailVerificationOTPTemplate");
 
 // @desc    Get user profile
 // @route   GET /api/v1/users/profile
@@ -36,71 +38,126 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/users/profile
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id); // Find user by ID from token
+  const user = await User.findById(req.user._id);
 
-  if (user) {
-    // Update fields if they are provided in the request body
-    user.name = req.body.name || user.name;
+  if (!user) {
+    res.status(404);
+    throw new Error("Người dùng không tồn tại.");
+  }
 
-    // Handle password update separately and securely
-    if (req.body.password) {
-      if (req.body.password.length < 6) {
-        res.status(400);
-        throw new Error("Mật khẩu mới phải có ít nhất 6 ký tự.");
-      }
-      // Password will be hashed by the pre-save hook
-      user.password = req.body.password;
+  // --- 1. Cập nhật Tên ---
+  if (req.body.name !== undefined) {
+    user.name = req.body.name || user.name; // Cho phép xóa tên nếu gửi rỗng, hoặc giữ nguyên nếu không gửi
+  }
+
+  // --- 2. Cập nhật Email (Yêu cầu xác thực lại) ---
+  if (req.body.email && req.body.email.toLowerCase().trim() !== user.email) {
+    const newEmail = req.body.email.toLowerCase().trim();
+
+    // Validate định dạng email mới (có thể dùng regex từ User model)
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(newEmail)) {
+      res.status(400);
+      throw new Error("Địa chỉ email mới không hợp lệ.");
     }
 
-    // --- Xử lý cập nhật Email (kiểm tra unique nếu email thay đổi) ---
-    if (req.body.email && req.body.email !== user.email) {
-      const emailExists = await User.findOne({ email: req.body.email });
-      if (emailExists) {
-        res.status(400);
-        throw new Error("Email này đã được sử dụng bởi tài khoản khác.");
-      }
-      user.email = req.body.email;
-    } else if (req.body.email === user.email) {
-      // Không làm gì nếu email gửi lên giống email cũ
+    const emailExists = await User.findOne({ email: newEmail });
+    if (emailExists) {
+      res.status(400);
+      throw new Error("Email này đã được sử dụng bởi tài khoản khác.");
+    }
+
+    // Lưu email mới nhưng đánh dấu là chưa xác thực
+    user.email = newEmail;
+    user.isEmailVerified = false;
+
+    // Tạo và gửi OTP xác thực cho email mới
+    const verificationOTP = user.createEmailVerificationOTP();
+    try {
+      const emailHtml = emailVerificationOTPTemplate(
+        user.name,
+        verificationOTP
+      );
+      await sendEmail({
+        email: user.email, // Gửi đến email MỚI
+        subject: `Xác Thực Địa Chỉ Email Mới Tại ${
+          process.env.SHOP_NAME || "Shop"
+        }`,
+        message: `Mã OTP để xác thực địa chỉ email mới của bạn là: ${verificationOTP}. Mã này có hiệu lực trong 10 phút.`,
+        html: emailHtml,
+      });
+    } catch (emailError) {
+      console.error(
+        `Lỗi gửi email OTP cho email mới ${user.email}:`,
+        emailError
+      );
+    }
+  }
+
+  // --- 3. Cập nhật Mật khẩu (YÊU CẦU MẬT KHẨU CŨ) ---
+  if (req.body.password) {
+    // Nếu người dùng muốn đặt mật khẩu mới
+    if (!req.body.currentPassword) {
+      res.status(400);
+      throw new Error(
+        "Vui lòng nhập mật khẩu hiện tại để thay đổi mật khẩu mới."
+      );
+    }
+    const isMatch = await user.matchPassword(req.body.currentPassword);
+    if (!isMatch) {
+      res.status(401); // Unauthorized
+      throw new Error("Mật khẩu hiện tại không chính xác.");
+    }
+
+    if (req.body.password.length < 6) {
+      res.status(400);
+      throw new Error("Mật khẩu mới phải có ít nhất 6 ký tự.");
+    }
+
+    if (req.body.password === req.body.currentPassword) {
+      res.status(400);
+      throw new Error("Mật khẩu mới không được trùng với mật khẩu hiện tại.");
+    }
+
+    user.password = req.body.password; // Mongoose pre-save hook sẽ hash
+  }
+
+  // --- 4. Cập nhật Số điện thoại (Kiểm tra unique) ---
+  const newPhone = req.body.phone;
+  if (newPhone !== undefined && newPhone.trim() !== user.phone) {
+    const phoneToUpdate = newPhone.trim();
+    if (phoneToUpdate === "") {
+      // Nếu người dùng muốn xóa SĐT
+      user.phone = null; // Hoặc undefined tùy schema
     } else {
-      user.email = user.email; // Giữ nguyên email cũ nếu không có email trong req.body
-    }
-
-    // --- Xử lý cập nhật Phone (kiểm tra unique nếu phone thay đổi) ---
-    const newPhone = req.body.phone;
-    if (newPhone !== undefined && newPhone !== user.phone) {
-      // Chỉ kiểm tra unique nếu phone được gửi lên và khác phone hiện tại
-      const phoneExists = await User.findOne({ phone: newPhone });
+      const phoneExists = await User.findOne({
+        phone: phoneToUpdate,
+        _id: { $ne: user._id },
+      }); // Loại trừ chính user này
       if (phoneExists) {
-        // Đã có user khác dùng SĐT này
         res.status(400);
         throw new Error(
           "Số điện thoại này đã được sử dụng bởi tài khoản khác."
         );
       }
-      // Nếu không bị trùng, cập nhật SĐT
-      user.phone = newPhone;
-    } else if (newPhone === undefined) {
-      // Giữ nguyên phone nếu không có trong req.body
-      user.phone = user.phone;
+      user.phone = phoneToUpdate;
     }
-    // Trường hợp newPhone === user.phone thì không cần làm gì
-
-    const updatedUser = await user.save();
-
-    // Respond with updated user info (excluding password)
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      role: updatedUser.role,
-      phone: updatedUser.phone,
-      addresses: updatedUser.addresses,
-    });
-  } else {
-    res.status(404);
-    throw new Error("Người dùng không tồn tại.");
   }
+
+  // --- 5. Lưu tất cả thay đổi ---
+  const updatedUser = await user.save();
+
+  // --- 6. Trả về thông tin User đã cập nhật (không bao gồm password) ---
+  // Nếu email vừa được đổi và chưa xác thực, client cần biết điều này
+  // để có thể hiển thị thông báo "Vui lòng xác thực email mới"
+  res.json({
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email, // Email mới (có thể chưa xác thực)
+    role: updatedUser.role,
+    phone: updatedUser.phone,
+    isEmailVerified: updatedUser.isEmailVerified, // Sẽ là false nếu email vừa được đổi
+  });
 });
 
 // --- Admin Only Routes  ---

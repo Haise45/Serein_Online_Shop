@@ -7,7 +7,10 @@ import { useCreateOrder } from "@/lib/react-query/orderQueries";
 import { useGetUserAddresses } from "@/lib/react-query/userQueries";
 import { getAllCategories } from "@/services/categoryService";
 import { AppDispatch, RootState } from "@/store";
-import { clearSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
+import {
+  clearSelectedItemsForCheckout,
+  setSelectedItemsForCheckout,
+} from "@/store/slices/checkoutSlice";
 import { Category } from "@/types/category";
 import { Coupon } from "@/types/coupon";
 import { OrderCreationPayload } from "@/types/order";
@@ -33,12 +36,10 @@ export default function CheckoutPageClient() {
 
   // State selectedCartItemIds giờ được khởi tạo từ Redux
   const [selectedCartItemIds, setSelectedCartItemIds] = useState<Set<string>>(
-    () => {
-      return new Set(selectedIdsFromRedux || []); // Khởi tạo trực tiếp
-    },
+    new Set(),
   );
-
   const [orderJustPlaced, setOrderJustPlaced] = useState<boolean>(false);
+  const [hasInitializedSelection, setHasInitializedSelection] = useState(false);
 
   useEffect(() => {
     // Đồng bộ từ Redux
@@ -103,6 +104,41 @@ export default function CheckoutPageClient() {
     },
     [],
   );
+
+  // Effect 1: Khởi tạo và đồng bộ selectedCartItemIds với Redux hoặc chọn tất cả
+  useEffect(() => {
+    if (isLoadingCart || !fullCart) return; // Đợi fullCart có dữ liệu
+
+    let newSelectedIdsSet: Set<string>;
+
+    if (selectedIdsFromRedux && selectedIdsFromRedux.length > 0) {
+      // Ưu tiên lựa chọn từ Redux (ví dụ: đến từ trang Cart có checkbox)
+      newSelectedIdsSet = new Set(selectedIdsFromRedux);
+    } else if (fullCart.items.length > 0) {
+      // Nếu Redux rỗng nhưng giỏ hàng có items -> Mặc định chọn tất cả
+      // (Xử lý trường hợp điều hướng từ CartPreviewModal hoặc truy cập trực tiếp)
+      newSelectedIdsSet = new Set(fullCart.items.map((item) => item._id));
+      dispatch(setSelectedItemsForCheckout(Array.from(newSelectedIdsSet))); // Cập nhật lại Redux
+    } else {
+      // Giỏ hàng rỗng
+      newSelectedIdsSet = new Set();
+    }
+
+    // Chỉ cập nhật state nếu thực sự có thay đổi để tránh re-render vô ích
+    if (
+      newSelectedIdsSet.size !== selectedCartItemIds.size ||
+      !Array.from(newSelectedIdsSet).every((id) => selectedCartItemIds.has(id))
+    ) {
+      setSelectedCartItemIds(newSelectedIdsSet);
+    }
+    setHasInitializedSelection(true); // Đánh dấu đã khởi tạo/đồng bộ xong
+  }, [
+    fullCart,
+    selectedIdsFromRedux,
+    isLoadingCart,
+    dispatch,
+    selectedCartItemIds,
+  ]);
 
   const itemsToCheckout = useMemo(() => {
     if (!fullCart || selectedCartItemIds.size === 0) return [];
@@ -206,43 +242,49 @@ export default function CheckoutPageClient() {
   }, [itemsToCheckout, fullCart?.appliedCoupon, categoryMap, getAncestorsFn]);
 
   useEffect(() => {
-    if (orderJustPlaced) {
-      // Nếu đơn hàng vừa đặt xong, không thực hiện logic điều hướng này nữa
+    // Chờ các query và việc khởi tạo selection hoàn tất
+    if (
+      orderJustPlaced ||
+      isLoadingCart ||
+      isCartError ||
+      isLoadingCategories ||
+      !hasInitializedSelection
+    ) {
       return;
     }
 
-    const hasAttemptedLoad =
-      !isLoadingCart && !isCartError && !isLoadingCategories; // Chờ tất cả data cần thiết
-
-    if (hasAttemptedLoad) {
-      // Chỉ thực hiện kiểm tra khi các query chính đã xong
-      if (selectedCartItemIds.size === 0) {
-        // Trường hợp này xảy ra nếu selectedIdsFromRedux rỗng, hoặc user truy cập trực tiếp /checkout
-        // mà không có gì trong Redux state.
-        if (fullCart && fullCart.items.length > 0) {
-          // Nếu giỏ hàng có đồ nhưng không có gì được chọn để checkout
-          toast("Vui lòng chọn sản phẩm từ giỏ hàng để thanh toán.");
-        }
-        router.push("/cart");
-      } else if (itemsToCheckout.length === 0 && selectedCartItemIds.size > 0) {
-        // Có ID được chọn trong Redux, nhưng không tìm thấy item tương ứng trong giỏ hàng thực tế
-        toast.error(
-          "Một số sản phẩm bạn chọn không còn khả dụng. Vui lòng kiểm tra lại giỏ hàng.",
-        );
-        router.push("/cart");
-        dispatch(clearSelectedItemsForCheckout()); // Xóa state Redux không hợp lệ
+    // Nếu sau tất cả, không có item nào được chọn hoặc giỏ hàng trống
+    if (selectedCartItemIds.size === 0) {
+      if (fullCart && fullCart.items.length > 0) {
+        // Giỏ hàng có đồ, nhưng không có gì được chọn (có thể do logic khởi tạo chưa đúng)
+        toast("Vui lòng chọn sản phẩm từ giỏ hàng để thanh toán.", {
+          id: "checkout-no-selection",
+        });
+      } else {
+        // Giỏ hàng thực sự trống
+        toast("Giỏ hàng của bạn trống.", { id: "checkout-empty-final" });
       }
+      router.push("/cart");
+    } else if (itemsToCheckout.length === 0 && selectedCartItemIds.size > 0) {
+      // Có ID được chọn (trong Redux/state), nhưng không tìm thấy item tương ứng trong giỏ hàng thực tế
+      toast.error(
+        "Một số sản phẩm bạn chọn không còn khả dụng. Vui lòng kiểm tra lại giỏ hàng.",
+        { id: "checkout-stale-items" },
+      );
+      router.push("/cart");
+      dispatch(clearSelectedItemsForCheckout());
     }
   }, [
+    orderJustPlaced,
     isLoadingCart,
     isCartError,
     isLoadingCategories,
+    hasInitializedSelection,
     itemsToCheckout.length,
     selectedCartItemIds.size,
     fullCart,
     router,
     dispatch,
-    orderJustPlaced,
   ]);
 
   const handlePlaceOrder = async (
@@ -324,8 +366,8 @@ export default function CheckoutPageClient() {
 
   if (
     !orderJustPlaced &&
-    ((selectedCartItemIds.size > 0 && itemsToCheckout.length === 0) ||
-      selectedCartItemIds.size === 0)
+    (selectedCartItemIds.size === 0 ||
+      (itemsToCheckout.length === 0 && selectedCartItemIds.size > 0))
   ) {
     if (!isLoadingCart && !isCartError && !isLoadingCategories) {
       return (

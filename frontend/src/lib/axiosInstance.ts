@@ -3,9 +3,6 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const axiosInstance = axios.create({
   baseURL: '/api',
-  headers: {
-    "Content-Type": "application/json",
-  },
   withCredentials: true,
 });
 
@@ -15,9 +12,16 @@ axiosInstance.interceptors.request.use(
     const token = store.getState().auth.accessToken;
     // Chỉ thêm Authorization header nếu token tồn tại VÀ request không phải là đến endpoint refresh
     // Các endpoint như login, register thường không cần token này
-    if (token && config.headers && !config.url?.endsWith("api/auth/refresh")) {
+    if (token && config.headers && !config.url?.endsWith("auth/refresh")) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Nếu data là FormData, Axios sẽ tự động set Content-Type đúng.
+    // Nếu data là object JSON, Axios cũng sẽ tự động set Content-Type là application/json nếu không có gì khác được chỉ định.
+    if (!(config.data instanceof FormData) && config.headers && !config.headers['Content-Type']) {
+        config.headers['Content-Type'] = 'application/json';
+    }
+
     return config;
   },
   (error: AxiosError) => {

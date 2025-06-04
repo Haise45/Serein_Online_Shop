@@ -20,7 +20,7 @@ const couponRoutes = require("./routes/couponRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const {
   productReviewRouter,
-  adminReviewRouter,
+  reviewRouter,
 } = require("./routes/reviewRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
@@ -83,7 +83,7 @@ app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/coupons", couponRoutes);
 app.use("/api/v1/orders", orderRoutes);
-app.use("/api/v1/reviews", adminReviewRouter);
+app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 

@@ -176,7 +176,7 @@ export default function CartSummary({
         {/* Truyền selectedSubtotal để CouponSection có thể kiểm tra minOrderValue cho các coupon */}
         <CouponSection
           cartSubtotal={selectedSubtotal}
-          appliedCouponCode={originalCart.appliedCoupon?.code}
+          appliedCouponFull={originalCart.appliedCoupon}
           selectedItems={selectedItemsForSummary}
           categoryMap={categoryMap}
           getAncestorsFn={getAncestorsFn}
