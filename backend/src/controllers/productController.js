@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 const sanitizeHtml = require("../utils/sanitize");
 const { createAdminNotification } = require("../utils/notificationUtils");
 const {
-  getCategoryDescendants, // Import hàm mới
+  getCategoryDescendants,
   fetchAndMapCategories,
 } = require("../utils/categoryUtils");
 
-const LOW_STOCK_THRESHOLD = 5; // Ngưỡng cảnh báo tồn kho thấp
+const LOW_STOCK_THRESHOLD = 10; // Ngưỡng cảnh báo tồn kho thấp
 
 // --- Hàm Helper: Xây dựng bộ lọc MongoDB từ query params ---
 // Tham số: query (từ req.query), isAdmin (bool - xác định quyền để lọc khác nhau)
@@ -232,10 +232,14 @@ const buildFilter = async (query, isAdmin = false) => {
 
   // 6. Filter theo tìm kiếm Text ($text index) - Đặt cuối cùng để kết hợp đúng
   if (query.search) {
-    console.log(
-      `[Filter Debug] Thêm điều kiện tìm kiếm text: "${query.search}"`
-    );
-    andConditions.push({ $text: { $search: query.search } });
+    let searchTerm = query.search.trim();
+    if (searchTerm) {
+      const exactPhraseSearchTerm = `"${searchTerm.replace(/"/g, '\\"')}"`; // Escape dấu " nếu có trong searchTerm
+      console.log(
+        `[Filter Debug] Thêm điều kiện tìm kiếm cụm từ chính xác: ${exactPhraseSearchTerm}`
+      );
+      andConditions.push({ $text: { $search: exactPhraseSearchTerm } });
+    }
   }
 
   // --- 7. Kết hợp cuối cùng ---
@@ -303,43 +307,52 @@ const buildFilter = async (query, isAdmin = false) => {
 // --- Hàm Helper: Xây dựng đối tượng sắp xếp MongoDB ---
 const buildSort = (query) => {
   const sort = {};
-  // Ưu tiên sắp xếp theo điểm liên quan nếu có tìm kiếm text
-  if (query.search) {
-    sort.score = { $meta: "textScore" };
-  }
-  // Xử lý sortBy và sortOrder
-  if (query.sortBy) {
-    // Danh sách các trường cho phép sắp xếp (để bảo mật và tránh lỗi)
+
+  // 1. Xử lý sortBy và sortOrder từ query trước
+  if (query.sortBy && query.sortBy !== "score") {
+    // Bỏ qua 'score' ở đây nếu người dùng chọn sort khác
     const allowedSortFields = [
       "price",
       "name",
       "createdAt",
-      "updatedAt",
       "totalSold",
       "averageRating",
     ];
     if (allowedSortFields.includes(query.sortBy)) {
-      const sortOrder = query.sortOrder === "desc" ? -1 : 1; // Mặc định là 'asc' (1)
-      // Chỉ thêm nếu sortBy không phải là 'score' hoặc không có tìm kiếm text (vì score đã được ưu tiên)
-      if (!query.search || query.sortBy !== "score") {
-        sort[query.sortBy] = sortOrder;
-      }
+      const sortOrder = query.sortOrder === "desc" ? -1 : 1;
+      sort[query.sortBy] = sortOrder;
     } else {
       console.warn(
-        `[Sort] Sắp xếp theo trường "${query.sortBy}" không được phép. Bỏ qua.`
+        `[Sort Product] Sắp xếp theo trường "${query.sortBy}" không được phép.`
       );
     }
   }
-  // Sắp xếp mặc định nếu không có tiêu chí nào (và không có search)
+
+  // 2. Nếu có tìm kiếm text VÀ KHÔNG có sortBy nào khác được chọn HOẶC sortBy là 'score' (mặc định khi search)
+  if (query.search && query.search.trim()) {
+    // Kiểm tra xem query.search có phải là tìm kiếm cụm từ chính xác không (bắt đầu và kết thúc bằng ")
+    const isExactPhraseSearch =
+      query.search.trim().startsWith('"') && query.search.trim().endsWith('"');
+
+    if (!isExactPhraseSearch && Object.keys(sort).length === 0) {
+      // Nếu là tìm kiếm text thông thường (không phải cụm từ chính xác) VÀ chưa có sort nào được chọn
+      sort.score = { $meta: "textScore" };
+      sort.createdAt = -1; // Tiêu chí phụ
+    } else if (isExactPhraseSearch && Object.keys(sort).length === 0) {
+      // Nếu là tìm kiếm CỤM TỪ CHÍNH XÁC và không có sort nào được chọn,
+      sort.createdAt = -1; // Ví dụ: mới nhất trước
+    }
+  }
+
+  // 3. Sắp xếp mặc định cuối cùng nếu không có tiêu chí nào
   if (Object.keys(sort).length === 0) {
-    sort.createdAt = -1; // Mới nhất trước
-  } else if (query.search && Object.keys(sort).length === 1 && sort.score) {
-    // Nếu chỉ có sort theo score, thêm tiêu chí phụ để ổn định kết quả (ví dụ: mới nhất)
     sort.createdAt = -1;
   }
-  console.log("--- [Sort] Đối tượng Sort cuối cùng ---");
-  console.log(JSON.stringify(sort, null, 2)); // Log để debug
-  console.log("------------------------------------");
+
+  console.log(
+    "--- [Sort Product] Đối tượng Sort cuối cùng (cho Phrase Search) ---"
+  );
+  console.log(JSON.stringify(sort, null, 2));
   return sort;
 };
 
@@ -471,7 +484,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // --- Xây dựng bộ lọc và sắp xếp ---
   const filter = await buildFilter(req.query, isAdmin); // Chờ vì có thể query Category
-  const sort = buildSort(req.query); // Hàm helper đã tạo
+  const sortOptions = buildSort(req.query); // Hàm helper đã tạo
 
   // --- Xây dựng projection (chọn lọc các trường trả về) ---
   let projection = {};
@@ -513,12 +526,22 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // --- Thực hiện Query ---
   // Query lấy danh sách sản phẩm
-  const productsQuery = Product.find(filter) // Áp dụng bộ lọc
+  let productsQuery = Product.find(filter) // Áp dụng bộ lọc
     .populate("category", "name slug parent") // Lấy thông tin 'name' và 'slug' của category liên kết
     .select({ ...projection, ...selectFieldsForList }) // Chọn lọc các trường cần thiết và score (nếu có)
-    .sort(sort) // Áp dụng sắp xếp
     .skip(skip) // Bỏ qua các sản phẩm của trang trước
     .limit(limit); // Giới hạn số lượng sản phẩm trên trang này
+
+  // Áp dụng collation NẾU sắp xếp theo tên VÀ KHÔNG phải là tìm kiếm text (vì textScore đã ưu tiên)
+  if (req.query.sortBy === "name" && !req.query.search) {
+    productsQuery = productsQuery.collation({
+      locale: "vi", // Hoặc "en", tùy ngôn ngữ tên sản phẩm
+      strength: 2, // Điều chỉnh strength nếu cần (1, 2, hoặc 3)
+    });
+  }
+
+  // Áp dụng sort sau khi đã có thể thêm collation
+  productsQuery = productsQuery.sort(sortOptions);
 
   // Query đếm tổng số sản phẩm thỏa mãn bộ lọc (để tính tổng số trang)
   const totalProductsQuery = Product.countDocuments(filter);

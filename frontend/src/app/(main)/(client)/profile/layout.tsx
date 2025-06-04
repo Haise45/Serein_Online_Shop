@@ -5,6 +5,7 @@ import { logoutUserApi } from "@/services/authService";
 import { AppDispatch, RootState } from "@/store";
 import { logout as logoutAction } from "@/store/slices/authSlice";
 import { BreadcrumbItem } from "@/types";
+import { generateProfileBreadcrumbs } from "@/utils/profileBreadcrumbs";
 import { Dialog, DialogPanel, Transition } from "@headlessui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -23,7 +24,6 @@ import {
   FiX,
 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { generateProfileBreadcrumbs } from "@/utils/profileBreadcrumbs";
 
 interface ProfileLayoutProps {
   children: ReactNode;
@@ -68,6 +68,26 @@ function classNames(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+// --- HÀM TIỆN ÍCH MỚI ĐỂ RÚT GỌN EMAIL ---
+const truncateEmailMiddle = (
+  email: string | undefined | null,
+  localPartLength: number = 8, // Số ký tự giữ lại ở phần local (trước @)
+  fallbackText: string = "Quản lý tài khoản"
+): string => {
+  if (!email) {
+    return fallbackText;
+  }
+  const parts = email.split('@');
+  if (parts.length !== 2) {
+    return email; // Trả về email gốc nếu không phải định dạng chuẩn
+  }
+  const [localPart, domainPart] = parts;
+  if (localPart.length > localPartLength) {
+    return `${localPart.substring(0, localPartLength)}...@${domainPart}`;
+  }
+  return email; // Trả về email gốc nếu phần local đủ ngắn
+};
+
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -77,9 +97,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
     user,
     isAuthenticated,
     isLoading: authIsLoading,
-  } = useSelector(
-    (state: RootState) => state.auth,
-  );
+  } = useSelector((state: RootState) => state.auth);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // --- STATE VÀ EFFECT CHO BREADCRUMBS ---
@@ -145,18 +163,18 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const SidebarContent = () => (
     <div className="flex h-full grow flex-col overflow-y-auto bg-white shadow-xl lg:shadow-none">
       {/* Header */}
-      <div className="flex justify-center bg-gradient-to-r from-indigo-600 to-purple-600 px-2 py-8">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+      <div className="flex justify-center bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-8">
+        <div className="flex w-full max-w-full items-center space-x-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
             <FiUser className="h-6 w-6 text-white" />
           </div>
-          <div>
-            <h2 className="text-base font-semibold text-white">
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-base font-semibold text-white">
               {user?.name ? `${user.name}` : "Tài khoản của tôi"}
             </h2>
-            <p className="text-sm text-indigo-100">
-              {user?.email || "Quản lý tài khoản"}
-            </p>
+            <p className="truncate text-sm text-indigo-100">
+              {truncateEmailMiddle(user?.email, 8)}
+             </p>
           </div>
         </div>
       </div>
