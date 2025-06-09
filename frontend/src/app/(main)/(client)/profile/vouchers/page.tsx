@@ -1,4 +1,3 @@
-// src/app/(main)/profile/vouchers/page.tsx
 import PageHeader from "@/components/shared/PageHeader";
 import type { Metadata } from "next";
 import { Suspense } from "react";
