@@ -1,4 +1,3 @@
-// src/app/(main)/products/components/filters/RatingFilter.tsx
 "use client";
 import classNames from "classnames";
 import { FiStar } from "react-icons/fi";

@@ -167,28 +167,32 @@ export default function CartPreviewModal({
                       )}
                   </div>
                   <div className="mt-2 flex flex-1 items-end justify-between text-sm">
-                    <div className="flex items-center rounded-md border border-gray-300">
+                    <div className="inline-flex items-center overflow-hidden rounded-md border border-gray-300">
                       <button
                         onClick={() =>
                           handleQuantityChange(item._id, item.quantity, -1)
                         }
                         disabled={
-                          updateCartItemMutation.isPending &&
-                          updateCartItemMutation.variables?.itemId === item._id
+                          item.quantity <= 1 ||
+                          (updateCartItemMutation.isPending &&
+                            updateCartItemMutation.variables?.itemId ===
+                              item._id)
                         }
-                        className="rounded-s-md p-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
                         aria-label={`Giảm số lượng sản phẩm ${item.name}`}
+                        className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
                       >
-                        <FiMinus className="h-3.5 w-3.5" />
+                        <FiMinus className="h-4 w-4 text-gray-600" />
                       </button>
+
                       <input
                         type="text"
                         readOnly
                         value={item.quantity}
-                        className="w-10 border-x border-y-0 border-gray-300 p-1 text-center text-sm text-gray-700 focus:outline-none"
                         aria-label={`Số lượng hiện tại của ${item.name}`}
                         title={`Số lượng ${item.name}`}
+                        className="w-10 border-x border-gray-200 bg-white text-center text-sm font-medium text-gray-800 select-none focus:outline-none"
                       />
+
                       <button
                         onClick={() =>
                           handleQuantityChange(item._id, item.quantity, 1)
@@ -199,10 +203,10 @@ export default function CartPreviewModal({
                               item._id) ||
                           item.quantity >= item.availableStock
                         }
-                        className="rounded-e-md p-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
                         aria-label={`Tăng số lượng sản phẩm ${item.name}`}
+                        className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
                       >
-                        <FiPlus className="h-3.5 w-3.5" />
+                        <FiPlus className="h-4 w-4 text-gray-600" />
                       </button>
                     </div>
 

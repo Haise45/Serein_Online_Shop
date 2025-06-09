@@ -1,8 +1,29 @@
 import { logout, setAccessToken, store } from "@/store";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
+// Xác định xem code đang chạy ở client hay server
+const IS_SERVER = typeof window === "undefined";
+
+let apiBaseUrl: string;
+
+if (IS_SERVER) {
+  // Khi ở server, chúng ta cần URL tuyệt đối đến backend API
+  // Đảm bảo các biến môi trường này được set đúng cho môi trường server của Next.js
+  if (process.env.NODE_ENV === "development") {
+    apiBaseUrl =
+      process.env.INTERNAL_API_BASE_URL || "http://localhost:8080/api/v1"; // URL backend API mà server Next.js có thể gọi
+  } else {
+    apiBaseUrl =
+      process.env.INTERNAL_API_BASE_URL ||
+      "https://online-store-pb1l.onrender.com/api/v1"; // URL backend API cho production
+  }
+} else {
+  // Khi ở client, chúng ta có thể dùng path tương đối '/api' để Next.js rewrites xử lý
+  apiBaseUrl = "/api";
+}
+
 const axiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
 
@@ -18,8 +39,12 @@ axiosInstance.interceptors.request.use(
 
     // Nếu data là FormData, Axios sẽ tự động set Content-Type đúng.
     // Nếu data là object JSON, Axios cũng sẽ tự động set Content-Type là application/json nếu không có gì khác được chỉ định.
-    if (!(config.data instanceof FormData) && config.headers && !config.headers['Content-Type']) {
-        config.headers['Content-Type'] = 'application/json';
+    if (
+      !(config.data instanceof FormData) &&
+      config.headers &&
+      !config.headers["Content-Type"]
+    ) {
+      config.headers["Content-Type"] = "application/json";
     }
 
     return config;
@@ -66,10 +91,6 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry &&
       originalRequest.headers?.Authorization
     ) {
-      console.log(
-        "[Axios Interceptor] Detected 401 on a protected route. Attempting token refresh for:",
-        originalRequest.url,
-      );
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -88,7 +109,6 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log("[Axios Interceptor] Calling /auth/refresh...");
         // Tạo một instance axios mới cho việc refresh token để tránh interceptor của chính nó
         // gây ra vòng lặp nếu endpoint /auth/refresh cũng yêu cầu Authorization header (dù không nên)
         const refreshAxiosInstance = axios.create({
@@ -101,7 +121,6 @@ axiosInstance.interceptors.response.use(
           {}, // Không cần body cho refresh token nếu backend đọc từ cookie
         );
         const newAccessToken = data.accessToken;
-        console.log("[Axios Interceptor] Token refreshed successfully.");
 
         store.dispatch(setAccessToken(newAccessToken));
         if (originalRequest.headers)

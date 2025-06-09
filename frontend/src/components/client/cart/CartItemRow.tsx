@@ -509,7 +509,7 @@ export default function CartItemRow({
         </div>
 
         <div className="mt-4 flex items-center justify-between pt-2 sm:pt-0">
-          <div className="flex items-center rounded-md border border-gray-300">
+          <div className="inline-flex items-center overflow-hidden rounded-lg border border-gray-300 shadow-sm">
             <button
               type="button"
               onClick={() => handleQuantityChange(quantity - 1)}
@@ -517,17 +517,17 @@ export default function CartItemRow({
                 quantity <= 1 || updateCartItemMutation.isPending || isUpdating
               }
               aria-label="Giảm số lượng"
-              className="rounded-s-md px-2.5 py-1.5 text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center bg-white px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <FiMinus className="h-4 w-4" />
+              <FiMinus className="h-5 w-5 text-gray-600" />
             </button>
 
             <input
               type="text"
               readOnly
               value={quantity}
-              className="w-10 border-x border-y-0 border-gray-300 p-1 text-center text-sm text-gray-700 focus:outline-none"
               aria-label={`Số lượng của ${item.name}`}
+              className="w-12 border-x border-gray-200 bg-white text-center text-base font-medium text-gray-800 select-none focus:outline-none"
             />
 
             <button
@@ -539,9 +539,9 @@ export default function CartItemRow({
                 isUpdating
               }
               aria-label="Tăng số lượng"
-              className="rounded-e-md px-2.5 py-1.5 text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center bg-white px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <FiPlus className="h-4 w-4" />
+              <FiPlus className="h-5 w-5 text-gray-600" />
             </button>
           </div>
 

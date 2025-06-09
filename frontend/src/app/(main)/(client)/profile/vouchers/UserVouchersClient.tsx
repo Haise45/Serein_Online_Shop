@@ -2,10 +2,9 @@
 
 import PaginationControls from "@/components/client/product/PaginationControls";
 import { useGetCoupons } from "@/lib/react-query/couponQueries";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { GetCouponsParams } from "@/services/couponService";
 import { Coupon } from "@/types/coupon";
-import { formatCurrency } from "@/lib/utils";
-import { formatDate } from "@/lib/utils";
 import classNames from "classnames";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -64,7 +63,6 @@ const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
   ) {
     const firstApplicableDetail = voucher.applicableDetails[0];
     if (voucher.applicableTo === "categories") {
-      // Giả sử API getProducts hỗ trợ filter category bằng slug
       utilizeLink = `/products?category=${firstApplicableDetail.slug}`;
     } else if (voucher.applicableTo === "products") {
       // Link đến trang chi tiết sản phẩm
@@ -92,7 +90,7 @@ const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
           </h3>
           <span
             className={classNames(
-              "rounded-full px-2 py-0.5 text-xs font-medium text-center",
+              "rounded-full px-2 py-0.5 text-center text-xs font-medium",
               isExpiredOrInactive
                 ? "bg-gray-100 text-gray-600"
                 : "bg-green-100 text-green-700",
@@ -149,7 +147,7 @@ const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
           <Link
             href={utilizeLink}
             className={classNames(
-              "rounded-md px-3 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 ease-in-out text-center",
+              "rounded-md px-3 py-2 text-center text-xs font-semibold text-white shadow-sm transition-all duration-200 ease-in-out",
               "bg-gradient-to-r from-indigo-600 to-purple-700",
               "hover:-translate-y-0.5 hover:from-indigo-500 hover:to-purple-600 hover:shadow-md",
               "focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none",
@@ -270,7 +268,7 @@ export default function UserVouchersClient() {
   return (
     <div className="mt-6">
       <div className="mb-4 text-sm text-gray-600">
-        Bạn có
+        Bạn có{" "}
         <span className="font-semibold text-indigo-600">{totalCoupons}</span> mã
         giảm giá khả dụng.
       </div>
