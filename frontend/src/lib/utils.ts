@@ -1,4 +1,5 @@
 import { Category } from "@/types";
+import DOMPurify from "isomorphic-dompurify";
 
 export const buildCategoryTree = (
   categories: Category[],
@@ -88,4 +89,26 @@ export const formatDate = (dateInput?: string | Date | null): string => {
   } catch {
     return "N/A";
   }
+};
+
+/**
+ * Làm sạch một chuỗi HTML để ngăn chặn các cuộc tấn công XSS.
+ * Sử dụng DOMPurify, hoạt động được cả ở server-side và client-side.
+ * @param dirtyHtml Chuỗi HTML có khả năng chứa mã độc.
+ * @returns Chuỗi HTML đã được làm sạch.
+ */
+export const sanitizeHtmlContent = (
+  dirtyHtml: string | null | undefined,
+): string => {
+  if (
+    dirtyHtml === null ||
+    dirtyHtml === undefined ||
+    typeof dirtyHtml !== "string"
+  ) {
+    return ""; // Trả về chuỗi rỗng nếu đầu vào không hợp lệ
+  }
+
+  // Sử dụng cấu hình mặc định thường là đủ tốt
+  const clean = DOMPurify.sanitize(dirtyHtml);
+  return clean;
 };
