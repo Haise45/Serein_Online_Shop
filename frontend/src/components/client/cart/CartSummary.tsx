@@ -1,25 +1,25 @@
 "use client";
+
 import { formatCurrency } from "@/lib/utils";
-import { AppDispatch } from "@/store"; // Import AppDispatch
+import { AppDispatch } from "@/store";
 import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
-import { CartData, CartItem as CartItemType } from "@/types/cart";
-import { Category } from "@/types/category";
+import { CartData, CartItem as CartItemType, Category } from "@/types";
 import classNames from "classnames";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux"; // Import useDispatch
+import { useDispatch } from "react-redux";
 import CouponSection from "./CouponSection";
 
 interface CartSummaryProps {
   originalCart: CartData; // Giỏ hàng gốc với tất cả items và coupon (nếu có)
   selectedItemsForSummary: CartItemType[]; // Chỉ các items được người dùng chọn
-  categoryMap: Map<string, Category>;
+  categoryMap: Map<string, Category>; // Map để tra cứu category
   getAncestorsFn: (
     categoryId: string,
     categoryMap: Map<string, Category>,
-  ) => string[];
+  ) => string[]; // Hàm để lấy tổ tiên category
 }
 
 export default function CartSummary({
@@ -30,7 +30,10 @@ export default function CartSummary({
 }: CartSummaryProps) {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  // Tính toán lại subtotal và totalQuantity DỰA TRÊN selectedItemsForSummary
+
+  // --- Tính toán lại các giá trị DỰA TRÊN các sản phẩm đã được chọn ---
+
+  // 1. Tính tổng tiền tạm tính của các sản phẩm đã chọn
   const selectedSubtotal = useMemo(() => {
     return selectedItemsForSummary.reduce(
       (acc, item) => acc + item.price * item.quantity,
@@ -38,8 +41,8 @@ export default function CartSummary({
     );
   }, [selectedItemsForSummary]);
 
+  // 2. Tính tổng số lượng và số loại sản phẩm đã chọn
   const numberOfSelectedProductLines = selectedItemsForSummary.length;
-  // Tính tổng số lượng sản phẩm thực tế được chọn
   const totalSelectedQuantity = useMemo(() => {
     return selectedItemsForSummary.reduce(
       (acc, item) => acc + item.quantity,
@@ -47,85 +50,71 @@ export default function CartSummary({
     );
   }, [selectedItemsForSummary]);
 
-  // Tính toán discountAmount CHỈ cho các selectedItemsForSummary
-  // dựa trên coupon đã được áp dụng cho originalCart.
+  // 3. Tính lại số tiền được giảm giá chỉ cho các sản phẩm đã chọn
   const discountAmountForSelected = useMemo(() => {
+    // Không có giảm giá nếu không có coupon hoặc không có sản phẩm nào được chọn
     if (!originalCart.appliedCoupon || selectedItemsForSummary.length === 0) {
       return 0;
     }
 
-    const coupon = originalCart.appliedCoupon; // Giả sử đây là type Coupon đầy đủ
-    let applicableSubtotalForSelectedItems = 0;
+    const coupon = originalCart.appliedCoupon;
 
-    // Lọc ra những item trong selectedItemsForSummary thực sự được coupon này áp dụng
-    const trulyApplicableItems = selectedItemsForSummary.filter((item) => {
-      if (!coupon || !coupon.applicableIds)
-        return coupon.applicableTo === "all";
+    // Lọc ra những item trong danh sách ĐÃ CHỌN mà coupon có thể áp dụng
+    const applicableItems = selectedItemsForSummary.filter((item) => {
+      // Trường hợp 1: Coupon áp dụng cho tất cả sản phẩm
+      if (coupon.applicableTo === "all") return true;
+      if (!coupon.applicableIds || coupon.applicableIds.length === 0)
+        return false;
 
-      const itemProductIdStr =
-        typeof item.productId === "string"
-          ? item.productId
-          : item.productId._id.toString();
+      const applicableIdsStr = coupon.applicableIds.map((id) => id.toString());
 
-      if (coupon.applicableTo === "all") {
-        return true;
+      // Trường hợp 2: Coupon áp dụng cho sản phẩm cụ thể
+      if (coupon.applicableTo === "products") {
+        return applicableIdsStr.includes(item.productId.toString());
       }
 
-      if (coupon.applicableTo === "products") {
-        return coupon.applicableIds.some(
-          (appId) => appId.toString() === itemProductIdStr,
+      // Trường hợp 3: Coupon áp dụng cho danh mục cụ thể (bao gồm cả danh mục cha)
+      if (coupon.applicableTo === "categories" && item.category) {
+        const itemCategoryIdStr = item.category._id.toString();
+        // Kiểm tra xem ID của category hoặc bất kỳ tổ tiên nào của nó có nằm trong danh sách được áp dụng không
+        const categoryAndAncestors = new Set([
+          itemCategoryIdStr,
+          ...getAncestorsFn(itemCategoryIdStr, categoryMap),
+        ]);
+        return applicableIdsStr.some((appId) =>
+          categoryAndAncestors.has(appId),
         );
       }
 
-      if (coupon.applicableTo === "categories") {
-        if (
-          item.category &&
-          typeof item.category !== "string" &&
-          item.category._id
-        ) {
-          const itemCategoryIdStr = item.category._id.toString();
-          const itemCategoryAndItsAncestors = new Set([
-            itemCategoryIdStr,
-            ...getAncestorsFn(itemCategoryIdStr, categoryMap),
-          ]);
-          return coupon.applicableIds.some((appId) =>
-            itemCategoryAndItsAncestors.has(appId.toString()),
-          );
-        }
-        return false; // Item không có category hợp lệ
-      }
-      return false; // Mặc định không áp dụng nếu applicableTo không khớp
+      return false;
     });
 
-    if (trulyApplicableItems.length === 0) {
-      return 0; // Không có sản phẩm nào được chọn phù hợp với coupon này
-    }
+    // Nếu không có sản phẩm nào được chọn phù hợp với coupon
+    if (applicableItems.length === 0) return 0;
 
-    applicableSubtotalForSelectedItems = trulyApplicableItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+    // Tính tổng tiền của các sản phẩm được coupon áp dụng
+    const applicableSubtotal = applicableItems.reduce(
+      (sum, item) => sum + item.lineTotal,
       0,
     );
 
-    // Kiểm tra minOrderValue với applicableSubtotalForSelectedItems (tổng tiền của các sản phẩm thực sự được coupon áp dụng)
-    if (
-      coupon.minOrderValue > 0 &&
-      applicableSubtotalForSelectedItems < coupon.minOrderValue
-    ) {
+    // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
+    const minOrderValue = coupon.minOrderValue || 0;
+    if (minOrderValue > 0 && applicableSubtotal < minOrderValue) {
       return 0;
     }
 
+    // Tính toán số tiền giảm giá
     let calculatedDiscount = 0;
+    const discountValue = coupon.discountValue || 0;
     if (coupon.discountType === "percentage") {
-      calculatedDiscount =
-        (applicableSubtotalForSelectedItems * coupon.discountValue) / 100;
+      calculatedDiscount = (applicableSubtotal * discountValue) / 100;
     } else if (coupon.discountType === "fixed_amount") {
-      calculatedDiscount = coupon.discountValue;
+      calculatedDiscount = discountValue;
     }
 
-    return Math.min(
-      Math.round(calculatedDiscount),
-      applicableSubtotalForSelectedItems, // Giảm giá không thể lớn hơn tổng tiền của các sản phẩm được áp dụng
-    );
+    // Giảm giá không thể lớn hơn tổng tiền của các sản phẩm được áp dụng
+    return Math.min(Math.round(calculatedDiscount), applicableSubtotal);
   }, [
     originalCart.appliedCoupon,
     selectedItemsForSummary,
@@ -133,24 +122,22 @@ export default function CartSummary({
     getAncestorsFn,
   ]);
 
+  // 4. Tính tổng tiền cuối cùng
   const finalTotalForSelected = selectedSubtotal - discountAmountForSelected;
 
+  // --- Logic và Handlers ---
   const canProceedToCheckout = selectedItemsForSummary.length > 0;
 
   const handleProceedToCheckout = () => {
-    // Đổi thành hàm xử lý onClick
     if (!canProceedToCheckout) {
       toast.error("Vui lòng chọn ít nhất một sản phẩm để tiếp tục.");
       return;
     }
 
+    // Lấy ID của các cart items đã được chọn và lưu vào Redux store
     const selectedIds = selectedItemsForSummary.map((item) => item._id);
-    if (selectedIds.length > 0) {
-      dispatch(setSelectedItemsForCheckout(selectedIds));
-      router.push("/checkout"); // Điều hướng không cần query params
-    } else {
-      toast.error("Vui lòng chọn sản phẩm để thanh toán."); // Trường hợp này ít xảy ra nếu canProceedToCheckout đã check
-    }
+    dispatch(setSelectedItemsForCheckout(selectedIds));
+    router.push("/checkout"); // Điều hướng sang trang thanh toán
   };
 
   return (
@@ -165,15 +152,15 @@ export default function CartSummary({
       <dl className="mt-6 space-y-4">
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600">
-            Sản phẩm đã chọn ({numberOfSelectedProductLines} loại -{" "}
-            {totalSelectedQuantity} chiếc)
+            Tạm tính ({numberOfSelectedProductLines} loại,{" "}
+            {totalSelectedQuantity} sản phẩm)
           </dt>
           <dd className="text-sm font-medium text-gray-900">
             {formatCurrency(selectedSubtotal)}
           </dd>
         </div>
 
-        {/* Truyền selectedSubtotal để CouponSection có thể kiểm tra minOrderValue cho các coupon */}
+        {/* Component Coupon nhận các props cần thiết để hoạt động độc lập */}
         <CouponSection
           cartSubtotal={selectedSubtotal}
           appliedCouponFull={originalCart.appliedCoupon}
@@ -182,6 +169,7 @@ export default function CartSummary({
           getAncestorsFn={getAncestorsFn}
         />
 
+        {/* Hiển thị số tiền được giảm nếu có */}
         {originalCart.appliedCoupon && discountAmountForSelected > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <dt className="flex items-center text-sm text-green-600">
@@ -193,11 +181,8 @@ export default function CartSummary({
           </div>
         )}
 
-        {/* ... Phí vận chuyển ... */}
         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-          <dt className="text-base font-semibold text-gray-900">
-            Tổng cộng (tạm tính)
-          </dt>
+          <dt className="text-base font-semibold text-gray-900">Tổng cộng</dt>
           <dd className="text-base font-semibold text-gray-900">
             {formatCurrency(finalTotalForSelected)}
           </dd>
@@ -207,7 +192,7 @@ export default function CartSummary({
       <div className="mt-8">
         <button
           type="button"
-          onClick={handleProceedToCheckout} // Gọi hàm mới
+          onClick={handleProceedToCheckout}
           disabled={!canProceedToCheckout}
           className={classNames(
             "block w-full rounded-md border border-transparent px-6 py-3 text-center text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",

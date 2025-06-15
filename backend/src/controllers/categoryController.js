@@ -3,6 +3,77 @@ const Product = require("../models/Product");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 
+// --- Hàm Helper: Xây dựng bộ lọc Category ---
+const buildCategoryFilter = (query, isAdmin = false) => {
+  const filter = {}; // Khởi tạo đối tượng filter rỗng
+
+  // 1. Lọc theo trạng thái hoạt động (isActive)
+  if (isAdmin) {
+    // Nếu là Admin:
+    if (query.isActive === "true") {
+      filter.isActive = true;
+    } else if (query.isActive === "false") {
+      filter.isActive = false;
+    }
+  } else {
+    // Nếu là Client:
+    filter.isActive = true;
+  }
+
+  // 2. Lọc theo danh mục cha (parent)
+  if (query.parent !== undefined) {
+    if (
+      query.parent === "null" ||
+      query.parent === null ||
+      query.parent === ""
+    ) {
+      // Tìm các danh mục cấp cao nhất (không có cha)
+      filter.parent = null;
+    } else if (mongoose.Types.ObjectId.isValid(query.parent)) {
+      // Tìm các danh mục con của một parent ID cụ thể
+      filter.parent = new mongoose.Types.ObjectId(query.parent);
+    } else {
+      // Nếu parent không hợp lệ, trả về filter không match gì
+      filter.parent = "invalid_id";
+    }
+  }
+
+  // 3. Tìm kiếm theo tên (name) hoặc slug
+  if (query.search) {
+    const searchQuery = { $regex: query.search.trim(), $options: "i" }; // 'i' for case-insensitive
+    // Tìm kiếm trên cả hai trường 'name' và 'slug'
+    filter.$or = [{ name: searchQuery }, { slug: searchQuery }];
+  }
+
+  // Ghi log để debug (tùy chọn)
+  console.log("--- [Category Filter] ---");
+  console.log(JSON.stringify(filter, null, 2));
+  console.log("-------------------------");
+
+  return filter;
+};
+
+// --- Hàm Helper: Xây dựng đối tượng sắp xếp Category ---
+const buildCategorySort = (query) => {
+  const sort = {};
+  const allowedSortFields = ["name", "createdAt", "updatedAt"]; // Các trường cho phép sắp xếp
+
+  if (query.sortBy && allowedSortFields.includes(query.sortBy)) {
+    const sortOrder = query.sortOrder === "asc" ? 1 : -1; // Mặc định là giảm dần (desc)
+    sort[query.sortBy] = sortOrder;
+  } else {
+    // Mặc định sắp xếp theo ngày tạo mới nhất để danh mục mới luôn ở trên đầu
+    sort.createdAt = 1;
+  }
+
+  // Ghi log để debug
+  console.log("--- [Category Sort] ---");
+  console.log(JSON.stringify(sort, null, 2));
+  console.log("-----------------------");
+
+  return sort;
+};
+
 // @desc    Tạo danh mục mới
 // @route   POST /api/v1/categories
 // @access  Private/Admin
@@ -48,12 +119,117 @@ const createCategory = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/categories
 // @access  Public (hoặc Private/Admin tùy yêu cầu)
 const getCategories = asyncHandler(async (req, res) => {
-  // Lấy tất cả danh mục (kể cả inactive - cho Admin) và có parent
-  const categories = await Category.find()
-    // .populate('parent', 'name slug') // Lấy thông tin parent nếu cần
-    .sort("name");
+  // Xác định context: user đang truy cập là admin hay client?
+  const isAdmin = req.user && req.user.role === "admin";
 
-  res.json(categories);
+  // 1. Xây dựng đối tượng filter từ query params
+  const filter = buildCategoryFilter(req.query, isAdmin);
+
+  // 2. Xây dựng đối tượng sắp xếp
+  const sort = buildCategorySort(req.query);
+
+  // --- Pipeline chính để tính toán dữ liệu ---
+  const calculationPipeline = [
+    // Giai đoạn 1: Áp dụng filter ngay từ đầu
+    { $match: filter },
+
+    // Giai đoạn 2: Tìm tất cả các danh mục con cháu của mỗi danh mục
+    {
+      $graphLookup: {
+        from: "categories", // Tên collection
+        startWith: "$_id", // Bắt đầu từ _id của mỗi document
+        connectFromField: "_id", // Trường nối từ
+        connectToField: "parent", // Trường nối đến (parent của document khác)
+        as: "descendants", // Tên mảng chứa tất cả con cháu
+        depthField: "depth", // (Tùy chọn) Thêm trường cho biết độ sâu
+      },
+    },
+
+    // Giai đoạn 3: Tạo một mảng chứa ID của chính nó và tất cả con cháu
+    {
+      $addFields: {
+        allCategoryIds: {
+          $concatArrays: [["$_id"], "$descendants._id"],
+        },
+      },
+    },
+
+    // Giai đoạn 4: Join với collection 'products' dựa trên mảng ID đã tạo
+    {
+      $lookup: {
+        from: "products",
+        localField: "allCategoryIds", // Mảng ID của danh mục (cha + con)
+        foreignField: "category", // Trường category trong Product
+        as: "allProducts", // Tên mảng chứa tất cả sản phẩm
+      },
+    },
+
+    // Giai đoạn 5: Join với collection 'categories' để lấy thông tin parent (cho hiển thị)
+    {
+      $lookup: {
+        from: "categories",
+        localField: "parent",
+        foreignField: "_id",
+        as: "parentInfo",
+      },
+    },
+
+    // Giai đoạn 6: Tạo các trường cuối cùng và định dạng lại
+    {
+      $addFields: {
+        productCount: { $size: "$allProducts" }, // Đếm tổng số sản phẩm
+        parent: { $ifNull: [{ $arrayElemAt: ["$parentInfo", 0] }, null] }, // Lấy parent hoặc set là null
+      },
+    },
+
+    // Giai đoạn 7: Chọn lọc các trường cần trả về
+    {
+      $project: {
+        name: 1,
+        slug: 1,
+        description: 1,
+        image: 1,
+        isActive: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        productCount: 1,
+        "parent._id": 1,
+        "parent.name": 1,
+        "parent.slug": 1,
+      },
+    },
+  ];
+
+  // 3. Xử lý phân trang
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10; // Mặc định 10 mục/trang
+  const skip = (page - 1) * limit;
+
+  // 4. Thực thi pipeline để lấy tổng số lượng và dữ liệu
+  const countPipeline = [...calculationPipeline, { $count: "total" }];
+
+  const [totalResult, categories] = await Promise.all([
+    Category.aggregate(countPipeline),
+    Category.aggregate(calculationPipeline).sort(sort).skip(skip).limit(limit),
+  ]);
+
+  const totalItems = totalResult.length > 0 ? totalResult[0].total : 0;
+  const totalPages = Math.ceil(totalItems / limit);
+
+  // Debug log
+  console.log("--- [Categories Result] ---");
+  console.log("Total items found:", totalItems);
+  console.log("Categories returned:", categories.length);
+  console.log("---------------------------");
+
+  // 5. Trả về response
+  res.status(200).json({
+    currentPage: page,
+    totalPages: totalPages,
+    totalCategories: totalItems,
+    limit: limit,
+    categories: categories,
+  });
 });
 
 // @desc    Lấy chi tiết một danh mục bằng ID hoặc Slug

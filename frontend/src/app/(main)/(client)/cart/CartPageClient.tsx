@@ -2,38 +2,46 @@
 
 import CartItemList from "@/components/client/cart/CartItemList";
 import CartSummary from "@/components/client/cart/CartSummary";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetCart } from "@/lib/react-query/cartQueries";
+import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
+import { Category } from "@/types/category";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FiAlertCircle, FiLoader, FiShoppingCart, FiTag } from "react-icons/fi";
-import { useQuery } from "@tanstack/react-query"; // Dùng để fetch categories
-import { getAllCategories } from "@/services/categoryService"; // Hàm service mới (sẽ tạo)
-import { Category } from "@/types/category";
 
 export default function CartPageClient() {
-  const { data: cart, isLoading, isError, error, refetch } = useGetCart();
+  const {
+    data: cart,
+    isLoading: isLoadingCart,
+    isError,
+    error,
+    refetch,
+  } = useGetCart();
 
   // State để lưu trữ ID của các cart items đã được chọn
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
     new Set(),
   );
-  const [hasInitializedSelectedItems, setHasInitializedSelectedItems] =
-    useState(false);
+
+  // const [hasInitializedSelectedItems, setHasInitializedSelectedItems] =
+  //   useState(false);
+
+  // Fetch tất cả thuộc tính để tra cứu
+  const { data: attributes, isLoading: isLoadingAttributes } =
+    useGetAttributes();
+
+  // Fetch tất cả các active categories để dùng cho CouponSection
+  const { data: categoriesData, isLoading: isLoadingCategories } =
+    useGetAllCategories({ limit: 9999, isActive: true });
 
   // Khởi tạo: chọn tất cả các item khi giỏ hàng được load lần đầu
   useEffect(() => {
-    // Chỉ khởi tạo selectedItemIds một lần khi cart có items và chưa được khởi tạo
-    if (cart && cart.items.length > 0 && !hasInitializedSelectedItems) {
-      setSelectedItemIds(new Set());
-      setHasInitializedSelectedItems(true); // Đánh dấu đã khởi tạo
-    } else if (
-      (!cart || cart.items.length === 0) &&
-      hasInitializedSelectedItems
-    ) {
-      // Nếu giỏ hàng trở nên rỗng sau khi đã khởi tạo, reset lại
-      setHasInitializedSelectedItems(false); // Cho phép khởi tạo lại nếu sau đó có item
+    if (cart && cart.items.length > 0) {
+      setSelectedItemIds(new Set(cart.items.map((item) => item._id)));
     }
-  }, [cart, hasInitializedSelectedItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart?.items.length]);
 
   const handleSelectItem = (itemId: string, isSelected: boolean) => {
     setSelectedItemIds((prevSelectedIds) => {
@@ -69,45 +77,58 @@ export default function CartPageClient() {
     return cart.items.length === selectedItemIds.size;
   }, [cart, selectedItemIds]);
 
-  // Fetch tất cả các active categories để dùng cho CouponSection
-  const { data: allActiveCategories, isLoading: isLoadingCategories } = useQuery<Category[], Error>({
-    queryKey: ['allActiveCategoriesForCart'],
-    queryFn: () => getAllCategories({ isActive: true }), // Lấy các category active
-    staleTime: 1000 * 60 * 60, // Cache 1 giờ
-  });
-
-  // Tạo categoryMap ở client
-  const activeCategoryMapClient = useMemo(() => {
+  // Tạo một Map để tra cứu Category từ ID một cách hiệu quả
+  const categoryMap = useMemo(() => {
     const map = new Map<string, Category>();
-    if (allActiveCategories) {
-      allActiveCategories.forEach(cat => map.set(cat._id.toString(), cat));
-    }
+    const allCategories = categoriesData?.categories || [];
+    allCategories.forEach((cat) => map.set(cat._id.toString(), cat));
     return map;
-  }, [allActiveCategories]);
+  }, [categoriesData]);
 
-  // Hàm getCategoryAncestors client-side
-  const getCategoryAncestorsClient = (categoryId: string, categoryMap: Map<string, Category>): string[] => {
-    if (!categoryId) return [];
-    const ancestors = [];
-    let currentId = categoryId;
-    for (let i = 0; i < 10 && currentId; i++) { // Giới hạn vòng lặp tránh vô hạn
-      const category = categoryMap.get(currentId);
-      if (category && category.parent) {
-        const parentId = typeof category.parent === 'string' ? category.parent : category.parent._id.toString();
-        if (parentId) {
-            ancestors.push(parentId);
-            currentId = parentId;
-        } else {
-            currentId = ""; // Ngắt vòng lặp nếu parent không hợp lệ
-        }
+  // Tạo bộ đệm tra cứu (lookup map)
+  const attributeMap = useMemo(() => {
+    if (!attributes) return new Map();
+    const map = new Map<
+      string,
+      { label: string; values: Map<string, string> }
+    >();
+    attributes.forEach((attr) => {
+      const valueMap = new Map<string, string>();
+      attr.values.forEach((val) => {
+        valueMap.set(val._id, val.value);
+      });
+      map.set(attr._id, { label: attr.label, values: valueMap });
+    });
+    return map;
+  }, [attributes]);
+
+  // Hàm helper client-side để tìm tất cả tổ tiên của một category
+  const getCategoryAncestorsClient = (
+    categoryId: string,
+    catMap: Map<string, Category>,
+  ): string[] => {
+    const ancestors: string[] = [];
+    let currentId: string | null = categoryId;
+    // Giới hạn vòng lặp để tránh lặp vô tận nếu có lỗi dữ liệu
+    for (let i = 0; i < 10 && currentId; i++) {
+      const category = catMap.get(currentId);
+      if (category?.parent) {
+        const parentId =
+          typeof category.parent === "string"
+            ? category.parent
+            : category.parent._id;
+        ancestors.push(parentId);
+        currentId = parentId;
       } else {
-        currentId = ""; // Ngắt vòng lặp
+        currentId = null; // Dừng lại khi không còn parent
       }
     }
     return ancestors;
   };
 
-  if (isLoading || isLoadingCategories) {
+  const isLoading = isLoadingCart || isLoadingCategories || isLoadingAttributes;
+
+  if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <FiLoader className="h-12 w-12 animate-spin text-indigo-600" />
@@ -189,13 +210,14 @@ export default function CartPageClient() {
             items={cart.items}
             selectedItemIds={selectedItemIds}
             onSelectItem={handleSelectItem}
+            attributeMap={attributeMap}
           />
         </section>
         <div className="lg:col-span-4">
           <CartSummary
             originalCart={cart}
             selectedItemsForSummary={selectedItems}
-            categoryMap={activeCategoryMapClient}
+            categoryMap={categoryMap}
             getAncestorsFn={getCategoryAncestorsClient}
           />
         </div>

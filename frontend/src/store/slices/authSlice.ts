@@ -95,6 +95,17 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
       }
     },
+    setAuthIsLoading(state, action: PayloadAction<boolean>) {
+      state.isLoading = action.payload;
+    },
+    setAuthError(state, action: PayloadAction<string | null>) {
+      state.error = action.payload;
+      if (action.payload) {
+        // Nếu có lỗi, thường là không authenticated
+        state.isLoading = false;
+        state.isAuthenticated = false;
+      }
+    },
   },
 });
 
@@ -105,5 +116,7 @@ export const {
   logout,
   setAccessToken,
   setUser,
+  setAuthIsLoading,
+  setAuthError,
 } = authSlice.actions;
 export default authSlice.reducer;

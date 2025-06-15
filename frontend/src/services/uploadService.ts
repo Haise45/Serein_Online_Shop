@@ -10,7 +10,6 @@ export interface UploadImagesResponse {
   message: string;
   imageUrls: string[];
 }
-
 /**
  * Upload multiple images to the backend.
  * @param files Array of File objects to upload.

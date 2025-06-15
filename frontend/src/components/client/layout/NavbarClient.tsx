@@ -1,15 +1,15 @@
 "use client";
 
+import SearchSuggestionList from "@/components/shared/SearchSuggestionList";
 import useDebounce from "@/hooks/useDebounce";
 import { useGetCart } from "@/lib/react-query/cartQueries";
-import { useGetProducts } from "@/lib/react-query/productQueries"; // Import useGetProducts
+import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
+import { useGetProducts } from "@/lib/react-query/productQueries";
 import { useGetWishlist } from "@/lib/react-query/wishlistQueries";
-import { buildCategoryTree, formatCurrency } from "@/lib/utils";
-import { getAllCategories } from "@/services/categoryService";
+import { buildCategoryTree } from "@/lib/utils";
 import { GetProductsParams } from "@/services/productService";
-import { Category } from "@/types"; // Import Product
+import { Category } from "@/types";
 import { Transition } from "@headlessui/react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,19 +19,13 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react"; // Thêm useRef
-import {
-  FiHeart,
-  FiLoader,
-  FiMenu,
-  FiSearch,
-  FiShoppingCart,
-  FiX,
-} from "react-icons/fi"; // Thêm FiX, FiLoader
+} from "react";
+import { FiHeart, FiMenu, FiSearch, FiShoppingCart, FiX } from "react-icons/fi";
 import CartPreviewModal from "../cart/CartPreviewModal";
 import CategoryMenu from "../category/CategoryMenu";
 import SideDrawer from "./SideDrawer";
 import UserMenu from "./UserMenu";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 
 export default function NavbarClient() {
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
@@ -41,15 +35,32 @@ export default function NavbarClient() {
   const [categories, setCategories] = useState<
     (Category & { children?: Category[] })[]
   >([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  const [errorCategories, setErrorCategories] = useState<string | null>(null);
   const [isMegaMenuOverlayVisible, setIsMegaMenuOverlayVisible] =
     useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const {
+    data: categoriesData,
+    isLoading: loadingCategories,
+    isError: errorCategories,
+  } = useGetAllCategories({
+    limit: 200, // Lấy một số lượng lớn để đảm bảo có đủ cho menu
+    isActive: true,
+  });
+
+  // Xử lý dữ liệu từ React Query
+  useEffect(() => {
+    if (categoriesData) {
+      // Dữ liệu trả về là object có phân trang
+      const activeCategories = categoriesData.categories || [];
+      const categoryTree = buildCategoryTree(activeCategories);
+      setCategories(categoryTree);
+    }
+  }, [categoriesData]);
+
   const { data: cartData } = useGetCart();
-  const cartItemCount = cartData?.totalQuantity || 0;
+  const cartItemCount = cartData?.totalDistinctItems || 0;
 
   const { data: wishlistItemsData } = useGetWishlist();
   const wishlistCount = wishlistItemsData?.length || 0;
@@ -84,26 +95,18 @@ export default function NavbarClient() {
   const suggestedProducts = suggestedProductsData?.products || [];
   // --- Kết thúc Logic Search Suggestions ---
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoadingCategories(true);
-      setErrorCategories(null);
-      try {
-        const data = await getAllCategories({ isActive: true });
-        const activeCategories =
-          data?.filter((c: Category) => c.isActive) || [];
-        const categoryTree = buildCategoryTree(activeCategories);
-        setCategories(categoryTree);
-      } catch (error) {
-        console.error("Lỗi fetch danh mục cho Navbar:", error);
-        setErrorCategories("Không thể tải danh mục"); // Hiển thị lỗi thân thiện hơn
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-    fetchCategories();
-  }, []);
-
+  const { data: attributes } = useGetAttributes();
+  const attributeMap = useMemo(() => {
+    if (!attributes) return new Map();
+    const map = new Map<string, { label: string; values: Map<string, string> }>();
+    attributes.forEach(attr => {
+      const valueMap = new Map<string, string>();
+      attr.values.forEach(val => valueMap.set(val._id, val.value));
+      map.set(attr._id, { label: attr.label, values: valueMap });
+    });
+    return map;
+  }, [attributes]);
+  
   useEffect(() => {
     setIsSearchBarActive(false);
     setSearchTerm("");
@@ -286,82 +289,18 @@ export default function NavbarClient() {
               </form>
 
               {/* Gợi ý tìm kiếm */}
-              {debouncedSearchTerm.length > 1 && (
-                <div className="mt-3 max-h-[calc(100vh-250px)] overflow-y-auto rounded-md bg-white">
-                  {isLoadingSuggestions &&
-                    !isPlaceholderData && ( // Chỉ hiện loading "to" khi không có placeholder
-                      <div className="p-4 text-center text-sm text-gray-500">
-                        <FiLoader className="mr-2 inline animate-spin" /> Đang
-                        tìm...
-                      </div>
-                    )}
-                  {isFetchingSuggestions &&
-                    isPlaceholderData && ( // Có thể hiện một loader nhỏ hơn khi có placeholder
-                      <div className="p-2 text-center text-xs text-gray-400">
-                        <FiLoader className="mr-1 inline h-3 w-3 animate-spin" />
-                      </div>
-                    )}
-
-                  {!isFetchingSuggestions &&
-                    !isLoadingSuggestions &&
-                    debouncedSearchTerm.length > 1 &&
-                    suggestedProducts.length === 0 && (
-                      <div className="p-4 text-center text-sm text-gray-500">
-                        Không tìm thấy sản phẩm nào khớp với &quot;
-                        {debouncedSearchTerm}&quot;.
-                      </div>
-                    )}
-
-                  {suggestedProducts.length > 0 && (
-                    <ul className="divide-y divide-gray-100">
-                      {suggestedProducts.map((product) => (
-                        <li key={product._id} className="hover:bg-gray-50">
-                          <Link
-                            href={`/products/${product.slug}`}
-                            onClick={() => setIsSearchBarActive(false)} // Đóng search bar khi click gợi ý
-                            className="flex items-center p-3 text-sm"
-                          >
-                            <Image
-                              src={
-                                product.images?.[0] || "/placeholder-image.jpg"
-                              }
-                              alt={product.name}
-                              width={40}
-                              height={40}
-                              className="mr-3 h-10 w-10 flex-shrink-0 rounded-md object-cover"
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate font-medium text-gray-800">
-                                {product.name}
-                              </p>
-                              <p className="text-xs font-semibold text-indigo-600">
-                                {formatCurrency(product.displayPrice)}
-                                {product.isOnSale &&
-                                  product.price > product.displayPrice && (
-                                    <span className="ml-2 text-[11px] text-gray-400 line-through">
-                                      {formatCurrency(product.price)}
-                                    </span>
-                                  )}
-                              </p>
-                            </div>
-                          </Link>
-                        </li>
-                      ))}
-                      {suggestedProducts.length > 0 && searchTerm.trim() && (
-                        <li className="p-3 text-center">
-                          <button
-                            onClick={() => handleSearchSubmit()}
-                            className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
-                          >
-                            Xem tất cả kết quả cho &quot;{searchTerm.trim()}
-                            &quot;
-                          </button>
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                </div>
-              )}
+              <div className="mt-3 max-h-[calc(100vh-250px)] overflow-y-auto rounded-md bg-white">
+                <SearchSuggestionList
+                  suggestions={suggestedProducts}
+                  isLoading={
+                    isLoadingSuggestions ||
+                    (isFetchingSuggestions && !isPlaceholderData)
+                  }
+                  searchTerm={debouncedSearchTerm}
+                  onSuggestionClick={() => setIsSearchBarActive(false)}
+                  onViewAllClick={handleSearchSubmit}
+                />
+              </div>
             </div>
           </div>
         </Transition>
@@ -374,6 +313,7 @@ export default function NavbarClient() {
       <CartPreviewModal
         isOpen={isCartModalOpen}
         setIsOpen={setIsCartModalOpen}
+        attributeMap={attributeMap}
       />
     </>
   );

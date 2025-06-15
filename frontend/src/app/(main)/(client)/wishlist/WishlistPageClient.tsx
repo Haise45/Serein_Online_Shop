@@ -7,16 +7,23 @@ import {
 } from "@/lib/react-query/wishlistQueries";
 import Link from "next/link";
 import { FiAlertCircle, FiHeart, FiLoader } from "react-icons/fi";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 
 export default function WishlistPageClient() {
   const {
     data: wishlistItems,
-    isLoading,
+    isLoading: isLoadingWishlist,
     isError,
     error,
     refetch,
   } = useGetWishlist();
+
+  const { data: attributes, isLoading: isLoadingAttributes } =
+    useGetAttributes();
+
   const removeFromWishlistMutation = useRemoveFromWishlist();
+
+  const isLoading = isLoadingWishlist || isLoadingAttributes;
 
   if (isLoading) {
     return (
@@ -98,6 +105,7 @@ export default function WishlistPageClient() {
               removeFromWishlistMutation.variables?.variantId ===
                 item.wishlistedVariantId
             }
+            attributes={attributes || []}
           />
         ))}
       </div>
