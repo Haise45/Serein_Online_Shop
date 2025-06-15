@@ -24,6 +24,7 @@ import {
 } from "react-icons/fi";
 import ReviewFilters from "./ReviewFilters";
 import ReviewItem from "./ReviewItem";
+import "@/app/globals.css"
 
 interface ProductDescriptionAndReviewsProps {
   product: Product; // Truyền thông tin sản phẩm vào
@@ -148,7 +149,6 @@ const ProductDescriptionAndReviews = forwardRef<
       id="reviews-section"
       className="mt-12 rounded-xl bg-white p-4 shadow-2xl sm:p-6 md:p-8 lg:mt-16"
     >
-      {/* THAY ĐỔI 2: Thay thế Tab.Group, Tab.List, Tab.Panels, Tab.Panel */}
       <TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
         <TabList className="flex border-b border-gray-200">
           {tabs.map((tab) => (
@@ -184,43 +184,45 @@ const ProductDescriptionAndReviews = forwardRef<
           {/* Panel Mô tả sản phẩm */}
           <TabPanel className="py-8">
             <h2 className="sr-only">Mô tả sản phẩm</h2>
-            <div
-              ref={descriptionContainerRef}
-              className={classNames(
-                "prose prose-sm sm:prose-base relative max-w-none overflow-hidden text-gray-700",
-                !showFullDescription ? "max-h-[400px]" : "",
-              )}
-              dangerouslySetInnerHTML={{
-                __html: sanitizeHtmlContent(
-                  product.description ||
-                    "<p>Chưa có thông tin mô tả cho sản phẩm này.</p>",
-                ),
-              }}
-            />
-            {(isDescriptionOverflowing ||
-              (!isDescriptionOverflowing && showFullDescription)) && (
+            <div className="relative">
               <div
+                ref={descriptionContainerRef}
                 className={classNames(
-                  "pt-4 text-center",
-                  !showFullDescription && isDescriptionOverflowing
-                    ? "absolute right-0 bottom-0 left-0 bg-gradient-to-t from-white via-white/80 to-transparent pt-12 pb-6"
-                    : "",
+                  "prose prose-sm sm:prose-base relative max-w-none overflow-hidden text-gray-700",
+                  !showFullDescription ? "max-h-[400px]" : "",
                 )}
-              >
-                <button
-                  onClick={() => setShowFullDescription(!showFullDescription)}
-                  className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none"
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtmlContent(
+                    product.description ||
+                      "<p>Chưa có thông tin mô tả cho sản phẩm này.</p>",
+                  ),
+                }}
+              />
+              {(isDescriptionOverflowing ||
+                (!isDescriptionOverflowing && showFullDescription)) && (
+                <div
+                  className={classNames(
+                    "pt-4 text-center",
+                    !showFullDescription && isDescriptionOverflowing
+                      ? "absolute right-0 bottom-0 left-0 bg-gradient-to-t from-white via-white/80 to-transparent pt-12 pb-6"
+                      : "",
+                  )}
                 >
-                  {showFullDescription ? "Thu gọn" : "Xem thêm"}
-                  <FiChevronDown
-                    className={classNames(
-                      "ml-2 h-4 w-4 transition-transform",
-                      showFullDescription ? "rotate-180" : "",
-                    )}
-                  />
-                </button>
-              </div>
-            )}
+                  <button
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none"
+                  >
+                    {showFullDescription ? "Thu gọn" : "Xem thêm"}
+                    <FiChevronDown
+                      className={classNames(
+                        "ml-2 h-4 w-4 transition-transform",
+                        showFullDescription ? "rotate-180" : "",
+                      )}
+                    />
+                  </button>
+                </div>
+              )}
+            </div>
           </TabPanel>
 
           {/* Panel Đánh giá người dùng */}

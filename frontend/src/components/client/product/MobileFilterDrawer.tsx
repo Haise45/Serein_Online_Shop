@@ -1,11 +1,12 @@
 // src/app/(main)/products/components/MobileFilterDrawer.tsx
 "use client";
 import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
+import { Attribute } from "@/types";
 import { Category } from "@/types/category";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { FiX } from "react-icons/fi";
-import ProductFiltersSidebar from "./ProductFiltersSidebar"; // Tái sử dụng sidebar
+import ProductFiltersSidebar from "./ProductFiltersSidebar";
 
 interface MobileFilterDrawerProps {
   isOpen: boolean;
@@ -14,7 +15,8 @@ interface MobileFilterDrawerProps {
   onFilterChange: (newFilters: ProductFilters) => void;
   categories: Category[];
   isLoadingCategories: boolean;
-  availableAttributes: Record<string, string[]>;
+  attributes: Attribute[];
+  isLoadingAttributes: boolean;
   onSearchChange: (searchTerm: string) => void;
   currentSearchTerm: string;
   onClearAllFilters: () => void;
@@ -27,7 +29,8 @@ export default function MobileFilterDrawer({
   onFilterChange,
   categories,
   isLoadingCategories,
-  availableAttributes,
+  attributes,
+  isLoadingAttributes,
   onSearchChange,
   currentSearchTerm,
   onClearAllFilters,
@@ -82,7 +85,8 @@ export default function MobileFilterDrawer({
                   }}
                   categories={categories}
                   isLoadingCategories={isLoadingCategories}
-                  availableAttributes={availableAttributes}
+                  attributes={attributes}
+                  isLoadingAttributes={isLoadingAttributes}
                   onSearchChange={(term) => {
                     onSearchChange(term);
                     // onClose(); // Đóng khi search

@@ -213,58 +213,39 @@ const updateCategorySchema = Joi.object({
   isActive: Joi.boolean().optional(),
 }).min(1); // Yêu cầu ít nhất một trường được cung cấp để cập nhật
 
+const objectIdSchema = Joi.string().hex().length(24).messages({
+  "string.length": "ID không hợp lệ",
+  "string.hex": "ID không hợp lệ",
+});
+
 // Schema cho một giá trị thuộc tính của biến thể
 const variantOptionValueSchema = Joi.object({
-  attributeName: Joi.string()
-    .required()
-    .messages({ "any.required": "Tên thuộc tính của biến thể là bắt buộc" }),
-  value: Joi.string().required().messages({
-    "any.required": "Giá trị thuộc tính của biến thể là bắt buộc",
+  attribute: objectIdSchema.required().messages({
+    "any.required": "ID thuộc tính của biến thể là bắt buộc",
+  }),
+  value: objectIdSchema.required().messages({
+    "any.required": "ID giá trị thuộc tính của biến thể là bắt buộc",
   }),
 });
 
 // Schema cho một biến thể
 const variantSchemaValidation = Joi.object({
-  sku: Joi.string().trim().optional().allow(null, "").messages({
-    // Cho phép rỗng, model sẽ tự tạo
-    // Có thể thêm các ràng buộc khác nếu người dùng nhập, ví dụ:
-    "string.min":
-      "SKU biến thể phải có ít nhất {#limit} ký tự nếu được cung cấp.",
-    "string.max":
-      "SKU biến thể không được vượt quá {#limit} ký tự nếu được cung cấp.",
-  }),
+  sku: Joi.string().trim().optional().allow(null, ""),
   price: Joi.number().min(0).required().messages({
     "any.required": "Giá của biến thể là bắt buộc",
     "number.min": "Giá biến thể không được âm",
   }),
-  salePrice: Joi.number()
-    .min(0)
-    .optional()
-    .allow(null)
-    .messages({ "number.min": "Giá sale biến thể không được âm" }),
-  salePriceEffectiveDate: Joi.date()
-    .optional()
-    .allow(null)
-    .messages({ "date.base": "Ngày bắt đầu sale biến thể không hợp lệ" }),
+  salePrice: Joi.number().min(0).optional().allow(null),
+  salePriceEffectiveDate: Joi.date().optional().allow(null),
   salePriceExpiryDate: Joi.date()
     .greater(Joi.ref("salePriceEffectiveDate"))
     .optional()
-    .allow(null)
-    .messages({
-      "date.base": "Ngày kết thúc sale biến thể không hợp lệ",
-      "date.greater": "Ngày kết thúc sale biến thể phải sau ngày bắt đầu",
-    }),
+    .allow(null),
   stockQuantity: Joi.number().integer().min(0).required().messages({
     "any.required": "Số lượng tồn kho của biến thể là bắt buộc",
     "number.min": "Số lượng tồn kho không được âm",
   }),
-  images: Joi.array()
-    .items(Joi.string().uri())
-    .optional()
-    .default([])
-    .messages({
-      "string.uri": "Mỗi ảnh của biến thể phải là một URL hợp lệ.",
-    }),
+  images: Joi.array().items(Joi.string().uri()).optional().default([]),
   optionValues: Joi.array()
     .items(variantOptionValueSchema)
     .min(1)
@@ -277,10 +258,10 @@ const variantSchemaValidation = Joi.object({
 
 // Schema cho một thuộc tính định nghĩa trên sản phẩm
 const productAttributeSchema = Joi.object({
-  name: Joi.string()
-    .required()
-    .messages({ "any.required": "Tên thuộc tính là bắt buộc" }),
-  values: Joi.array().items(Joi.string()).min(1).required().messages({
+  attribute: objectIdSchema.required().messages({
+    "any.required": "ID thuộc tính là bắt buộc",
+  }),
+  values: Joi.array().items(objectIdSchema).min(1).required().messages({
     "any.required": "Thuộc tính phải có ít nhất một giá trị",
     "array.min": "Thuộc tính phải có ít nhất một giá trị",
   }),

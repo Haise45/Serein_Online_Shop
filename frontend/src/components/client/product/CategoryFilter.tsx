@@ -1,4 +1,4 @@
-// src/app/(main)/products/components/filters/CategoryFilter.tsx
+
 "use client";
 import { Category } from '@/types/category';
 import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";

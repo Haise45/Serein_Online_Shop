@@ -12,17 +12,27 @@ const PORT = process.env.PORT || 5000;
 const httpServer = http.createServer(app);
 const io = initSocket(httpServer);
 
-const server = app.listen(PORT, () => {
+const serverInstance = httpServer.listen(PORT, () => {
   console.log(
     `Server running in ${
       process.env.NODE_ENV || "development"
     } mode on port ${PORT}`
   );
+  if (process.env.CLOUDINARY_CLOUD_NAME) {
+    console.log("Cloudinary is configured.");
+  } else {
+    console.warn("Cloudinary IS NOT configured. Check environment variables.");
+  }
+  console.log("Socket.IO is attached to the HTTP server.");
 });
 
-// Handle unhandled promise rejections (e.g., DB connection issues after initial connect)
+// Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {
   console.error(`Unhandled Rejection: ${err.message}`);
-  // Close server & exit process
-  server.close(() => process.exit(1));
+  console.error(err.stack); // Log thêm stack trace để dễ debug
+  // Đóng server một cách an toàn
+  serverInstance.close(() => {
+    console.log("Server closed due to unhandled rejection.");
+    process.exit(1);
+  });
 });

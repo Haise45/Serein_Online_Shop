@@ -4,11 +4,11 @@ import { useAddToCart } from "@/lib/react-query/cartQueries";
 import { formatCurrency } from "@/lib/utils";
 import { AppDispatch } from "@/store";
 import { addPopup } from "@/store/slices/notificationPopupSlice"; // Import action và type
-import { WishlistItem } from "@/types";
+import { Attribute, WishlistItem } from "@/types";
 import classNames from "classnames";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FiLoader, FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { useDispatch } from "react-redux";
@@ -17,15 +17,53 @@ interface WishlistItemCardProps {
   item: WishlistItem;
   onRemove: (productId: string, variantId?: string | null) => void;
   isRemoving: boolean;
+  attributes: Attribute[];
 }
 
 export default function WishlistItemCard({
   item,
   onRemove,
   isRemoving,
+  attributes,
 }: WishlistItemCardProps) {
   const dispatch: AppDispatch = useDispatch(); // Khởi tạo dispatch
   const addToCartMutation = useAddToCart();
+
+  // === TẠO BỘ ĐỆM TRA CỨU (LOOKUP MAP) TỪ PROPS ===
+  const attributeMap = useMemo(() => {
+    if (!attributes) return new Map();
+    const map = new Map<
+      string,
+      { label: string; values: Map<string, string> }
+    >();
+    attributes.forEach((attr) => {
+      const valueMap = new Map<string, string>();
+      attr.values.forEach((val) => valueMap.set(val._id, val.value));
+      map.set(attr._id, { label: attr.label, values: valueMap });
+    });
+    return map;
+  }, [attributes]);
+
+  // === LOGIC HIỂN THỊ TÊN BIẾN THỂ ĐÃ ĐƯỢC CẬP NHẬT ===
+  const variantDisplayName = useMemo(() => {
+    if (!item.variantDetails?.optionValues) return null;
+
+    return item.variantDetails.optionValues
+      .map((opt) => {
+        // opt.attribute và opt.value bây giờ là ObjectId (string)
+        const attrId =
+          typeof opt.attribute === "string" ? opt.attribute : opt.attribute._id;
+        const valueId =
+          typeof opt.value === "string" ? opt.value : opt.value._id;
+
+        const attrInfo = attributeMap.get(attrId);
+        const valueName = attrInfo?.values.get(valueId);
+
+        // Trả về "Tên thuộc tính: Tên giá trị" để rõ ràng hơn
+        return `${attrInfo?.label || "Thuộc tính"}: ${valueName || "N/A"}`;
+      })
+      .join(" / ");
+  }, [item.variantDetails, attributeMap]);
 
   // --- Logic quản lý ảnh hover ---
   const getInitialImage = useCallback(() => {
@@ -111,10 +149,23 @@ export default function WishlistItemCard({
               variantInfo: item.variantDetails
                 ? {
                     _id: item.variantDetails._id,
-                    options: item.variantDetails.optionValues.map((opt) => ({
-                      attributeName: opt.attributeName,
-                      value: opt.value,
-                    })),
+                    options: item.variantDetails.optionValues.map((opt) => {
+                      const attrId =
+                        typeof opt.attribute === "string"
+                          ? opt.attribute
+                          : opt.attribute._id;
+                      const valueId =
+                        typeof opt.value === "string"
+                          ? opt.value
+                          : opt.value._id;
+                      const attributeInfo = attributeMap.get(attrId);
+                      const valueName =
+                        attributeInfo?.values.get(valueId) || "N/A";
+                      return {
+                        attributeName: attributeInfo?.label || "N/A",
+                        value: valueName,
+                      };
+                    }),
                     sku: item.variantDetails.sku,
                   }
                 : undefined,
@@ -176,14 +227,11 @@ export default function WishlistItemCard({
       </button>
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
-        {item.variantDetails?.optionValues &&
-          item.variantDetails.optionValues.length > 0 && (
-            <p className="mb-1 truncate text-xs text-gray-500">
-              {item.variantDetails.optionValues
-                .map((opt) => `${opt.attributeName}: ${opt.value}`)
-                .join(" / ")}
-            </p>
-          )}
+        {variantDisplayName && (
+          <p className="mb-1 truncate text-xs text-gray-500">
+            {variantDisplayName}
+          </p>
+        )}
         <h3 className="mb-2 line-clamp-2 flex-grow text-sm font-medium text-gray-800 transition-colors hover:text-indigo-600 sm:text-base">
           <Link href={linkToProduct}>{name}</Link>
         </h3>

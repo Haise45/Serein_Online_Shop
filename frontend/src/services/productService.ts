@@ -28,6 +28,33 @@ export interface PaginatedProductsResponse {
   products: Product[];
 }
 
+// Type cho một VariantOptionValue khi tạo/cập nhật (chứa string ID)
+export type VariantOptionValueCreation = {
+  attribute: string; // ObjectId của Attribute
+  value: string; // ObjectId của AttributeValue
+};
+
+// Type cho một Variant khi tạo/cập nhật
+export type VariantCreationData = Omit<
+  Variant,
+  "_id" | "displayPrice" | "isOnSale" | "optionValues"
+> & {
+  optionValues: VariantOptionValueCreation[];
+};
+
+// Type cho một ProductAttribute khi tạo/cập nhật
+export type ProductAttributeCreation = {
+  attribute: string; // ObjectId của Attribute
+  values: string[]; // Mảng ObjectId của các AttributeValue
+};
+
+export interface StockUpdateResponse {
+  productId: string;
+  variantId?: string;
+  newStockQuantity: number;
+}
+
+// Type chính cho dữ liệu tạo sản phẩm
 export interface ProductCreationData
   extends Omit<
     Product,
@@ -40,15 +67,19 @@ export interface ProductCreationData
     | "totalSold"
     | "displayPrice"
     | "isOnSale"
-    | "isNew"
+    | "isConsideredNew"
+    | "variants"
+    | "attributes"
   > {
-  category: string;
+  category: string; // ObjectId của Category
+  attributes: ProductAttributeCreation[];
+  variants: VariantCreationData[];
 }
 
+// Type cho dữ liệu cập nhật sản phẩm
 export interface ProductUpdateData extends Partial<ProductCreationData> {
   isActive?: boolean;
   isPublished?: boolean;
-  variants?: Variant[];
 }
 
 // --- Utils ---
@@ -59,7 +90,7 @@ const getErrorMessage = (err: unknown, fallback: string): string => {
 };
 
 // --- API Services ---
-
+// === API Services cho CLIENT (Người dùng thông thường) ===
 export const getProducts = async (
   params?: GetProductsParams,
 ): Promise<PaginatedProductsResponse> => {
@@ -91,14 +122,12 @@ export const getProductByIdOrSlug = async (
   }
 };
 
+// === API Services cho ADMIN ===
 export const createProduct = async (
   productData: ProductCreationData,
 ): Promise<Product> => {
   try {
-    const response = await axiosInstance.post<Product>(
-      "products",
-      productData,
-    );
+    const response = await axiosInstance.post<Product>("products", productData);
     return response.data;
   } catch (err: unknown) {
     console.error("Lỗi khi tạo sản phẩm:", err);
@@ -136,6 +165,41 @@ export const deleteProduct = async (
     console.error(`Lỗi khi xóa sản phẩm ${productId}:`, err);
     throw new Error(
       getErrorMessage(err, `Xóa sản phẩm ${productId} thất bại.`),
+    );
+  }
+};
+
+// Cập nhật tồn kho cho sản phẩm không có biến thể
+export const updateProductStockApi = async (
+  productId: string,
+  update: { change?: number; set?: number },
+): Promise<StockUpdateResponse> => {
+  try {
+    const { data } = await axiosInstance.put<StockUpdateResponse>(
+      `/products/${productId}/stock`,
+      update,
+    );
+    return data;
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, "Cập nhật tồn kho thất bại."));
+  }
+};
+
+// Cập nhật tồn kho cho một biến thể cụ thể
+export const updateVariantStockApi = async (
+  productId: string,
+  variantId: string,
+  update: { change?: number; set?: number },
+): Promise<StockUpdateResponse> => {
+  try {
+    const { data } = await axiosInstance.put<StockUpdateResponse>(
+      `/products/${productId}/variants/${variantId}/stock`,
+      update,
+    );
+    return data;
+  } catch (err: unknown) {
+    throw new Error(
+      getErrorMessage(err, "Cập nhật tồn kho biến thể thất bại."),
     );
   }
 };

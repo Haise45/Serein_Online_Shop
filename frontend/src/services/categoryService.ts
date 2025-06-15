@@ -1,53 +1,107 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { Category } from "@/types";
+import { Category, CategoryCreationData, CategoryUpdateData, GetCategoriesParams, PaginatedCategoriesResponse } from "@/types";
 import { AxiosError } from "axios";
 
-interface GetCategoriesParams {
-  isActive?: boolean;
-  parent?: string | null;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
-}
+// Helper lấy thông điệp lỗi
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  const error = err as AxiosError<{ message?: string }>;
+  return error.response?.data?.message || error.message || fallback;
+};
 
+// --- API Services ---
+
+/**
+ * Lấy tất cả danh mục từ backend.
+ * Backend controller hiện tại trả về một danh sách phẳng.
+ * @returns Promise<Category[]>
+ */
 export const getAllCategories = async (
-  params?: GetCategoriesParams,
-): Promise<Category[]> => {
+  params: GetCategoriesParams = {}
+): Promise<PaginatedCategoriesResponse> => {
   try {
-    const response = await axiosInstance.get<Category[]>("categories", {
-      params,
-    });
-    return response.data;
+    const { data } = await axiosInstance.get<PaginatedCategoriesResponse>("categories", { params });
+    return data;
   } catch (error: unknown) {
-    const err = error as AxiosError<{ message?: string }>;
-    console.error(
-      "Lỗi khi lấy danh sách danh mục:",
-      err.response?.data || err.message,
-    );
-    throw new Error(err.response?.data?.message || "Không thể tải danh mục.");
+    throw new Error(getErrorMessage(error, "Không thể tải danh sách danh mục."));
   }
 };
 
-export const getCategoryBySlug = async (
-  slug: string,
+/**
+ * Lấy chi tiết một danh mục bằng ID hoặc slug.
+ * @param idOrSlug ID hoặc slug của danh mục.
+ * @returns Promise<Category | null>
+ */
+export const getCategoryByIdOrSlug = async (
+  idOrSlug: string,
 ): Promise<Category | null> => {
   try {
-    const { data } = await axiosInstance.get<Category>(`categories/${slug}`);
+    const { data } = await axiosInstance.get<Category>(
+      `categories/${idOrSlug}`,
+    );
     return data;
   } catch (error: unknown) {
-    const err = error as AxiosError<{ message?: string }>;
-
-    if (err.response?.status === 404) {
-      return null;
-    }
-
-    console.error(
-      `Lỗi khi lấy danh mục theo slug "${slug}":`,
-      err.response?.data || err.message,
-    );
+    const err = error as AxiosError;
+    if (err.response?.status === 404) return null; // Trả về null nếu không tìm thấy
     throw new Error(
-      err.response?.data?.message || `Không thể tải danh mục "${slug}".`,
+      getErrorMessage(error, `Không thể tải danh mục "${idOrSlug}".`),
     );
+  }
+};
+
+/**
+ * Tạo một danh mục mới.
+ * @param categoryData Dữ liệu để tạo danh mục.
+ * @returns Promise<Category>
+ */
+export const createCategory = async (
+  categoryData: CategoryCreationData,
+): Promise<Category> => {
+  try {
+    const { data } = await axiosInstance.post<Category>(
+      "categories",
+      categoryData,
+    );
+    return data;
+  } catch (error: unknown) {
+    throw new Error(getErrorMessage(error, "Tạo danh mục thất bại."));
+  }
+};
+
+/**
+ * Cập nhật một danh mục.
+ * @param categoryId ID của danh mục cần cập nhật.
+ * @param categoryData Dữ liệu cập nhật.
+ * @returns Promise<Category>
+ */
+export const updateCategory = async (
+  categoryId: string,
+  categoryData: CategoryUpdateData,
+): Promise<Category> => {
+  try {
+    const { data } = await axiosInstance.put<Category>(
+      `categories/${categoryId}`,
+      categoryData,
+    );
+    return data;
+  } catch (error: unknown) {
+    throw new Error(getErrorMessage(error, "Cập nhật danh mục thất bại."));
+  }
+};
+
+/**
+ * Xóa (soft delete) một danh mục.
+ * @param categoryId ID của danh mục cần xóa.
+ * @returns Promise<{ message: string }>
+ */
+export const deleteCategory = async (
+  categoryId: string,
+): Promise<{ message: string }> => {
+  try {
+    const { data } = await axiosInstance.delete<{ message: string }>(
+      `categories/${categoryId}`,
+    );
+    return data;
+  } catch (error: unknown) {
+    throw new Error(getErrorMessage(error, "Xóa danh mục thất bại."));
   }
 };

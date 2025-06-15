@@ -4,6 +4,7 @@ import FooterClient from "@/components/client/layout/FooterClient";
 import HeroBanner from "@/components/client/layout/HeroBanner";
 import NavbarClient from "@/components/client/layout/NavbarClient";
 import ProductList from "@/components/client/product/ProductList";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetProducts } from "@/lib/react-query/productQueries";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -28,6 +29,10 @@ export default function HomePage() {
     isError: isErrorPopular,
     error: errorPopularObject,
   } = useGetProducts({ limit: 10, sortBy: "totalSold", sortOrder: "desc" });
+
+  // Fetch tất cả thuộc tính
+  const { data: attributes, isLoading: isLoadingAttributes } =
+    useGetAttributes();
 
   // Xử lý hiển thị toast lỗi bằng useEffect
   useEffect(() => {
@@ -61,7 +66,8 @@ export default function HomePage() {
           <ProductList
             title="#SảnPhẩmMớiNhất"
             products={newProducts}
-            loading={isLoadingNew}
+            loading={isLoadingNew || isLoadingAttributes}
+            attributes={attributes || []}
             error={
               isErrorNew
                 ? errorNewObject?.message || "Lỗi tải sản phẩm mới."
@@ -72,7 +78,8 @@ export default function HomePage() {
           <ProductList
             title="#SảnPhẩmBánChạy"
             products={popularProducts}
-            loading={isLoadingPopular}
+            loading={isLoadingPopular || isLoadingAttributes}
+            attributes={attributes || []}
             error={
               isErrorPopular
                 ? errorPopularObject?.message || "Lỗi tải sản phẩm phổ biến."

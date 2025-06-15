@@ -21,7 +21,6 @@ export default function AdminDashboardPage() {
           <CCardBody>
             <p>Chào mừng, {authUser?.name || "Admin"}!</p>
             <p>Đây là trang quản trị sử dụng CoreUI.</p>
-            {/* Thêm các widget hoặc thông tin khác tại đây */}
           </CCardBody>
         </CCard>
       </CCol>

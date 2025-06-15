@@ -12,7 +12,7 @@ export default function PageHeader({
   actions,
 }: PageHeaderProps) {
   return (
-    <div className="mb-8 border-b border-gray-300 pb-5 sm:flex sm:items-center sm:justify-between">
+    <div className="mb-4 border-b border-gray-300 pb-4 sm:flex sm:items-center sm:justify-between">
       <div>
         <h1 className="text-2xl leading-7 font-bold text-gray-900 sm:text-3xl sm:tracking-tight">
           {title}

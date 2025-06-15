@@ -25,9 +25,6 @@ body {
 }
 
 .swiper-pagination-bullet {
-  /* Kích thước cơ bản, có thể dùng Tailwind class trong renderBullet thay thế */
-  /* width: 12px !important; */
-  /* height: 12px !important; */
   background-color: rgba(
     255,
     255,
@@ -94,4 +91,89 @@ body {
       transform: translateX(0);
     }
   }
+}
+
+/* Áp dụng style cho nav-link bên trong một nav-item đang active */
+/* Style cho CNavItem active (Đã có từ trước) */
+.sidebar .nav-item .nav-link.active {
+  background-color: #ffffff;
+  color: #3c4b64;
+  font-weight: 600;
+}
+.sidebar .nav-item .nav-link.active .nav-icon {
+  color: currentColor;
+}
+
+/*
+ * Style cho CNavGroup active
+ * Chúng ta nhắm vào `.nav-group-toggle` là thẻ <a> chứa tên group.
+*/
+.sidebar .nav-group.active > .nav-group-toggle {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/*
+ * Đảm bảo icon của group active cũng có màu nhất quán.
+ * `currentColor` sẽ lấy màu từ `.nav-group-toggle` ở trên.
+*/
+.sidebar .nav-group.active > .nav-group-toggle .nav-icon {
+  color: currentColor;
+}
+
+/* Style cho hover */
+.sidebar .nav-item .nav-link:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/*
+ * Style hover cho group không active
+ * để người dùng biết có thể click vào.
+*/
+.sidebar .nav-group:not(.active) > .nav-group-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Style cho sidebar thu gọn */
+.sidebar.sidebar-narrow .nav-item .nav-link.active {
+  background-color: transparent;
+  border-left: 3px solid #3399ff;
+}
+.sidebar.sidebar-narrow .nav-item .nav-link.active,
+.sidebar.sidebar-narrow .nav-item .nav-link.active .nav-icon {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* gray-300 */
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* gray-400 */
+}
+
+.grabbable {
+  cursor: grab;
+  cursor: -webkit-grab;
+}
+
+.grabbable.grabbing {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.prose figure {
+  @apply mx-auto;
+}
+
+/* Dự phòng nếu ảnh không có thẻ figure */
+.prose img {
+  @apply mx-auto;
 }

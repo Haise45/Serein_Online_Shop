@@ -1,4 +1,3 @@
-// src/app/(main)/products/components/MobileFilterButton.tsx
 "use client";
 import { FiFilter } from "react-icons/fi";
 

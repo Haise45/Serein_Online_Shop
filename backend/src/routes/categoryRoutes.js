@@ -6,7 +6,11 @@ const {
   updateCategory,
   deleteCategory,
 } = require("../controllers/categoryController");
-const { protect, isAdmin } = require("../middlewares/authMiddleware");
+const {
+  protect,
+  isAdmin,
+  protectOptional,
+} = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validationMiddleware");
 const {
   createCategorySchema,
@@ -16,8 +20,8 @@ const {
 const router = express.Router();
 
 // Public routes (ai cũng xem được)
-router.get("/", getCategories);
-router.get("/:idOrSlug", getCategoryByIdOrSlug); // Dùng chung param cho ID hoặc Slug
+router.get("/", protectOptional, getCategories);
+router.get("/:idOrSlug", protectOptional, getCategoryByIdOrSlug); // Dùng chung param cho ID hoặc Slug
 
 // Admin only routes
 router.post(

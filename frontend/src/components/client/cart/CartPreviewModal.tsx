@@ -5,6 +5,7 @@ import {
   useRemoveCartItem,
   useUpdateCartItem,
 } from "@/lib/react-query/cartQueries";
+import { getVariantDisplayName } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
 import {
   Dialog,
@@ -33,11 +34,13 @@ const formatCurrency = (amount: number | undefined) => {
 interface CartPreviewModalProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  attributeMap: Map<string, { label: string; values: Map<string, string> }>;
 }
 
 export default function CartPreviewModal({
   isOpen,
   setIsOpen,
+  attributeMap,
 }: CartPreviewModalProps) {
   const { data: cartData, isLoading, isError, error, refetch } = useGetCart();
   const removeCartItemMutation = useRemoveCartItem();
@@ -129,109 +132,113 @@ export default function CartPreviewModal({
         {/* Danh sách sản phẩm */}
         <div className="flow-root">
           <ul role="list" className="-my-4 divide-y divide-gray-200 px-1">
-            {cartData.items.map((item: CartItem) => (
-              <li key={item._id} className="flex py-4 last:mb-4">
-                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                  <Image
-                    src={item.image || "/placeholder-image.jpg"}
-                    alt={item.name}
-                    width={80}
-                    height={80}
-                    className="h-full w-full object-cover object-center"
-                  />
-                </div>
+            {cartData.items.map((item: CartItem) => {
+              const variantDisplayName = item.variantInfo
+                ? getVariantDisplayName(item.variantInfo.options, attributeMap)
+                : null;
 
-                <div className="ml-4 flex flex-1 flex-col">
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-gray-900">
-                      <h3>
-                        <Link
-                          href={`/products/${item.slug}`}
-                          onClick={closeModal}
-                          className="hover:text-indigo-600"
-                        >
-                          {item.name}
-                        </Link>
-                      </h3>
-                      <p className="ml-4 whitespace-nowrap">
-                        {formatCurrency(item.price)}
-                      </p>
-                    </div>
-                    {item.variantInfo &&
-                      item.variantInfo.options.length > 0 && (
+              return (
+                <li key={item._id} className="flex py-4 last:mb-4">
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <Image
+                      src={item.image || "/placeholder-image.jpg"}
+                      alt={item.name}
+                      width={80}
+                      height={80}
+                      quality={100}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+
+                  <div className="ml-4 flex flex-1 flex-col">
+                    <div>
+                      <div className="flex justify-between text-sm font-medium text-gray-900">
+                        <h3>
+                          <Link
+                            href={`/products/${item.slug}`}
+                            onClick={closeModal}
+                            className="hover:text-indigo-600"
+                          >
+                            {item.name}
+                          </Link>
+                        </h3>
+                        <p className="ml-4 whitespace-nowrap">
+                          {formatCurrency(item.price)}
+                        </p>
+                      </div>
+                      {variantDisplayName && (
                         <p className="mt-1 truncate text-xs text-gray-500">
-                          {item.variantInfo.options
-                            .map((opt) => `${opt.attributeName}: ${opt.value}`)
-                            .join(" / ")}
+                          {variantDisplayName}
                         </p>
                       )}
-                  </div>
-                  <div className="mt-2 flex flex-1 items-end justify-between text-sm">
-                    <div className="inline-flex items-center overflow-hidden rounded-md border border-gray-300">
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(item._id, item.quantity, -1)
-                        }
-                        disabled={
-                          item.quantity <= 1 ||
-                          (updateCartItemMutation.isPending &&
-                            updateCartItemMutation.variables?.itemId ===
-                              item._id)
-                        }
-                        aria-label={`Giảm số lượng sản phẩm ${item.name}`}
-                        className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
-                      >
-                        <FiMinus className="h-4 w-4 text-gray-600" />
-                      </button>
-
-                      <input
-                        type="text"
-                        readOnly
-                        value={item.quantity}
-                        aria-label={`Số lượng hiện tại của ${item.name}`}
-                        title={`Số lượng ${item.name}`}
-                        className="w-10 border-x border-gray-200 bg-white text-center text-sm font-medium text-gray-800 select-none focus:outline-none"
-                      />
-
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(item._id, item.quantity, 1)
-                        }
-                        disabled={
-                          (updateCartItemMutation.isPending &&
-                            updateCartItemMutation.variables?.itemId ===
-                              item._id) ||
-                          item.quantity >= item.availableStock
-                        }
-                        aria-label={`Tăng số lượng sản phẩm ${item.name}`}
-                        className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
-                      >
-                        <FiPlus className="h-4 w-4 text-gray-600" />
-                      </button>
                     </div>
+                    <div className="mt-2 flex flex-1 items-end justify-between text-sm">
+                      <div className="inline-flex items-center overflow-hidden rounded-md border border-gray-300">
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item._id, item.quantity, -1)
+                          }
+                          disabled={
+                            item.quantity <= 1 ||
+                            (updateCartItemMutation.isPending &&
+                              updateCartItemMutation.variables?.itemId ===
+                                item._id)
+                          }
+                          aria-label={`Giảm số lượng sản phẩm ${item.name}`}
+                          className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
+                        >
+                          <FiMinus className="h-4 w-4 text-gray-600" />
+                        </button>
 
-                    <div className="flex">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(item._id)}
-                        disabled={
-                          removeCartItemMutation.isPending &&
-                          removeCartItemMutation.variables === item._id
-                        }
-                        className="p-1.5 font-medium text-gray-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-70"
-                        title={`Xóa ${item.name} khỏi giỏ hàng`}
-                      >
-                        <FiTrash2 className="h-4 w-4" />
-                      </button>
+                        <input
+                          type="text"
+                          readOnly
+                          value={item.quantity}
+                          aria-label={`Số lượng hiện tại của ${item.name}`}
+                          title={`Số lượng ${item.name}`}
+                          className="w-10 border-x border-gray-200 bg-white text-center text-sm font-medium text-gray-800 select-none focus:outline-none"
+                        />
+
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item._id, item.quantity, 1)
+                          }
+                          disabled={
+                            (updateCartItemMutation.isPending &&
+                              updateCartItemMutation.variables?.itemId ===
+                                item._id) ||
+                            item.quantity >= item.availableStock
+                          }
+                          aria-label={`Tăng số lượng sản phẩm ${item.name}`}
+                          className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
+                        >
+                          <FiPlus className="h-4 w-4 text-gray-600" />
+                        </button>
+                      </div>
+
+                      <div className="flex">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(item._id)}
+                          disabled={
+                            removeCartItemMutation.isPending &&
+                            removeCartItemMutation.variables === item._id
+                          }
+                          className="p-1.5 font-medium text-gray-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-70"
+                          title={`Xóa ${item.name} khỏi giỏ hàng`}
+                        >
+                          <FiTrash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
+                    {/* Hiển thị tổng tiền của item này (nếu muốn) */}
+                    <p className="mt-1 text-right text-xs font-medium text-indigo-600">
+                      Tổng: {formatCurrency(item.price * item.quantity)}
+                    </p>
                   </div>
-                  {/* Hiển thị tổng tiền của item này (nếu muốn) */}
-                  <p className="mt-1 text-right text-xs font-medium text-indigo-600">
-                    Tổng: {formatCurrency(item.price * item.quantity)}
-                  </p>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </div>
 

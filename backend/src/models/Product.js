@@ -1,7 +1,43 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 
-// Định nghĩa Sub-schema cho Biến thể (Variant)
+// === SUB-SCHEMA MỚI CHO THUỘC TÍNH CỦA SẢN PHẨM ===
+// Lưu trữ tham chiếu đến thuộc tính và các giá trị đã chọn
+const productAttributeSchema = new mongoose.Schema(
+  {
+    attribute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attribute", // Tham chiếu đến model Attribute
+      required: true,
+    },
+    values: [
+      {
+        // Đây là _id của subdocument trong mảng `values` của model Attribute
+        type: mongoose.Schema.Types.ObjectId,
+      },
+    ],
+  },
+  { _id: false }
+);
+
+// === SUB-SCHEMA MỚI CHO CÁC LỰA CHỌN CỦA MỘT BIẾN THỂ ===
+const variantOptionValueSchema = new mongoose.Schema(
+  {
+    attribute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attribute",
+      required: true,
+    },
+    value: {
+      // Đây là _id của subdocument giá trị trong model Attribute
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
+// === SUB-SCHEMA CHO BIẾN THỂ (VARIANT) ===
 const variantSchema = new mongoose.Schema(
   {
     sku: {
@@ -27,32 +63,13 @@ const variantSchema = new mongoose.Schema(
       min: [0, "Số lượng tồn kho không được âm"],
       default: 0,
     },
-    images: {
-      // Mảng các URL ảnh biến thể của sản phẩm
-      type: [String],
-      default: [],
-    },
-    optionValues: [
-      // Mảng các cặp thuộc tính-giá trị xác định biến thể này
-      {
-        _id: false,
-        attributeName: {
-          type: String,
-          required: [true, "Biến thể phải có tên thuộc tính"],
-        },
-        value: {
-          type: String,
-          required: [true, "Biến thể phải có giá trị thuộc tính"],
-        },
-      },
-    ],
+    images: { type: [String], default: [] },
+    optionValues: [variantOptionValueSchema],
   },
-  {
-    _id: true,
-  }
-); // Cho phép mỗi variant có _id riêng để dễ quản lý/cập nhật
+  { _id: true }
+);
 
-// Định nghĩa Schema chính cho Sản phẩm (Product)
+// === SCHEMA CHÍNH CHO SẢN PHẨM (PRODUCT) ===
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -62,15 +79,8 @@ const productSchema = new mongoose.Schema(
       maxlenght: [200, "Tên sản phẩm không được quá 200 ký tự"],
       text: true,
     },
-    slug: {
-      type: String,
-      unique: true,
-      index: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
+    slug: { type: String, unique: true, index: true },
+    description: { type: String, trim: true },
     price: {
       type: Number,
       required: [true, "Vui lòng nhập giá sản phẩm"],
@@ -83,42 +93,24 @@ const productSchema = new mongoose.Schema(
     },
     salePriceEffectiveDate: { type: Date, default: null },
     salePriceExpiryDate: { type: Date, default: null },
-    sku: {
-      type: String,
-      sparse: true,
-      trim: true,
-    },
+    sku: { type: String, sparse: true, trim: true },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: [true, "Vui lòng chọn danh mục cho sản phẩm"],
       index: true,
     },
-    images: {
-      // Mảng các URL ảnh chính của sản phẩm
-      type: [String],
-      default: [],
-    },
+    images: { type: [String], default: [] },
     stockQuantity: {
       type: Number,
       required: function () {
         return !this.variants || this.variants.length === 0;
-      }, // Bắt buộc nếu không có variant
+      },
       min: [0, "Số lượng tồn kho không được âm"],
       default: 0,
     },
-    isPublished: {
-      // Trạng thái: true = công khai, false = nháp
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-      index: true,
-    },
-    // Thêm các trường Rating/Review
+    isPublished: { type: Boolean, default: false, index: true },
+    isActive: { type: Boolean, default: true, index: true },
     averageRating: {
       type: Number,
       default: 0,
@@ -126,28 +118,14 @@ const productSchema = new mongoose.Schema(
       max: [5, "Điểm đánh giá trung bình không thể lớn hơn 5"],
     },
     numReviews: {
-      // Tổng số lượt đánh giá đã được duyệt
       type: Number,
       default: 0,
       min: [0, "Số lượt đánh giá không thể âm"],
     },
-    // Lưu định nghĩa các thuộc tính và giá trị áp dụng cho sản phẩm này
-    // Ví dụ: [{ name: 'Màu sắc', values: ['Đỏ', 'Xanh'] }, { name: 'Kích thước', values: ['S', 'M'] }]
-    attributes: [
-      {
-        _id: false,
-        name: { type: String, required: true },
-        values: { type: [String], required: true, default: [] },
-      },
-    ],
-    totalSold: {
-      // Tổng số lượng đã bán (cho sản phẩm này và các biến thể của nó)
-      type: Number,
-      default: 0,
-      min: 0,
-      index: true,
-    },
-    // Mảng các biến thể sản phẩm (nếu có)
+
+    attributes: [productAttributeSchema],
+
+    totalSold: { type: Number, default: 0, min: 0, index: true },
     variants: [variantSchema],
   },
   {
@@ -194,7 +172,7 @@ variantSchema.virtual("isOnSale").get(onSaleVirtual);
 
 // --- VIRTUAL FIELD: Kiểm tra sản phẩm có phải MỚI không ---
 const IS_NEW_PRODUCT_DAYS_LIMIT = 20; // Số ngày coi là sản phẩm mới
-productSchema.virtual("isNew").get(function () {
+productSchema.virtual("isConsideredNew").get(function () {
   if (!this.createdAt) return false;
   const twentyDaysAgo = new Date();
   twentyDaysAgo.setDate(twentyDaysAgo.getDate() - IS_NEW_PRODUCT_DAYS_LIMIT);

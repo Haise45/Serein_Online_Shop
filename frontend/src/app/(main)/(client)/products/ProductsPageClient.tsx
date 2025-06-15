@@ -1,12 +1,10 @@
 "use client";
 
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
+import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import { useGetProducts } from "@/lib/react-query/productQueries";
-import { getAllCategories } from "@/services/categoryService";
 import { GetProductsParams } from "@/services/productService";
-import { Category } from "@/types/category";
 import { PageSearchParams } from "@/types/next";
-import { Product } from "@/types/product";
-import { useQuery } from "@tanstack/react-query";
 import {
   useSearchParams as useNextSearchParamsHook,
   usePathname,
@@ -14,11 +12,11 @@ import {
 } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import ActiveFiltersDisplay from "@/components/client/product/ActiveFiltersDisplay";
 import MobileFilterButton from "@/components/client/product/MobileFilterButton";
 import MobileFilterDrawer from "@/components/client/product/MobileFilterDrawer";
 import ProductFiltersSidebar from "@/components/client/product/ProductFiltersSidebar";
 import ProductGrid from "@/components/client/product/ProductGrid";
-import ActiveFiltersDisplay from "@/components/client/product/ActiveFiltersDisplay";
 
 // Giả sử bạn có hằng số này ở đâu đó, ví dụ: src/constants/pagination.ts
 const DEFAULT_PRODUCTS_LIMIT = 12; // Hoặc giá trị bạn muốn
@@ -233,14 +231,21 @@ export default function ProductsPageClient({
   });
 
   // --- Fetch Categories Data for Filters ---
-  const { data: categories, isLoading: isLoadingCategories } = useQuery<
-    Category[],
-    Error
-  >({
-    queryKey: ["allActiveCategoriesForFilter"],
-    queryFn: () => getAllCategories({ isActive: true }),
-    staleTime: 1000 * 60 * 60,
-  });
+  const { data: categoriesPaginatedData, isLoading: isLoadingCategories } =
+    useGetAllCategories({
+      isActive: true,
+      limit: 200,
+    });
+
+  // --- Fetch tất cả thuộc tính có sẵn để dùng cho bộ lọc ---
+  const { data: availableAttributes, isLoading: isLoadingAttributes } =
+    useGetAttributes();
+
+  // Trích xuất mảng categories từ object trả về
+  const categories = useMemo(
+    () => categoriesPaginatedData?.categories || [],
+    [categoriesPaginatedData],
+  );
 
   // --- Handlers ---
   const handleFilterChange = useCallback((newFilters: ProductFilters) => {
@@ -275,30 +280,6 @@ export default function ProductsPageClient({
     // Các giá trị sort có thể giữ nguyên hoặc reset tùy ý
   }, []);
 
-  // Logic lấy các giá trị thuộc tính để hiển thị trong bộ lọc (cần cải thiện nếu muốn chính xác hơn)
-  const availableAttributeFilters = useMemo(() => {
-    if (isLoading || !productData?.products) return {}; // Trả về rỗng nếu đang loading hoặc không có product
-    const attrs: Record<string, Set<string>> = {};
-    productData.products.forEach((p: Product) => {
-      p.attributes?.forEach((attr) => {
-        if (!attrs[attr.name]) attrs[attr.name] = new Set();
-        attr.values.forEach((val) => attrs[attr.name].add(val));
-      });
-      p.variants?.forEach((v) => {
-        v.optionValues.forEach((ov) => {
-          if (!attrs[ov.attributeName]) attrs[ov.attributeName] = new Set();
-          attrs[ov.attributeName].add(ov.value);
-        });
-      });
-    });
-    return Object.fromEntries(
-      Object.entries(attrs).map(([key, valueSet]) => [
-        key,
-        Array.from(valueSet).sort(),
-      ]),
-    );
-  }, [productData?.products, isLoading]);
-
   return (
     <div>
       <div className="mb-4 lg:hidden">
@@ -322,9 +303,10 @@ export default function ProductsPageClient({
           <ProductFiltersSidebar
             filters={filters}
             onFilterChange={handleFilterChange}
-            categories={categories || []}
+            categories={categories}
             isLoadingCategories={isLoadingCategories}
-            availableAttributes={availableAttributeFilters}
+            attributes={availableAttributes || []}
+            isLoadingAttributes={isLoadingAttributes}
             onSearchChange={handleSearchChange}
             currentSearchTerm={searchTerm}
             onClearAllFilters={handleClearAllFilters}
@@ -332,18 +314,19 @@ export default function ProductsPageClient({
         </aside>
 
         <main className="lg:col-span-9 xl:col-span-9">
-           {/* Hiển thị ActiveFiltersDisplay phía trên ProductGrid */}
+          {/* Hiển thị ActiveFiltersDisplay phía trên ProductGrid */}
           <ActiveFiltersDisplay
             filters={filters}
             searchTerm={searchTerm}
-            categories={categories || []} // Cần danh sách categories để lấy tên
+            categories={categories} // Cần danh sách categories để lấy tên
             onFilterChange={handleFilterChange}
             onSearchChange={handleSearchChange}
             onClearAllFilters={handleClearAllFilters}
           />
           <ProductGrid
             products={productData?.products || []}
-            isLoading={isLoading} // Truyền trạng thái loading của products
+            attributes={availableAttributes || []}
+            isLoading={isLoading || isLoadingAttributes} // Truyền trạng thái loading của products
             isError={isError}
             error={error}
             sortBy={sortBy}
@@ -363,9 +346,10 @@ export default function ProductsPageClient({
         onClose={() => setIsMobileFilterOpen(false)}
         filters={filters}
         onFilterChange={handleFilterChange}
-        categories={categories || []}
+        categories={categories}
         isLoadingCategories={isLoadingCategories}
-        availableAttributes={availableAttributeFilters}
+        attributes={availableAttributes || []}
+        isLoadingAttributes={isLoadingAttributes}
         onSearchChange={handleSearchChange}
         currentSearchTerm={searchTerm}
         onClearAllFilters={handleClearAllFilters}

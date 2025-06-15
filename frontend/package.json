@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+    "@ckeditor/ckeditor5-react": "^9.5.0",
     "@coreui/coreui": "^5.3.2",
     "@coreui/icons": "^3.0.1",
     "@coreui/icons-react": "^2.3.0",
@@ -30,6 +32,7 @@
     "react-redux": "^9.2.0",
     "simplebar": "^6.3.1",
     "simplebar-react": "^3.3.1",
+    "socket.io-client": "^4.8.1",
     "swiper": "^11.2.6"
   },
   "devDependencies": {

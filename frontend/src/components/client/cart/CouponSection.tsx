@@ -1,11 +1,9 @@
 "use client";
 import { useApplyCoupon, useRemoveCoupon } from "@/lib/react-query/cartQueries";
-import {
-  useGetCoupons,
-} from "@/lib/react-query/couponQueries";
+import { useGetCoupons } from "@/lib/react-query/couponQueries";
 import { formatCurrency } from "@/lib/utils";
 import { GetCouponsParams } from "@/services/couponService";
-import { CartItem as CartItemType } from "@/types/cart";
+import { AppliedCouponInfo, CartItem as CartItemType } from "@/types/cart";
 import { Category } from "@/types/category";
 import { Coupon } from "@/types/coupon";
 import { useEffect, useMemo, useState } from "react";
@@ -14,12 +12,12 @@ import {
   FiChevronUp,
   FiLoader,
   FiTag,
-  FiXCircle
+  FiXCircle,
 } from "react-icons/fi";
 
 interface CouponSectionProps {
   cartSubtotal: number;
-  appliedCouponFull?: Coupon | null;
+  appliedCouponFull?: AppliedCouponInfo | null;
   selectedItems: CartItemType[];
   categoryMap: Map<string, Category>;
   getAncestorsFn: (
@@ -58,7 +56,7 @@ export default function CouponSection({
   useEffect(() => {
     // Nếu có coupon đã áp dụng, điền vào ô input
     if (appliedCouponFull) {
-      setCouponCodeInput(appliedCouponFull.code);
+      setCouponCodeInput(appliedCouponFull.code || "");
     } else {
       setCouponCodeInput(""); // Xóa input nếu coupon bị gỡ
     }
@@ -279,7 +277,7 @@ export default function CouponSection({
                 )}
               </button>
               {showApplicableCoupons && (
-                <div className="mt-2 max-h-40 space-y-2 overflow-y-auto pr-1 scrollbar-thin">
+                <div className="scrollbar-thin mt-2 max-h-40 space-y-2 overflow-y-auto pr-1">
                   {displayableCoupons.map((coupon) => (
                     <div
                       key={coupon._id.toString()}

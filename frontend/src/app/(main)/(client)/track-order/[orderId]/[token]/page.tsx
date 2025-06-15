@@ -4,12 +4,12 @@ import OrderDetailsDisplay from "@/components/client/orders/OrderDetailsDisplay"
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import { useGetGuestOrderByToken } from "@/lib/react-query/orderQueries";
 import { BreadcrumbItem } from "@/types";
+import type { AxiosError } from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { FiAlertCircle, FiLoader } from "react-icons/fi";
-import type { AxiosError } from "axios";
 
 export default function GuestTrackOrderPage() {
   const params = useParams();
@@ -77,7 +77,7 @@ export default function GuestTrackOrderPage() {
       <div className="mb-6">
         <Breadcrumbs items={breadcrumbItems} />
       </div>
-      <OrderDetailsDisplay order={order} title="Theo dõi đơn hàng" />
+      <OrderDetailsDisplay order={order} title="Theo dõi đơn hàng"/>
     </div>
   );
 }
