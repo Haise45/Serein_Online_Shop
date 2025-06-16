@@ -108,7 +108,8 @@ const OrderRow: React.FC<OrderRowProps> = ({
                 alt={order.orderItems[0].name}
                 width={40}
                 height={40}
-                className="mr-3 h-10 w-10 flex-shrink-0 rounded border object-cover"
+                quality={100}
+                className="mr-3 h-10 w-10 flex-shrink-0 rounded border object-cover object-top"
               />
               <span className="flex-1 truncate">
                 {order.orderItems[0].name}

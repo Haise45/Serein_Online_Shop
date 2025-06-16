@@ -1,5 +1,4 @@
-import { CartItemOption } from "./cart";
-import { Product } from "./product";
+import { Product, VariantOptionValue } from "./product";
 import { User } from "./user";
 
 // Dựa trên shippingAddressSchema
@@ -20,7 +19,7 @@ export interface OrderShippingAddress {
 export interface OrderItemVariantInfo {
   variantId: string; // ID của variant gốc
   sku?: string | null;
-  options: CartItemOption[];
+  options: VariantOptionValue[];
 }
 
 // Dựa trên orderItemSchema

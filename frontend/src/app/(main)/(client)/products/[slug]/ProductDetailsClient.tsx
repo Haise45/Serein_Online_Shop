@@ -1,11 +1,11 @@
 "use client";
 
-import AttributeSelector from "@/components/client/product/AttributeSelector";
 import ImageGallery from "@/components/client/product/ImageGallery";
 import ProductDescriptionAndReviews, {
   ProductReviewsRef,
 } from "@/components/client/product/ProductDescriptionAndReviews";
 import RatingStars from "@/components/shared/RatingStars";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useAddToCart } from "@/lib/react-query/cartQueries";
 import { useGetProductDetails } from "@/lib/react-query/productQueries";
 import {
@@ -16,10 +16,16 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { AppDispatch } from "@/store";
 import { addPopup } from "@/store/slices/notificationPopupSlice";
-import { Variant } from "@/types/product";
+import {
+  Attribute,
+  AttributeValue,
+  ProductAttribute,
+  Variant,
+  VariantOptionValue,
+} from "@/types";
 import classNames from "classnames";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -30,8 +36,10 @@ import {
   FiMinus,
   FiPlus,
   FiShoppingCart,
+  FiSlash,
   FiTag,
   FiTrendingUp,
+  FiXCircle,
 } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 
@@ -42,122 +50,173 @@ interface ProductDetailsClientProps {
 export default function ProductDetailsClient({
   slug,
 }: ProductDetailsClientProps) {
+  // --- Hooks ---
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const dispatch = useDispatch<AppDispatch>();
+  const reviewsSectionRef = useRef<ProductReviewsRef>(null);
+
+  // --- Data Fetching ---
   const {
     data: product,
     isLoading,
     isError,
     error,
   } = useGetProductDetails(slug);
-  const dispatch = useDispatch<AppDispatch>();
-  const searchParams = useSearchParams();
+  const { isLoading: isLoadingAttributes } = useGetAttributes();
+  const { data: wishlistData } = useGetWishlist();
+  const addToCartMutation = useAddToCart();
+  const addToWishlistMutation = useAddToWishlist();
+  const removeFromWishlistMutation = useRemoveFromWishlist();
 
-  const reviewsSectionRef = useRef<ProductReviewsRef>(null);
-
+  // --- State ---
+  // State giờ đây lưu theo dạng { attributeId: valueId }
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string | null>
   >({});
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [quantity, setQuantity] = useState(1);
 
-  const addToCartMutation = useAddToCart();
-  const { data: wishlistData } = useGetWishlist();
-  const addToWishlistMutation = useAddToWishlist();
-  const removeFromWishlistMutation = useRemoveFromWishlist();
+  const colorAttributeId = useMemo(() => {
+    if (!product?.attributes) return null;
+    const colorAttrWrapper = (product.attributes as ProductAttribute[]).find(
+      (aw) => {
+        const attr = aw.attribute as Attribute;
+        return attr?.name === "color";
+      },
+    );
+    return (colorAttrWrapper?.attribute as Attribute)?._id || null;
+  }, [product?.attributes]);
 
-  // Effect để khởi tạo/đồng bộ selectedOptions và selectedVariant khi product hoặc variantId từ URL thay đổi
+  const variantIdFromUrl = useMemo(
+    () => searchParams.get("variant"),
+    [searchParams],
+  );
+
+  // --- useEffects để đồng bộ state ---
+  // Effect 1: Khởi tạo lựa chọn khi sản phẩm hoặc URL thay đổi
   useEffect(() => {
-    if (product) {
-      const variantIdFromUrl = searchParams.get("variant");
+    // Chỉ chạy khi product đã được fetch về
+    if (product && product.attributes) {
       const initialOptions: Record<string, string | null> = {};
       let initialVariant: Variant | null = null;
 
+      // 1. Ưu tiên xử lý nếu có variantId từ URL
       if (variantIdFromUrl && product.variants && product.variants.length > 0) {
         const variantFromUrl = product.variants.find(
           (v) => v._id === variantIdFromUrl,
         );
+
         if (variantFromUrl) {
           initialVariant = variantFromUrl;
-          // Thiết lập selectedOptions dựa trên variant từ URL
-          variantFromUrl.optionValues.forEach((ov) => {
-            initialOptions[ov.attributeName] = ov.value;
-          });
-        } else {
-          // Nếu variantId từ URL không hợp lệ, không chọn gì cả
-          console.warn(
-            `Variant ID "${variantIdFromUrl}" từ URL không tìm thấy trong sản phẩm.`,
+          // Điền các lựa chọn từ variant tìm được
+          (variantFromUrl.optionValues as VariantOptionValue[]).forEach(
+            (ov) => {
+              const attrId =
+                typeof ov.attribute === "string"
+                  ? ov.attribute
+                  : ov.attribute._id;
+              const valueId =
+                typeof ov.value === "string" ? ov.value : ov.value._id;
+              initialOptions[attrId] = valueId;
+            },
           );
-          product.attributes?.forEach((attr) => {
-            initialOptions[attr.name] = null;
-          });
+        } else {
+          // Nếu variantId không hợp lệ, không làm gì cả, để các giá trị là null
+          console.warn(`Variant ID từ URL không hợp lệ: ${variantIdFromUrl}`);
         }
-      } else {
-        // Nếu không có variantId từ URL, không chọn gì cả ban đầu
-        product.attributes?.forEach((attr) => {
-          initialOptions[attr.name] = null;
-        });
       }
 
+      // 2. Đảm bảo tất cả các thuộc tính của sản phẩm đều có một key trong `initialOptions`
+      (product.attributes as ProductAttribute[]).forEach((attrWrapper) => {
+        const attrId =
+          typeof attrWrapper.attribute === "string"
+            ? attrWrapper.attribute
+            : attrWrapper.attribute._id;
+        if (!(attrId in initialOptions)) {
+          initialOptions[attrId] = null;
+        }
+      });
+
+      // 3. Cập nhật state một lần duy nhất
       setSelectedOptions(initialOptions);
       setSelectedVariant(initialVariant);
-      setQuantity(1); // Reset quantity khi product/variant load
+      setQuantity(1); // Luôn reset số lượng khi load
     }
-  }, [product, searchParams]); // Thêm searchParams vào dependencies
+  }, [product, variantIdFromUrl]);
 
+  // Effect 2: Tìm biến thể tương ứng khi lựa chọn thay đổi
   useEffect(() => {
-    if (product && product.variants && product.attributes) {
-      // Kiểm tra xem TẤT CẢ các thuộc tính (attributes) có giá trị được chọn không rỗng (khác null) không
-      const allRequiredAttributesSelected = product.attributes.every(
-        (attr) =>
-          selectedOptions[attr.name] !== null &&
-          selectedOptions[attr.name] !== undefined,
-      );
+    if (variantIdFromUrl && selectedVariant?._id !== variantIdFromUrl) {
+      return;
+    }
 
-      if (allRequiredAttributesSelected) {
+    if (product && product.variants && product.attributes) {
+      const allOptionsSelected = (
+        product.attributes as ProductAttribute[]
+      ).every((attrWrapper) => {
+        const attrId =
+          typeof attrWrapper.attribute === "string"
+            ? attrWrapper.attribute
+            : attrWrapper.attribute._id;
+        return !!selectedOptions[attrId];
+      });
+
+      let newUrl = pathname;
+      let variantToSet: Variant | null = null;
+
+      if (allOptionsSelected) {
         const foundVariant = product.variants.find((variant) =>
-          variant.optionValues.every(
-            (ov) => selectedOptions[ov.attributeName] === ov.value,
-          ),
+          variant.optionValues.every((ov) => {
+            const attrId =
+              typeof ov.attribute === "string"
+                ? ov.attribute
+                : ov.attribute._id;
+            const valueId =
+              typeof ov.value === "string" ? ov.value : ov.value._id;
+            return selectedOptions[attrId] === valueId;
+          }),
         );
-        // Chỉ cập nhật selectedVariant nếu nó khác với variant hiện tại
-        // để tránh vòng lặp nếu effect trên cũng đang set selectedVariant
-        if (foundVariant?._id !== selectedVariant?._id) {
-          // So sánh bằng id để chắc chắn
-          setSelectedVariant(foundVariant || null);
-          if (foundVariant) setQuantity(1);
-        } else if (!foundVariant && selectedVariant !== null) {
-          // Trường hợp tổ hợp options không tạo ra variant nào, reset selectedVariant
-          setSelectedVariant(null);
+        variantToSet = foundVariant || null;
+        if (foundVariant) {
+          newUrl = `${pathname}?variant=${foundVariant._id}`;
         }
-      } else if (selectedVariant !== null) {
-        // Nếu không phải tất cả option được chọn, nhưng trước đó đã có selectedVariant, reset nó
-        setSelectedVariant(null);
+      }
+
+      // Chỉ cập nhật state nếu có sự thay đổi thực sự
+      if (selectedVariant?._id !== variantToSet?._id) {
+        setSelectedVariant(variantToSet);
+        setQuantity(1); // Reset số lượng khi đổi variant
+      }
+
+      // Cập nhật URL một cách nhẹ nhàng
+      if (
+        typeof window !== "undefined" &&
+        window.location.href !== new URL(newUrl, window.location.origin).href
+      ) {
+        router.replace(newUrl, { scroll: false });
       }
     }
-  }, [product, selectedOptions, selectedVariant]);
+  }, [
+    product,
+    selectedOptions,
+    selectedVariant,
+    pathname,
+    router,
+    variantIdFromUrl,
+  ]);
 
-  const handleScrollToReviews = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    reviewsSectionRef.current?.focusReviewsTab(); // Gọi hàm từ component con
-  };
+  // --- Logic hiển thị ---
 
-  const handleOptionSelect = (attributeName: string, value: string | null) => {
-    setSelectedOptions((prev) => {
-      const newOptions = { ...prev, [attributeName]: value };
-      // Khi một lựa chọn thay đổi, chúng ta cần xác định lại các lựa chọn khả dụng cho các thuộc tính khác.
-      return newOptions;
-    });
-  };
-
-  // --- Logic xác định khi nào tất cả các option bắt buộc đã được chọn ---
   const allRequiredOptionsSelected = useMemo(() => {
-    if (!product || !product.attributes || product.attributes.length === 0) {
-      return true; // Nếu không có attributes, coi như đã chọn xong (cho sản phẩm không có variant)
-    }
-    return product.attributes.every(
-      (attr) =>
-        selectedOptions[attr.name] !== null &&
-        selectedOptions[attr.name] !== undefined,
-    );
+    if (!product?.attributes || product.attributes.length === 0) return true;
+    return (product.attributes as ProductAttribute[]).every((attrWrapper) => {
+      // Quan trọng: Phải lấy _id từ object attribute, không phải cast object thành string
+      const attributeId = (attrWrapper.attribute as Attribute)?._id;
+      if (!attributeId) return false;
+      return !!selectedOptions[attributeId];
+    });
   }, [product, selectedOptions]);
 
   // --- Thông tin tồn kho chỉ hiển thị khi đã chọn xong variant (hoặc sản phẩm không có variant) ---
@@ -178,71 +237,112 @@ export default function ProductDetailsClient({
     return true; // Luôn hiển thị stock nếu sản phẩm không có variant
   }, [product, selectedVariant]);
 
-  // Hàm tính toán các options bị disable cho một thuộc tính cụ thể
+  // === HÀM getDisabledOptions ĐÃ ĐƯỢC CẬP NHẬT ===
   const getDisabledOptionsForAttribute = useCallback(
-    (attributeName: string): Set<string> => {
-      if (!product || !product.variants || !product.attributes) {
-        return new Set<string>();
-      }
+    (attributeIdToTest: string): Set<string> => {
+      if (!product?.variants || !product.attributes) return new Set();
 
-      const disabled = new Set<string>();
-      const currentAttribute = product.attributes.find(
-        (attr) => attr.name === attributeName,
+      // Lấy các lựa chọn đã được chọn ở các thuộc tính KHÁC
+      const otherSelectedOptions = Object.entries(selectedOptions).filter(
+        ([attrId, valueId]) => attrId !== attributeIdToTest && valueId !== null,
       );
-      if (!currentAttribute) return disabled;
 
-      // Lặp qua từng giá trị có thể có của thuộc tính hiện tại
-      currentAttribute.values.forEach((potentialValue) => {
-        // Tạo một bản sao các lựa chọn hiện tại và thử đặt giá trị này cho thuộc tính đang xét
-        const tempSelectedOptions = {
-          ...selectedOptions,
-          [attributeName]: potentialValue,
-        };
+      // Tìm tất cả các biến thể tương thích với các lựa chọn khác đó
+      const compatibleVariants = product.variants.filter((variant) =>
+        otherSelectedOptions.every(([attrId, valueId]) =>
+          (variant.optionValues as VariantOptionValue[]).some(
+            (ov) =>
+              (ov.attribute as Attribute)._id === attrId &&
+              (ov.value as AttributeValue)._id === valueId,
+          ),
+        ),
+      );
 
-        // Kiểm tra xem có variant nào tồn tại với tổ hợp lựa chọn tạm thời này không
-        const hasMatchingVariant = product.variants.some((variant) => {
-          // Variant này phải khớp với TẤT CẢ các lựa chọn đã có trong tempSelectedOptions (bao gồm cả potentialValue)
-          // NGOẠI TRỪ những lựa chọn đang là null (chưa được chọn)
-          return product.attributes.every((attr) => {
-            const selectedVal = tempSelectedOptions[attr.name];
-            if (selectedVal === null || selectedVal === undefined) return true; // Bỏ qua nếu thuộc tính đó chưa được chọn trong temp
-            return variant.optionValues.some(
-              (ov) =>
-                ov.attributeName === attr.name && ov.value === selectedVal,
-            );
-          });
+      // Từ các biến thể tương thích, thu thập tất cả các giá trị hợp lệ cho thuộc tính đang xét
+      const availableValues = new Set<string>();
+      compatibleVariants.forEach((variant) => {
+        (variant.optionValues as VariantOptionValue[]).forEach((ov) => {
+          if ((ov.attribute as Attribute)._id === attributeIdToTest) {
+            availableValues.add((ov.value as AttributeValue)._id);
+          }
         });
+      });
 
-        if (!hasMatchingVariant) {
-          disabled.add(potentialValue);
+      // Một tùy chọn bị vô hiệu hóa nếu nó không nằm trong tập hợp các giá trị hợp lệ
+      const allPossibleValuesForAttr =
+        ((product.attributes as ProductAttribute[]).find(
+          (a) => (a.attribute as Attribute)._id === attributeIdToTest,
+        )?.values as AttributeValue[]) || [];
+
+      const disabledValues = new Set<string>();
+      allPossibleValuesForAttr.forEach((valueOption) => {
+        if (!availableValues.has(valueOption._id)) {
+          disabledValues.add(valueOption._id);
         }
       });
-      return disabled;
+
+      return disabledValues;
     },
     [product, selectedOptions],
   );
 
   const imagesToDisplay = useMemo(() => {
+    // Ưu tiên 1: Ảnh của biến thể đã chọn đầy đủ
     if (selectedVariant?.images && selectedVariant.images.length > 0) {
       return selectedVariant.images;
     }
-    if (selectedOptions["Màu sắc"] && product?.variants) {
-      const colorMatchedVariant = product.variants.find(
+    // Ưu tiên 2: Nếu đã chọn màu, tìm ảnh của một biến thể bất kỳ có màu đó
+    if (colorAttributeId && selectedOptions[colorAttributeId]) {
+      const selectedColorValueId = selectedOptions[colorAttributeId];
+      const variantWithColorImage = product?.variants.find(
         (v) =>
-          v.optionValues.some(
+          (v.optionValues as VariantOptionValue[]).some(
             (opt) =>
-              opt.attributeName === "Màu sắc" &&
-              opt.value === selectedOptions["Màu sắc"],
+              opt.attribute === colorAttributeId &&
+              opt.value === selectedColorValueId,
           ) &&
           v.images &&
           v.images.length > 0,
       );
-      if (colorMatchedVariant?.images?.length) {
-        return colorMatchedVariant.images;
+      if (variantWithColorImage?.images?.length) {
+        return variantWithColorImage.images;
       }
     }
+    // Mặc định: Ảnh chính của sản phẩm
     return product?.images || [];
-  }, [product, selectedVariant, selectedOptions]);
+  }, [product, selectedVariant, selectedOptions, colorAttributeId]);
+
+  // --- Handlers ---
+  const handleScrollToReviews = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    reviewsSectionRef.current?.focusReviewsTab(); // Gọi hàm từ component con
+  };
+
+  const handleOptionSelect = (attributeId: string, valueId: string | null) => {
+    setSelectedOptions((prev) => ({ ...prev, [attributeId]: valueId }));
+  };
+
+  // const imagesToDisplay = useMemo(() => {
+  //   if (selectedVariant?.images && selectedVariant.images.length > 0) {
+  //     return selectedVariant.images;
+  //   }
+  //   if (selectedOptions["Màu sắc"] && product?.variants) {
+  //     const colorMatchedVariant = product.variants.find(
+  //       (v) =>
+  //         v.optionValues.some(
+  //           (opt) =>
+  //             opt.attributeName === "Màu sắc" &&
+  //             opt.value === selectedOptions["Màu sắc"],
+  //         ) &&
+  //         v.images &&
+  //         v.images.length > 0,
+  //     );
+  //     if (colorMatchedVariant?.images?.length) {
+  //       return colorMatchedVariant.images;
+  //     }
+  //   }
+  //   return product?.images || [];
+  // }, [product, selectedVariant, selectedOptions]);
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => Math.max(1, Math.min(prev + amount, stockToDisplay)));
@@ -304,13 +404,25 @@ export default function ProductDetailsClient({
     else addToWishlistMutation.mutate(payload);
   };
 
-  const nameToDisplay = product?.name || "Đang tải...";
-  const priceToDisplay = selectedVariant?.price ?? product?.price ?? 0;
-  const displayPriceFinal =
-    selectedVariant?.displayPrice ?? product?.displayPrice ?? 0;
+  // Lấy ra giá gốc (không sale) của sản phẩm chính để làm giá tham chiếu
+  const baseOriginalPrice = product?.price ?? 0;
+  // Lấy ra giá sale của sản phẩm chính
+  const baseSalePrice = product?.displayPrice ?? 0;
+
+  // Giá gốc (không sale) để hiển thị: ưu tiên giá của variant, nếu không có thì lấy giá sản phẩm chính
+  const priceToDisplay = selectedVariant?.price ?? baseOriginalPrice;
+
+  // Giá cuối cùng (đã sale) để hiển thị: ưu tiên giá của variant, nếu không có thì lấy giá sản phẩm chính
+  const displayPriceFinal = selectedVariant?.displayPrice ?? baseSalePrice;
+
+  // Trạng thái sale: ưu tiên của variant, nếu không thì lấy của sản phẩm chính
   const isOnSaleFinal = selectedVariant?.isOnSale ?? product?.isOnSale ?? false;
+
+  // Các biến khác giữ nguyên logic
   const skuToDisplay = selectedVariant?.sku ?? product?.sku ?? "N/A";
   const totalSoldDisplay = product?.totalSold ?? 0;
+
+  // Tính toán phần trăm giảm giá dựa trên các giá trị đã được xác định ở trên
   const percentageDiscount =
     isOnSaleFinal && priceToDisplay > displayPriceFinal
       ? Math.round(
@@ -318,28 +430,80 @@ export default function ProductDetailsClient({
         )
       : 0;
 
-  if (isLoading)
+  const buttonState = useMemo(() => {
+    if (addToCartMutation.isPending) {
+      return {
+        text: "Đang thêm...",
+        disabled: true,
+        icon: <FiLoader className="mr-2 h-5 w-5 animate-spin" />,
+      };
+    }
+    if (product && product.variants.length > 0) {
+      if (!allRequiredOptionsSelected) {
+        return {
+          text: "Vui lòng chọn đầy đủ thông tin",
+          disabled: true,
+          icon: <FiInfo className="mr-2 h-5 w-5" />,
+        };
+      }
+      if (!selectedVariant) {
+        return {
+          text: "Phiên bản không tồn tại",
+          disabled: true,
+          icon: <FiXCircle className="mr-2 h-5 w-5" />,
+        };
+      }
+    }
+    if (stockToDisplay <= 0) {
+      return {
+        text: "Hết hàng",
+        disabled: true,
+        icon: <FiSlash className="mr-2 h-5 w-5" />,
+      };
+    }
+    return {
+      text: "Thêm vào giỏ",
+      disabled: false,
+      icon: <FiShoppingCart className="mr-2 h-5 w-5" />,
+    };
+  }, [
+    product,
+    allRequiredOptionsSelected,
+    selectedVariant,
+    stockToDisplay,
+    addToCartMutation.isPending,
+  ]);
+
+  if (isLoading || isLoadingAttributes) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center p-4">
+      <div className="flex min-h-[60vh] items-center justify-center p-4">
         <FiLoader className="h-12 w-12 animate-spin text-indigo-600" />
-        <p className="ml-3 text-lg text-gray-600">Đang tải sản phẩm...</p>
+        <p className="ml-4 text-lg text-gray-600">Đang tải sản phẩm...</p>
       </div>
     );
+  }
 
-  if (isError || !product)
+  if (isError || !product) {
     return (
-      <div className="p-4 py-10 text-center">
-        <FiAlertCircle className="mx-auto h-16 w-16 text-red-500" />
+      <div className="flex min-h-[60vh] flex-col items-center justify-center p-4 text-center">
+        <FiAlertCircle className="h-16 w-16 text-red-400" />
         <p className="mt-4 text-xl font-semibold text-red-700">
           Lỗi không tải được sản phẩm
         </p>
-        <p className="text-gray-600">
+        <p className="mt-2 max-w-md text-gray-600">
           {error instanceof Error
             ? error.message
-            : "Có lỗi xảy ra, vui lòng thử lại."}
+            : "Sản phẩm bạn tìm kiếm có thể không tồn tại hoặc đã bị ẩn. Vui lòng thử lại sau."}
         </p>
+        <Link
+          href="/products"
+          className="mt-6 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          Quay lại trang sản phẩm
+        </Link>
       </div>
     );
+  }
 
   return (
     <>
@@ -364,7 +528,7 @@ export default function ProductDetailsClient({
           <div className="mt-8 lg:col-span-5 lg:mt-0 xl:col-span-5">
             <div className="flex flex-col space-y-4">
               <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
-                {nameToDisplay}
+                {product?.name}
               </h1>
               <div className="mt-2">
                 {/* ... Price section ... */}
@@ -438,25 +602,114 @@ export default function ProductDetailsClient({
             </div>
 
             <form className="mt-6">
+              {/* Phần chọn thuộc tính */}
               {product.attributes && product.attributes.length > 0 && (
                 <div className="space-y-6 border-t border-gray-200 pt-6">
-                  {product.attributes.map((attr) => (
-                    <AttributeSelector
-                      key={attr.name}
-                      attribute={attr}
-                      selectedValue={selectedOptions[attr.name]}
-                      onSelectValue={handleOptionSelect}
-                      type={
-                        attr.name.toLowerCase().includes("màu")
-                          ? "color"
-                          : "text"
-                      }
-                      disabledOptions={getDisabledOptionsForAttribute(
-                        attr.name,
-                      )} // Giữ nguyên
-                      isGroupDisabled={isLoading}
-                    />
-                  ))}
+                  {(product.attributes as ProductAttribute[]).map(
+                    (attrWrapper) => {
+                      const attribute = attrWrapper.attribute as Attribute;
+                      if (!attribute) return null;
+                      const disabledOptionsSet = getDisabledOptionsForAttribute(
+                        attribute._id,
+                      );
+
+                      return (
+                        <div key={attribute._id}>
+                          <h3 className="flex items-center text-sm font-medium text-gray-900">
+                            {attribute.label}
+                          </h3>
+                          <div
+                            className={classNames(
+                              "mt-3 grid gap-3",
+                              attribute.name === "color"
+                                ? "grid-cols-6 sm:grid-cols-8"
+                                : "grid-cols-3 sm:grid-cols-4",
+                            )}
+                          >
+                            {(attrWrapper.values as AttributeValue[]).map(
+                              (valueOption) => {
+                                const isSelected =
+                                  selectedOptions[attribute._id] ===
+                                  valueOption._id;
+                                const isDisabled = disabledOptionsSet.has(
+                                  valueOption._id,
+                                );
+
+                                // Render ô màu
+                                if (attribute.name === "color") {
+                                  const hex =
+                                    (valueOption.meta?.hex as string) ||
+                                    "#E5E7EB";
+                                  const borderColor =
+                                    (valueOption.meta?.borderColor as string) ||
+                                    "transparent";
+                                  return (
+                                    <button
+                                      key={valueOption._id}
+                                      type="button"
+                                      title={valueOption.value}
+                                      disabled={isDisabled}
+                                      onClick={() =>
+                                        handleOptionSelect(
+                                          attribute._id,
+                                          isSelected ? null : valueOption._id,
+                                        )
+                                      }
+                                      className={classNames(
+                                        "relative flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all duration-200 focus:outline-none",
+                                        isDisabled
+                                          ? "cursor-not-allowed"
+                                          : "cursor-pointer hover:scale-110",
+                                        isSelected
+                                          ? "border-indigo-500 ring-2 ring-indigo-500 ring-offset-1"
+                                          : "border-transparent",
+                                        !isSelected && !isDisabled
+                                          ? `hover:border-indigo-400`
+                                          : "",
+                                      )}
+                                      style={{
+                                        backgroundColor: hex,
+                                        borderColor: borderColor,
+                                      }}
+                                    >
+                                      {isDisabled && (
+                                        <FiSlash className="h-4 w-4 text-white mix-blend-difference" />
+                                      )}
+                                    </button>
+                                  );
+                                }
+
+                                // Render nút text
+                                return (
+                                  <button
+                                    key={valueOption._id}
+                                    type="button"
+                                    disabled={isDisabled}
+                                    onClick={() =>
+                                      handleOptionSelect(
+                                        attribute._id,
+                                        isSelected ? null : valueOption._id,
+                                      )
+                                    }
+                                    className={classNames(
+                                      "flex items-center justify-center rounded-md border px-3 py-2 text-xs font-medium uppercase transition-colors duration-150 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none",
+                                      isDisabled
+                                        ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+                                        : isSelected
+                                          ? "border-transparent bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
+                                          : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50",
+                                    )}
+                                  >
+                                    {valueOption.value}
+                                  </button>
+                                );
+                              },
+                            )}
+                          </div>
+                        </div>
+                      );
+                    },
+                  )}
                 </div>
               )}
 
@@ -512,24 +765,14 @@ export default function ProductDetailsClient({
 
               {/* Action Buttons */}
               <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
-                {/* ... Nút "Thêm vào giỏ" và "Yêu thích" ... */}
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  disabled={
-                    addToCartMutation.isPending ||
-                    !showStockInfo ||
-                    stockToDisplay === 0 ||
-                    (product.variants.length > 0 && !selectedVariant)
-                  }
-                  className="flex w-full flex-1 items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-md transition-colors duration-200 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-indigo-300"
+                  disabled={buttonState.disabled}
+                  className="flex w-full flex-1 items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-md transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-300"
                 >
-                  {addToCartMutation.isPending ? (
-                    <FiLoader className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <FiShoppingCart className="mr-2 h-5 w-5" />
-                  )}
-                  Thêm vào giỏ
+                  {buttonState.icon}
+                  {buttonState.text}
                 </button>
                 <button
                   type="button"
@@ -540,7 +783,7 @@ export default function ProductDetailsClient({
                     (product.variants.length > 0 && !selectedVariant)
                   }
                   className={classNames(
-                    "flex w-full items-center justify-center rounded-lg border px-6 py-3.5 text-base font-semibold shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto",
+                    "flex w-full items-center justify-center rounded-lg border px-6 py-3.5 text-base font-semibold shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto",
                     isFavorite
                       ? "border-red-500 bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-500"
                       : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-indigo-500",
@@ -562,20 +805,6 @@ export default function ProductDetailsClient({
                   />
                 </button>
               </div>
-              {/* Thông báo nếu chưa chọn đủ variant */}
-              {product.variants.length > 0 && !allRequiredOptionsSelected && (
-                <p className="mt-3 text-center text-xs text-orange-600">
-                  Vui lòng chọn đầy đủ các tùy chọn.
-                </p>
-              )}
-              {product.variants.length > 0 &&
-                allRequiredOptionsSelected &&
-                !selectedVariant && (
-                  <p className="mt-3 text-center text-xs text-red-700">
-                    Phiên bản bạn chọn hiện không có sẵn. Vui lòng thử tùy chọn
-                    khác.
-                  </p>
-                )}
             </form>
 
             {/* Product Description Section */}

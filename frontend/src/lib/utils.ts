@@ -216,6 +216,26 @@ export const getVariantDisplayName = (
       const valueId = typeof opt.value === "string" ? opt.value : opt.value._id;
 
       const attrInfo = attributeMap.get(attrId);
+      const valueName = attrInfo?.values.get(valueId);
+
+      return valueName || "?"; // Trả về '?' nếu không tìm thấy
+    })
+    .join(" / ");
+};
+
+export const getVariantDisplayNameClient = (
+  optionValues: VariantOptionValue[],
+  attributeMap: Map<string, { label: string; values: Map<string, string> }>,
+): string => {
+  if (!optionValues || !attributeMap) return "N/A";
+
+  return optionValues
+    .map((opt) => {
+      const attrId =
+        typeof opt.attribute === "string" ? opt.attribute : opt.attribute._id;
+      const valueId = typeof opt.value === "string" ? opt.value : opt.value._id;
+
+      const attrInfo = attributeMap.get(attrId);
       const label = attrInfo?.label || "Thuộc tính";
       const valueName = attrInfo?.values.get(valueId) || "?";
 

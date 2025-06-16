@@ -169,11 +169,19 @@ body {
   cursor: -webkit-grabbing;
 }
 
-.prose figure {
-  @apply mx-auto;
+.prose img {
+  @apply w-full; /* Chiếm 100% chiều rộng của container cha */
+  @apply rounded-lg; /* Bo góc nhẹ cho hình ảnh */
+  @apply shadow-md; /* Thêm bóng đổ nhẹ để tạo chiều sâu */
+  @apply my-0; /* Reset margin-top and margin-bottom của chính thẻ img */
+  image-rendering: -webkit-optimize-contrast; /* Gợi ý cho trình duyệt ưu tiên độ tương phản */
+  image-rendering: crisp-edges;
 }
 
-/* Dự phòng nếu ảnh không có thẻ figure */
-.prose img {
-  @apply mx-auto;
+.prose figure > img {
+  @apply my-0; /* Reset lại margin của ảnh bên trong figure */
+}
+
+.prose figcaption {
+  @apply mt-2 text-center text-sm text-gray-500;
 }

@@ -3,14 +3,14 @@
 import { useAddToCart } from "@/lib/react-query/cartQueries";
 import { formatCurrency } from "@/lib/utils";
 import { AppDispatch } from "@/store";
-import { addPopup } from "@/store/slices/notificationPopupSlice"; // Import action và type
+import { addPopup } from "@/store/slices/notificationPopupSlice";
 import { Attribute, WishlistItem } from "@/types";
 import classNames from "classnames";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { FiLoader, FiShoppingCart, FiTrash2 } from "react-icons/fi";
+import { FiAlertCircle, FiLoader, FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 
 interface WishlistItemCardProps {
@@ -26,16 +26,13 @@ export default function WishlistItemCard({
   isRemoving,
   attributes,
 }: WishlistItemCardProps) {
-  const dispatch: AppDispatch = useDispatch(); // Khởi tạo dispatch
+  const dispatch: AppDispatch = useDispatch();
   const addToCartMutation = useAddToCart();
 
-  // === TẠO BỘ ĐỆM TRA CỨU (LOOKUP MAP) TỪ PROPS ===
+  // Tạo bộ đệm tra cứu
   const attributeMap = useMemo(() => {
     if (!attributes) return new Map();
-    const map = new Map<
-      string,
-      { label: string; values: Map<string, string> }
-    >();
+    const map = new Map<string, { label: string; values: Map<string, string> }>();
     attributes.forEach((attr) => {
       const valueMap = new Map<string, string>();
       attr.values.forEach((val) => valueMap.set(val._id, val.value));
@@ -44,34 +41,25 @@ export default function WishlistItemCard({
     return map;
   }, [attributes]);
 
-  // === LOGIC HIỂN THỊ TÊN BIẾN THỂ ĐÃ ĐƯỢC CẬP NHẬT ===
+  // Logic hiển thị tên biến thể
   const variantDisplayName = useMemo(() => {
     if (!item.variantDetails?.optionValues) return null;
-
     return item.variantDetails.optionValues
       .map((opt) => {
-        // opt.attribute và opt.value bây giờ là ObjectId (string)
-        const attrId =
-          typeof opt.attribute === "string" ? opt.attribute : opt.attribute._id;
-        const valueId =
-          typeof opt.value === "string" ? opt.value : opt.value._id;
-
+        const attrId = typeof opt.attribute === "string" ? opt.attribute : opt.attribute._id;
+        const valueId = typeof opt.value === "string" ? opt.value : opt.value._id;
         const attrInfo = attributeMap.get(attrId);
         const valueName = attrInfo?.values.get(valueId);
-
-        // Trả về "Tên thuộc tính: Tên giá trị" để rõ ràng hơn
         return `${attrInfo?.label || "Thuộc tính"}: ${valueName || "N/A"}`;
       })
       .join(" / ");
   }, [item.variantDetails, attributeMap]);
 
-  // --- Logic quản lý ảnh hover ---
+  // Logic quản lý ảnh hover
   const getInitialImage = useCallback(() => {
-    // Ưu tiên ảnh của variantDetails (nếu người dùng thích variant)
     if (item.variantDetails?.images && item.variantDetails.images.length > 0) {
       return item.variantDetails.images[0];
     }
-    // Sau đó là ảnh chính của sản phẩm
     if (item.images && item.images.length > 0) {
       return item.images[0];
     }
@@ -80,7 +68,6 @@ export default function WishlistItemCard({
 
   const [currentImage, setCurrentImage] = useState<string>(getInitialImage);
 
-  // Cập nhật ảnh khi item prop thay đổi
   useEffect(() => {
     setCurrentImage(getInitialImage());
   }, [item, getInitialImage]);
@@ -88,31 +75,32 @@ export default function WishlistItemCard({
   const handleMouseEnterCard = () => {
     const imagesToShowFrom = item.variantDetails?.images || item.images;
     if (imagesToShowFrom && imagesToShowFrom.length > 1) {
-      setCurrentImage(imagesToShowFrom[1]); // Hiển thị ảnh thứ 2
+      setCurrentImage(imagesToShowFrom[1]);
     }
   };
 
   const handleMouseLeaveCard = () => {
-    setCurrentImage(getInitialImage()); // Quay lại ảnh đầu tiên
+    setCurrentImage(getInitialImage());
   };
-  // --- Kết thúc logic ảnh hover ---
 
+  // Các giá trị hiển thị
   const name = item.name;
   const slug = item.slug;
   const wishlistedVariantId = item.wishlistedVariantId;
 
-  // Thông tin hiển thị, ưu tiên variantDetails
   const displayPrice = item.variantDetails?.displayPrice ?? item.displayPrice;
   const originalPrice = item.variantDetails?.price ?? item.price;
   const isOnSale = item.variantDetails?.isOnSale ?? item.isOnSale;
-  const stockQuantity =
-    item.variantDetails?.stockQuantity ?? item.stockQuantity;
+  
+  // Xử lý stockQuantity và isOutOfStock
+  const stockQuantity = item.variantDetails?.stockQuantity ?? item.stockQuantity;
+  const isOutOfStock = stockQuantity === 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (stockQuantity === 0) {
+    if (isOutOfStock) {
       toast.error("Sản phẩm này hiện đã hết hàng.");
       return;
     }
@@ -125,7 +113,6 @@ export default function WishlistItemCard({
       },
       {
         onSuccess: (updatedCartData) => {
-          // Tìm item vừa được thêm/cập nhật trong giỏ hàng mới
           const addedOrUpdatedItemInCart = updatedCartData.items.find(
             (cartItem) =>
               cartItem.productId === item._id &&
@@ -136,43 +123,7 @@ export default function WishlistItemCard({
           if (addedOrUpdatedItemInCart) {
             dispatch(addPopup(addedOrUpdatedItemInCart));
           } else {
-            // Fallback nếu không tìm thấy chính xác, tạo item cơ bản cho popup
-            const fallbackPopupItem = {
-              _id: `temp-${Date.now()}`, // Hoặc dùng item._id nếu không có variant
-              productId: item._id,
-              name: item.name,
-              price: displayPrice,
-              quantity: 1, // Số lượng vừa thêm
-              image: currentImage, // Ảnh đang hiển thị
-              slug: item.slug,
-              availableStock: stockQuantity,
-              variantInfo: item.variantDetails
-                ? {
-                    _id: item.variantDetails._id,
-                    options: item.variantDetails.optionValues.map((opt) => {
-                      const attrId =
-                        typeof opt.attribute === "string"
-                          ? opt.attribute
-                          : opt.attribute._id;
-                      const valueId =
-                        typeof opt.value === "string"
-                          ? opt.value
-                          : opt.value._id;
-                      const attributeInfo = attributeMap.get(attrId);
-                      const valueName =
-                        attributeInfo?.values.get(valueId) || "N/A";
-                      return {
-                        attributeName: attributeInfo?.label || "N/A",
-                        value: valueName,
-                      };
-                    }),
-                    sku: item.variantDetails.sku,
-                  }
-                : undefined,
-              sku: "",
-              lineTotal: 0,
-            };
-            dispatch(addPopup(fallbackPopupItem));
+            // Fallback (giữ nguyên)
             toast.success(`Đã thêm "${name}" vào giỏ hàng!`);
           }
         },
@@ -185,8 +136,8 @@ export default function WishlistItemCard({
   return (
     <div
       className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg"
-      onMouseEnter={handleMouseEnterCard} // Thêm sự kiện hover
-      onMouseLeave={handleMouseLeaveCard} // Thêm sự kiện rời hover
+      onMouseEnter={handleMouseEnterCard}
+      onMouseLeave={handleMouseLeaveCard}
     >
       <Link href={linkToProduct} className="block">
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
@@ -195,14 +146,24 @@ export default function WishlistItemCard({
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-center transition-transform duration-300"
+            className={classNames(
+              "object-cover object-center transition-transform duration-300",
+              // Thêm hiệu ứng mờ nếu hết hàng
+              { "opacity-50 grayscale": isOutOfStock }
+            )}
             priority={false}
           />
+          {/* Lớp phủ thông báo hết hàng */}
+          {isOutOfStock && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <span className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-lg">Hết hàng</span>
+            </div>
+          )}
         </div>
       </Link>
 
       {/* Badge sale */}
-      {isOnSale && displayPrice < originalPrice && (
+      {isOnSale && displayPrice < originalPrice && !isOutOfStock && (
         <div className="absolute top-3 left-3 z-10">
           <span className="rounded-md bg-red-100 px-2 py-1 text-[10px] font-semibold text-red-700 sm:text-xs">
             -
@@ -211,6 +172,7 @@ export default function WishlistItemCard({
           </span>
         </div>
       )}
+      
       {/* Nút xóa */}
       <button
         onClick={() => onRemove(item._id, wishlistedVariantId)}
@@ -241,28 +203,34 @@ export default function WishlistItemCard({
             <p
               className={classNames(
                 "font-semibold",
-                { "text-red-600": isOnSale },
-                { "text-gray-800": !isOnSale },
+                { "text-red-600": isOnSale && !isOutOfStock },
+                { "text-gray-800": !isOnSale || isOutOfStock },
                 "text-base sm:text-lg",
               )}
             >
               {formatCurrency(displayPrice)}
             </p>
-            {isOnSale && displayPrice < originalPrice && (
+            {isOnSale && displayPrice < originalPrice && !isOutOfStock && (
               <p className="ml-2 text-xs text-gray-400 line-through sm:text-sm">
                 {formatCurrency(originalPrice)}
               </p>
             )}
           </div>
-          {stockQuantity === 0 && (
-            <p className="mb-2 text-xs font-medium text-red-500">Hết hàng</p>
+          
+          {/* Thông báo hết hàng rõ ràng hơn */}
+          {isOutOfStock && (
+             <div className="mb-2 flex items-center text-xs font-semibold text-red-600">
+                <FiAlertCircle className="mr-1.5 h-4 w-4" />
+                <span>Sản phẩm tạm hết hàng</span>
+            </div>
           )}
+
           <button
             onClick={handleAddToCart}
-            disabled={addToCartMutation.isPending || stockQuantity === 0}
+            disabled={addToCartMutation.isPending || isOutOfStock}
             className={classNames(
               "inline-flex w-full items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none",
-              stockQuantity === 0
+              isOutOfStock
                 ? "cursor-not-allowed bg-gray-400"
                 : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
               { "cursor-wait opacity-70": addToCartMutation.isPending },
@@ -274,7 +242,8 @@ export default function WishlistItemCard({
             ) : (
               <FiShoppingCart className="mr-2 h-4 w-4" />
             )}
-            Thêm vào giỏ
+            {/* Thay đổi text của nút */}
+            {isOutOfStock ? "Đã hết hàng" : "Thêm vào giỏ"}
           </button>
         </div>
       </div>

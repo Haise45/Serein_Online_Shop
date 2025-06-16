@@ -81,16 +81,30 @@ export const useCreateOrder = (
       toast.success(
         `Đặt hàng thành công! Mã đơn hàng: #${newOrder._id.toString().slice(-6)}`,
       );
-      queryClient.invalidateQueries({ queryKey: cartKeys.cart });
-      queryClient.invalidateQueries({ queryKey: orderKeys.list({}) }); // Invalidate list chung
+      // Gọi lại onSuccess gốc nếu có
       options?.onSuccess?.(newOrder, variables, context);
     },
+    
     onError: (error, variables, context) => {
       toast.error(
         error.response?.data?.message || error.message || "Đặt hàng thất bại.",
       );
       options?.onError?.(error, variables, context);
     },
+
+    // onSettled sẽ chạy sau onSuccess hoặc onError.
+    onSettled: (data, error, variables, context) => {
+      // 1. Invalidate query giỏ hàng.
+      // Invalidate sẽ đánh dấu là stale và refetch ở lần tiếp theo component active.
+      queryClient.invalidateQueries({ queryKey: cartKeys.cart });
+      
+      // 2. Invalidate danh sách đơn hàng để nó được làm mới.
+      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+
+      // Gọi lại onSettled gốc nếu có
+      options?.onSettled?.(data, error, variables, context);
+    },
+    
     ...options,
   });
 };

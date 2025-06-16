@@ -37,7 +37,7 @@ interface ProductTableProps {
   sortOrder: "asc" | "desc";
   onDeleteClick: (productId: string, productName: string) => void;
   attributes: Attribute[];
-  onStockUpdateClick: (product: Product, variant?: Variant) => void;
+  onStockUpdateClick: (product: Product, variant?: Variant, returnToList?: boolean) => void;
   viewingVariantsForProduct: Product | null;
   setViewingVariantsForProduct: (product: Product | null) => void;
 }
@@ -446,7 +446,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                             onStockUpdateClick(
                               viewingVariantsForProduct,
                               variant,
-                              true
+                              true,
                             );
                           }, 100);
                         }}

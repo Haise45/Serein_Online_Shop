@@ -5,11 +5,13 @@ import {
   useRemoveCartItem,
   useUpdateCartItem,
 } from "@/lib/react-query/cartQueries";
-import { getVariantDisplayName } from "@/lib/utils";
+import { getVariantDisplayNameClient } from "@/lib/utils";
+import { AppDispatch } from "@/store";
 import { CartItem } from "@/types/cart";
 import {
   Dialog,
   DialogPanel,
+  DialogTitle,
   Transition,
   TransitionChild,
 } from "@headlessui/react";
@@ -25,6 +27,10 @@ import {
   FiTrash2,
   FiX,
 } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
+import toast from "react-hot-toast";
 
 const formatCurrency = (amount: number | undefined) => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";
@@ -46,6 +52,9 @@ export default function CartPreviewModal({
   const removeCartItemMutation = useRemoveCartItem();
   const updateCartItemMutation = useUpdateCartItem();
 
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+
   const closeModal = () => setIsOpen(false);
 
   const handleRemoveItem = (itemId: string) => {
@@ -66,6 +75,20 @@ export default function CartPreviewModal({
     } else if (newQuantity < 1) {
       handleRemoveItem(itemId);
     }
+  };
+
+  const handleProceedToCheckout = () => {
+    if (!cartData || !cartData.items || cartData.items.length === 0) {
+      toast.error("Giỏ hàng của bạn đang trống.");
+      return;
+    }
+
+    const allItemIds = cartData.items.map((item) => item._id);
+    dispatch(setSelectedItemsForCheckout(allItemIds));
+
+    // Đóng modal và chuyển trang
+    closeModal();
+    router.push("/checkout");
   };
 
   const handleRetryFetchCart = () => {
@@ -134,8 +157,13 @@ export default function CartPreviewModal({
           <ul role="list" className="-my-4 divide-y divide-gray-200 px-1">
             {cartData.items.map((item: CartItem) => {
               const variantDisplayName = item.variantInfo
-                ? getVariantDisplayName(item.variantInfo.options, attributeMap)
+                ? getVariantDisplayNameClient(
+                    item.variantInfo.options,
+                    attributeMap,
+                  )
                 : null;
+
+              const hasStockError = item.quantity > item.availableStock;
 
               return (
                 <li key={item._id} className="flex py-4 last:mb-4">
@@ -155,7 +183,7 @@ export default function CartPreviewModal({
                       <div className="flex justify-between text-sm font-medium text-gray-900">
                         <h3>
                           <Link
-                            href={`/products/${item.slug}`}
+                            href={`/products/${item.slug}${item.variantInfo?._id ? `?variant=${item.variantInfo._id}` : ""}`}
                             onClick={closeModal}
                             className="hover:text-indigo-600"
                           >
@@ -231,6 +259,11 @@ export default function CartPreviewModal({
                         </button>
                       </div>
                     </div>
+                    {hasStockError && (
+                      <p className="mt-1.5 text-right text-xs font-semibold text-red-600">
+                        Tồn kho chỉ còn: {item.availableStock}
+                      </p>
+                    )}
                     {/* Hiển thị tổng tiền của item này (nếu muốn) */}
                     <p className="mt-1 text-right text-xs font-medium text-indigo-600">
                       Tổng: {formatCurrency(item.price * item.quantity)}
@@ -275,13 +308,13 @@ export default function CartPreviewModal({
             >
               Xem chi tiết giỏ hàng
             </Link>
-            <Link
-              href="/checkout"
-              onClick={closeModal}
+            <button
+              type="button"
+              onClick={handleProceedToCheckout}
               className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
               Tiến hành thanh toán
-            </Link>
+            </button>
           </div>
         </div>
       </>
@@ -320,9 +353,9 @@ export default function CartPreviewModal({
                     <div className="flex min-h-0 flex-1 flex-col overflow-y-scroll">
                       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-5 sm:px-6">
                         <div className="flex items-center justify-between">
-                          <Dialog.Title className="text-lg font-semibold text-white">
+                          <DialogTitle className="text-lg font-semibold text-white">
                             Giỏ hàng của bạn
-                          </Dialog.Title>
+                          </DialogTitle>
                           <div className="ml-3 flex h-7 items-center">
                             <button
                               type="button"
