@@ -1,7 +1,8 @@
 // src/components/checkout/CheckoutOrderSummary.tsx
 "use client";
 
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getVariantDisplayNameClient } from "@/lib/utils";
+import { VariantOptionValue } from "@/types";
 import { CartItem as CartItemType } from "@/types/cart"; // Sử dụng Cart type cho originalCart
 import { Coupon } from "@/types/coupon"; // Import Coupon type
 import classNames from "classnames";
@@ -18,6 +19,8 @@ interface CheckoutOrderSummaryProps {
   finalTotal: number; // Final total của các items được chọn sau khi áp dụng discount và shipping
   isPlacingOrder: boolean; // Trạng thái khi đang gọi API tạo đơn hàng
   onPlaceOrderTriggerFromSummary: () => void; // Hàm để trigger submit form ở CheckoutForm
+  attributeMap: Map<string, { label: string; values: Map<string, string> }>;
+  stockError: string | null;
 }
 
 export default function CheckoutOrderSummary({
@@ -29,8 +32,12 @@ export default function CheckoutOrderSummary({
   finalTotal,
   isPlacingOrder,
   onPlaceOrderTriggerFromSummary,
+  attributeMap,
+  stockError,
 }: CheckoutOrderSummaryProps) {
   const numberOfItems = items.reduce((acc, item) => acc + item.quantity, 0);
+
+  const isButtonDisabled = isPlacingOrder || items.length === 0 || !!stockError;
 
   return (
     <aside
@@ -63,47 +70,53 @@ export default function CheckoutOrderSummary({
             role="list"
             className="scrollbar-thin max-h-80 divide-y divide-gray-200 overflow-y-auto pr-1"
           >
-            {items.map((item) => (
-              <li key={item._id} className="flex py-4">
-                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                  <Image
-                    src={item.image || "/placeholder-image.jpg"}
-                    alt={item.name}
-                    width={80}
-                    height={80}
-                    className="h-full w-full object-cover object-center"
-                  />
-                </div>
-                <div className="ml-4 flex flex-1 flex-col">
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-gray-900">
-                      <h3 className="pr-2">
-                        <Link
-                          href={`/products/${item.slug}${item.variantInfo?._id ? `?variant=${item.variantInfo._id}` : ""}`}
-                          className="line-clamp-2 hover:text-indigo-600"
-                        >
-                          {item.name}
-                        </Link>
-                      </h3>
-                      <p className="ml-4 whitespace-nowrap">
-                        {formatCurrency(item.price * item.quantity)}
-                      </p>
-                    </div>
-                    {item.variantInfo?.options &&
-                      item.variantInfo.options.length > 0 && (
+            {items.map((item) => {
+              const variantDisplayName = item.variantInfo
+                ? getVariantDisplayNameClient(
+                    item.variantInfo.options as VariantOptionValue[],
+                    attributeMap,
+                  )
+                : null;
+
+              return (
+                <li key={item._id} className="flex py-4">
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <Image
+                      src={item.image || "/placeholder-image.jpg"}
+                      alt={item.name}
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover object-center"
+                    />
+                  </div>
+                  <div className="ml-4 flex flex-1 flex-col">
+                    <div>
+                      <div className="flex justify-between text-sm font-medium text-gray-900">
+                        <h3 className="pr-2">
+                          <Link
+                            href={`/products/${item.slug}${item.variantInfo?._id ? `?variant=${item.variantInfo._id}` : ""}`}
+                            className="line-clamp-2 hover:text-indigo-600"
+                          >
+                            {item.name}
+                          </Link>
+                        </h3>
+                        <p className="ml-4 whitespace-nowrap">
+                          {formatCurrency(item.price * item.quantity)}
+                        </p>
+                      </div>
+                      {variantDisplayName && (
                         <p className="mt-1 text-xs text-gray-500">
-                          {item.variantInfo.options
-                            .map((opt) => `${opt.attributeName}: ${opt.value}`)
-                            .join(" / ")}
+                          {variantDisplayName}
                         </p>
                       )}
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      SL: {item.quantity} x {formatCurrency(item.price)}
-                    </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        SL: {item.quantity} x {formatCurrency(item.price)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           <div className="mt-6 space-y-3 border-t border-gray-200 pt-6">
@@ -157,11 +170,17 @@ export default function CheckoutOrderSummary({
             )}
           </div>
 
+          {stockError && (
+            <div className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800">
+              <p>{stockError} Vui lòng quay lại giỏ hàng để điều chỉnh.</p>
+            </div>
+          )}
+
           <div className="mt-8">
             <button
               type="button" // Để không submit form cha nếu có
               onClick={onPlaceOrderTriggerFromSummary}
-              disabled={isPlacingOrder || items.length === 0}
+              disabled={isButtonDisabled}
               className={classNames(
                 "flex w-full items-center justify-center rounded-md border border-transparent px-6 py-3 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",
                 items.length === 0

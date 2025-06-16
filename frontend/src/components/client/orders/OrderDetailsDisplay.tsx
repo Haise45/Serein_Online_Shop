@@ -172,7 +172,8 @@ const OrderItemRow: React.FC<{
           alt={item.name}
           width={96}
           height={96}
-          className="h-full w-full object-cover object-center"
+          quality={100}
+          className="h-full w-full object-cover object-top"
         />
       </div>
       <div className="flex flex-1 flex-col">

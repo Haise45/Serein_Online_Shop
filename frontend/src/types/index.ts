@@ -5,3 +5,5 @@ export * from "./product";
 export * from "./ui";
 export * from "./user";
 export * from "./wishlist";
+export * from "./coupon";
+export * from "./attribute";

@@ -1,13 +1,6 @@
 "use client";
 import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
-import {
-  ColorOption,
-  FIXED_ATTRIBUTE_NAMES,
-  PREDEFINED_COLORS,
-  PREDEFINED_SIZES_LETTER,
-  PREDEFINED_SIZES_NUMERIC,
-  SizeOption,
-} from "@/constants/filters";
+import { Attribute } from "@/types";
 import classNames from "classnames";
 import { FiCheck } from "react-icons/fi";
 import FilterDisclosure from "./FilterDisclosure";
@@ -15,12 +8,15 @@ import FilterDisclosure from "./FilterDisclosure";
 interface AttributeFilterProps {
   currentFilters: ProductFilters;
   onFilterChange: (newFilters: ProductFilters) => void;
-  // availableAttributes: Record<string, string[]>; // Có thể dùng để chỉ hiển thị các giá trị có sản phẩm
+  attributes: Attribute[]; // Nhận danh sách thuộc tính từ API
+  isLoading: boolean;
 }
 
 export default function AttributeFilter({
   currentFilters,
   onFilterChange,
+  attributes,
+  isLoading,
 }: AttributeFilterProps) {
   const handleAttributeChange = (
     attributeName: string,
@@ -57,105 +53,118 @@ export default function AttributeFilter({
     });
   };
 
-  const renderColorOptions = () => (
-    <div className="ml-0.5 grid grid-cols-5 gap-2 sm:grid-cols-6 md:grid-cols-5">
-      {PREDEFINED_COLORS.map((color: ColorOption) => {
-        const isSelected = !!currentFilters.attributes?.[
-          FIXED_ATTRIBUTE_NAMES.COLOR
-        ]?.includes?.(color.value);
-        return (
-          <button
-            key={color.value}
-            type="button"
-            onClick={() =>
-              handleAttributeChange(
-                FIXED_ATTRIBUTE_NAMES.COLOR,
-                color.value,
-                !isSelected, // Toggle state
-              )
-            }
-            title={color.name}
-            className={classNames(
-              "relative flex items-center justify-center rounded-full transition-all duration-150 focus:outline-none",
-              "h-7 w-7",
-              isSelected
-                ? "ring-0 ring-black ring-offset-1 ring-offset-white dark:ring-offset-gray-800" // Offset với màu nền
-                : "hover:bg-gray-100 dark:hover:bg-indigo-500", // Hover state cho button cha khi chưa active
-            )}
-            aria-pressed={!!isSelected} // Thêm aria-pressed cho accessibility
-          >
-            <span
-              className={classNames(
-                "h-5 w-5 rounded-full shadow-sm sm:h-6 sm:w-6", // Kích thước của hình tròn màu bên trong
-                // Thêm border cho màu trắng/sáng để dễ nhìn trên nền trắng
-                color.hex === "#FFFFFF" ||
-                  color.hex === "#FFFDD0" ||
-                  color.hex === "#FFFFF0" ||
-                  color.name.toLowerCase().includes("trắng") ||
-                  color.hex.toLowerCase().includes("light")
-                  ? "border border-gray-300 dark:border-gray-600"
-                  : "border border-transparent", // Border transparent cho các màu khác để giữ kích thước
-              )}
-              style={
-                color.hex.startsWith("linear-gradient")
-                  ? { background: color.hex }
-                  : { backgroundColor: color.hex }
-              }
-              aria-hidden="true"
-            />
-            {isSelected && (
-              <FiCheck className="absolute h-5 w-5 text-white mix-blend-difference" />
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  const renderSizeOptions = (sizes: SizeOption[], attributeName: string) => (
-    <div className="grid grid-cols-4 gap-2">
-      {sizes.map((size) => (
-        <button
-          key={size.name}
-          type="button"
-          onClick={() =>
-            handleAttributeChange(
-              attributeName, // "Kích cỡ" hoặc "Kích cỡ số"
-              size.name,
-              !currentFilters.attributes?.[attributeName]?.includes(size.name),
-            )
-          }
-          className={classNames(
-            "flex items-center justify-center rounded-md border px-2 py-1.5 text-xs transition-colors focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none",
-            currentFilters.attributes?.[attributeName]?.includes(size.name)
-              ? "border-indigo-600 bg-indigo-600 text-white"
-              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
-          )}
-        >
-          {size.name}
-        </button>
-      ))}
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div className="pt-6">
+        <div className="mb-4 h-6 w-1/3 animate-pulse rounded bg-gray-200"></div>
+        <div className="grid grid-cols-4 gap-2">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="h-8 animate-pulse rounded-md bg-gray-200"
+            ></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <FilterDisclosure title="Màu sắc" defaultOpen={true}>
-        {renderColorOptions()}
-      </FilterDisclosure>
-      <FilterDisclosure title="Kích cỡ (Chữ)" defaultOpen={true}>
-        {renderSizeOptions(PREDEFINED_SIZES_LETTER, FIXED_ATTRIBUTE_NAMES.SIZE)}
-      </FilterDisclosure>
-      <FilterDisclosure title="Kích cỡ (Số)" defaultOpen={false}>
-        {" "}
-        {/* Mặc định đóng size số */}
-        {renderSizeOptions(
-          PREDEFINED_SIZES_NUMERIC,
-          FIXED_ATTRIBUTE_NAMES.SIZE,
-        )}
-      </FilterDisclosure>
-      {/* Bạn có thể thêm các filter thuộc tính khác ở đây nếu cần,
-          lấy danh sách từ availableAttributes và render tương tự */}
+      {attributes.map((attr) => {
+        // Chỉ render filter nếu thuộc tính có giá trị
+        if (attr.values.length === 0) return null;
+
+        // Xử lý đặc biệt cho màu sắc
+        if (attr.name === "color") {
+          return (
+            <FilterDisclosure
+              key={attr._id}
+              title={attr.label}
+              defaultOpen={true}
+            >
+              <div className="ml-0.5 grid grid-cols-5 gap-2 sm:grid-cols-6 md:grid-cols-5">
+                {attr.values.map((valueOption) => {
+                  const isSelected = !!currentFilters.attributes?.[
+                    attr.label
+                  ]?.includes?.(valueOption.value);
+                  const hex = (valueOption.meta?.hex as string) || "#E5E7EB";
+                  return (
+                    <button
+                      key={valueOption._id}
+                      type="button"
+                      onClick={() =>
+                        handleAttributeChange(
+                          attr.label,
+                          valueOption.value,
+                          !isSelected,
+                        )
+                      }
+                      title={valueOption.value}
+                      className={classNames(
+                        "relative flex h-7 w-7 items-center justify-center rounded-full border border-gray-400 transition-all duration-150 focus:outline-none",
+                        {
+                          // Khi được chọn, ring sẽ che đi border mặc định
+                          "ring-2 ring-indigo-500": isSelected,
+                          "hover:scale-110": !isSelected,
+                        },
+                      )}
+                      style={
+                        hex.startsWith("linear-gradient")
+                          ? { background: hex }
+                          : { backgroundColor: hex }
+                      }
+                      aria-pressed={isSelected ? "true" : "false"}
+                    >
+                      {isSelected && (
+                        <FiCheck className="absolute h-5 w-5 text-white mix-blend-difference" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </FilterDisclosure>
+          );
+        }
+
+        // Render mặc định cho các thuộc tính khác (VD: Size)
+        return (
+          <FilterDisclosure
+            key={attr._id}
+            title={attr.label}
+            defaultOpen={true}
+          >
+            <div className="grid grid-cols-4 gap-2">
+              {attr.values.map((valueOption) => {
+                const isSelected = !!currentFilters.attributes?.[
+                  attr.label
+                ]?.includes?.(valueOption.value);
+                return (
+                  <button
+                    key={valueOption._id}
+                    type="button"
+                    onClick={() =>
+                      handleAttributeChange(
+                        attr.label,
+                        valueOption.value,
+                        !isSelected,
+                      )
+                    }
+                    className={classNames(
+                      "flex items-center justify-center rounded-md border px-2 py-1.5 text-xs transition-colors focus:ring-2 focus:ring-indigo-500 focus:outline-none",
+                      isSelected
+                        ? "border-indigo-600 bg-indigo-600 text-white"
+                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
+                    )}
+                  >
+                    {valueOption.value}
+                  </button>
+                );
+              })}
+            </div>
+          </FilterDisclosure>
+        );
+      })}
     </>
   );
 }

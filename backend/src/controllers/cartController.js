@@ -1,6 +1,7 @@
 const Cart = require("../models/Cart");
 const Coupon = require("../models/Coupon");
 const Product = require("../models/Product");
+const Attribute = require("../models/Attribute");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 const {
@@ -19,347 +20,420 @@ const findOrCreateCart = async (identifier) => {
 };
 
 // Hàm helper populate và tính toán giỏ hàng
-const populateAndCalculateCart = async (cart) => {
-  const isMongooseDocument = cart && typeof cart.populate === "function";
-  if (!cart || !cart.items || cart.items.length === 0) {
-    // Nếu không có cart hoặc cart rỗng, kiểm tra xem có coupon nào được áp dụng không (trường hợp cart bị xóa item cuối)
-    const appliedCouponInfo = cart?.appliedCoupon
+const populateAndCalculateCart = async (cartObject) => {
+  // --- Bước 0: Xử lý trường hợp giỏ hàng rỗng hoặc không tồn tại ---
+  if (!cartObject || !cartObject.items || cartObject.items.length === 0) {
+    const appliedCouponInfo = cartObject?.appliedCoupon
       ? {
-          code: cart.appliedCoupon.code,
-          discountAmount: 0, // Giảm giá là 0 nếu cart rỗng
+          code: cartObject.appliedCoupon.code,
+          discountAmount: 0,
+          error: "Giỏ hàng trống.",
         }
       : null;
     return {
-      _id: cart?._id,
+      _id: cartObject?._id,
       items: [],
       subtotal: 0,
-      totalQuantity: 0,
+      totalQuantity: 0, // Số lượng sản phẩm
+      totalDistinctItems: 0, // Số dòng sản phẩm
       appliedCoupon: appliedCouponInfo,
+      discountAmount: 0,
       finalTotal: 0,
-      userId: cart?.userId,
-      guestId: cart?.guestId,
-    }; // Trả về cấu trúc giỏ hàng rỗng
+      createdAt: cartObject?.createdAt,
+      updatedAt: cartObject?.updatedAt,
+      userId: cartObject?.userId,
+      guestId: cartObject?.guestId,
+    };
   }
 
-  let itemsToProcess = cart.items;
+  // --- Bước 1: Lấy ID sản phẩm từ giỏ hàng để bắt đầu pipeline ---
+  const productIds = cartObject.items.map(
+    (item) => new mongoose.Types.ObjectId(item.productId)
+  );
 
-  // Nếu cartInput LÀ Mongoose document, chúng ta có thể dùng populate() của nó
-  if (isMongooseDocument) {
-    await cart.populate({
-      path: "items.productId",
-      select:
-        "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category",
-      match: { isActive: true, isPublished: true },
-      populate: { path: "category", select: "name slug _id isActive parent" },
-    });
-    itemsToProcess = cart.items.filter((item) => item.productId); // Lấy items đã populate và hợp lệ
-  } else {
-    // Nếu cartInput KHÔNG PHẢI là Mongoose document (ví dụ: cartForCalculation từ orderController)
-    // Chúng ta cần populate productId cho từng item một cách thủ công.
-    console.log(
-      "[populateAndCalculateCart] Input is not a Mongoose document. Populating items manually."
-    );
-    const populatedManualItems = [];
-    for (const item of cart.items) {
-      if (item.productId) {
-        // Giả sử item.productId là ID string hoặc ObjectId
-        const productDoc = await Product.findById(item.productId)
-          .select(
-            "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category"
-          )
-          .populate({
-            path: "category",
-            select: "name slug _id isActive parent",
-          })
-          .lean({ virtuals: true }); // Dùng lean ở đây vì chúng ta đang xây dựng object mới
+  // --- Bước 2: Sử dụng Aggregation Pipeline để lấy và "làm giàu" dữ liệu ---
+  // Pipeline này hiệu quả hơn nhiều so với nhiều lệnh .populate() lồng nhau.
+  const populatedProductsInfo = await Product.aggregate([
+    // Giai đoạn 1: Lọc ra các sản phẩm có trong giỏ hàng và đang được bán
+    { $match: { _id: { $in: productIds }, isActive: true, isPublished: true } },
 
-        if (productDoc && productDoc.isActive && productDoc.isPublished) {
-          // Tạo lại cấu trúc item với productDoc đã populate
-          populatedManualItems.push({
-            ...item, // Giữ lại các trường của item gốc (_id, quantity, variantId)
-            productId: productDoc, // Gán product đã populate
-          });
-        } else {
-          console.warn(
-            `[Cart Manual Populate] Product ${item.productId} not found or not active/published.`
-          );
-        }
-      }
-    }
-    itemsToProcess = populatedManualItems;
-  }
+    // Giai đoạn 2: "Tháo" mảng variants ra để xử lý từng biến thể
+    { $unwind: { path: "$variants", preserveNullAndEmptyArrays: true } },
 
-  // --- Fetch tất cả category active một lần để tra cứu ---
-  const activeCategoryMap = await fetchAndMapCategories({ isActive: true });
+    // Giai đoạn 3: Join với collection 'categories' để lấy thông tin danh mục
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "categoryInfo",
+      },
+    },
 
+    // Giai đoạn 4: Join với collection 'attributes' để lấy thông tin thuộc tính (tên, nhãn)
+    // Dựa trên ID thuộc tính trong optionValues của mỗi biến thể
+    {
+      $lookup: {
+        from: "attributes",
+        localField: "variants.optionValues.attribute",
+        foreignField: "_id",
+        as: "attributeDetails",
+      },
+    },
+
+    // Giai đoạn 5: Định dạng lại dữ liệu trả về cho dễ sử dụng
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        slug: 1,
+        price: 1,
+        salePrice: 1,
+        salePriceEffectiveDate: 1,
+        salePriceExpiryDate: 1,
+        images: 1,
+        sku: 1,
+        stockQuantity: 1,
+        category: { $arrayElemAt: ["$categoryInfo", 0] }, // Lấy object category đầu tiên
+        // Tạo một object variant đã được "làm giàu" thông tin
+        variant: {
+          _id: "$variants._id",
+          sku: "$variants.sku",
+          price: "$variants.price",
+          salePrice: "$variants.salePrice",
+          salePriceEffectiveDate: "$variants.salePriceEffectiveDate",
+          salePriceExpiryDate: "$variants.salePriceExpiryDate",
+          stockQuantity: "$variants.stockQuantity",
+          images: "$variants.images",
+          // Map qua optionValues để thêm tên thuộc tính và tên giá trị
+          optionValues: {
+            $map: {
+              input: "$variants.optionValues",
+              as: "option", // Biến đại diện cho mỗi phần tử { attribute: ID, value: ID }
+              in: {
+                attributeId: "$$option.attribute",
+                valueId: "$$option.value",
+                // Tìm tên thuộc tính từ mảng `attributeDetails` đã join
+                attributeLabel: {
+                  $let: {
+                    vars: {
+                      attrDoc: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$attributeDetails",
+                              cond: {
+                                $eq: ["$$this._id", "$$option.attribute"],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: "$$attrDoc.label",
+                  },
+                },
+                // Tìm tên giá trị từ mảng con `values` của thuộc tính tương ứng
+                valueName: {
+                  $let: {
+                    vars: {
+                      attrDoc: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$attributeDetails",
+                              cond: {
+                                $eq: ["$$this._id", "$$option.attribute"],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: {
+                      $let: {
+                        vars: {
+                          valDoc: {
+                            $arrayElemAt: [
+                              {
+                                $filter: {
+                                  input: "$$attrDoc.values",
+                                  cond: {
+                                    $eq: ["$$this._id", "$$option.value"],
+                                  },
+                                },
+                              },
+                              0,
+                            ],
+                          },
+                        },
+                        in: "$$valDoc.value",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  ]);
+
+  // --- Bước 3: Tạo một Map để tra cứu nhanh thông tin đã populate ---
+  const productInfoMap = new Map();
+  populatedProductsInfo.forEach((p) => {
+    // Tạo key duy nhất cho mỗi sản phẩm hoặc biến thể
+    const key = p.variant
+      ? `${p._id.toString()}-${p.variant._id.toString()}`
+      : p._id.toString();
+    productInfoMap.set(key, p);
+  });
+
+  // --- Bước 4: Lặp qua các item trong giỏ hàng để tính toán và xây dựng kết quả cuối cùng ---
   let subtotal = 0;
-  const populatedItems = [];
-  const productIdsInCart = new Set();
-  const categoryIdsInCart = new Set();
+  const finalCartItems = [];
 
-  // --- Lọc bỏ item có sản phẩm không populate được (do bị inactive/unpublished) ---
-  const validCartItems = cart.items.filter((item) => item.productId);
+  for (const item of cartObject.items) {
+    // Tạo key để tra cứu trong Map
+    const key = item.variantId
+      ? `${item.productId.toString()}-${item.variantId.toString()}`
+      : item.productId.toString();
+    const productInfo = productInfoMap.get(key);
 
-  for (const item of validCartItems) {
-    const product = item.productId;
-
-    // Nếu sản phẩm/danh mục không tồn tại hoặc không active/publish thì bỏ qua item này
-    if (!product || !product.isActive || !product.isPublished) {
+    // Nếu không tìm thấy thông tin (sản phẩm đã bị xóa/ẩn), bỏ qua item này
+    if (!productInfo) {
       console.warn(
-        `[Cart] Bỏ qua item với sản phẩm không hợp lệ hoặc không hoạt động: ${item.productId?._id}`
+        `[Cart] Bỏ qua item không hợp lệ: Product ${item.productId}, Variant ${item.variantId}`
       );
       continue;
     }
 
-    if (!product.category || !product.category.isActive) {
-      console.warn(
-        `[Cart Populate] Bỏ qua item vì category không hợp lệ hoặc không active: Product ${product._id}, Category ${product.category?._id}`
-      );
-      continue;
+    const isVariant = !!item.variantId;
+    // `source` là sản phẩm gốc hoặc biến thể cụ thể
+    const source = isVariant ? productInfo.variant : productInfo;
+
+    // Tính toán giá hiển thị (displayPrice) bằng tay vì virtuals không chạy trong aggregation
+    const now = new Date();
+    let displayPrice = source.price;
+    const isOnSale =
+      source.salePrice &&
+      source.salePrice < source.price &&
+      (!source.salePriceEffectiveDate ||
+        source.salePriceEffectiveDate <= now) &&
+      (!source.salePriceExpiryDate || source.salePriceExpiryDate >= now);
+
+    if (isOnSale) {
+      displayPrice = source.salePrice;
     }
 
-    let itemPrice = product.displayPrice; // Giá mặc định là giá sản phẩm gốc
-    let itemSku = product.sku;
-    let itemImage =
-      product.images && product.images.length > 0 ? product.images[0] : null;
-    let availableStock = product.stockQuantity;
-    let variantInfo = null; // Thông tin biến thể cụ thể
-    let originalPrice = product.price;
+    subtotal += displayPrice * item.quantity;
 
-    // Nếu item này là một biến thể
-    if (item.variantId) {
-      const variant = product.variants.id(item.variantId); // Tìm subdocument variant bằng ID
-      if (variant) {
-        itemPrice = variant.displayPrice;
-        originalPrice = variant.price;
-        itemSku = variant.sku;
-        // Ưu tiên ảnh ĐẦU TIÊN của biến thể nếu có.
-        // Nếu biến thể không có ảnh, itemImage sẽ giữ nguyên ảnh của sản phẩm chính.
-        if (variant.images && variant.images.length > 0 && variant.images[0]) {
-          itemImage = variant.images[0];
-        }
-        availableStock = variant.stockQuantity;
-        variantInfo = {
-          // Lấy thông tin các option của variant này
-          _id: variant._id,
-          options: variant.optionValues.map((opt) => ({
-            attributeName: opt.attributeName,
-            value: opt.value,
-          })),
-        };
-      } else {
-        // Nếu không tìm thấy variant ID trong sản phẩm -> dữ liệu cart bị lỗi thời?
-        console.warn(
-          `[Cart] Không tìm thấy Variant ID ${item.variantId} trong Product ${product._id}. Bỏ qua item.`
-        );
-        continue; // Bỏ qua item này
-      }
-    } else {
-      // Nếu là sản phẩm đơn giản, kiểm tra stock của sản phẩm gốc
-      if (product.variants && product.variants.length > 0) {
-        console.warn(
-          `[Cart] Sản phẩm ${product._id} có biến thể nhưng item trong giỏ hàng không có variantId. Bỏ qua item.`
-        );
-        continue;
-      }
-      availableStock = product.stockQuantity;
-    }
-
-    // Thêm ID category vào Set sau khi đã kiểm tra hợp lệ
-    categoryIdsInCart.add(product.category._id.toString());
-
-    // Tạo đối tượng item trả về cho frontend
-    populatedItems.push({
-      _id: item._id, // ID của cart item
-      productId: product._id,
+    finalCartItems.push({
+      _id: item._id,
+      productId: productInfo._id,
       variantId: item.variantId,
-      name: product.name,
-      slug: product.slug,
-      sku: itemSku,
-      price: itemPrice,
-      originalPrice: originalPrice,
-      isOnSale: itemPrice < originalPrice,
+      name: productInfo.name,
+      slug: productInfo.slug,
+      sku: source.sku,
+      price: displayPrice,
+      originalPrice: source.price,
+      isOnSale,
       quantity: item.quantity,
-      lineTotal: itemPrice * item.quantity,
-      image: itemImage,
-      availableStock: availableStock, // Số lượng tồn kho hiện tại
-      category: product.category
+      lineTotal: displayPrice * item.quantity,
+      image:
+        source.images && source.images.length > 0
+          ? source.images[0]
+          : productInfo.images[0] || null,
+      availableStock: source.stockQuantity,
+      category: productInfo.category, // Category đã được populate sẵn
+      variantInfo: isVariant
         ? {
-            _id: product.category._id,
-            name: product.category.name,
-            slug: product.category.slug,
-            parent: product.category.parent,
+            _id: source._id,
+            options: source.optionValues.map((opt) => ({
+              attribute: opt.attributeId,
+              value: opt.valueId,
+              attributeName: opt.attributeLabel,
+              valueName: opt.valueName,
+            })),
           }
-        : null,
-      variantInfo: variantInfo, // Thông tin các lựa chọn của biến thể
+        : undefined,
     });
+  }
 
-    subtotal += itemPrice * item.quantity;
-    productIdsInCart.add(product._id.toString()); // Thêm ID sản phẩm vào Set
-    if (product.category._id) {
-      categoryIdsInCart.add(product.category._id.toString()); // Thêm ID category vào Set
+  // === Bước 5 & 6: Gọi hàm Helper và xử lý kết quả ===
+  const { discountAmount, finalTotal, appliedCouponInfo } =
+    await calculateDiscount(cartObject.appliedCoupon, finalCartItems, subtotal);
+
+  // Nếu coupon không còn hợp lệ, `appliedCouponInfo` sẽ chứa lỗi. Chúng ta cần xóa nó khỏi DB.
+  if (appliedCouponInfo?.error) {
+    const cartToUpdate = await Cart.findById(cartObject._id);
+    if (cartToUpdate) {
+      cartToUpdate.appliedCoupon = null;
+      await cartToUpdate.save();
+    }
+  } else if (
+    cartObject.appliedCoupon &&
+    cartObject.appliedCoupon.discountAmount !== discountAmount
+  ) {
+    // Cập nhật lại discountAmount trong DB nếu nó thay đổi (ví dụ: người dùng xóa bớt sản phẩm)
+    const cartToUpdate = await Cart.findById(cartObject._id);
+    if (cartToUpdate) {
+      cartToUpdate.appliedCoupon.discountAmount = discountAmount;
+      await cartToUpdate.save();
     }
   }
 
-  // --- Tính toán giảm giá nếu có coupon ---
-  let discountAmount = 0;
-  let appliedCouponInfo = null;
-  let finalTotal = subtotal;
-
-  if (cart.appliedCoupon && cart.appliedCoupon.code) {
-    const coupon = await Coupon.findOne({
-      code: cart.appliedCoupon.code,
-    }).lean(); // Tìm lại coupon để re-validate nhẹ
-    let isValid = true; // Kiểm tra coupon còn hợp lệ không
-    let validationError = null;
-
-    // Re-validate các điều kiện cơ bản (active, expiry, minOrder)
-    if (!coupon) {
-      isValid = false;
-      validationError = "Mã giảm giá không tồn tại.";
-    } else if (!coupon.isActive) {
-      isActive = false;
-      validationError = "Mã giảm giá đã bị vô hiệu hóa.";
-    } else if (coupon.expiryDate && coupon.expiryDate < new Date()) {
-      isValid = false;
-      validationError = "Mã giảm giá đã hết hạn.";
-    } else if (coupon.startDate && coupon.startDate > new Date()) {
-      isValid = false;
-      validationError = "Mã giảm giá chưa đến ngày được áp dụng.";
-    } else if (subtotal < coupon.minOrderValue) {
-      isValid = false;
-      validationError = `Đơn hàng tối thiểu ${coupon.minOrderValue.toLocaleString(
-        "vi-VN"
-      )}đ để áp dụng mã này.`;
+  // --- Bước 7: Xử lý các item không hợp lệ bị loại bỏ (nếu có) ---
+  if (finalCartItems.length !== cartObject.items.length) {
+    const validItemIds = finalCartItems.map((item) => item._id);
+    // Cần một cart document để save
+    const cartToUpdate = await Cart.findById(cartObject._id);
+    if (cartToUpdate) {
+      cartToUpdate.items.pull({ _id: { $nin: validItemIds } });
+      await cartToUpdate.save();
     }
+  }
 
-    // Re-validate điều kiện áp dụng (applicableTo)
-    if (isValid && coupon.applicableTo !== "all") {
-      const applicableIdsStr = coupon.applicableIds.map((id) => id.toString());
-      let applicableSubtotal = 0;
-      let foundApplicableItem = false;
+  // --- Bước 8: Trả về object giỏ hàng hoàn chỉnh ---
+  return {
+    _id: cartObject._id,
+    items: finalCartItems,
+    subtotal,
+    totalQuantity: finalCartItems.reduce((sum, item) => sum + item.quantity, 0),
+    totalDistinctItems: finalCartItems.length,
+    appliedCoupon: appliedCouponInfo,
+    discountAmount,
+    finalTotal,
+    createdAt: cartObject.createdAt,
+    updatedAt: cartObject.updatedAt,
+    userId: cartObject.userId,
+    guestId: cartObject.guestId,
+  };
+};
 
-      for (const item of populatedItems) {
-        let isItemApplicable = false;
+/**
+ * Hàm Helper: Tính toán giảm giá dựa trên coupon và các item trong giỏ hàng.
+ * Re-validate lại coupon để đảm bảo tính hợp lệ.
+ * @param {object} appliedCoupon - Thông tin coupon đang được áp dụng trong giỏ hàng.
+ * @param {Array} cartItems - Mảng các item đã được populate thông tin.
+ * @param {number} subtotal - Tổng tiền của các item trong cartItems.
+ * @returns {Promise<object>} - Object chứa { discountAmount, finalTotal, appliedCouponInfo }
+ */
+const calculateDiscount = async (appliedCoupon, cartItems, subtotal) => {
+  if (!appliedCoupon || !appliedCoupon.code) {
+    return { discountAmount: 0, finalTotal: subtotal, appliedCouponInfo: null };
+  }
+
+  const coupon = await Coupon.findOne({ code: appliedCoupon.code }).lean();
+  let validationError = null;
+
+  // --- Re-validate Coupon ---
+  if (!coupon) {
+    validationError = "Mã giảm giá không tồn tại.";
+  } else if (!coupon.isActive) {
+    validationError = "Mã giảm giá đã bị vô hiệu hóa.";
+  } else if (coupon.expiryDate && coupon.expiryDate < new Date()) {
+    validationError = "Mã giảm giá đã hết hạn.";
+  } else if (coupon.startDate && coupon.startDate > new Date()) {
+    validationError = "Mã giảm giá chưa đến ngày áp dụng.";
+  } else if (subtotal < coupon.minOrderValue) {
+    validationError = `Đơn hàng tối thiểu ${coupon.minOrderValue.toLocaleString(
+      "vi-VN"
+    )}đ để áp dụng mã này.`;
+  }
+
+  if (validationError) {
+    console.warn(
+      `[Cart] Mã giảm giá "${appliedCoupon.code}" không còn hợp lệ: ${validationError}`
+    );
+    return {
+      discountAmount: 0,
+      finalTotal: subtotal,
+      appliedCouponInfo: { error: validationError },
+    };
+  }
+
+  // --- Tính toán số tiền giảm giá ---
+  let discountAmount = 0;
+  let applicableSubtotal = subtotal; // Mặc định áp dụng cho toàn bộ giỏ hàng
+
+  // Nếu coupon chỉ áp dụng cho một số sản phẩm/danh mục nhất định
+  if (coupon.applicableTo !== "all") {
+    const applicableIdsStr = coupon.applicableIds.map((id) => id.toString());
+    const activeCategoryMap = await fetchAndMapCategories({ isActive: true });
+
+    const applicableItems = await Promise.all(
+      cartItems.map(async (item) => {
         const itemProductIdStr = item.productId.toString();
-        const itemCategoryIdStr = item.category?._id?.toString(); // Lấy ID category của item
+        const itemCategoryIdStr = item.category?._id?.toString();
 
         if (
           coupon.applicableTo === "products" &&
           applicableIdsStr.includes(itemProductIdStr)
         ) {
-          isItemApplicable = true;
-        } else if (coupon.applicableTo === "categories" && itemCategoryIdStr) {
-          // 1. Kiểm tra khớp trực tiếp
-          if (applicableIdsStr.includes(itemCategoryIdStr)) {
-            isItemApplicable = true;
-          } else {
-            // 2. Kiểm tra tổ tiên
-            const ancestorIds = await getCategoryAncestors(
-              itemCategoryIdStr,
-              activeCategoryMap
-            );
-            if (
-              ancestorIds.some((ancestorId) =>
-                applicableIdsStr.includes(ancestorId)
-              )
-            ) {
-              isItemApplicable = true;
-            }
-          }
+          return item;
         }
 
-        if (isItemApplicable) {
-          foundApplicableItem = true;
-          applicableSubtotal += item.lineTotal; // Cộng dồn giá trị item hợp lệ
-        }
-      }
-
-      if (!foundApplicableItem) {
-        isValid = false;
-        validationError =
-          "Không có sản phẩm nào trong giỏ hàng phù hợp với mã giảm giá này.";
-      } else {
-        // Nếu hợp lệ, tính giảm giá trên applicableSubtotal thay vì subtotal
-        if (coupon.discountType === "percentage") {
-          discountAmount = Math.round(
-            (applicableSubtotal * coupon.discountValue) / 100
+        if (coupon.applicableTo === "categories" && itemCategoryIdStr) {
+          if (applicableIdsStr.includes(itemCategoryIdStr)) return item;
+          const ancestorIds = await getCategoryAncestors(
+            itemCategoryIdStr,
+            activeCategoryMap
           );
-        } else {
-          // fixed_amount
-          discountAmount = coupon.discountValue;
+          if (ancestorIds.some((ancId) => applicableIdsStr.includes(ancId)))
+            return item;
         }
-        // Đảm bảo giảm giá không vượt quá tổng tiền sản phẩm hợp lệ
-        discountAmount = Math.min(discountAmount, applicableSubtotal);
-      }
-    } else if (isValid) {
-      // Áp dụng cho tất cả ('all')
-      // Tính giảm giá trên subtotal
-      if (coupon.discountType === "percentage") {
-        discountAmount = Math.round((subtotal * coupon.discountValue) / 100);
-      } else {
-        // fixed_amount
-        discountAmount = coupon.discountValue;
-      }
-      // Đảm bảo giảm giá không vượt quá tổng tiền
-      discountAmount = Math.min(discountAmount, subtotal);
-    }
-    // Nếu coupon không còn hợp lệ sau khi re-validate -> Xóa khỏi giỏ hàng
-    if (!isValid) {
-      console.warn(
-        `[Cart] Mã giảm giá "${cart.appliedCoupon.code}" không còn hợp lệ: ${validationError}. Đang xóa khỏi giỏ hàng ${cart._id}`
-      );
-      cart.appliedCoupon = null;
-      await cart.save(); // Lưu lại việc xóa coupon
-      discountAmount = 0; // Reset giảm giá
-      appliedCouponInfo = { error: validationError }; // Trả về lỗi cho frontend biết
-    } else {
-      // Nếu vẫn hợp lệ, cập nhật lại discountAmount trong cart (phòng trường hợp giỏ hàng thay đổi)
-      if (cart.appliedCoupon.discountAmount !== discountAmount) {
-        cart.appliedCoupon.discountAmount = discountAmount;
-        // Chỉ lưu lại nếu discountAmount thay đổi
-        await cart.save();
-      }
-      appliedCouponInfo = {
-        _id: coupon._id, // Thêm ID coupon
-        code: coupon.code,
-        discountType: coupon.discountType,
-        discountValue: coupon.discountValue,
-        minOrderValue: coupon.minOrderValue,
-        applicableTo: coupon.applicableTo,
-        applicableIds: coupon.applicableIds,
-      };
-      finalTotal = subtotal - discountAmount; // Tính lại tổng cuối
-    }
-  }
 
-  // Cập nhật lại items trong cart nếu có item bị loại bỏ (do sản phẩm/variant không hợp lệ)
-  if (populatedItems.length !== validCartItems.length) {
-    console.log(
-      "[Cart] Có sự thay đổi item sau khi populate, cập nhật lại cart..."
+        return null;
+      })
     );
-    // Lấy danh sách _id của các item hợp lệ
-    const validItemIds = populatedItems.map((pItem) => pItem._id);
-    await Cart.findByIdAndUpdate(cart._id, {
-      $pull: { items: { _id: { $nin: validItemIds } } }, // Xóa các item không có trong validItemIds
-    });
+
+    const filteredApplicableItems = applicableItems.filter(Boolean);
+
+    if (filteredApplicableItems.length === 0) {
+      validationError =
+        "Không có sản phẩm nào trong giỏ hàng phù hợp với mã giảm giá này.";
+      return {
+        discountAmount: 0,
+        finalTotal: subtotal,
+        appliedCouponInfo: { error: validationError },
+      };
+    }
+
+    // Tính lại subtotal chỉ trên các sản phẩm được áp dụng
+    applicableSubtotal = filteredApplicableItems.reduce(
+      (sum, item) => sum + item.lineTotal,
+      0
+    );
   }
 
-  const totalDistinctItems = populatedItems.length;
+  // Áp dụng công thức giảm giá
+  if (coupon.discountType === "percentage") {
+    discountAmount = Math.round(
+      (applicableSubtotal * coupon.discountValue) / 100
+    );
+  } else {
+    discountAmount = coupon.discountValue;
+  }
 
-  return {
-    _id: cart._id,
-    items: populatedItems,
-    subtotal: subtotal,
-    totalQuantity: totalDistinctItems,
-    appliedCoupon: appliedCouponInfo,
-    discountAmount: discountAmount,
-    finalTotal: finalTotal,
-    createdAt: cart.createdAt,
-    updatedAt: cart.updatedAt,
-    userId: cart.userId,
-    guestId: cart.guestId,
+  // Đảm bảo không giảm giá nhiều hơn giá trị của các sản phẩm được áp dụng
+  discountAmount = Math.min(discountAmount, applicableSubtotal);
+
+  const finalTotal = subtotal - discountAmount;
+  const appliedCouponInfo = {
+    _id: coupon._id,
+    code: coupon.code,
+    discountType: coupon.discountType,
+    discountValue: coupon.discountValue,
+    minOrderValue: coupon.minOrderValue,
+    applicableTo: coupon.applicableTo,
+    applicableIds: coupon.applicableIds,
   };
+
+  return { discountAmount, finalTotal, appliedCouponInfo };
 };
 
 // @desc    Áp dụng mã giảm giá vào giỏ hàng
@@ -576,33 +650,39 @@ const addItemToCart = asyncHandler(async (req, res) => {
   let variant = null;
   let availableStock = product.stockQuantity;
   let productHasVariants = product.variants && product.variants.length > 0;
+  const finalVariantId = variantId
+    ? new mongoose.Types.ObjectId(variantId)
+    : null;
 
-  if (variantId) {
-    // Nếu thêm một biến thể cụ thể
+  if (finalVariantId) {
     if (!productHasVariants) {
       res.status(400);
       throw new Error("Sản phẩm này không có biến thể.");
     }
-    variant = product.variants.id(variantId);
+    variant = product.variants.id(finalVariantId);
     if (!variant) {
       res.status(404);
       throw new Error("Biến thể sản phẩm không tồn tại.");
     }
-    availableStock = variant.stockQuantity; // Lấy tồn kho của biến thể
+    availableStock = variant.stockQuantity;
   } else if (productHasVariants) {
-    // Nếu sản phẩm có biến thể nhưng client không gửi variantId
     res.status(400);
     throw new Error("Vui lòng chọn một phiên bản (biến thể) của sản phẩm.");
   }
-  // Nếu không có variantId và sản phẩm không có biến thể -> dùng stockQuantity của sản phẩm
 
   // --- 3. Tìm item hiện có trong giỏ hàng ---
-  const existingItemIndex = cart.items.findIndex(
-    (item) =>
-      item.productId.equals(productId) && // So sánh ObjectId
-      // So sánh variantId (phải cùng là null hoặc cùng bằng giá trị)
-      (item.variantId ? item.variantId.equals(variantId) : variantId === null)
-  );
+  const existingItemIndex = cart.items.findIndex((item) => {
+    const productMatch = item.productId.equals(productId);
+
+    // So sánh variantId một cách an toàn (cả hai đều là ObjectId hoặc cả hai đều là null)
+    const variantMatch =
+      (item.variantId &&
+        finalVariantId &&
+        item.variantId.equals(finalVariantId)) ||
+      (!item.variantId && !finalVariantId);
+
+    return productMatch && variantMatch;
+  });
 
   let newQuantity = Number(quantity);
   if (existingItemIndex > -1) {
@@ -641,7 +721,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
 
   // --- 6. Lưu giỏ hàng và trả về ---
   await cart.save();
-  const populatedCart = await populateAndCalculateCart(cart);
+  const populatedCart = await populateAndCalculateCart(cart.toObject());
   res.status(200).json(populatedCart); // Trả về giỏ hàng đã cập nhật và populate
 });
 
@@ -669,14 +749,12 @@ const updateCartItem = asyncHandler(async (req, res) => {
     throw new Error("ID item trong giỏ hàng không hợp lệ.");
   }
 
-  if (
-    quantity !== undefined &&
-    (isNaN(parseInt(quantity)) || parseInt(quantity) < 1)
-  ) {
-    res.status(400);
-    throw new Error("Số lượng không hợp lệ.");
-  }
   const newQuantity = quantity !== undefined ? parseInt(quantity) : undefined;
+  const finalNewVariantId = newVariantId
+    ? new mongoose.Types.ObjectId(newVariantId)
+    : newVariantId === null
+    ? null
+    : undefined;
 
   if (
     newVariantId !== undefined &&
@@ -702,151 +780,141 @@ const updateCartItem = asyncHandler(async (req, res) => {
   }
 
   // --- 3. Lấy thông tin sản phẩm gốc ---
-  // Populate một lần để có thông tin product và variants
-  const product = await Product.findById(itemToUpdate.productId)
-    .select(
-      "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images variants sku stockQuantity isActive isPublished category"
-    )
-    .populate({ path: "category", select: "name slug _id isActive parent" });
+  // Nếu có yêu cầu đổi sang variant mới
+  if (finalNewVariantId !== undefined) {
+    // Tìm xem có item nào khác trong giỏ đã có variant mới này chưa
+    const mergeTargetItem = cart.items.find(
+      (item) =>
+        item.productId.equals(itemToUpdate.productId) &&
+        (finalNewVariantId
+          ? item.variantId?.equals(finalNewVariantId)
+          : !item.variantId) &&
+        !item._id.equals(itemToUpdate._id) // Phải là một item khác
+    );
 
+    if (mergeTargetItem) {
+      // Nếu tìm thấy item để gộp vào...
+      console.log(
+        `[Cart Update] Gộp item ${itemToUpdate._id} vào ${mergeTargetItem._id}`
+      );
+
+      const product = await Product.findById(itemToUpdate.productId).select(
+        "variants stockQuantity"
+      );
+      const newVariant = finalNewVariantId
+        ? product.variants.id(finalNewVariantId)
+        : null;
+      const availableStock = newVariant
+        ? newVariant.stockQuantity
+        : product.stockQuantity;
+      const totalQuantity = mergeTargetItem.quantity + itemToUpdate.quantity;
+
+      if (availableStock < totalQuantity) {
+        res.status(400);
+        throw new Error(
+          `Không thể gộp sản phẩm. Tổng số lượng (${totalQuantity}) vượt quá tồn kho (${availableStock}).`
+        );
+      }
+
+      // Gộp số lượng và xóa item cũ
+      mergeTargetItem.quantity = totalQuantity;
+      cart.items.pull({ _id: itemToUpdate._id });
+
+      await cart.save();
+      const populatedCart = await populateAndCalculateCart(cart.toObject());
+      return res.status(200).json(populatedCart);
+    }
+    // Nếu không tìm thấy item để gộp, tiếp tục logic cập nhật bình thường ở dưới
+  }
+
+  // --- Logic cập nhật item như cũ (khi chỉ đổi số lượng hoặc đổi sang variant chưa có trong giỏ) ---
+  const product = await Product.findById(itemToUpdate.productId).select(
+    "name variants stockQuantity isActive isPublished"
+  );
   if (!product || !product.isActive || !product.isPublished) {
-    // Nếu sản phẩm gốc không hợp lệ, nên xóa item khỏi giỏ
     cart.items.pull({ _id: itemId });
     await cart.save();
     const populatedCart = await populateAndCalculateCart(cart);
-    console.warn(
-      `[Cart Update] Sản phẩm ${itemToUpdate.productId} không còn hợp lệ, đã xóa item ${itemId} khỏi giỏ.`
-    );
-    // Trả về lỗi hoặc giỏ hàng đã cập nhật với thông báo
-    res.status(404).json({
+    return res.status(404).json({
       message: "Sản phẩm không còn tồn tại hoặc không hoạt động.",
       cart: populatedCart,
     });
-    return;
   }
 
   let finalQuantity =
     newQuantity !== undefined ? newQuantity : itemToUpdate.quantity;
-  let targetVariantId = itemToUpdate.variantId; // Variant ID hiện tại hoặc mới
-  let targetVariant = null;
   let availableStock = 0;
 
-  // --- 4. Xử lý nếu có yêu cầu đổi sang newVariantId ---
-  if (newVariantId !== undefined) {
-    // newVariantId có thể là null nếu muốn đổi về sản phẩm không có variant
+  // Nếu có yêu cầu đổi sang newVariantId (nhưng không có item để gộp)
+  if (finalNewVariantId !== undefined) {
     if (
-      newVariantId === null &&
+      finalNewVariantId === null &&
       product.variants &&
       product.variants.length > 0
     ) {
       res.status(400);
-      throw new Error(
-        "Không thể đổi sang sản phẩm không có biến thể khi sản phẩm gốc yêu cầu biến thể."
-      );
+      throw new Error("Sản phẩm này yêu cầu chọn biến thể.");
     }
 
-    if (newVariantId !== null) {
-      // Nếu đang đổi sang một variant cụ thể
-      targetVariant = product.variants.id(newVariantId);
+    if (finalNewVariantId !== null) {
+      const targetVariant = product.variants.id(finalNewVariantId);
       if (!targetVariant) {
         res.status(404);
         throw new Error("Biến thể mới không tồn tại cho sản phẩm này.");
       }
-      targetVariantId = targetVariant._id;
       availableStock = targetVariant.stockQuantity;
     } else {
-      // newVariantId là null (muốn đổi về sản phẩm không có variant)
-      if (product.variants && product.variants.length > 0) {
-        // Trường hợp này đã chặn ở trên, nhưng để an toàn
-        res.status(400);
-        throw new Error("Sản phẩm này yêu cầu chọn biến thể.");
-      }
-      targetVariantId = null;
       availableStock = product.stockQuantity;
     }
 
-    // Kiểm tra tồn kho cho variant mới với số lượng hiện tại (hoặc số lượng mới nếu có)
     if (availableStock < finalQuantity) {
       res.status(400);
       throw new Error(
         `Biến thể mới chỉ còn ${availableStock} sản phẩm. Không đủ số lượng ${finalQuantity}.`
       );
     }
-    // Cập nhật variantId trong cart item
-    itemToUpdate.variantId = targetVariantId;
-    console.log(
-      `[Cart Update] Item ${itemId} đổi sang variant ${
-        targetVariantId || "sản phẩm gốc"
-      }.`
-    );
+    itemToUpdate.variantId = finalNewVariantId;
   } else {
-    // Nếu không đổi variant, chỉ cập nhật số lượng (nếu có)
-    // Lấy stock của variant hiện tại hoặc sản phẩm chính
+    // Nếu không đổi variant, chỉ cập nhật số lượng
     if (itemToUpdate.variantId) {
       const currentVariant = product.variants.id(itemToUpdate.variantId);
       if (!currentVariant) {
-        // Variant hiện tại không còn tồn tại -> lỗi dữ liệu, xóa item
         cart.items.pull({ _id: itemId });
         await cart.save();
         const populatedCart = await populateAndCalculateCart(cart);
-        console.warn(
-          `[Cart Update] Variant hiện tại ${itemToUpdate.variantId} của item ${itemId} không tồn tại, đã xóa item.`
-        );
-        res.status(404).json({
+        return res.status(404).json({
           message: "Biến thể sản phẩm hiện tại không còn tồn tại.",
           cart: populatedCart,
         });
-        return;
       }
       availableStock = currentVariant.stockQuantity;
     } else {
-      if (product.variants && product.variants.length > 0) {
-        // Lỗi: Item này nên có variantId
-        cart.items.pull({ _id: itemId });
-        await cart.save();
-        const populatedCart = await populateAndCalculateCart(cart);
-        res.status(400).json({
-          message: "Lỗi dữ liệu: sản phẩm này yêu cầu biến thể.",
-          cart: populatedCart,
-        });
-        return;
-      }
       availableStock = product.stockQuantity;
     }
   }
 
-  // --- 5. Cập nhật số lượng (nếu có) và kiểm tra tồn kho cuối cùng ---
+  // Cập nhật số lượng và kiểm tra tồn kho
   if (newQuantity !== undefined) {
     if (availableStock < newQuantity) {
       res.status(400);
-      // Thông báo lỗi sẽ khác nhau tùy thuộc vào việc có đổi variant hay không
-      const stockSource =
-        newVariantId !== undefined
-          ? "biến thể mới"
-          : "sản phẩm/biến thể hiện tại";
       throw new Error(
-        `Số lượng tồn kho của ${stockSource} không đủ (Chỉ còn ${availableStock}). Không thể cập nhật thành ${newQuantity}.`
+        `Số lượng tồn kho không đủ (Chỉ còn ${availableStock}). Không thể cập nhật thành ${newQuantity}.`
       );
     }
     itemToUpdate.quantity = newQuantity;
-    console.log(
-      `[Cart Update] Item ${itemId} cập nhật số lượng thành ${newQuantity}.`
-    );
-  }
-  // Nếu không có newQuantity, finalQuantity (số lượng hiện tại của item) vẫn phải được kiểm tra với stock mới (nếu đã đổi variant)
-  else if (
-    newVariantId !== undefined &&
+  } else if (
+    finalNewVariantId !== undefined &&
     availableStock < itemToUpdate.quantity
   ) {
     res.status(400);
     throw new Error(
-      `Biến thể mới chỉ còn ${availableStock} sản phẩm, không đủ cho số lượng hiện tại (${itemToUpdate.quantity}). Vui lòng giảm số lượng.`
+      `Biến thể mới chỉ còn ${availableStock} sản phẩm, không đủ cho số lượng hiện tại (${itemToUpdate.quantity}).`
     );
   }
 
-  // --- 6. Lưu giỏ hàng ---
+  // Lưu giỏ hàng
   await cart.save();
-  const populatedCart = await populateAndCalculateCart(cart); // Hàm này sẽ tính toán lại giá, hình ảnh, v.v.
+  const populatedCart = await populateAndCalculateCart(cart.toObject());
   res.status(200).json(populatedCart);
 });
 

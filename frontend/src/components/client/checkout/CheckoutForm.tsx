@@ -295,29 +295,9 @@ export default function CheckoutForm({
   useEffect(() => {
     if (isAuthenticated && userAddresses.length > 0) {
       const defaultAddr = userAddresses.find((addr) => addr.isDefault);
-      const targetId =
-        defaultAddr?._id?.toString() ||
-        userAddresses[0]?._id?.toString() ||
-        null;
+      const targetId = defaultAddr?._id || userAddresses[0]?._id || null;
       if (targetId) {
-        setSelectedAddressId(targetId);
-        setIsEditingNewAddress(false);
-        const initialSelectedAddr = userAddresses.find(
-          (addr) => addr._id?.toString() === targetId,
-        );
-        if (initialSelectedAddr) {
-          setNewAddressData({
-            fullName: initialSelectedAddr.fullName,
-            phone: initialSelectedAddr.phone,
-            street: initialSelectedAddr.street,
-            provinceCode: initialSelectedAddr.provinceCode,
-            provinceName: initialSelectedAddr.provinceName,
-            districtCode: initialSelectedAddr.districtCode,
-            districtName: initialSelectedAddr.districtName,
-            communeCode: initialSelectedAddr.communeCode,
-            communeName: initialSelectedAddr.communeName,
-          });
-        }
+        handleAddressSelect(targetId.toString());
       } else {
         setIsEditingNewAddress(true);
         setSelectedAddressId(null);
@@ -328,6 +308,7 @@ export default function CheckoutForm({
       setSelectedAddressId(null);
       setNewAddressData({});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, userAddresses]);
 
   const handleAddressSelect = (addressId: string) => {
@@ -405,13 +386,21 @@ export default function CheckoutForm({
     e.preventDefault();
     if (isSubmittingOrder) return;
 
-    let payload: OrderCreationPayload;
-    const currentShippingAddress = isEditingNewAddress
-      ? newAddressData
-      : userAddresses.find(
-          (addr) => addr._id?.toString() === selectedAddressId,
-        );
+    // 1. Xác định object địa chỉ cuối cùng để gửi đi
+    let finalShippingAddress: Partial<ShippingAddressData> | null = null;
 
+    if (isAuthenticated && selectedAddressId) {
+      // Nếu user đã login và CHỌN một địa chỉ
+      finalShippingAddress =
+        userAddresses.find(
+          (addr) => addr._id?.toString() === selectedAddressId,
+        ) || null;
+    } else if (isEditingNewAddress || !isAuthenticated) {
+      // Nếu user đang NHẬP một địa chỉ mới (cả guest và user đã login)
+      finalShippingAddress = newAddressData;
+    }
+
+    // 2. Validate email cho guest
     if (!isAuthenticated && !email.trim()) {
       toast.error("Vui lòng nhập email của bạn.");
       return;
@@ -422,40 +411,33 @@ export default function CheckoutForm({
       return;
     }
 
+    // 3. Validate object địa chỉ cuối cùng
     if (
-      !currentShippingAddress ||
-      !currentShippingAddress.fullName ||
-      !currentShippingAddress.phone ||
-      !currentShippingAddress.street ||
-      !currentShippingAddress.provinceCode ||
-      !currentShippingAddress.districtCode ||
-      !currentShippingAddress.communeCode ||
-      !currentShippingAddress.provinceName ||
-      !currentShippingAddress.districtName ||
-      !currentShippingAddress.communeName
+      !finalShippingAddress ||
+      !finalShippingAddress.fullName ||
+      !finalShippingAddress.phone ||
+      !finalShippingAddress.street ||
+      !finalShippingAddress.provinceCode ||
+      !finalShippingAddress.districtCode ||
+      !finalShippingAddress.communeCode ||
+      !finalShippingAddress.provinceName ||
+      !finalShippingAddress.districtName ||
+      !finalShippingAddress.communeName
     ) {
       toast.error("Vui lòng điền đầy đủ thông tin địa chỉ giao hàng.");
       return;
     }
 
-    if (isAuthenticated && selectedAddressId && !isEditingNewAddress) {
-      // User đã đăng nhập và chọn địa chỉ có sẵn
-      payload = {
-        shippingAddressId: selectedAddressId,
-        paymentMethod,
-        notes,
-        selectedCartItemIds: [],
-      };
-    } else {
-      // User chưa đăng nhập (guest) hoặc nhập địa chỉ mới
-      payload = {
-        shippingAddress: currentShippingAddress as ShippingAddressData,
-        paymentMethod,
-        selectedCartItemIds: [],
-        notes,
-        email: isAuthenticated ? undefined : email,
-      };
-    }
+    // 4. Tạo payload cuối cùng
+    // Backend bây giờ sẽ LUÔN nhận được object `shippingAddress`
+    const payload: OrderCreationPayload = {
+      shippingAddress: finalShippingAddress as ShippingAddressData, // Gửi object địa chỉ đầy đủ
+      paymentMethod,
+      notes,
+      email: isAuthenticated ? undefined : email,
+      selectedCartItemIds: [], // Sẽ được điền ở component cha
+    };
+
     onSubmitOrder(payload);
   };
 

@@ -2,7 +2,6 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const Coupon = require("../models/Coupon");
-const User = require("../models/User");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 const sendEmail = require("../utils/sendEmail");
@@ -16,328 +15,210 @@ const { createAdminNotification } = require("../utils/notificationUtils");
 
 require("dotenv").config();
 
-// --- Hàm Helper: Cập nhật tồn kho và coupon usage ---
-const updateStockAndCouponUsage = async (
-  orderItems,
-  appliedCouponCode,
+// --- HELPER FUNCTIONS FOR ORDER CREATION ---
+
+/**
+ * Lấy và xác thực thông tin giỏ hàng dựa trên các item được chọn.
+ * Tái sử dụng logic từ cartController.
+ * @param {object} cartIdentifier - { userId } hoặc { guestId }
+ * @param {Array<ObjectId>} selectedCartItemIds - Mảng ID của các item được chọn trong giỏ hàng.
+ * @param {mongoose.Session} session - Transaction session.
+ * @returns {Promise<object>} - Dữ liệu giỏ hàng đã được populate và tính toán.
+ */
+const getAndValidateCartForOrder = async (
+  cartIdentifier,
+  selectedCartItemIds,
   session
 ) => {
-  console.log(
-    "[Stock Update Debug] Dữ liệu orderItems nhận được để cập nhật stock:",
-    JSON.stringify(orderItems, null, 2)
-  );
-  if (!Array.isArray(orderItems) || orderItems.length === 0) {
-    console.error(
-      "[Stock Update Error] Dữ liệu orderItems không hợp lệ hoặc rỗng."
-    );
-    // Không nên tiếp tục nếu dữ liệu sai
-    return; // Hoặc throw new Error('Dữ liệu items không hợp lệ để cập nhật stock.');
+  const originalCart = await Cart.findOne(cartIdentifier).session(session);
+  if (!originalCart || originalCart.items.length === 0) {
+    throw new Error("Giỏ hàng của bạn đang trống hoặc không tồn tại.");
   }
-  console.log(
-    "[Stock & Sold Update] Bắt đầu cập nhật tồn kho, totalSold và coupon."
+
+  // Lọc ra các items được chọn từ giỏ hàng gốc
+  const itemsToProcess = originalCart.items.filter((item) =>
+    selectedCartItemIds.some((selectedId) => selectedId.equals(item._id))
   );
-  const stockBulkOps = []; // Cho tồn kho
-  const soldBulkOps = []; // Cho totalSold
 
-  // 1. Chuẩn bị cập nhật tồn kho
+  if (itemsToProcess.length !== selectedCartItemIds.length) {
+    throw new Error(
+      "Một số sản phẩm bạn chọn không còn tồn tại trong giỏ hàng. Vui lòng làm mới trang."
+    );
+  }
+
+  // Tạo một instance Cart tạm thời để tính toán, KHÔNG LƯU vào DB
+  const cartForCalculation = new Cart({
+    items: itemsToProcess,
+    appliedCoupon: originalCart.appliedCoupon,
+  });
+
+  // Sử dụng hàm từ cartController để tính toán lại giá, coupon...
+  const calculatedData = await populateAndCalculateCart(cartForCalculation);
+
+  if (
+    !calculatedData ||
+    !calculatedData.items ||
+    calculatedData.items.length === 0
+  ) {
+    throw new Error("Không thể xử lý các sản phẩm đã chọn trong giỏ hàng.");
+  }
+  return { calculatedData, originalCartId: originalCart._id };
+};
+
+/**
+ * Kiểm tra lại tồn kho lần cuối trước khi tạo đơn hàng.
+ * @param {Array} orderItems - Mảng các item đã được tính toán.
+ * @param {mongoose.Session} session - Transaction session.
+ */
+const revalidateStock = async (orderItems, session) => {
+  const productIds = orderItems.map((item) => item.productId);
+  const productsInDB = await Product.find({ _id: { $in: productIds } })
+    .select("name sku variants stockQuantity")
+    .session(session);
+
+  const productMap = new Map(productsInDB.map((p) => [p._id.toString(), p]));
+
   for (const item of orderItems) {
-    const changeAmount = item.quantity;
-
-    // 1. Chuẩn bị giảm tồn kho
-    if (item.variant?.variantId) {
-      stockBulkOps.push({
-        updateOne: {
-          filter: { _id: item.product, "variants._id": item.variant.variantId },
-          update: { $inc: { "variants.$.stockQuantity": -changeAmount } },
-        },
-      });
-    } else {
-      stockBulkOps.push({
-        updateOne: {
-          filter: { _id: item.product },
-          update: { $inc: { stockQuantity: -changeAmount } },
-        },
-      });
+    const product = productMap.get(item.productId.toString());
+    if (!product) {
+      throw new Error(`Sản phẩm "${item.name}" không còn tồn tại.`);
     }
 
-    // 2. Chuẩn bị tăng totalSold cho sản phẩm gốc
-    soldBulkOps.push({
-      updateOne: {
-        filter: { _id: item.product },
-        update: { $inc: { totalSold: +changeAmount } }, // Tăng totalSold
-      },
-    });
+    let availableStock = 0;
+    if (item.variantId) {
+      const variant = product.variants.id(item.variantId);
+      availableStock = variant ? variant.stockQuantity : 0;
+    } else {
+      availableStock = product.stockQuantity;
+    }
+
+    if (item.quantity > availableStock) {
+      throw new Error(
+        `Sản phẩm "${item.name}" (SKU: ${
+          item.sku || "N/A"
+        }) không đủ tồn kho (Còn ${availableStock}, cần ${item.quantity}).`
+      );
+    }
+  }
+};
+
+/**
+ * Cập nhật tồn kho, totalSold và lượt sử dụng coupon.
+ * @param {Array} orderItems - Mảng các item trong đơn hàng đã tạo.
+ * @param {string} appliedCouponCode - Mã coupon đã áp dụng.
+ * @param {mongoose.Session} session - Transaction session.
+ */
+const updateStockAndCoupon = async (orderItems, appliedCouponCode, session) => {
+  const bulkOps = [];
+
+  for (const item of orderItems) {
+    const changeAmount = item.quantity;
+    const filter = item.variant?.variantId
+      ? { _id: item.product, "variants._id": item.variant.variantId }
+      : { _id: item.product };
+
+    const update = item.variant?.variantId
+      ? {
+          $inc: {
+            "variants.$.stockQuantity": -changeAmount,
+            totalSold: +changeAmount,
+          },
+        }
+      : { $inc: { stockQuantity: -changeAmount, totalSold: +changeAmount } };
+
+    bulkOps.push({ updateOne: { filter, update } });
   }
 
-  // 3. Chuẩn bị cập nhật coupon usage (nếu có)
-  let couponUpdatePromise = Promise.resolve();
+  // Thực thi cập nhật sản phẩm (stock & totalSold)
+  if (bulkOps.length > 0) {
+    await Product.bulkWrite(bulkOps, { session });
+  }
+
+  // Cập nhật coupon usage
   if (appliedCouponCode) {
-    couponUpdatePromise = Coupon.updateOne(
+    await Coupon.updateOne(
       { code: appliedCouponCode },
       { $inc: { usageCount: 1 } }
     ).session(session);
   }
-
-  // 4. Thực thi cập nhật với session
-  if (stockBulkOps.length > 0) {
-    await Product.bulkWrite(stockBulkOps, { session });
-    console.log("[Stock & Sold Update] Đã cập nhật tồn kho.");
-  }
-  if (soldBulkOps.length > 0) {
-    await Product.bulkWrite(soldBulkOps, { session });
-    console.log("[Stock & Sold Update] Đã cập nhật totalSold.");
-  }
-  await couponUpdatePromise;
-  console.log(
-    "[Stock & Sold Update] Cập nhật coupon usage thành công (nếu có)."
-  );
 };
 
-// @desc    Tạo đơn hàng mới từ giỏ hàng (cho User hoặc Guest)
-// @route   POST /api/v1/orders
-// @access  Public
-const createOrder = asyncHandler(async (req, res) => {
-  // --- Xác định User hoặc Guest ---
-  const loggedInUser = req.user; // Sẽ là object User nếu đăng nhập, hoặc null nếu là guest
-  let userIdForOrder = loggedInUser ? loggedInUser._id : null;
-  let userEmailForOrder = loggedInUser ? loggedInUser.email : null;
-  let userNameForOrder = loggedInUser ? loggedInUser.name : null;
+/**
+ * Dọn dẹp giỏ hàng sau khi đặt hàng thành công.
+ * @param {ObjectId} cartId - ID của giỏ hàng gốc.
+ * @param {Array<ObjectId>} processedItemIds - Mảng ID của các item đã được xử lý.
+ * @param {mongoose.Session} session - Transaction session.
+ */
+const cleanupCart = async (cartId, processedItemIds, session) => {
+  await Cart.updateOne(
+    { _id: cartId },
+    { $pull: { items: { _id: { $in: processedItemIds } } } },
+    { session }
+  );
 
+  // Kiểm tra nếu giỏ hàng rỗng, xóa coupon
+  const cartAfterUpdate = await Cart.findById(cartId).session(session).lean();
+  if (
+    cartAfterUpdate &&
+    cartAfterUpdate.items.length === 0 &&
+    cartAfterUpdate.appliedCoupon
+  ) {
+    await Cart.updateOne(
+      { _id: cartId },
+      { $set: { appliedCoupon: null } },
+      { session }
+    );
+  }
+};
+
+// @desc    Tạo đơn hàng mới
+// @route   POST /api/v1/orders
+// @access  Public (User or Guest)
+const createOrder = asyncHandler(async (req, res) => {
   const {
-    shippingAddressId,
-    shippingAddress: newShippingAddressData,
+    shippingAddress,
     paymentMethod,
     shippingMethod,
     notes,
-    // Các trường CHỈ DÀNH CHO GUEST (nếu không có loggedInUser)
     email: guestEmailFromBody,
-    selectedCartItemIds,
+    selectedCartItemIds: selectedIds,
   } = req.body;
 
-  // --- Validate selectedCartItemIds ---
-  if (
-    !selectedCartItemIds ||
-    !Array.isArray(selectedCartItemIds) ||
-    selectedCartItemIds.length === 0
-  ) {
+  // --- 1. Validate Input ---
+  if (!selectedIds || !Array.isArray(selectedIds) || selectedIds.length === 0) {
     res.status(400);
     throw new Error("Vui lòng chọn ít nhất một sản phẩm để đặt hàng.");
   }
-  for (const itemId of selectedCartItemIds) {
-    if (!mongoose.Types.ObjectId.isValid(itemId)) {
-      res.status(400);
-      throw new Error(`ID sản phẩm trong giỏ hàng không hợp lệ: ${itemId}`);
-    }
-  }
-  const objectIdSelectedCartItemIds = selectedCartItemIds.map(
+  const selectedCartItemIds = selectedIds.map(
     (id) => new mongoose.Types.ObjectId(id)
   );
 
-  // --- Lấy Guest Identifier (từ cart cookie) ---
+  // --- 2. Xác định Identifier ---
+  const loggedInUser = req.user;
   const cartGuestId = req.cookies.cartGuestId;
+  let cartIdentifier;
+  if (loggedInUser) cartIdentifier = { userId: loggedInUser._id };
+  else if (cartGuestId) cartIdentifier = { guestId: cartGuestId };
+  else throw new Error("Không tìm thấy thông tin giỏ hàng.");
 
-  // --- Xác định các phương thức thanh toán trả trước ---
-  const prepaidPaymentMethods = ["BANK_TRANSFER", "PAYPAL"];
-
-  // --- Bắt đầu Transaction ---
+  // --- 3. Bắt đầu Transaction ---
   const session = await mongoose.startSession();
   session.startTransaction();
-  console.log("[Transaction] Bắt đầu Transaction tạo đơn hàng.");
 
   let createdOrder;
-  let customerEmailForNotification = null; // Email để gửi xác nhận
-  let customerNameForNotification = null; // Tên để cá nhân hóa email
-
   try {
-    // --- 1. Xử lý thông tin người đặt hàng (User vs Guest) ---
-    let finalShippingAddress = null;
-
-    if (loggedInUser) {
-      // --- 1.1. XỬ LÝ CHO USER ĐÃ ĐĂNG NHẬP ---
-      console.log(`[Order Create] Người dùng đăng nhập: ${loggedInUser.email}`);
-      customerEmailForNotification = loggedInUser.email;
-      customerNameForNotification = loggedInUser.name;
-
-      if (shippingAddressId) {
-        if (!mongoose.Types.ObjectId.isValid(shippingAddressId)) {
-          res.status(400);
-          throw new Error("ID địa chỉ giao hàng không hợp lệ.");
-        }
-        const userWithAddresses = await User.findById(userIdForOrder)
-          .select("addresses")
-          .session(session);
-        const address = userWithAddresses?.addresses?.id(shippingAddressId);
-        if (!address) {
-          res.status(404);
-          throw new Error(
-            "Không tìm thấy địa chỉ giao hàng này trong tài khoản của bạn."
-          );
-        }
-        // Tạo snapshot từ địa chỉ tìm được
-        finalShippingAddress = {
-          fullName: address.fullName,
-          phone: address.phone,
-          street: address.street,
-          communeCode: address.communeCode,
-          communeName: address.communeName,
-          districtCode: address.districtCode,
-          districtName: address.districtName,
-          provinceCode: address.provinceCode,
-          provinceName: address.provinceName,
-          countryCode: address.countryCode,
-        };
-      } else if (newShippingAddressData) {
-        // User đăng nhập nhưng nhập địa chỉ mới
-        const userToUpdateAddress = await User.findById(userIdForOrder).session(
-          session
-        );
-        if (!userToUpdateAddress) {
-          res.status(404);
-          throw new Error("Không tìm thấy thông tin người dùng.");
-        }
-        // Kiểm tra xem có nên đặt làm mặc định không
-        const isDefaultAddress =
-          !userToUpdateAddress.addresses ||
-          userToUpdateAddress.addresses.length === 0;
-
-        // Thêm địa chỉ mới vào danh sách của user
-        userToUpdateAddress.addresses.push({
-          ...newShippingAddressData,
-          isDefault: isDefaultAddress,
-        });
-        await userToUpdateAddress.save({ session }); // <<< Lưu user trong transaction >>>
-        console.log("[Address] Đã lưu địa chỉ mới vào user.");
-
-        // Sử dụng địa chỉ mới này cho đơn hàng
-        finalShippingAddress = { ...newShippingAddressData };
-      } else {
-        res.status(400);
-        throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
-      }
-    } else {
-      // --- 1.2. XỬ LÝ CHO GUEST ---
-      console.log("[Order Create] Khách đặt hàng.");
-
-      userIdForOrder = null; // Không có user ID cho guest
-      userEmailForOrder = guestEmailFromBody.toLowerCase().trim(); // Email của guest
-      userNameForOrder = newShippingAddressData.fullName; // Tên của guest
-
-      customerEmailForNotification = userEmailForOrder;
-      customerNameForNotification = userNameForOrder;
-      finalShippingAddress = { ...newShippingAddressData }; // Địa chỉ của guest
-    }
-
-    if (!finalShippingAddress) {
-      res.status(400);
-      throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
-    }
-
-    // --- 2. Tìm giỏ hàng gốc của user/guest ---
-    let cartIdentifier;
-    if (loggedInUser) cartIdentifier = { userId: loggedInUser._id };
-    else if (cartGuestId) cartIdentifier = { guestId: cartGuestId };
-    else {
-      res.status(400);
-      throw new Error("Không tìm thấy thông tin giỏ hàng (thiếu identifier).");
-    }
-
-    const originalCart = await Cart.findOne(cartIdentifier).session(session);
-    if (!originalCart || originalCart.items.length === 0) {
-      res.status(404);
-      throw new Error("Giỏ hàng của bạn đang trống hoặc không tồn tại.");
-    }
-
-    // --- 3. Lọc ra các items được chọn từ giỏ hàng gốc ---
-    const itemsToProcessInOrder = originalCart.items.filter((item) =>
-      objectIdSelectedCartItemIds.some((selectedId) =>
-        selectedId.equals(item._id)
-      )
+    // --- 4. Lấy và xác thực giỏ hàng ---
+    const { calculatedData, originalCartId } = await getAndValidateCartForOrder(
+      cartIdentifier,
+      selectedCartItemIds,
+      session
     );
 
-    if (itemsToProcessInOrder.length !== objectIdSelectedCartItemIds.length) {
-      res.status(400);
-      throw new Error(
-        "Một số sản phẩm bạn chọn không còn tồn tại trong giỏ hàng. Vui lòng làm mới trang."
-      );
-    }
-    if (itemsToProcessInOrder.length === 0) {
-      // Double check
-      res.status(400);
-      throw new Error("Không có sản phẩm nào được chọn hợp lệ để đặt hàng.");
-    }
+    // --- 5. Kiểm tra lại tồn kho lần cuối ---
+    await revalidateStock(calculatedData.items, session);
 
-    // --- 4. Tạo một "cart object tạm thời" chỉ chứa các items được chọn để tính toán ---
-    // Điều này quan trọng để populateAndCalculateCart chỉ làm việc trên các item được chọn
-    const cartForCalculation = {
-      _id: originalCart._id, // Vẫn là ID của cart gốc
-      items: itemsToProcessInOrder,
-      appliedCoupon: originalCart.appliedCoupon, // Coupon sẽ được re-validate với items đã chọn
-      userId: originalCart.userId,
-      guestId: originalCart.guestId,
-    };
-
-    // --- 5. Populate và Tính toán cho các items đã chọn ---
-    const cartInstanceForCalculation = await Cart.findById(
-      originalCart._id
-    ).session(session); // Lấy lại instance
-    if (!cartInstanceForCalculation) {
-      throw new Error("Không thể tải lại giỏ hàng để tính toán.");
-    }
-    cartInstanceForCalculation.items = itemsToProcessInOrder; // Gán các item đã chọn
-    cartInstanceForCalculation.appliedCoupon = originalCart.appliedCoupon; // Giữ lại coupon nếu có
-
-    // Bây giờ populateAndCalculateCart sẽ nhận một Mongoose Document đã được sửa đổi items
-    const calculatedDataForOrder = await populateAndCalculateCart(
-      cartInstanceForCalculation
-    );
-
-    if (
-      !calculatedDataForOrder ||
-      !calculatedDataForOrder.items ||
-      calculatedDataForOrder.items.length === 0
-    ) {
-      res.status(400);
-      throw new Error("Không thể xử lý các sản phẩm đã chọn trong giỏ hàng.");
-    }
-
-    // --- 6. Re-validate Tồn kho lần cuối ---
-    const productIdsForStockCheck = calculatedDataForOrder.items.map(
-      (item) => item.productId
-    );
-    const productsDataForStock = await Product.find({
-      _id: { $in: productIdsForStockCheck },
-    })
-      .select("name sku variants stockQuantity")
-      .session(session);
-    const productMapStock = new Map(
-      productsDataForStock.map((p) => [p._id.toString(), p])
-    );
-
-    for (const item of calculatedDataForOrder.items) {
-      const productStockInfo = productMapStock.get(item.productId.toString());
-      let availableStock = 0;
-      if (productStockInfo) {
-        if (item.variantId) {
-          const variant = productStockInfo.variants.id(item.variantId);
-          availableStock = variant ? variant.stockQuantity : 0;
-        } else {
-          availableStock = productStockInfo.stockQuantity;
-        }
-      }
-      if (item.quantity > availableStock) {
-        throw new Error(
-          `Sản phẩm "${item.name}" (SKU: ${
-            item.sku || "N/A"
-          }) không đủ tồn kho (Còn ${availableStock}, cần ${item.quantity}).`
-        );
-      }
-    }
-    console.log(
-      "[Transaction] Kiểm tra tồn kho cho các sản phẩm đã chọn thành công."
-    );
-
-    // --- 4. Tạo mảng orderItems (snapshot) ---
-    const orderItemsData = calculatedDataForOrder.items.map((item) => ({
+    // --- 6. Chuẩn bị dữ liệu cho đơn hàng (Snapshot) ---
+    const orderItems = calculatedData.items.map((item) => ({
       name: item.name,
       quantity: item.quantity,
       price: item.price,
@@ -347,217 +228,141 @@ const createOrder = asyncHandler(async (req, res) => {
         ? {
             variantId: item.variantId,
             sku: item.sku,
-            options: item.variantInfo?.options || [],
+            options: item.variantInfo.options.map((opt) => ({
+              attributeName: opt.attributeName,
+              value: opt.valueName,
+            })),
           }
         : null,
     }));
 
-    // --- 5. Tạo đối tượng Order ---
-    let initialStatus = "Pending";
-    let initialIsPaid = false;
-    let initialPaidAt = null;
+    // --- 7. Tạo đối tượng Order ---
+    const initialStatus = ["BANK_TRANSFER", "PAYPAL"].includes(paymentMethod)
+      ? "Processing"
+      : "Pending";
+    const isPaid = initialStatus === "Processing";
 
-    // <<< KIỂM TRA THANH TOÁN TRẢ TRƯỚC >>>
-    if (prepaidPaymentMethods.includes(paymentMethod)) {
-      initialStatus = "Processing"; // Chuyển thẳng sang Processing
-      initialIsPaid = true; // Đánh dấu đã thanh toán
-      initialPaidAt = new Date(); // Ghi nhận thời điểm thanh toán
-      console.log(
-        `[Order Create] Thanh toán trả trước (${paymentMethod}). Đặt trạng thái Processing, isPaid=true.`
-      );
-    }
-    const orderDataToCreate = {
-      user: userIdForOrder, // Sẽ là null nếu là guest
-      guestOrderEmail: loggedInUser ? null : userEmailForOrder, // Chỉ set cho guest
-      guestSessionId: loggedInUser ? null : cartGuestId, // Chỉ set cho guest (lưu lại cartGuestId)
-      orderItems: orderItemsData,
-      shippingAddress: finalShippingAddress,
-      paymentMethod: paymentMethod || "COD",
-      shippingMethod: shippingMethod || "Standard",
-      itemsPrice: calculatedDataForOrder.subtotal,
-      shippingPrice: 0,
-      taxPrice: 0, // Tạm thời
-      discountAmount: calculatedDataForOrder.discountAmount || 0,
-      totalPrice:
-        calculatedDataForOrder.finalTotal || calculatedDataForOrder.subtotal,
-      appliedCouponCode: calculatedDataForOrder.appliedCoupon?.code || null,
+    const orderData = {
+      user: loggedInUser?._id || null,
+      guestOrderEmail: !loggedInUser
+        ? guestEmailFromBody.toLowerCase().trim()
+        : null,
+      guestSessionId: !loggedInUser ? cartGuestId : null,
+      orderItems,
+      shippingAddress,
+      paymentMethod,
+      shippingMethod,
+      notes,
+      itemsPrice: calculatedData.subtotal,
+      shippingPrice: 0, // Tính toán sau nếu cần
+      taxPrice: 0,
+      discountAmount: calculatedData.discountAmount,
+      totalPrice: calculatedData.finalTotal,
+      appliedCouponCode: calculatedData.appliedCoupon?.code || null,
       status: initialStatus,
-      notes: notes || "",
-      isPaid: initialIsPaid,
-      paidAt: initialPaidAt,
-      isDelivered: false,
+      isPaid,
+      paidAt: isPaid ? new Date() : null,
     };
 
-    const order = new Order(orderDataToCreate);
+    const order = new Order(orderData);
 
-    // --- TẠO VÀ GÁN TRACKING TOKEN NẾU LÀ GUEST ---
-    let guestTrackingTokenValue = null;
+    // Tạo tracking token nếu là guest
     if (!loggedInUser) {
-      // Chỉ tạo token cho guest
-      guestTrackingTokenValue = order.createGuestOrderTrackingToken(); // Gọi method từ model
-      console.log(`[Guest Order] Created tracking token for guest order.`);
+      order.createGuestOrderTrackingToken();
     }
 
-    // --- 6. Lưu Order ---
+    // --- 8. Lưu đơn hàng ---
     createdOrder = await order.save({ session });
-    console.log(
-      `[Transaction] Đã lưu Order: ${createdOrder._id} cho ${
-        loggedInUser
-          ? "User: " + loggedInUser.email
-          : "Guest: " + userEmailForOrder
-      }`
-    );
-    console.log(
-      "[Debug] Dữ liệu createdOrder.orderItems SAU KHI lưu:",
-      JSON.stringify(createdOrder.orderItems, null, 2)
-    );
 
-    // --- 7. Cập nhật tồn kho và coupon usage ---
-    console.log("[Debug] createdOrder type:", typeof createdOrder);
-    console.log(
-      "[Debug] createdOrder.orderItems type:",
-      typeof createdOrder.orderItems
-    );
-    console.log(
-      "[Debug] Is createdOrder.orderItems an array?",
-      Array.isArray(createdOrder.orderItems)
-    );
-    if (!Array.isArray(createdOrder.orderItems)) {
-      console.error(
-        "[Debug] LỖI: createdOrder.orderItems không phải là mảng!",
-        createdOrder.orderItems
-      );
-    }
-    await updateStockAndCouponUsage(
+    // --- 9. Cập nhật Stock và Coupon ---
+    await updateStockAndCoupon(
       createdOrder.orderItems,
       createdOrder.appliedCouponCode,
       session
     );
-    console.log("[Transaction] Đã cập nhật stock và coupon.");
 
-    // --- 8. Xóa giỏ hàng ---
-    await Cart.updateOne(
-      { _id: originalCart._id },
-      { $pull: { items: { _id: { $in: objectIdSelectedCartItemIds } } } }, // Sử dụng ID của các cart item đã chọn
-      { session }
-    );
-    console.log(
-      `[Cart] Đã xóa ${objectIdSelectedCartItemIds.length} items đã đặt khỏi giỏ hàng ${originalCart._id}.`
-    );
+    // --- 10. Dọn dẹp giỏ hàng ---
+    await cleanupCart(originalCartId, selectedCartItemIds, session);
 
-    // Kiểm tra lại giỏ hàng sau khi xóa items
-    const cartAfterUpdate = await Cart.findById(originalCart._id)
-      .session(session)
-      .lean(); // Dùng lean để đọc
-    if (
-      cartAfterUpdate &&
-      cartAfterUpdate.items.length === 0 &&
-      cartAfterUpdate.appliedCoupon
-    ) {
-      // Nếu giỏ hàng rỗng và vẫn còn coupon, xóa coupon
-      await Cart.updateOne(
-        { _id: originalCart._id },
-        { $set: { appliedCoupon: null } },
-        { session }
-      );
-      console.log(`[Cart] Giỏ hàng rỗng sau khi đặt hàng, đã xóa coupon.`);
-    }
-
-    // --- 9. Commit Transaction ---
+    // --- 11. Commit Transaction ---
     await session.commitTransaction();
-    console.log("[Transaction] Commit Transaction thành công.");
   } catch (error) {
-    // --- Nếu có lỗi ở bất kỳ bước nào, Abort Transaction ---
-    console.error(
-      "[Transaction] Gặp lỗi, đang abort transaction:",
-      error.message
-    );
-    await session.abortTransaction(); // Hủy bỏ mọi thay đổi trong transaction
-    console.log("[Transaction] Đã abort transaction.");
-    // Ném lỗi ra ngoài để global error handler xử lý
+    await session.abortTransaction();
+    console.error("[Order Creation Error]", error.message);
     throw new Error(error.message || "Tạo đơn hàng thất bại.");
   } finally {
-    // --- Kết thúc Session ---
     await session.endSession();
-    console.log("[Transaction] Đã kết thúc session.");
   }
 
-  // --- Bước 10: Gửi Email Xác nhận ---
+  // --- 12. Gửi thông báo (Email, Admin Notification) ---
   if (createdOrder) {
     try {
       const orderForEmail = await Order.findById(createdOrder._id)
-        .populate("user", "name email phone")
+        .populate("user", "name email") // Lấy cả name và email
         .lean();
       if (orderForEmail) {
-        const nameForEmail = orderForEmail.user
-          ? orderForEmail.user.name
-          : customerNameForNotification;
-        const emailForNotification = orderForEmail.user
-          ? orderForEmail.user.email
-          : customerEmailForNotification;
+        let customerEmail;
+        let customerName;
 
-        // Tạo tracking URL nếu là guest và có token
-        let guestTrackingUrl = null;
-        if (!orderForEmail.user && orderForEmail.guestOrderTrackingToken) {
-          guestTrackingUrl = `${process.env.FRONTEND_URL}/track-order/${orderForEmail._id}/${orderForEmail.guestOrderTrackingToken}`;
+        if (orderForEmail.user) {
+          // Nếu là đơn hàng của user đã đăng nhập
+          customerEmail = orderForEmail.user.email;
+          customerName = orderForEmail.user.name;
+        } else {
+          // Nếu là đơn hàng của guest
+          customerEmail = orderForEmail.guestOrderEmail;
+          customerName = orderForEmail.shippingAddress.fullName;
         }
 
-        const emailHtml = orderConfirmationTemplate(
-          nameForEmail,
-          orderForEmail,
-          guestTrackingUrl
-        );
-        await sendEmail({
-          email: emailForNotification,
-          subject: `Xác nhận đơn hàng #${orderForEmail._id
-            .toString()
-            .slice(-6)} tại ${process.env.SHOP_NAME || "Shop"}`,
-          message: `Cảm ơn bạn đã đặt hàng! Mã đơn hàng của bạn là ${
-            orderForEmail._id
-          }. ${
+        // Kiểm tra lần cuối trước khi gửi để đảm bảo có người nhận
+        if (customerEmail) {
+          let guestTrackingUrl = null;
+          if (!orderForEmail.user && orderForEmail.guestOrderTrackingToken) {
+            guestTrackingUrl = `${process.env.FRONTEND_URL}/track-order/${orderForEmail._id}/${orderForEmail.guestOrderTrackingToken}`;
+          }
+
+          const emailHtml = orderConfirmationTemplate(
+            customerName,
+            orderForEmail,
             guestTrackingUrl
-              ? "Bạn có thể theo dõi đơn hàng tại: " + guestTrackingUrl
-              : ""
-          }`,
-          html: emailHtml,
-        });
+          );
+
+          await sendEmail({
+            email: customerEmail,
+            subject: `Xác nhận đơn hàng #${orderForEmail._id
+              .toString()
+              .slice(-6)} tại ${process.env.SHOP_NAME || "Shop"}`,
+            html: emailHtml,
+          });
+
+          // Gửi thông báo cho Admin (logic này có vẻ đã đúng)
+          await createAdminNotification(
+            `Đơn hàng mới #${createdOrder._id.toString().slice(-6)}`,
+            `Đơn hàng bởi "${customerName}" vừa được đặt với tổng tiền ${createdOrder.totalPrice.toLocaleString(
+              "vi-VN"
+            )}đ.`,
+            "NEW_ORDER_PLACED",
+            `/admin/orders/${createdOrder._id}`,
+            { orderId: createdOrder._id, userId: createdOrder.user }
+          );
+        } else {
+          console.error(
+            `[Email Send Error] Không thể xác định email người nhận cho đơn hàng ${createdOrder._id}.`
+          );
+        }
       }
-    } catch (emailError) {
+    } catch (notificationError) {
       console.error(
-        `Lỗi gửi email xác nhận cho đơn hàng ${createdOrder._id}:`,
-        emailError
+        `Lỗi gửi thông báo cho đơn hàng ${createdOrder._id}:`,
+        notificationError
       );
     }
 
-    // --- Gửi thông báo cho Admin ---
-    const adminNotifierName = loggedInUser
-      ? loggedInUser.name
-      : `Khách (Email: ${userEmailForOrder})`;
-    await createAdminNotification(
-      "Đơn hàng mới được đặt",
-      `Đơn hàng #${createdOrder._id
-        .toString()
-        .slice(
-          -6
-        )} bởi "${adminNotifierName}" vừa được đặt. Tổng tiền: ${createdOrder.totalPrice.toLocaleString(
-        "vi-VN"
-      )}đ.`,
-      "NEW_ORDER_PLACED",
-      `/admin/orders/${createdOrder._id}`,
-      { orderId: createdOrder._id, userId: userIdForOrder } // userIdForOrder sẽ là null cho guest
-    );
-
-    // --- Trả về đơn hàng đã tạo ---
-    // Populate lại user lần nữa cho response cuối cùng nếu cần
-    const finalResponseOrder = await Order.findById(createdOrder._id)
-      .populate("user", "name email phone")
-      .lean();
-    res.status(201).json(finalResponseOrder || createdOrder.toObject());
+    res.status(201).json(createdOrder.toObject());
   } else {
-    // Trường hợp hiếm hoi transaction thành công nhưng createdOrder không có giá trị
+    // Trường hợp hiếm gặp
     res.status(500).json({
-      message:
-        "Tạo đơn hàng thành công nhưng có lỗi khi lấy lại thông tin đơn hàng.",
+      message: "Tạo đơn hàng thành công nhưng có lỗi khi lấy lại thông tin.",
     });
   }
 });

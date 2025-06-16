@@ -1,17 +1,28 @@
+// src/app/admin/layout.tsx
 "use client";
 
 import "@coreui/coreui/dist/css/coreui.min.css";
-import { CSpinner } from "@coreui/react"; // Ví dụ Spinner
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import { CSpinner } from "@coreui/react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import "simplebar/dist/simplebar.min.css"; // Dependency của CoreUI sidebar
+import "simplebar/dist/simplebar.min.css";
 
-// import AdminHeader from "@/components/admin/AdminHeader"; // Sẽ tạo sau
-// import AdminSidebar from "@/components/admin/AdminSidebar"; // Sẽ tạo sau
-import { getMyProfile } from "@/services/authService"; // Service lấy profile
+import AdminBreadcrumb from "@/components/admin/layout/AdminBreadcrumb";
+import AdminFooter from "@/components/admin/layout/AdminFooter";
+import AdminHeader from "@/components/admin/layout/AdminHeader";
+import AdminSidebar from "@/components/admin/layout/AdminSidebar";
+import { getMyProfile } from "@/services/authService";
 import { AppDispatch, RootState } from "@/store";
-import { logout, setUser } from "@/store/slices/authSlice"; // setUser để cập nhật info user
+import { logout, setAuthIsLoading, setUser } from "@/store/slices/authSlice";
+import { BreadcrumbItem } from "@/types";
+import { generateAdminBreadcrumbs } from "@/utils/adminBreadcrumbs";
+import { useQueryClient } from "@tanstack/react-query";
+
+// Constants for localStorage keys
+const SIDEBAR_VISIBLE_KEY = "admin_sidebar_visible";
+const SIDEBAR_UNFOLDABLE_KEY = "admin_sidebar_unfoldable";
 
 export default function AdminLayout({
   children,
@@ -19,93 +30,171 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
+  const queryClient = useQueryClient();
+
   const {
     isAuthenticated,
     user,
-    isLoading: authLoading,
+    isLoading: authStateIsLoading,
     accessToken,
   } = useSelector((state: RootState) => state.auth);
-  const [isVerifying, setIsVerifying] = React.useState(true); // State để check auth ban đầu
 
+  // State riêng cho layout để không phụ thuộc hoàn toàn vào Redux isLoading cho lần check đầu
+  const [isVerifyingAuth, setIsVerifyingAuth] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [unfoldable, setUnfoldable] = useState(false);
+  const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItem[]>([]);
+
+  // Load sidebar state from localStorage on component mount
   useEffect(() => {
-    const verifyAuth = async () => {
-      // Nếu Redux đã có token và user, kiểm tra vai trò
-      if (accessToken && user) {
-        if (user.role !== "admin") {
-          dispatch(logout()); // Logout nếu không phải admin
-          router.replace("/login");
-        } else {
-          setIsVerifying(false); // Đã xác thực
-        }
-      }
-      // Nếu Redux có token nhưng chưa có user (ví dụ: sau khi F5, token load từ localStorage)
-      else if (accessToken && !user) {
-        try {
-          const profile = await getMyProfile(); // Dùng token từ axios interceptor
-          dispatch(setUser(profile)); // Cập nhật user vào Redux
-          if (profile.role !== "admin") {
-            dispatch(logout());
-            router.replace("/login");
-          } else {
-            setIsVerifying(false);
-          }
-        } catch (error) {
-          console.error(
-            "AdminLayout: Error fetching profile, logging out.",
-            error,
-          );
-          dispatch(logout());
-          router.replace("/login");
-        }
-      }
-      // Nếu không có token trong Redux
-      else {
-        router.replace("/login");
-        // setIsVerifying(false) sẽ không được gọi ở đây, user sẽ bị redirect
-      }
-    };
+    const savedSidebarVisible = localStorage.getItem(SIDEBAR_VISIBLE_KEY);
+    const savedUnfoldable = localStorage.getItem(SIDEBAR_UNFOLDABLE_KEY);
 
-    verifyAuth();
-  }, [accessToken, user, dispatch, router]);
-
-  useEffect(() => {
-    document.title = "Trang quản Trị | Serein Shop";
+    if (savedSidebarVisible !== null) {
+      setSidebarVisible(JSON.parse(savedSidebarVisible));
+    }
+    if (savedUnfoldable !== null) {
+      setUnfoldable(JSON.parse(savedUnfoldable));
+    }
   }, []);
 
-  if (isVerifying || authLoading) {
-    // Hiển thị loading khi đang xác thực hoặc authSlice đang loading
+  // Save sidebar visible state to localStorage whenever it changes
+  const handleSidebarVisibleChange = (visible: boolean) => {
+    setSidebarVisible(visible);
+    localStorage.setItem(SIDEBAR_VISIBLE_KEY, JSON.stringify(visible));
+  };
+
+  // Save unfoldable state to localStorage whenever it changes
+  const handleUnfoldableChange = (unfoldableState: boolean) => {
+    setUnfoldable(unfoldableState);
+    localStorage.setItem(
+      SIDEBAR_UNFOLDABLE_KEY,
+      JSON.stringify(unfoldableState),
+    );
+  };
+
+  useEffect(() => {
+    document.title = "Trang Quản Trị | Serein Shop";
+  }, []);
+
+  useEffect(() => {
+    const verifyAndFetchUser = async () => {
+      if (!accessToken) {
+        toast.error(
+          "Không tìm thấy token xác thực, chuyển hướng đến trang đăng nhập",
+        );
+        router.replace("/login?redirect=/admin/dashboard");
+        return;
+      }
+
+      // Nếu có token nhưng chưa có user object trong Redux
+      if (!user) {
+        dispatch(setAuthIsLoading(true));
+        try {
+          toast.loading("Đang xác thực thông tin người dùng...", {
+            id: "auth-loading",
+          });
+          const profile = await getMyProfile();
+          if (profile.role !== "admin") {
+            toast.error("Bạn không có quyền truy cập trang quản trị");
+            dispatch(logout());
+            queryClient.clear();
+            router.replace("/login");
+            return;
+          }
+          dispatch(setUser(profile));
+          toast.success("Xác thực thành công!", { id: "auth-loading" });
+        } catch {
+          toast.error("Lỗi xác thực thông tin, vui lòng đăng nhập lại", {
+            id: "auth-loading",
+          });
+          dispatch(logout());
+          queryClient.clear();
+          router.replace("/login");
+          return;
+        } finally {
+          dispatch(setAuthIsLoading(false));
+        }
+      } else if (user.role !== "admin") {
+        toast.error("Bạn không có quyền truy cập trang quản trị");
+        dispatch(logout());
+        queryClient.clear();
+        router.replace("/login");
+        return;
+      }
+      setIsVerifyingAuth(false);
+    };
+
+    verifyAndFetchUser();
+  }, [accessToken, user, dispatch, router, queryClient]);
+
+  // Cập nhật breadcrumbs khi pathname hoặc user thay đổi
+  useEffect(() => {
+    if (pathname && isAuthenticated && user?.role === "admin") {
+      setBreadcrumbItems(generateAdminBreadcrumbs(pathname));
+    } else if (!isAuthenticated) {
+      setBreadcrumbItems([]);
+    }
+  }, [pathname, isAuthenticated, user]);
+
+  if (isVerifyingAuth || authStateIsLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <CSpinner color="primary" />
-        <p className="ml-2">Đang tải và xác thực...</p>
+      <div className="bg-light flex min-h-screen items-center justify-center">
+        <CSpinner color="primary" size="sm" />
+        <p className="ml-3 text-lg">Đang tải và xác thực...</p>
       </div>
     );
   }
 
-  // Chỉ render layout admin nếu đã xác thực và là admin
+  // Sau khi isVerifyingAuth là false, kiểm tra lại lần nữa
   if (!isAuthenticated || user?.role !== "admin") {
-    // Redirect đã được xử lý trong useEffect, nhưng return null để tránh render sớm
     return null;
   }
 
+  // Tính toán margin-left cho content wrapper dựa trên trạng thái sidebar
+  const getContentMarginLeft = () => {
+    if (!sidebarVisible) return "0";
+    if (unfoldable) return "56px"; // Sidebar collapsed width
+    return "256px"; // Sidebar full width
+  };
+
   return (
-    <div className="c-app c-default-layout">
-      {" "}
-      {/* Class của CoreUI */}
-      {/* <AdminSidebar /> */}
-      <div className="c-wrapper">
-        {/* <AdminHeader /> */}
-        <div className="c-body">
-          <main className="c-main">
-            <div className="container-fluid">
-              {" "}
-              {/* Hoặc CContainer từ CoreUI */}
-              {children}
-            </div>
-          </main>
+    <div className="d-flex">
+      {/* Sidebar với position fixed */}
+      <AdminSidebar
+        sidebarVisible={sidebarVisible}
+        onVisibleChange={handleSidebarVisibleChange}
+        unfoldable={unfoldable}
+        onUnfoldableChange={handleUnfoldableChange}
+      />
+
+      {/* Container cho phần nội dung chính với margin-left động */}
+      <div
+        className="wrapper d-flex flex-column bg-light flex-grow-1"
+        style={{
+          marginLeft: getContentMarginLeft(),
+          transition: "margin-left 0.15s ease-in-out",
+          minWidth: 0,
+        }}
+      >
+        <AdminHeader
+          onSidebarToggle={() => handleSidebarVisibleChange(!sidebarVisible)}
+          onUnfoldableToggle={() => handleUnfoldableChange(!unfoldable)}
+        />
+
+        <AdminBreadcrumb items={breadcrumbItems} />
+
+        {/* Đây là phần body chính, nó sẽ co giãn và có thanh cuộn */}
+        <div
+          className="body min-h-screen flex-grow-1 px-3"
+          style={{ overflowY: "auto" }}
+        >
+          {children}
         </div>
-        {/* <CFooter>...</CFooter> */}
+
+        <AdminFooter />
       </div>
     </div>
   );
