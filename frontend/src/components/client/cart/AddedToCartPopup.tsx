@@ -1,6 +1,6 @@
 "use client";
 import "@/app/globals.css";
-import { getVariantDisplayName } from "@/lib/utils";
+import { getVariantDisplayNameClient } from "@/lib/utils";
 import { PopupNotificationItem } from "@/store/slices/notificationPopupSlice";
 import { VariantOptionValue } from "@/types";
 import Image from "next/image";
@@ -23,10 +23,10 @@ export default function AddedToCartPopup({
   attributeMap,
 }: AddedToCartPopupProps) {
   useEffect(() => {
-    // Tự động đóng sau 3 giây
+    // Tự động đóng sau 4 giây
     const timer = setTimeout(() => {
       onClose(); // Gọi onClose để xóa khỏi store
-    }, 3000);
+    }, 4000);
     return () => clearTimeout(timer);
   }, [onClose, item.id]); // Thêm item.id vào dependency để reset timer nếu item thay đổi (ít khả năng)
 
@@ -34,7 +34,7 @@ export default function AddedToCartPopup({
 
   // Sử dụng hàm helper để lấy tên biến thể
   const variantDisplayName = item.variantInfo
-    ? getVariantDisplayName(
+    ? getVariantDisplayNameClient(
         item.variantInfo.options as VariantOptionValue[],
         attributeMap,
       )
@@ -46,7 +46,7 @@ export default function AddedToCartPopup({
       : "/placeholder-image.jpg";
 
   return (
-    <div className="animate-slideDownAndFadeIn relative w-full max-w-sm transform-gpu rounded-lg bg-white p-5 shadow-xl transition-all duration-300 ease-out">
+    <div className="animate-slideDownAndFadeIn ring-opacity-5 relative w-80 transform-gpu rounded-lg bg-white p-4 shadow-xl ring-1 ring-gray-300 transition-all duration-300 ease-out sm:w-96">
       <button
         onClick={onClose} // Gọi onClose khi click nút X
         className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -71,7 +71,7 @@ export default function AddedToCartPopup({
             className="h-16 w-16 rounded border border-gray-200 object-cover object-top"
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <h3 className="line-clamp-2 text-xs font-medium text-gray-800 sm:text-sm">
             {item.name}
           </h3>

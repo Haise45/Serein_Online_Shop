@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import toast from "react-hot-toast";
+import { FiAlertCircle } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import CouponSection from "./CouponSection";
 
@@ -50,33 +51,22 @@ export default function CartSummary({
     );
   }, [selectedItemsForSummary]);
 
-  // 3. Tính lại số tiền được giảm giá chỉ cho các sản phẩm đã chọn
+  // 3. Tính lại số tiền được giảm giá (logic này giữ nguyên)
   const discountAmountForSelected = useMemo(() => {
-    // Không có giảm giá nếu không có coupon hoặc không có sản phẩm nào được chọn
     if (!originalCart.appliedCoupon || selectedItemsForSummary.length === 0) {
       return 0;
     }
-
     const coupon = originalCart.appliedCoupon;
-
-    // Lọc ra những item trong danh sách ĐÃ CHỌN mà coupon có thể áp dụng
     const applicableItems = selectedItemsForSummary.filter((item) => {
-      // Trường hợp 1: Coupon áp dụng cho tất cả sản phẩm
       if (coupon.applicableTo === "all") return true;
       if (!coupon.applicableIds || coupon.applicableIds.length === 0)
         return false;
-
       const applicableIdsStr = coupon.applicableIds.map((id) => id.toString());
-
-      // Trường hợp 2: Coupon áp dụng cho sản phẩm cụ thể
       if (coupon.applicableTo === "products") {
         return applicableIdsStr.includes(item.productId.toString());
       }
-
-      // Trường hợp 3: Coupon áp dụng cho danh mục cụ thể (bao gồm cả danh mục cha)
       if (coupon.applicableTo === "categories" && item.category) {
         const itemCategoryIdStr = item.category._id.toString();
-        // Kiểm tra xem ID của category hoặc bất kỳ tổ tiên nào của nó có nằm trong danh sách được áp dụng không
         const categoryAndAncestors = new Set([
           itemCategoryIdStr,
           ...getAncestorsFn(itemCategoryIdStr, categoryMap),
@@ -85,26 +75,17 @@ export default function CartSummary({
           categoryAndAncestors.has(appId),
         );
       }
-
       return false;
     });
-
-    // Nếu không có sản phẩm nào được chọn phù hợp với coupon
     if (applicableItems.length === 0) return 0;
-
-    // Tính tổng tiền của các sản phẩm được coupon áp dụng
     const applicableSubtotal = applicableItems.reduce(
       (sum, item) => sum + item.lineTotal,
       0,
     );
-
-    // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
     const minOrderValue = coupon.minOrderValue || 0;
     if (minOrderValue > 0 && applicableSubtotal < minOrderValue) {
       return 0;
     }
-
-    // Tính toán số tiền giảm giá
     let calculatedDiscount = 0;
     const discountValue = coupon.discountValue || 0;
     if (coupon.discountType === "percentage") {
@@ -112,8 +93,6 @@ export default function CartSummary({
     } else if (coupon.discountType === "fixed_amount") {
       calculatedDiscount = discountValue;
     }
-
-    // Giảm giá không thể lớn hơn tổng tiền của các sản phẩm được áp dụng
     return Math.min(Math.round(calculatedDiscount), applicableSubtotal);
   }, [
     originalCart.appliedCoupon,
@@ -125,19 +104,32 @@ export default function CartSummary({
   // 4. Tính tổng tiền cuối cùng
   const finalTotalForSelected = selectedSubtotal - discountAmountForSelected;
 
-  // --- Logic và Handlers ---
-  const canProceedToCheckout = selectedItemsForSummary.length > 0;
+  // --- LOGIC MỚI: Kiểm tra lỗi tồn kho trong các sản phẩm đã chọn ---
+  const hasStockErrorInSelectedItems = useMemo(() => {
+    return selectedItemsForSummary.some(
+      (item) => item.quantity > item.availableStock,
+    );
+  }, [selectedItemsForSummary]);
+
+  // --- Cập nhật điều kiện để có thể đi đến trang thanh toán ---
+  const canProceedToCheckout =
+    selectedItemsForSummary.length > 0 && !hasStockErrorInSelectedItems;
 
   const handleProceedToCheckout = () => {
-    if (!canProceedToCheckout) {
+    if (hasStockErrorInSelectedItems) {
+      toast.error(
+        "Một số sản phẩm bạn chọn có số lượng vượt quá tồn kho. Vui lòng kiểm tra lại.",
+      );
+      return;
+    }
+    if (selectedItemsForSummary.length === 0) {
       toast.error("Vui lòng chọn ít nhất một sản phẩm để tiếp tục.");
       return;
     }
 
-    // Lấy ID của các cart items đã được chọn và lưu vào Redux store
     const selectedIds = selectedItemsForSummary.map((item) => item._id);
     dispatch(setSelectedItemsForCheckout(selectedIds));
-    router.push("/checkout"); // Điều hướng sang trang thanh toán
+    router.push("/checkout");
   };
 
   return (
@@ -160,7 +152,7 @@ export default function CartSummary({
           </dd>
         </div>
 
-        {/* Component Coupon nhận các props cần thiết để hoạt động độc lập */}
+        {/* ... (CouponSection giữ nguyên) ... */}
         <CouponSection
           cartSubtotal={selectedSubtotal}
           appliedCouponFull={originalCart.appliedCoupon}
@@ -169,7 +161,6 @@ export default function CartSummary({
           getAncestorsFn={getAncestorsFn}
         />
 
-        {/* Hiển thị số tiền được giảm nếu có */}
         {originalCart.appliedCoupon && discountAmountForSelected > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <dt className="flex items-center text-sm text-green-600">
@@ -189,6 +180,26 @@ export default function CartSummary({
         </div>
       </dl>
 
+      {/* THÊM KHỐI THÔNG BÁO LỖI TỒN KHO */}
+      {hasStockErrorInSelectedItems && (
+        <div className="mt-6 rounded-md bg-red-50 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FiAlertCircle
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-red-800">
+                Sản phẩm bạn chọn có số lượng không hợp lệ. Vui lòng kiểm tra
+                lại các sản phẩm được tô đỏ trong giỏ hàng.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-8">
         <button
           type="button"
@@ -200,7 +211,6 @@ export default function CartSummary({
               ? "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
               : "cursor-not-allowed bg-gray-400",
           )}
-          aria-disabled={!canProceedToCheckout}
         >
           Tiến hành đặt hàng ({totalSelectedQuantity})
         </button>

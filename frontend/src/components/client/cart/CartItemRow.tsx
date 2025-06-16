@@ -5,7 +5,7 @@ import {
   useUpdateCartItem,
 } from "@/lib/react-query/cartQueries";
 import { useGetProductDetails } from "@/lib/react-query/productQueries";
-import { formatCurrency, getVariantDisplayName } from "@/lib/utils";
+import { formatCurrency, getVariantDisplayNameClient } from "@/lib/utils";
 import {
   Attribute,
   AttributeValue,
@@ -90,6 +90,10 @@ export default function CartItemRow({
     setQuantity(item.quantity);
   }, [item]); // Phụ thuộc vào `item` để luôn cập nhật khi giỏ hàng thay đổi từ server
 
+  // --- Logic kiểm tra lỗi tồn kho ---
+  const isOutOfStock = item.availableStock === 0;
+  const hasStockError = !isOutOfStock && item.quantity > item.availableStock;
+
   // --- Handlers ---
   const handleQuantityChange = (newQuantity: number) => {
     if (updateCartItemMutation.isPending) return;
@@ -100,6 +104,11 @@ export default function CartItemRow({
       });
     } else if (newQuantity > item.availableStock) {
       toast.error(`Chỉ còn ${item.availableStock} sản phẩm tồn kho.`);
+      // Vẫn cập nhật số lượng về mức tối đa có thể
+      updateCartItemMutation.mutate({
+        itemId: item._id,
+        payload: { quantity: item.availableStock },
+      });
     }
   };
 
@@ -201,7 +210,8 @@ export default function CartItemRow({
   return (
     <li
       className={classNames("flex flex-col px-4 py-6 sm:flex-row sm:px-6", {
-        "bg-indigo-50/50": isSelected,
+        "bg-indigo-50/50": isSelected && !hasStockError && !isOutOfStock,
+        "bg-red-50": hasStockError || isOutOfStock,
       })}
     >
       <div className="flex flex-shrink-0 flex-row justify-between">
@@ -244,12 +254,44 @@ export default function CartItemRow({
 
           {item.variantInfo && (
             <p className="mt-1 text-sm text-gray-500">
-              {getVariantDisplayName(item.variantInfo.options, attributeMap)}
+              {getVariantDisplayNameClient(
+                item.variantInfo.options,
+                attributeMap,
+              )}
             </p>
           )}
           <p className="mt-1 text-sm text-gray-500">
             Đơn giá: {formatCurrency(item.price)}
           </p>
+
+          {(hasStockError || isOutOfStock) && (
+            <div className="mt-3 rounded-md bg-red-100 p-3">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <FiAlertCircle
+                    className="h-5 w-5 text-red-500"
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {isOutOfStock
+                      ? "Sản phẩm đã hết hàng"
+                      : "Sản phẩm không đủ"}
+                  </h3>
+                  {!isOutOfStock && hasStockError && (
+                    <div className="mt-1 text-xs text-red-700">
+                      <p>
+                        Bạn đang chọn {item.quantity} sản phẩm, nhưng hiện chỉ
+                        còn {item.availableStock} sản phẩm. Vui lòng cập nhật số
+                        lượng hoặc chọn sản phẩm khác. Xin cảm ơn
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {productDetails.attributes?.length > 0 && (
             <div
@@ -353,36 +395,52 @@ export default function CartItemRow({
         </div>
 
         <div className="mt-4 flex items-center justify-between pt-2 sm:pt-0">
-          <div className="inline-flex items-center overflow-hidden rounded-lg border border-gray-300 shadow-sm">
-            <button
-              type="button"
-              onClick={() => handleQuantityChange(quantity - 1)}
-              disabled={quantity <= 1 || updateCartItemMutation.isPending}
-              aria-label="Giảm số lượng"
-              className="flex items-center justify-center bg-gray-100 px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+          {isOutOfStock ? (
+            <div className="flex-grow">
+              <p className="text-sm font-semibold text-red-700">Đã hết hàng</p>
+            </div>
+          ) : (
+            <div
+              className={classNames(
+                "inline-flex items-center overflow-hidden rounded-lg border bg-gray-100 shadow-sm",
+                hasStockError
+                  ? "border-red-500 ring-2 ring-red-500"
+                  : "border-gray-300",
+              )}
             >
-              <FiMinus className="h-5 w-5 text-gray-600" />
-            </button>
-            <input
-              type="text"
-              readOnly
-              value={quantity}
-              aria-label={`Số lượng của ${item.name}`}
-              className="w-12 border-x border-gray-200 bg-gray-100 text-center text-base font-medium text-gray-800 select-none focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => handleQuantityChange(quantity + 1)}
-              disabled={
-                quantity >= item.availableStock ||
-                updateCartItemMutation.isPending
-              }
-              aria-label="Tăng số lượng"
-              className="flex items-center justify-center bg-gray-100 px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <FiPlus className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => handleQuantityChange(quantity - 1)}
+                disabled={quantity <= 1 || updateCartItemMutation.isPending}
+                aria-label="Giảm số lượng"
+                className="flex items-center justify-center px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <FiMinus className="h-5 w-5 text-gray-600" />
+              </button>
+              <input
+                type="text"
+                readOnly
+                value={quantity}
+                aria-label={`Số lượng của ${item.name}`}
+                className={classNames(
+                  "w-12 border-x border-x-gray-400 text-center text-base font-medium select-none focus:outline-none",
+                  hasStockError ? "text-red-500" : "text-gray-600",
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => handleQuantityChange(quantity + 1)}
+                disabled={
+                  quantity >= item.availableStock ||
+                  updateCartItemMutation.isPending
+                }
+                aria-label="Tăng số lượng"
+                className="flex items-center justify-center px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <FiPlus className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+          )}
           <button
             type="button"
             onClick={handleRemoveItem}

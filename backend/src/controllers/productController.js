@@ -440,7 +440,7 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
     initialFilter.isPublished = true;
   }
 
-  const product = await Product.findOne(initialFilter).lean({ virtuals: true });
+  const product = await Product.findOne(initialFilter).lean();
 
   if (!product) {
     res.status(404);
@@ -492,15 +492,16 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
   product.attributes = product.attributes
     .map((attr) => {
       const populatedAttribute = attributeMap.get(attr.attribute.toString());
-      const populatedValues = attr.values.map((valId) =>
-        valueMap.get(valId.toString())
-      );
+      if (!populatedAttribute) return null; // Bỏ qua nếu không tìm thấy attribute
+      const populatedValues = attr.values
+        .map((valId) => valueMap.get(valId.toString()))
+        .filter(Boolean); // Lọc bỏ giá trị không tìm thấy
       return {
         attribute: populatedAttribute,
         values: populatedValues,
       };
     })
-    .filter((attr) => attr.attribute); // Lọc bỏ những thuộc tính không tìm thấy
+    .filter(Boolean); // Lọc bỏ những thuộc tính null
 
   // 5.3 Hydrate Variants
   product.variants = product.variants.map((variant) => {
@@ -508,12 +509,13 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
       .map((opt) => {
         const populatedAttribute = attributeMap.get(opt.attribute.toString());
         const populatedValue = valueMap.get(opt.value.toString());
+        if (!populatedAttribute || !populatedValue) return null; // Bỏ qua nếu không hợp lệ
         return {
           attribute: populatedAttribute,
           value: populatedValue,
         };
       })
-      .filter((opt) => opt.attribute && opt.value); // Lọc bỏ những option không hợp lệ
+      .filter(Boolean); // Lọc bỏ những option không hợp lệ
 
     // Thêm virtuals cho từng biến thể
     const now = new Date();
@@ -529,7 +531,19 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
     return { ...variant, optionValues: populatedOptions };
   });
 
-  // 6. Trả về kết quả cuối cùng
+  // 6. Thêm virtuals cho sản phẩm chính
+  const now = new Date();
+  const mainProductIsOnSale =
+    product.salePrice &&
+    product.salePrice < product.price &&
+    (!product.salePriceEffectiveDate ||
+      product.salePriceEffectiveDate <= now) &&
+    (!product.salePriceExpiryDate || product.salePriceExpiryDate >= now);
+  
+  product.isOnSale = mainProductIsOnSale;
+  product.displayPrice = mainProductIsOnSale ? product.salePrice : product.price;
+
+  // 7. Trả về kết quả cuối cùng
   res.json(product);
 });
 
@@ -919,7 +933,10 @@ const updateVariantStock = asyncHandler(async (req, res) => {
   }
 
   // --- 2. Tìm sản phẩm và biến thể ---
-  const product = await Product.findById(productId);
+  const product = await Product.findById(productId).populate({
+    path: "attributes.attribute",
+    select: "label values",
+  });
   if (!product) {
     res.status(404);
     throw new Error("Không tìm thấy sản phẩm.");
@@ -959,22 +976,43 @@ const updateVariantStock = asyncHandler(async (req, res) => {
   await product.save();
 
   // --- Gửi thông báo tồn kho cho biến thể ---
-  const variantName = `${product.name} (${variant.optionValues
-    .map((o) => o.value)
-    .join("/")})`;
-  if (variant.stockQuantity <= 0) {
+  // 1. Tạo các Map để tra cứu tên thuộc tính và giá trị
+  const attributeMap = new Map();
+  product.attributes.forEach(attrWrapper => {
+      if(attrWrapper.attribute) { // Đảm bảo attribute được populate
+        const valueMap = new Map(attrWrapper.attribute.values.map(val => [val._id.toString(), val.value]));
+        attributeMap.set(attrWrapper.attribute._id.toString(), {
+            label: attrWrapper.attribute.label,
+            values: valueMap
+        });
+      }
+  });
+
+  // 2. Xây dựng chuỗi tên hiển thị
+  const variantDisplayName = variant.optionValues
+    .map((opt) => {
+        const attrInfo = attributeMap.get(opt.attribute.toString());
+        if (!attrInfo) return '?';
+        const valueName = attrInfo.values.get(opt.value.toString());
+        return valueName || '?';
+    })
+    .join(" / ");
+
+  const variantNameForNotification = `${product.name} (${variantDisplayName})`;
+
+   if (variant.stockQuantity <= 0) {
     await createAdminNotification(
       "Biến thể hết hàng!",
-      `Biến thể "${variantName}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" đã hết hàng (Tồn kho: 0).`,
-      "PRODUCT_OUT_OF_STOCK", // Có thể tạo type riêng: VARIANT_OUT_OF_STOCK
-      `/admin/products/${product._id}/edit`, // Link sửa sản phẩm
+      `Biến thể "${variantNameForNotification}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" đã hết hàng (Tồn kho: 0).`,
+      "PRODUCT_OUT_OF_STOCK",
+      `/admin/products/${product._id}/edit`,
       { productId: product._id, variantId: variant._id }
     );
   } else if (variant.stockQuantity <= LOW_STOCK_THRESHOLD) {
     await createAdminNotification(
       "Biến thể sắp hết hàng!",
-      `Biến thể "${variantName}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" sắp hết hàng (Tồn kho: ${variant.stockQuantity}).`,
-      "PRODUCT_LOW_STOCK", // Có thể tạo type riêng: VARIANT_LOW_STOCK
+      `Biến thể "${variantNameForNotification}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" sắp hết hàng (Tồn kho: ${variant.stockQuantity}).`,
+      "PRODUCT_LOW_STOCK",
       `/admin/products/${product._id}/edit`,
       { productId: product._id, variantId: variant._id }
     );

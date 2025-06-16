@@ -84,6 +84,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+    // *** BƯỚC 1: Xử lý lỗi 401 để refresh token ***
     if (
       error.response?.status === 401 &&
       originalRequest &&
@@ -109,16 +110,14 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Tạo một instance axios mới cho việc refresh token để tránh interceptor của chính nó
-        // gây ra vòng lặp nếu endpoint /auth/refresh cũng yêu cầu Authorization header (dù không nên)
         const refreshAxiosInstance = axios.create({
           withCredentials: true,
         });
         const { data } = await refreshAxiosInstance.post<{
           accessToken: string;
         }>(
-          `auth/refresh`,
-          {}, // Không cần body cho refresh token nếu backend đọc từ cookie
+          `${apiBaseUrl}/auth/refresh`, // Đảm bảo URL tuyệt đối
+          {},
         );
         const newAccessToken = data.accessToken;
 
@@ -133,30 +132,33 @@ axiosInstance.interceptors.response.use(
           "[Axios Interceptor] Refresh token failed:",
           axiosRefreshError.response?.data || axiosRefreshError.message,
         );
-        // Chỉ logout nếu lỗi thực sự từ endpoint refresh
         if (axiosRefreshError.config?.url?.endsWith("auth/refresh")) {
           store.dispatch(logout());
         }
         processQueue(axiosRefreshError, null);
-        // Không nên tự động chuyển hướng ở đây, để component cha xử lý
         return Promise.reject(axiosRefreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Nếu là lỗi 401 từ /auth/login hoặc /auth/register, hoặc các lỗi khác, thì không refresh.
-    // Chỉ trả về lỗi gốc.
-    if (
-      error.response?.status === 401 &&
-      (originalRequest.url?.endsWith("auth/login") ||
-        originalRequest.url?.endsWith("auth/register"))
-    ) {
-      console.log(
-        `[Axios Interceptor] 401 error from ${originalRequest.url}, not attempting refresh.`,
-      );
+    // *** BƯỚC 2: XỬ LÝ CÁC LỖI KHÁC (ví dụ 400, 404, 500) ***
+    // Khối này được thêm vào để trích xuất thông điệp lỗi từ backend
+    if (error.response) {
+      // Lấy dữ liệu lỗi từ body của response
+      const apiErrorData = error.response.data as { message?: string };
+
+      // Nếu có trường `message` trong dữ liệu lỗi, tạo một Error object mới
+      // với thông điệp đó. Đây là thông điệp mà người dùng sẽ thấy.
+      if (apiErrorData && typeof apiErrorData.message === "string") {
+        const customError = new Error(apiErrorData.message);
+        console.error("[API Error Message]:", customError.message);
+        return Promise.reject(customError);
+      }
     }
 
+    // *** BƯỚC 3: Trả về lỗi gốc nếu không rơi vào các trường hợp trên ***
+    // (Ví dụ: lỗi mạng, lỗi CORS, hoặc lỗi không có `message` trong body)
     return Promise.reject(error);
   },
 );

@@ -9,8 +9,15 @@ import { formatCurrency } from "@/lib/utils";
 import { getWishlist as getWishlistApi } from "@/services/wishlistService";
 import { AppDispatch } from "@/store";
 import { addPopup } from "@/store/slices/notificationPopupSlice";
-import { Attribute, ColorMeta, Product, Variant, WishlistItem } from "@/types";
-import { CartItem, CartItemOption } from "@/types/cart";
+import {
+  Attribute,
+  ColorMeta,
+  Product,
+  Variant,
+  VariantOptionValue,
+  WishlistItem,
+} from "@/types";
+import { CartItem } from "@/types/cart";
 import { useQuery } from "@tanstack/react-query";
 import classNames from "classnames";
 import Image from "next/image";
@@ -396,6 +403,15 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
           // Dispatch action để thêm popup vào Redux store
           dispatch(addPopup(addedOrUpdatedItem));
         } else {
+          const variantInfoForPopup = activeVariant
+            ? {
+                _id: activeVariant._id,
+                // `options` bây giờ là một mảng VariantOptionValue
+                // chứa các object { attribute: 'ID', value: 'ID' }
+                options: activeVariant.optionValues as VariantOptionValue[],
+              }
+            : undefined;
+
           // Fallback, có thể dispatch một popup chung chung hơn hoặc chỉ toast
           const genericItemForPopup: CartItem = {
             // Tạo một CartItem giả để hiển thị
@@ -408,34 +424,8 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
             slug: product.slug,
             availableStock:
               product.stockQuantity || (activeVariant?.stockQuantity ?? 0), // Cần xem lại logic stock này
-
             // variantInfo có thể null nếu không có activeVariant
-            variantInfo: activeVariant
-              ? {
-                  _id: activeVariant._id, // Sử dụng _id thay vì variantId
-                  options: activeVariant.optionValues.map(
-                    (opt): CartItemOption => {
-                      const attrId =
-                        typeof opt.attribute === "string"
-                          ? opt.attribute
-                          : opt.attribute._id;
-                      const valueId =
-                        typeof opt.value === "string"
-                          ? opt.value
-                          : opt.value._id;
-
-                      const attributeInfo = attributeMap.get(attrId);
-                      const valueName =
-                        attributeInfo?.values.get(valueId) || "N/A";
-
-                      return {
-                        attributeName: attributeInfo?.label || "N/A",
-                        value: valueName,
-                      };
-                    },
-                  ),
-                }
-              : undefined,
+            variantInfo: variantInfoForPopup,
             sku: "",
             lineTotal: 0,
             category: {
@@ -443,6 +433,8 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
               slug: "",
               _id: "",
             },
+            originalPrice: 0,
+            isOnSale: false,
           };
           if (updatedCartData.items.length > 0) {
             // Nếu có item trong giỏ hàng, dùng item cuối cùng

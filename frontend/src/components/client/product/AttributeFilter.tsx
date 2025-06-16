@@ -114,7 +114,7 @@ export default function AttributeFilter({
                           ? { background: hex }
                           : { backgroundColor: hex }
                       }
-                      aria-pressed={!!isSelected}
+                      aria-pressed={isSelected ? "true" : "false"}
                     >
                       {isSelected && (
                         <FiCheck className="absolute h-5 w-5 text-white mix-blend-difference" />
