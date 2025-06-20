@@ -1,6 +1,10 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { PaginatedCouponsResponse } from "@/types/coupon";
 import { AxiosError } from "axios";
+import {
+  Coupon,
+  CouponFormData,
+  PaginatedCouponsResponse,
+} from "@/types/coupon";
 
 const getErrorMessage = (err: unknown, fallback: string): string => {
   const error = err as AxiosError<{ message?: string }>;
@@ -43,4 +47,34 @@ export const getCouponsApi = async (
       getErrorMessage(err, "Không thể tải danh sách mã giảm giá."),
     );
   }
+};
+
+export const getCouponByIdApi = async (id: string): Promise<Coupon> => {
+  const { data } = await axiosInstance.get<Coupon>(`/coupons/${id}`);
+  return data;
+};
+
+export const createCouponApi = async (
+  payload: Partial<CouponFormData>,
+): Promise<Coupon> => {
+  const { data } = await axiosInstance.post<Coupon>("/coupons", payload);
+  return data;
+};
+
+export const updateCouponApi = async (
+  id: string,
+  payload: Partial<CouponFormData>,
+): Promise<Coupon> => {
+  const { data } = await axiosInstance.put<Coupon>(`/coupons/${id}`, payload);
+  return data;
+};
+
+// Đổi tên để rõ ràng hơn là cho Admin
+export const deleteCouponAdminApi = async (
+  id: string,
+): Promise<{ message: string }> => {
+  const { data } = await axiosInstance.delete<{ message: string }>(
+    `/coupons/${id}`,
+  );
+  return data;
 };

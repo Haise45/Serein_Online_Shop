@@ -1,5 +1,5 @@
 import { Attribute, Category } from "@/types";
-import { cilFilter, cilPlus } from "@coreui/icons";
+import { cilFilterX, cilPlus } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import { CButton, CCol, CFormInput, CFormSelect, CRow } from "@coreui/react";
 import Link from "next/link";
@@ -193,7 +193,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             title="Xóa bộ lọc"
             className="px-3"
           >
-            <CIcon icon={cilFilter} className="me-1" />
+            <CIcon icon={cilFilterX} className="me-1" />
             Xóa lọc
           </CButton>
         </CCol>

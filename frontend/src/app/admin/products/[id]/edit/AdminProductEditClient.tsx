@@ -37,6 +37,13 @@ import { CButton, CCol, CRow, CSpinner } from "@coreui/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useSearchParams } from "next/navigation";
+import { AppDispatch } from "@/store";
+import {
+  setBreadcrumbDynamicData,
+  clearBreadcrumbDynamicData,
+} from "@/store/slices/breadcrumbAdminSlice";
+import { useDispatch } from "react-redux";
 
 // --- Type Definitions ---
 // Định nghĩa kiểu cho hàm xử lý thay đổi biến thể, cần export để component con dùng
@@ -76,6 +83,8 @@ export default function AdminProductEditClient({
   productId,
 }: AdminProductEditClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dispatch = useDispatch<AppDispatch>();
 
   // --- States cho Form ---
   const [name, setName] = useState("");
@@ -100,6 +109,8 @@ export default function AdminProductEditClient({
 
   // --- useRef để lưu trữ dữ liệu gốc của biến thể, tránh mất dữ liệu khi re-render ---
   const originalVariantsRef = useRef<VariantFormState[]>([]);
+
+  const backLink = `/admin/products?${searchParams.toString()}`;
 
   // --- React Query Hooks ---
   const {
@@ -205,6 +216,16 @@ export default function AdminProductEditClient({
       setIsInitialized(true); // Đánh dấu là đã điền dữ liệu xong
     }
   }, [product, isInitialized, availableAttributes]);
+
+  useEffect(() => {
+    if (product?.name) {
+      dispatch(setBreadcrumbDynamicData({ productName: product.name }));
+    }
+
+    return () => {
+      dispatch(clearBreadcrumbDynamicData());
+    };
+  }, [product?.name, dispatch]);
 
   // --- Dữ liệu được tính toán (Memoized) ---
   const categoriesForSelect = useMemo(() => {
@@ -511,7 +532,7 @@ export default function AdminProductEditClient({
         <CButton
           color="secondary"
           variant="outline"
-          onClick={() => router.push("/admin/products")}
+          onClick={() => router.push(backLink)}
         >
           ← Quay lại danh sách
         </CButton>
@@ -576,7 +597,7 @@ export default function AdminProductEditClient({
             error={errors.category}
           />
 
-          <div className="d-grid sticky-top gap-2" style={{ top: "80px" }}>
+          <div className="d-grid gap-2">
             <CButton
               type="submit"
               color="primary"

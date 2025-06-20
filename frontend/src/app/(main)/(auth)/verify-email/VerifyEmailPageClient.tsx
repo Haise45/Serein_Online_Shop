@@ -1,5 +1,6 @@
 "use client";
 
+import GuestGuard from "@/app/GuestGuard";
 import {
   resendVerificationEmail,
   verifyEmailOTP,
@@ -99,7 +100,7 @@ export default function VerifyEmailPage() {
       previousSibling?.focus();
     }
   };
-  
+
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData("text").replace(/[^0-9]/g, ""); // Chỉ lấy số
@@ -206,85 +207,87 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
-        <h1 className="mb-4 text-center text-3xl font-bold text-gray-800">
-          Xác Thực Email
-        </h1>
-        {initialMessage && (
-          <p className="mb-4 rounded-md bg-green-50 p-3 text-center text-sm text-green-600">
-            {initialMessage}
+    <GuestGuard>
+      <div className="flex items-center justify-center bg-gray-100">
+        <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
+          <h1 className="mb-4 text-center text-3xl font-bold text-gray-800">
+            Xác Thực Email
+          </h1>
+          {initialMessage && (
+            <p className="mb-4 rounded-md bg-green-50 p-3 text-center text-sm text-green-600">
+              {initialMessage}
+            </p>
+          )}
+          <p className="mb-6 text-center text-sm text-gray-600">
+            Một mã OTP gồm 6 chữ số đã được gửi đến{" "}
+            <strong>{emailFromQuery || "email của bạn"}</strong>. Vui lòng nhập
+            mã vào bên dưới.
           </p>
-        )}
-        <p className="mb-6 text-center text-sm text-gray-600">
-          Một mã OTP gồm 6 chữ số đã được gửi đến{" "}
-          <strong>{emailFromQuery || "email của bạn"}</strong>. Vui lòng nhập mã
-          vào bên dưới.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <p className="rounded-md bg-red-100 p-3 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-          {successMessage && !error && (
-            <p className="rounded-md bg-green-100 p-3 text-sm text-green-600">
-              {successMessage}
-            </p>
-          )}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <p className="rounded-md bg-red-100 p-3 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            {successMessage && !error && (
+              <p className="rounded-md bg-green-100 p-3 text-sm text-green-600">
+                {successMessage}
+              </p>
+            )}
 
-          <div
-            className="flex justify-center space-x-1.5 sm:space-x-2"
-            onPaste={handlePaste}
-          >
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                type="text" // Dùng text để dễ dàng style và xử lý hơn number
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(e, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                onFocus={(e) => e.target.select()} // Chọn toàn bộ text khi focus
-                className="h-12 w-9 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:h-14 sm:w-12"
-                disabled={loading}
-                aria-label={`Ký tự OTP thứ ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          <div>
-            <button
-              className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
-              type="submit"
-              disabled={loading || otp.join("").length !== 6}
+            <div
+              className="flex justify-center space-x-1.5 sm:space-x-2"
+              onPaste={handlePaste}
             >
-              {loading ? "Đang xác thực..." : "Xác Thực Mã OTP"}
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text" // Dùng text để dễ dàng style và xử lý hơn number
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(e, index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  onFocus={(e) => e.target.select()} // Chọn toàn bộ text khi focus
+                  className="h-12 w-9 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:h-14 sm:w-12"
+                  disabled={loading}
+                  aria-label={`Ký tự OTP thứ ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <div>
+              <button
+                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                type="submit"
+                disabled={loading || otp.join("").length !== 6}
+              >
+                {loading ? "Đang xác thực..." : "Xác Thực Mã OTP"}
+              </button>
+            </div>
+          </form>
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleResendOtp}
+              disabled={resendLoading || resendCooldown > 0 || !emailFromQuery}
+              className={`text-sm font-medium ${!emailFromQuery || resendCooldown > 0 ? "cursor-not-allowed text-gray-400" : "text-indigo-600 hover:text-indigo-500"}`}
+            >
+              {resendLoading
+                ? "Đang gửi lại..."
+                : resendCooldown > 0
+                  ? `Gửi lại sau (${resendCooldown}s)`
+                  : "Chưa nhận được mã? Gửi lại OTP"}
             </button>
           </div>
-        </form>
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleResendOtp}
-            disabled={resendLoading || resendCooldown > 0 || !emailFromQuery}
-            className={`text-sm font-medium ${!emailFromQuery || resendCooldown > 0 ? "cursor-not-allowed text-gray-400" : "text-indigo-600 hover:text-indigo-500"}`}
-          >
-            {resendLoading
-              ? "Đang gửi lại..."
-              : resendCooldown > 0
-                ? `Gửi lại sau (${resendCooldown}s)`
-                : "Chưa nhận được mã? Gửi lại OTP"}
-          </button>
+          <p className="mt-4 text-center text-sm text-gray-600">
+            <Link
+              href="/login"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              Quay lại Đăng nhập
+            </Link>
+          </p>
         </div>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          <Link
-            href="/login"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Quay lại Đăng nhập
-          </Link>
-        </p>
       </div>
-    </div>
+    </GuestGuard>
   );
 }

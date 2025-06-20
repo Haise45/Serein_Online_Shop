@@ -4,6 +4,7 @@ import cartReducer from "./slices/cartSlice";
 import wishlistReducer from "./slices/wishlistSlice";
 import notificationPopupReducer from "./slices/notificationPopupSlice";
 import checkoutReducer from "./slices/checkoutSlice";
+import breadcrumbAdminReducer from "./slices/breadcrumbAdminSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     wishlist: wishlistReducer,
     notificationPopup: notificationPopupReducer,
     checkout: checkoutReducer,
+    breadcrumbAdmin: breadcrumbAdminReducer,
     // Thêm các reducers khác ở đây
   },
   // Middleware (tùy chọn, ví dụ Redux Logger cho dev)

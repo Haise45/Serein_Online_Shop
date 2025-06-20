@@ -243,3 +243,25 @@ export const getVariantDisplayNameClient = (
     })
     .join(" / ");
 };
+
+/**
+ * Che một phần của chuỗi, giữ lại ký tự đầu và cuối.
+ * @param str Chuỗi cần che.
+ * @param visibleStart Số ký tự hiển thị ở đầu.
+ * @param visibleEnd Số ký tự hiển thị ở cuối.
+ * @returns Chuỗi đã được che.
+ */
+export const maskString = (
+  str: string,
+  visibleStart: number,
+  visibleEnd: number,
+): string => {
+  if (!str || str.length <= visibleStart + visibleEnd) {
+    return str; // Trả về chuỗi gốc nếu quá ngắn để che
+  }
+  const start = str.substring(0, visibleStart);
+  const end = str.substring(str.length - visibleEnd);
+  const maskedLength = str.length - visibleStart - visibleEnd;
+  const masked = "*".repeat(Math.max(0, maskedLength));
+  return `${start}${masked}${end}`;
+};

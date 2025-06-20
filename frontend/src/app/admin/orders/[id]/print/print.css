@@ -1,0 +1,58 @@
+/*
+  Style cho trang in.
+  Sử dụng @media print để áp dụng style chỉ khi người dùng thực hiện hành động in.
+*/
+@media print {
+  /* Ẩn tất cả các element khác trên trang, chỉ hiển thị container in */
+  body * {
+    visibility: hidden;
+  }
+
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+
+  /* Đặt container in ở vị trí trên cùng của trang */
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  /* --- SỬA LỖI TRANG THỨ HAI --- */
+  /* Reset các thuộc tính của thẻ body và html có thể gây tràn trang */
+  html,
+  body {
+    height: auto !important; /* Quan trọng: Ghi đè mọi height: 100vh hoặc 100% */
+    overflow: visible !important; /* Loại bỏ scrollbar */
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important; /* Đảm bảo nền trắng khi in */
+  }
+  /* ------------------------------ */
+
+  /* Bỏ qua các lề và padding mặc định của trình duyệt */
+  @page {
+    size: A4; /* Hoặc A5 tùy nhu cầu */
+    margin: 1cm; /* Đặt lề cho trang giấy */
+  }
+
+  /* Tránh bị ngắt trang không mong muốn bên trong các phần tử */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+  }
+  table,
+  figure {
+    page-break-inside: avoid;
+  }
+}

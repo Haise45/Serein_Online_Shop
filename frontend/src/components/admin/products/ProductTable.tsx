@@ -22,6 +22,7 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CTooltip,
 } from "@coreui/react";
 import classNames from "classnames";
 import Image from "next/image";
@@ -37,9 +38,10 @@ interface ProductTableProps {
   sortOrder: "asc" | "desc";
   onDeleteClick: (productId: string, productName: string) => void;
   attributes: Attribute[];
-  onStockUpdateClick: (product: Product, variant?: Variant, returnToList?: boolean) => void;
+  onStockUpdateClick: (product: Product, variant?: Variant) => void;
   viewingVariantsForProduct: Product | null;
   setViewingVariantsForProduct: (product: Product | null) => void;
+  queryString: string;
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({
@@ -52,6 +54,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
   onStockUpdateClick,
   viewingVariantsForProduct,
   setViewingVariantsForProduct,
+  queryString,
 }) => {
   // Tạo một map để tra cứu tên thuộc tính/giá trị từ ID một cách hiệu quả
   const attributeMap = useMemo(() => {
@@ -165,20 +168,27 @@ const ProductTable: React.FC<ProductTableProps> = ({
               0,
             );
             const displayStock =
-              product.variants && product.variants.length > 0
+              product.variants?.length > 0
                 ? totalStockFromVariants
                 : product.stockQuantity;
+
+            const stockStatus =
+              displayStock! <= 0
+                ? { color: "danger", text: "Hết hàng" }
+                : displayStock! <= LOW_STOCK_THRESHOLD
+                  ? { color: "warning", text: "Sắp hết hàng" }
+                  : { color: "success", text: "Còn hàng" };
+
+            const editLink = `/admin/products/${product._id}/edit?${queryString}`;
 
             return (
               <CTableRow key={product._id} className="align-middle">
                 <CTableDataCell className="text-center">
-                  <code
-                    className="user-select-all rounded bg-gray-100 px-2 py-1 text-xs"
-                    title={product._id}
-                    style={{ fontSize: "0.75rem" }}
-                  >
-                    {product._id.slice(-6).toUpperCase()}
-                  </code>
+                  <CTooltip content={product._id}>
+                    <code className="user-select-all rounded bg-gray-100 px-2 py-1 text-xs">
+                      #{product._id.slice(-6).toUpperCase()}
+                    </code>
+                  </CTooltip>
                 </CTableDataCell>
                 <CTableDataCell className="p-2 text-center">
                   <div className="d-inline-block">
@@ -194,20 +204,21 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 </CTableDataCell>
                 <CTableDataCell>
                   <div className="d-flex align-items-center">
-                    <Link
-                      href={`/admin/products/${product._id}/edit`}
-                      className="fw-medium text-primary text-decoration-none hover:text-primary-dark me-2"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        lineHeight: "1.3",
-                      }}
-                      title={product.name}
-                    >
-                      {product.name}
-                    </Link>
+                    <CTooltip content={product.name}>
+                      <Link
+                        href={editLink}
+                        className="fw-medium text-primary text-decoration-none hover:text-primary-dark me-2"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          lineHeight: "1.3",
+                        }}
+                      >
+                        {product.name}
+                      </Link>
+                    </CTooltip>
                     <Link
                       href={`/products/${product.slug}`}
                       target="_blank"
@@ -219,43 +230,60 @@ const ProductTable: React.FC<ProductTableProps> = ({
                     </Link>
                   </div>
                 </CTableDataCell>
-                <CTableDataCell>
-                  <span className="text-muted text-sm">
-                    {product.sku || "N/A"}
-                  </span>
+                <CTableDataCell
+                  style={{
+                    width: "80px",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  <CTooltip content={product.sku || "Không có SKU"}>
+                    <span className="text-muted block text-sm break-words">
+                      {product.sku || "N/A"}
+                    </span>
+                  </CTooltip>
                 </CTableDataCell>
+
                 <CTableDataCell className="text-end">
-                  <span className="fw-semibold text-success">
-                    {formatCurrency(product.price)}
+                  <span className="fw-semibold text-gray-800">
+                    {formatCurrency(product.displayPrice)}
                   </span>
+                  {product.isOnSale && (
+                    <CTooltip
+                      content={`Giá gốc: ${formatCurrency(product.price)}`}
+                    >
+                      <div className="text-xs text-gray-500 line-through">
+                        {formatCurrency(product.price)}
+                      </div>
+                    </CTooltip>
+                  )}
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
-                  <div className="flex items-center justify-center">
-                    <span
-                      className={classNames("fw-semibold", {
-                        "text-danger": displayStock <= 0,
-                        "text-warning":
-                          displayStock > 0 &&
-                          displayStock <= LOW_STOCK_THRESHOLD,
-                        "text-success": displayStock > LOW_STOCK_THRESHOLD,
-                      })}
-                    >
-                      {displayStock}
-                    </span>
-                    {(!product.variants || product.variants.length === 0) && (
-                      <CButton
-                        size="sm"
-                        color="light"
-                        className="ml-2 !p-1"
-                        onClick={() => onStockUpdateClick(product)}
+                  <CTooltip content={stockStatus.text}>
+                    <div className="flex items-center justify-center">
+                      <span
+                        className={classNames(
+                          "fw-semibold",
+                          `text-${stockStatus.color}`,
+                        )}
                       >
-                        <CIcon icon={cilPencil} size="sm" />
-                      </CButton>
-                    )}
-                  </div>
+                        {displayStock}
+                      </span>
+                      {(!product.variants || product.variants.length === 0) && (
+                        <CButton
+                          size="sm"
+                          color="light"
+                          className="ml-2 !p-1"
+                          onClick={() => onStockUpdateClick(product)}
+                        >
+                          <CIcon icon={cilPencil} size="sm" />
+                        </CButton>
+                      )}
+                    </div>
+                  </CTooltip>
                 </CTableDataCell>
                 <CTableDataCell>
-                  {product.variants && product.variants.length > 0 ? (
+                  {product.variants?.length > 0 ? (
                     <div className="text-sm">
                       {product.variants.slice(0, 2).map((v) => {
                         const variantDisplayName = getVariantDisplayName(
@@ -263,31 +291,33 @@ const ProductTable: React.FC<ProductTableProps> = ({
                           attributeMap,
                         );
                         return (
-                          <div
+                          <CTooltip
                             key={v._id}
-                            className="bg-light text-truncate mb-1 flex items-center rounded p-1"
-                            title={`${variantDisplayName} - SKU: ${v.sku} - Kho: ${v.stockQuantity}`}
-                            style={{ fontSize: "0.75rem" }}
+                            content={`${variantDisplayName} | Kho: ${v.stockQuantity} | SKU: ${v.sku}`}
                           >
-                            <span className="text-dark">
-                              {variantDisplayName}
-                            </span>
-                            {/* Nhóm hiển thị tồn kho và nút sửa của biến thể */}
-                            <div className="ml-1 flex flex-shrink-0 items-center">
-                              <span className="text-muted">
-                                ({v.stockQuantity})
+                            <div
+                              className="bg-light text-truncate mb-1 flex items-center justify-between rounded p-1"
+                              style={{ fontSize: "0.75rem" }}
+                            >
+                              <span className="text-dark">
+                                {variantDisplayName}
                               </span>
-                              <CButton
-                                size="sm"
-                                color="light"
-                                className="ml-1 !p-1"
-                                title={`Cập nhật tồn kho cho ${variantDisplayName}`}
-                                onClick={() => onStockUpdateClick(product, v)}
-                              >
-                                <CIcon icon={cilPencil} size="sm" />
-                              </CButton>
+                              <div className="ml-2 flex flex-shrink-0 items-center">
+                                <span className="text-muted">
+                                  ({v.stockQuantity})
+                                </span>
+                                <CButton
+                                  size="sm"
+                                  color="light"
+                                  className="ml-1 !p-1"
+                                  title={`Cập nhật tồn kho cho ${variantDisplayName}`}
+                                  onClick={() => onStockUpdateClick(product, v)}
+                                >
+                                  <CIcon icon={cilPencil} size="sm" />
+                                </CButton>
+                              </div>
                             </div>
-                          </div>
+                          </CTooltip>
                         );
                       })}
                       {product.variants.length > 2 && (
@@ -296,7 +326,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                           variant="ghost"
                           size="sm"
                           className="mt-1 !p-1 !text-xs !font-medium"
-                          onClick={() => setViewingVariantsForProduct(product)} // Mở modal
+                          onClick={() => setViewingVariantsForProduct(product)}
                         >
                           +{product.variants.length - 2} biến thể khác...
                         </CButton>
@@ -313,69 +343,94 @@ const ProductTable: React.FC<ProductTableProps> = ({
                   )}
                 </CTableDataCell>
                 <CTableDataCell>
-                  <span className="text-sm">
-                    {typeof product.category === "object"
-                      ? product.category.name
-                      : "N/A"}
-                  </span>
+                  <CTooltip
+                    content={
+                      typeof product.category === "object"
+                        ? product.category.name
+                        : "N/A"
+                    }
+                  >
+                    <span className="truncate text-sm">
+                      {typeof product.category === "object"
+                        ? product.category.name
+                        : "N/A"}
+                    </span>
+                  </CTooltip>
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
-                  {product.isPublished ? (
-                    <CIcon
-                      icon={cilCheckCircle}
-                      className="text-success"
-                      title="Đã công khai"
-                      size="lg"
-                    />
-                  ) : (
-                    <CIcon
-                      icon={cilXCircle}
-                      className="text-danger"
-                      title="Chưa công khai"
-                      size="lg"
-                    />
-                  )}
+                  <CTooltip
+                    content={
+                      product.isPublished ? "Đã công khai" : "Chưa công khai"
+                    }
+                  >
+                    <div>
+                      {product.isPublished ? (
+                        <CIcon
+                          icon={cilCheckCircle}
+                          className="text-success"
+                          size="lg"
+                        />
+                      ) : (
+                        <CIcon
+                          icon={cilXCircle}
+                          className="text-danger"
+                          size="lg"
+                        />
+                      )}
+                    </div>
+                  </CTooltip>
                 </CTableDataCell>
+
                 <CTableDataCell className="text-center">
-                  {product.isActive ? (
-                    <CIcon
-                      icon={cilCheckCircle}
-                      className="text-success"
-                      title="Đang kích hoạt"
-                      size="lg"
-                    />
-                  ) : (
-                    <CIcon
-                      icon={cilXCircle}
-                      className="text-muted"
-                      title="Ngừng kích hoạt"
-                      size="lg"
-                    />
-                  )}
+                  <CTooltip
+                    content={
+                      product.isActive ? "Đang kích hoạt" : "Ngừng kích hoạt"
+                    }
+                  >
+                    <div>
+                      {product.isActive ? (
+                        <CIcon
+                          icon={cilCheckCircle}
+                          className="text-success"
+                          size="lg"
+                        />
+                      ) : (
+                        <CIcon
+                          icon={cilXCircle}
+                          className="text-muted"
+                          size="lg"
+                        />
+                      )}
+                    </div>
+                  </CTooltip>
                 </CTableDataCell>
+
                 <CTableDataCell className="text-center">
                   <div className="d-flex justify-content-center gap-1">
-                    <Link href={`/admin/products/${product._id}/edit`} passHref>
+                    <CTooltip content="Xem chi tiết và chỉnh sửa thông tin">
+                      <Link href={editLink} passHref>
+                        <CButton
+                          color="info"
+                          variant="outline"
+                          size="sm"
+                          className="p-2"
+                        >
+                          <CIcon icon={cilPen} size="sm" />
+                        </CButton>
+                      </Link>
+                    </CTooltip>
+
+                    <CTooltip content="Ẩn sản phẩm">
                       <CButton
-                        color="info"
+                        color="danger"
                         variant="outline"
                         size="sm"
                         className="p-2"
-                        title="Sửa"
+                        onClick={() => onDeleteClick(product._id, product.name)}
                       >
-                        <CIcon icon={cilPen} size="sm" />
+                        <CIcon icon={cilTrash} size="sm" />
                       </CButton>
-                    </Link>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      className="p-2"
-                      onClick={() => onDeleteClick(product._id, product.name)}
-                      title="Xóa (Ẩn)"
-                    >
-                      <CIcon icon={cilTrash} size="sm" />
-                    </CButton>
+                    </CTooltip>
                   </div>
                 </CTableDataCell>
               </CTableRow>
@@ -387,12 +442,12 @@ const ProductTable: React.FC<ProductTableProps> = ({
       <CModal
         visible={!!viewingVariantsForProduct}
         onClose={() => setViewingVariantsForProduct(null)}
-        size="lg" // Modal lớn hơn để chứa bảng
+        size="lg"
         alignment="center"
       >
         <CModalHeader>
           <CModalTitle>
-            Tất cả biến thể cho: {viewingVariantsForProduct?.name}
+            Tất cả biến thể: {viewingVariantsForProduct?.name}
           </CModalTitle>
         </CModalHeader>
         <CModalBody>
@@ -416,9 +471,14 @@ const ProductTable: React.FC<ProductTableProps> = ({
                   variant.optionValues,
                   attributeMap,
                 );
-
+                const variantStockStatus =
+                  variant.stockQuantity <= 0
+                    ? "Hết"
+                    : variant.stockQuantity <= LOW_STOCK_THRESHOLD
+                      ? "Sắp hết"
+                      : "Còn";
                 return (
-                  <CTableRow key={variant._id}>
+                  <CTableRow key={variant._id} className="align-middle">
                     <CTableDataCell className="font-medium">
                       {displayName}
                     </CTableDataCell>
@@ -426,33 +486,49 @@ const ProductTable: React.FC<ProductTableProps> = ({
                       <code>{variant.sku}</code>
                     </CTableDataCell>
                     <CTableDataCell className="text-end">
-                      {formatCurrency(variant.price)}
+                      <div className="fw-semibold text-gray-800">
+                        {formatCurrency(variant.salePrice)}
+                      </div>
+                      {viewingVariantsForProduct?.isOnSale && (
+                        <div className="text-xs text-gray-400 line-through">
+                          {formatCurrency(variant.price)}
+                        </div>
+                      )}
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
-                      {variant.stockQuantity}
+                      <CTooltip content={variantStockStatus}>
+                        <span
+                          className={classNames("fw-semibold", {
+                            "text-danger": variant.stockQuantity <= 0,
+                            "text-warning":
+                              variant.stockQuantity > 0 &&
+                              variant.stockQuantity <= LOW_STOCK_THRESHOLD,
+                          })}
+                        >
+                          {variant.stockQuantity}
+                        </span>
+                      </CTooltip>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
-                      <CButton
-                        size="sm"
-                        color="info"
-                        variant="outline"
-                        className="!p-1"
-                        title="Cập nhật tồn kho"
-                        onClick={() => {
-                          // Đóng modal hiện tại trước
-                          setViewingVariantsForProduct(null);
-                          // Đợi một khoảng ngắn để animation đóng hoàn tất rồi mới mở modal kia
-                          setTimeout(() => {
-                            onStockUpdateClick(
-                              viewingVariantsForProduct,
-                              variant,
-                              true,
-                            );
-                          }, 100);
-                        }}
-                      >
-                        <CIcon icon={cilPencil} size="sm" />
-                      </CButton>
+                      <CTooltip content="Cập nhật tồn kho">
+                        <CButton
+                          size="sm"
+                          color="info"
+                          variant="outline"
+                          className="!p-1"
+                          onClick={() => {
+                            setViewingVariantsForProduct(null);
+                            setTimeout(() => {
+                              onStockUpdateClick(
+                                viewingVariantsForProduct!,
+                                variant,
+                              );
+                            }, 150);
+                          }}
+                        >
+                          <CIcon icon={cilPencil} size="sm" />
+                        </CButton>
+                      </CTooltip>
                     </CTableDataCell>
                   </CTableRow>
                 );

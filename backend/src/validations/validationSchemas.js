@@ -497,6 +497,17 @@ const createOrderSchema = Joi.object({
       "Vui lòng chọn địa chỉ đã lưu HOẶC nhập địa chỉ mới, không chọn cả hai hoặc bỏ trống.",
   });
 
+// Schema cho Admin nhập lý do và thời hạn đình chỉ
+const updateUserStatusSchema = Joi.object({
+  isActive: Joi.boolean().required(),
+  reason: Joi.string().when("isActive", {
+    is: false,
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  suspensionEndDate: Joi.date().allow(null).optional(),
+});
+
 // Schema cho User tạo/sửa review
 const reviewSchemaValidation = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required().messages({
@@ -568,6 +579,7 @@ module.exports = {
   createCouponSchema,
   updateCouponSchema,
   createOrderSchema,
+  updateUserStatusSchema,
   reviewSchemaValidation,
   updateReviewSchemaValidation,
   adminReplySchemaValidation,

@@ -4,6 +4,12 @@ import {
   getProductReviewsApi,
   getUserReviewForProductApi,
   updateUserReviewApi,
+  getAllReviewsAdminApi,
+  GetAllReviewsAdminParams,
+  approveReviewAdminApi,
+  rejectReviewAdminApi,
+  deleteReviewAdminApi,
+  addAdminReplyApi,
 } from "@/services/reviewService";
 import {
   CreateReviewPayload,
@@ -23,17 +29,30 @@ import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { productKeys } from "./productQueries";
 
+// --- Query Keys ---
 export const reviewKeys = {
   all: ["reviews"] as const,
-  lists: () => [...reviewKeys.all, "list"] as const,
-  list: (productId: string, params: GetProductReviewsParams) =>
-    [...reviewKeys.lists(), productId, params ?? {}] as const,
-  detail: (reviewId: string) =>
-    [...reviewKeys.all, "detail", reviewId] as const,
+
+  // Keys cho danh sách review của một sản phẩm cụ thể
+  productLists: () => [...reviewKeys.all, "product-list"] as const,
+  productList: (productId: string, params: GetProductReviewsParams) =>
+    [...reviewKeys.productLists(), productId, params ?? {}] as const,
+
+  // Keys cho danh sách review của trang Admin
+  adminLists: () => [...reviewKeys.all, "admin-list"] as const,
+  adminList: (params: GetAllReviewsAdminParams) =>
+    [...reviewKeys.adminLists(), params] as const,
+
+  // Key cho chi tiết một review
+  details: () => [...reviewKeys.all, "detail"] as const,
+  detail: (reviewId: string) => [...reviewKeys.details(), reviewId] as const,
+
+  // Key cho review cụ thể của một user cho một sản phẩm
   userReviewForProduct: (productId: string, userId?: string) =>
     [...reviewKeys.all, "userSpecific", productId, userId || "guest"] as const,
 };
 
+// --- Type Helpers ---
 type MutationOptions<TData, TVariables> = Omit<
   UseMutationOptions<
     TData,
@@ -43,6 +62,8 @@ type MutationOptions<TData, TVariables> = Omit<
   >,
   "mutationFn"
 >;
+
+// --- USER HOOKS ---
 
 // Hook lấy reviews của một sản phẩm
 export const useGetProductReviews = (
@@ -54,10 +75,27 @@ export const useGetProductReviews = (
   >,
 ) => {
   return useQuery<PaginatedReviewsResponse, AxiosError<{ message?: string }>>({
-    queryKey: reviewKeys.list(productId!, params || {}), // Dùng ! vì đã có enabled
+    queryKey: reviewKeys.productList(productId!, params || {}),
     queryFn: () => getProductReviewsApi(productId!, params),
     enabled: !!productId,
     placeholderData: (previousData) => previousData,
+    ...options,
+  });
+};
+
+// Hook kiểm tra user đã review sản phẩm này chưa
+export const useGetUserReviewForProduct = (
+  productId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<Review | null, AxiosError<{ message?: string }>>,
+    "queryKey" | "queryFn"
+  >,
+) => {
+  return useQuery<Review | null, AxiosError<{ message?: string }>>({
+    queryKey: reviewKeys.userReviewForProduct(productId!),
+    queryFn: () => getUserReviewForProductApi(productId!),
+    enabled: !!productId,
+    staleTime: 1000 * 60 * 5,
     ...options,
   });
 };
@@ -77,51 +115,21 @@ export const useCreateReview = (
   >({
     mutationFn: ({ productId, payload }) => createReviewApi(productId, payload),
     onSuccess: (data, variables, context) => {
-      toast.success(
-        data.message || "Đánh giá của bạn đã được gửi và đang chờ duyệt!",
-      );
-      // Invalidate danh sách review của sản phẩm đó để hiển thị review mới (nếu được duyệt ngay)
-      queryClient.invalidateQueries({
-        queryKey: reviewKeys.list(variables.productId, {}),
-      });
-      // Invalidate query chi tiết sản phẩm để cập nhật averageRating và numReviews
+      toast.success(data.message || "Đánh giá của bạn đã được gửi!");
+      // Invalidate các query liên quan
+      queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.productId),
       });
-      // (Tùy chọn) Invalidate query lấy review của user cho sản phẩm này
       queryClient.invalidateQueries({
         queryKey: reviewKeys.userReviewForProduct(variables.productId),
       });
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Gửi đánh giá thất bại.",
-      );
+      toast.error(error.response?.data?.message || "Gửi đánh giá thất bại.");
       options?.onError?.(error, variables, context);
     },
-    ...options,
-  });
-};
-
-// Hook kiểm tra user đã review sản phẩm này chưa
-export const useGetUserReviewForProduct = (
-  productId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<Review | null, AxiosError<{ message?: string }>>,
-    "queryKey" | "queryFn"
-  >,
-) => {
-  // Giả sử userId được lấy từ Redux store hoặc context ở component sử dụng
-  // Nếu không, bạn cần truyền userId vào đây
-  // const { user } = useSelector((state: RootState) => state.auth);
-  return useQuery<Review | null, AxiosError<{ message?: string }>>({
-    queryKey: reviewKeys.userReviewForProduct(productId!), // Thêm userId nếu API cần
-    queryFn: () => getUserReviewForProductApi(productId!),
-    enabled: !!productId, // Chỉ fetch khi có productId
-    staleTime: 1000 * 60 * 5, // Cache 5 phút
     ...options,
   });
 };
@@ -142,35 +150,27 @@ export const useUpdateReview = (
     mutationFn: ({ reviewId, payload }) =>
       updateUserReviewApi(reviewId, payload),
     onSuccess: (data, variables, context) => {
-      toast.success(
-        data.message ||
-          "Đánh giá của bạn đã được cập nhật và đang chờ duyệt lại.",
-      );
-      // Invalidate review chi tiết (nếu có trang xem chi tiết review)
+      toast.success(data.message || "Đánh giá đã được cập nhật.");
+      const productId =
+        typeof data.review.product === "string"
+          ? data.review.product
+          : data.review.product._id;
+      // Invalidate các query liên quan
       queryClient.invalidateQueries({
         queryKey: reviewKeys.detail(variables.reviewId),
       });
-      // Invalidate danh sách review của sản phẩm đó
+      queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
       queryClient.invalidateQueries({
-        queryKey: reviewKeys.list(data.review.product.toString(), {}),
+        queryKey: productKeys.detail(productId),
       });
-      // Invalidate query chi tiết sản phẩm để cập nhật averageRating
       queryClient.invalidateQueries({
-        queryKey: productKeys.detail(data.review.product.toString()),
-      });
-      // Invalidate query lấy review của user cho sản phẩm này
-      queryClient.invalidateQueries({
-        queryKey: reviewKeys.userReviewForProduct(
-          data.review.product.toString(),
-        ),
+        queryKey: reviewKeys.userReviewForProduct(productId),
       });
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Cập nhật đánh giá thất bại.",
+        error.response?.data?.message || "Cập nhật đánh giá thất bại.",
       );
       options?.onError?.(error, variables, context);
     },
@@ -194,28 +194,106 @@ export const useDeleteReview = (
     mutationFn: ({ reviewId }) => deleteMyReviewApi(reviewId),
     onSuccess: (data, variables, context) => {
       toast.success(data.message || "Đánh giá đã được xóa.");
-      // Invalidate danh sách review của sản phẩm đó
-      queryClient.invalidateQueries({
-        queryKey: reviewKeys.list(variables.productId, {}),
-      });
-      // Invalidate query chi tiết sản phẩm để cập nhật averageRating
+      // Invalidate các query liên quan
+      queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.productId),
       });
-      // Invalidate query lấy review của user cho sản phẩm này
       queryClient.invalidateQueries({
         queryKey: reviewKeys.userReviewForProduct(variables.productId),
       });
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Xóa đánh giá thất bại.",
-      );
+      toast.error(error.response?.data?.message || "Xóa đánh giá thất bại.");
       options?.onError?.(error, variables, context);
     },
     ...options,
+  });
+};
+
+// --- ADMIN HOOKS ---
+
+export const useGetAllReviewsAdmin = (params?: GetAllReviewsAdminParams) => {
+  return useQuery<PaginatedReviewsResponse, Error>({
+    queryKey: reviewKeys.adminList(params || {}),
+    queryFn: () => getAllReviewsAdminApi(params),
+    placeholderData: (prev) => prev,
+  });
+};
+
+// Helper để invalidate các query liên quan khi admin thực hiện hành động
+const useAdminReviewMutationInvalidation = () => {
+  const queryClient = useQueryClient();
+  return (review: Review) => {
+    // Invalidate list chung của admin để cập nhật bảng
+    queryClient.invalidateQueries({ queryKey: reviewKeys.adminLists() });
+
+    // Invalidate các query khác nếu có thông tin sản phẩm
+    const productId =
+      typeof review.product === "string" ? review.product : review.product?._id;
+    if (productId) {
+      queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.detail(productId),
+      });
+    }
+  };
+};
+
+export const useApproveReviewAdmin = () => {
+  const invalidate = useAdminReviewMutationInvalidation();
+  return useMutation<Review, Error, string>({
+    // string là reviewId
+    mutationFn: approveReviewAdminApi,
+    onSuccess: (updatedReview) => {
+      toast.success("Đã duyệt đánh giá.");
+      invalidate(updatedReview);
+    },
+    onError: (error) =>
+      toast.error(error.message || "Duyệt đánh giá thất bại."),
+  });
+};
+
+export const useRejectReviewAdmin = () => {
+  const invalidate = useAdminReviewMutationInvalidation();
+  return useMutation<Review, Error, string>({
+    // string là reviewId
+    mutationFn: rejectReviewAdminApi,
+    onSuccess: (updatedReview) => {
+      toast.success("Đã ẩn đánh giá.");
+      invalidate(updatedReview);
+    },
+    onError: (error) => toast.error(error.message || "Ẩn đánh giá thất bại."),
+  });
+};
+
+export const useDeleteReviewAdmin = () => {
+  const queryClient = useQueryClient();
+  return useMutation<{ message: string }, Error, string>({
+    // string là reviewId
+    mutationFn: deleteReviewAdminApi,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: reviewKeys.adminLists() });
+      queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
+    },
+    onError: (error) => toast.error(error.message || "Xóa đánh giá thất bại."),
+  });
+};
+
+export const useAddAdminReply = () => {
+  const invalidate = useAdminReviewMutationInvalidation();
+  return useMutation<
+    Review,
+    Error,
+    { reviewId: string; payload: { comment: string } }
+  >({
+    mutationFn: ({ reviewId, payload }) => addAdminReplyApi(reviewId, payload),
+    onSuccess: (updatedReview) => {
+      toast.success("Đã gửi phản hồi.");
+      invalidate(updatedReview);
+    },
+    onError: (error) => toast.error(error.message || "Gửi phản hồi thất bại."),
   });
 };

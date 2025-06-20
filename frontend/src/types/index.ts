@@ -4,6 +4,8 @@ export * from "./next";
 export * from "./product";
 export * from "./ui";
 export * from "./user";
+export * from "./order";
+export * from "./order_model";
 export * from "./wishlist";
 export * from "./coupon";
 export * from "./attribute";
