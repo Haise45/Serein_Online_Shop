@@ -84,6 +84,29 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+    // --- LOGIC TỰ ĐỘNG LOGOUT KHI GẶP LỖI 403 (Forbidden) ---
+    // Đây là trường hợp tài khoản bị đình chỉ hoặc không có quyền admin.
+    if (error.response?.status === 403) {
+      // Hiển thị thông báo cho người dùng biết lý do
+      const apiErrorData = error.response.data as { message?: string };
+      const errorMessage =
+        apiErrorData?.message ||
+        "Bạn không có quyền thực hiện hành động này. Đang đăng xuất.";
+
+      // Dispatch action logout để xóa state và token
+      store.dispatch(logout());
+
+      // Chuyển hướng về trang đăng nhập
+      // if (typeof window !== "undefined") {
+      //   // Chỉ chuyển hướng ở client-side
+      //   window.location.href = "/login";
+      // }
+
+      // Reject promise để dừng chuỗi xử lý hiện tại
+      return Promise.reject(new Error(errorMessage));
+    }
+    // --- KẾT THÚC LOGIC TỰ ĐỘNG LOGOUT ---
+
     // *** BƯỚC 1: Xử lý lỗi 401 để refresh token ***
     if (
       error.response?.status === 401 &&

@@ -216,6 +216,10 @@ const orderSchema = new mongoose.Schema(
       // Thời điểm giao hàng thành công
       type: Date,
     },
+    isStockRestored: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,

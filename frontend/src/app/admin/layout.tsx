@@ -46,6 +46,9 @@ export default function AdminLayout({
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [unfoldable, setUnfoldable] = useState(false);
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItem[]>([]);
+  const dynamicData = useSelector(
+    (state: RootState) => state.breadcrumbAdmin.dynamicData,
+  );
 
   // Load sidebar state from localStorage on component mount
   useEffect(() => {
@@ -133,11 +136,11 @@ export default function AdminLayout({
   // Cập nhật breadcrumbs khi pathname hoặc user thay đổi
   useEffect(() => {
     if (pathname && isAuthenticated && user?.role === "admin") {
-      setBreadcrumbItems(generateAdminBreadcrumbs(pathname));
+      setBreadcrumbItems(generateAdminBreadcrumbs(pathname, dynamicData));
     } else if (!isAuthenticated) {
       setBreadcrumbItems([]);
     }
-  }, [pathname, isAuthenticated, user]);
+  }, [pathname, isAuthenticated, user, dynamicData]);
 
   if (isVerifyingAuth || authStateIsLoading) {
     return (

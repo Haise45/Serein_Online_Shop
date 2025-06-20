@@ -337,7 +337,7 @@ export default function OrderDetailsDisplay({
           <h2 className="mb-3 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800 md:text-base lg:text-lg">
             <FiHome className="mr-2 text-indigo-600" /> Địa chỉ giao hàng
           </h2>
-          <div className="space-y-1 text-sm text-gray-600 lg:text-base">
+          <div className="space-y-1 text-sm text-gray-600">
             <p className="font-medium text-gray-700">
               {order.shippingAddress.fullName}
             </p>
@@ -356,7 +356,7 @@ export default function OrderDetailsDisplay({
           <h2 className="mb-3 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800 md:text-base lg:text-lg">
             <FiCreditCard className="mr-2 text-indigo-600" /> Thanh toán
           </h2>
-          <div className="space-y-1 text-sm text-gray-600 lg:text-base">
+          <div className="space-y-1 text-sm text-gray-600">
             <p>
               Phương thức:{" "}
               <span className="font-medium text-gray-700">
@@ -387,7 +387,7 @@ export default function OrderDetailsDisplay({
           <h2 className="mb-3 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800 md:text-base lg:text-lg">
             <FiFileText className="mr-2 text-indigo-600" /> Thông tin đơn hàng
           </h2>
-          <div className="space-y-1 text-sm text-gray-600 lg:text-base">
+          <div className="space-y-1 text-sm text-gray-600">
             <p className="flex items-center">
               <FiHash className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
               Mã ĐH:{" "}

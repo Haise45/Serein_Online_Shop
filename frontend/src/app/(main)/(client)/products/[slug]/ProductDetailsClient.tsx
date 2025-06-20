@@ -56,6 +56,7 @@ export default function ProductDetailsClient({
   const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const reviewsSectionRef = useRef<ProductReviewsRef>(null);
+  const isInitialMount = useRef(true);
 
   // --- Data Fetching ---
   const {
@@ -95,117 +96,97 @@ export default function ProductDetailsClient({
   );
 
   // --- useEffects để đồng bộ state ---
-  // Effect 1: Khởi tạo lựa chọn khi sản phẩm hoặc URL thay đổi
+  // Effect 1: Đồng bộ hóa trạng thái từ URL (khi tải trang hoặc back/forward)
   useEffect(() => {
-    // Chỉ chạy khi product đã được fetch về
-    if (product && product.attributes) {
-      const initialOptions: Record<string, string | null> = {};
-      let initialVariant: Variant | null = null;
+    if (!product) return;
 
-      // 1. Ưu tiên xử lý nếu có variantId từ URL
-      if (variantIdFromUrl && product.variants && product.variants.length > 0) {
-        const variantFromUrl = product.variants.find(
-          (v) => v._id === variantIdFromUrl,
-        );
+    // Tìm variant từ URL
+    const variantFromUrl = variantIdFromUrl
+      ? product.variants.find((v) => v._id === variantIdFromUrl)
+      : null;
 
-        if (variantFromUrl) {
-          initialVariant = variantFromUrl;
-          // Điền các lựa chọn từ variant tìm được
-          (variantFromUrl.optionValues as VariantOptionValue[]).forEach(
-            (ov) => {
-              const attrId =
-                typeof ov.attribute === "string"
-                  ? ov.attribute
-                  : ov.attribute._id;
-              const valueId =
-                typeof ov.value === "string" ? ov.value : ov.value._id;
-              initialOptions[attrId] = valueId;
-            },
-          );
-        } else {
-          // Nếu variantId không hợp lệ, không làm gì cả, để các giá trị là null
-          console.warn(`Variant ID từ URL không hợp lệ: ${variantIdFromUrl}`);
-        }
+    if (variantFromUrl) {
+      // Nếu variant từ URL khác với variant đang được chọn, hãy cập nhật state
+      if (variantFromUrl._id !== selectedVariant?._id) {
+        const newOptions: Record<string, string | null> = {};
+        (variantFromUrl.optionValues as VariantOptionValue[]).forEach((ov) => {
+          const attrId = (ov.attribute as Attribute)._id;
+          const valueId = (ov.value as AttributeValue)._id;
+          newOptions[attrId] = valueId;
+        });
+
+        // Đảm bảo tất cả thuộc tính đều có key
+        (product.attributes as ProductAttribute[]).forEach((attrWrapper) => {
+          const attrId = (attrWrapper.attribute as Attribute)._id;
+          if (!(attrId in newOptions)) {
+            newOptions[attrId] = null;
+          }
+        });
+
+        setSelectedOptions(newOptions);
+        setSelectedVariant(variantFromUrl);
+        setQuantity(1);
       }
-
-      // 2. Đảm bảo tất cả các thuộc tính của sản phẩm đều có một key trong `initialOptions`
+    } else {
+      // Nếu không có variantId trên URL, hãy khởi tạo state trống
+      const initialOptions: Record<string, string | null> = {};
       (product.attributes as ProductAttribute[]).forEach((attrWrapper) => {
-        const attrId =
-          typeof attrWrapper.attribute === "string"
-            ? attrWrapper.attribute
-            : attrWrapper.attribute._id;
-        if (!(attrId in initialOptions)) {
-          initialOptions[attrId] = null;
-        }
+        const attrId = (attrWrapper.attribute as Attribute)._id;
+        initialOptions[attrId] = null;
       });
-
-      // 3. Cập nhật state một lần duy nhất
       setSelectedOptions(initialOptions);
-      setSelectedVariant(initialVariant);
-      setQuantity(1); // Luôn reset số lượng khi load
+      setSelectedVariant(null);
+      setQuantity(1);
     }
-  }, [product, variantIdFromUrl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product, variantIdFromUrl]); // Chỉ phụ thuộc vào product và variantId từ URL
 
-  // Effect 2: Tìm biến thể tương ứng khi lựa chọn thay đổi
+  // Effect 2: Tìm variant dựa trên lựa chọn của người dùng và cập nhật URL
   useEffect(() => {
-    if (variantIdFromUrl && selectedVariant?._id !== variantIdFromUrl) {
+    // Bỏ qua lần render đầu tiên để tránh ghi đè URL không cần thiết
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
       return;
     }
 
-    if (product && product.variants && product.attributes) {
-      const allOptionsSelected = (
-        product.attributes as ProductAttribute[]
-      ).every((attrWrapper) => {
-        const attrId =
-          typeof attrWrapper.attribute === "string"
-            ? attrWrapper.attribute
-            : attrWrapper.attribute._id;
-        return !!selectedOptions[attrId];
-      });
+    if (!product) return;
 
-      let newUrl = pathname;
-      let variantToSet: Variant | null = null;
+    const allOptionsSelected = (product.attributes as ProductAttribute[]).every(
+      (attrWrapper) =>
+        !!selectedOptions[(attrWrapper.attribute as Attribute)._id],
+    );
 
-      if (allOptionsSelected) {
-        const foundVariant = product.variants.find((variant) =>
-          variant.optionValues.every((ov) => {
-            const attrId =
-              typeof ov.attribute === "string"
-                ? ov.attribute
-                : ov.attribute._id;
-            const valueId =
-              typeof ov.value === "string" ? ov.value : ov.value._id;
-            return selectedOptions[attrId] === valueId;
-          }),
-        );
-        variantToSet = foundVariant || null;
-        if (foundVariant) {
-          newUrl = `${pathname}?variant=${foundVariant._id}`;
-        }
-      }
+    let newUrl = pathname;
+    let variantToSet: Variant | null = null;
 
-      // Chỉ cập nhật state nếu có sự thay đổi thực sự
-      if (selectedVariant?._id !== variantToSet?._id) {
-        setSelectedVariant(variantToSet);
-        setQuantity(1); // Reset số lượng khi đổi variant
-      }
+    if (allOptionsSelected) {
+      const foundVariant = product.variants.find((variant) =>
+        (variant.optionValues as VariantOptionValue[]).every((ov) => {
+          const attrId = (ov.attribute as Attribute)._id;
+          const valueId = (ov.value as AttributeValue)._id;
+          return selectedOptions[attrId] === valueId;
+        }),
+      );
 
-      // Cập nhật URL một cách nhẹ nhàng
-      if (
-        typeof window !== "undefined" &&
-        window.location.href !== new URL(newUrl, window.location.origin).href
-      ) {
-        router.replace(newUrl, { scroll: false });
+      variantToSet = foundVariant || null;
+
+      if (foundVariant) {
+        newUrl = `${pathname}?variant=${foundVariant._id}`;
       }
     }
-  }, [
-    product,
-    selectedOptions,
-    selectedVariant,
-    pathname,
-    router,
-    variantIdFromUrl,
-  ]);
+
+    // Cập nhật variant nếu có thay đổi thực sự
+    if (selectedVariant?._id !== variantToSet?._id) {
+      setSelectedVariant(variantToSet);
+      setQuantity(1); // Reset số lượng khi đổi variant
+    }
+
+    // Cập nhật URL một cách nhẹ nhàng, chỉ khi URL thực sự thay đổi
+    if (window.location.pathname + window.location.search !== newUrl) {
+      router.replace(newUrl, { scroll: false });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product, selectedOptions, pathname, router]);
 
   // --- Logic hiển thị ---
 
@@ -769,7 +750,7 @@ export default function ProductDetailsClient({
                   type="button"
                   onClick={handleAddToCart}
                   disabled={buttonState.disabled}
-                  className="flex w-full flex-1 items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-md transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                  className="flex w-full flex-1 items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-md transition-colors duration-200 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-indigo-300"
                 >
                   {buttonState.icon}
                   {buttonState.text}
@@ -783,7 +764,7 @@ export default function ProductDetailsClient({
                     (product.variants.length > 0 && !selectedVariant)
                   }
                   className={classNames(
-                    "flex w-full items-center justify-center rounded-lg border px-6 py-3.5 text-base font-semibold shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto",
+                    "flex w-full items-center justify-center rounded-lg border px-6 py-3.5 text-base font-semibold shadow-sm transition-colors duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto",
                     isFavorite
                       ? "border-red-500 bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-500"
                       : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-indigo-500",

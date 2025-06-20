@@ -41,6 +41,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Variant } from "@/types";
 import StockUpdateModal from "@/components/admin/products/StockUpdateModal";
 import { getVariantDisplayName } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
 const DEFAULT_LIMIT = 10;
 
@@ -49,6 +50,7 @@ export default function AdminProductsClient() {
   const pathname = usePathname();
   const currentNextSearchParams = useNextSearchParamsHook();
   const scrollableContainerRef = useGrabToScroll<HTMLDivElement>();
+  const currentSearchParams = useSearchParams();
 
   // --- States ---
   const [currentPage, setCurrentPage] = useState<number>(
@@ -91,6 +93,7 @@ export default function AdminProductsClient() {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedMinPrice = useDebounce(filterMinPrice, 500);
   const debouncedMaxPrice = useDebounce(filterMaxPrice, 500);
+  const currentQueryString = currentSearchParams.toString();
 
   // State để quản lý modal
   const [modalState, setModalState] = useState<{
@@ -266,25 +269,16 @@ export default function AdminProductsClient() {
       visible: false,
       product: null,
       variant: null,
-      returnToList: false,
     });
   };
 
   const handleSaveStock = (update: { change?: number; set?: number }) => {
-    const { product, variant, returnToList } = stockModal;
+    const { product, variant } = stockModal;
     if (!product) return;
 
     // Logic để mở lại modal danh sách sau khi thành công
     const onSuccessCallback = () => {
-      if (returnToList) {
-        // Đóng modal stock và mở lại modal danh sách
-        handleCloseStockModal();
-        // `product` ở đây chính là sản phẩm có danh sách variant cần xem lại
-        setViewingVariantsForProduct(product);
-      } else {
-        // Hành vi mặc định: chỉ đóng modal stock
-        handleCloseStockModal();
-      }
+      handleCloseStockModal();
     };
 
     if (variant) {
@@ -467,6 +461,7 @@ export default function AdminProductsClient() {
                   setViewingVariantsForProduct={setViewingVariantsForProduct}
                   viewingVariantsForProduct={viewingVariantsForProduct}
                   attributes={attributesForFilter || []}
+                  queryString={currentQueryString}
                 />
                 {isLoading && (
                   <div className="position-absolute d-flex align-items-center justify-content-center bg-opacity-75 start-0 top-0 z-3 h-100 w-100 bg-white">

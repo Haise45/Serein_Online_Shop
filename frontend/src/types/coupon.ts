@@ -34,3 +34,19 @@ export interface PaginatedCouponsResponse {
   limit: number;
   coupons: Coupon[];
 }
+
+// Dùng cho cả tạo mới và cập nhật
+export interface CouponFormData {
+  code: string;
+  description: string;
+  discountType: DiscountType;
+  discountValue: number | string; // Cho phép string để form dễ xử lý
+  minOrderValue: number | string;
+  maxUsage: number | string | null;
+  maxUsagePerUser: number | string;
+  startDate: string;
+  expiryDate: string;
+  isActive: boolean;
+  applicableTo: CouponApplicableTo;
+  applicableIds: string[];
+}

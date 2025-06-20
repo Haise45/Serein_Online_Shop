@@ -86,7 +86,8 @@ export default function CheckoutOrderSummary({
                       alt={item.name}
                       width={80}
                       height={80}
-                      className="h-full w-full object-cover object-center"
+                      quality={100}
+                      className="h-full w-full object-cover object-top"
                     />
                   </div>
                   <div className="ml-4 flex flex-1 flex-col">
