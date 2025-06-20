@@ -18,10 +18,7 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 const orderRoutes = require("./routes/orderRoutes");
-const {
-  productReviewRouter,
-  reviewRouter,
-} = require("./routes/reviewRoutes");
+const { productReviewRouter, reviewRouter } = require("./routes/reviewRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const attrttributeRoutes = require("./routes/attributeRoutes");
@@ -67,8 +64,12 @@ app.set("query parser", "extended");
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
 // API Routes
+app.get("/", (req, res) => {
+  res.send("Welcome to Serein Shop API");
+});
+
 app.get("/api/v1", (req, res) => {
-  res.send("Shop API is running...");
+  res.send("Serein Shop API is running...");
 });
 
 app.use("/api/v1/cart", protectOptional, identifyCartUser);

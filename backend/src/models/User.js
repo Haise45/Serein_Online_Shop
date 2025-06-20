@@ -65,6 +65,19 @@ const userSchema = new mongoose.Schema(
     emailVerificationExpires: Date, // Thời gian hết hạn của OTP
     passwordResetToken: String, // Lưu token (đã hash) để reset mật khẩu
     passwordResetExpires: Date, // Thời gian hết hạn của token
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
+    suspensionReason: {
+      type: String,
+      default: null,
+    },
+    suspensionEndDate: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

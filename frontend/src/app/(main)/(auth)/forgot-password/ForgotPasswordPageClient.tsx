@@ -1,5 +1,6 @@
 "use client";
 
+import GuestGuard from "@/app/GuestGuard";
 import axiosInstance from "@/lib/axiosInstance";
 import { AxiosError } from "axios";
 import Link from "next/link";
@@ -40,62 +41,64 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
-        <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
-          Quên Mật Khẩu
-        </h1>
-        <p className="mb-6 text-center text-sm text-gray-600">
-          Nhập địa chỉ email đã đăng ký của bạn. Chúng tôi sẽ gửi cho bạn một
-          liên kết (hoặc mã OTP) để đặt lại mật khẩu.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <p className="rounded-md bg-red-100 p-3 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-          {message && (
-            <p className="rounded-md bg-green-100 p-3 text-sm text-green-600">
-              {message}
-            </p>
-          )}
-          <div>
-            <label
-              className="mb-1 block text-sm font-medium text-gray-700"
-              htmlFor="email"
+    <GuestGuard>
+      <div className="flex items-center justify-center bg-gray-100">
+        <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
+          <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
+            Quên Mật Khẩu
+          </h1>
+          <p className="mb-6 text-center text-sm text-gray-600">
+            Nhập địa chỉ email đã đăng ký của bạn. Chúng tôi sẽ gửi cho bạn một
+            liên kết (hoặc mã OTP) để đặt lại mật khẩu.
+          </p>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <p className="rounded-md bg-red-100 p-3 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            {message && (
+              <p className="rounded-md bg-green-100 p-3 text-sm text-green-600">
+                {message}
+              </p>
+            )}
+            <div>
+              <label
+                className="mb-1 block text-sm font-medium text-gray-700"
+                htmlFor="email"
+              >
+                Địa chỉ Email
+              </label>
+              <input
+                className="input-field"
+                id="email"
+                type="email"
+                placeholder="Nhập email của bạn"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <button
+                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? "Đang gửi..." : "Gửi Yêu Cầu Đặt Lại"}
+              </button>
+            </div>
+          </form>
+          <p className="mt-6 text-center text-sm text-gray-600">
+            <Link
+              href="/login"
+              className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
             >
-              Địa chỉ Email
-            </label>
-            <input
-              className="input-field"
-              id="email"
-              type="email"
-              placeholder="Nhập email của bạn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <button
-              className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Đang gửi..." : "Gửi Yêu Cầu Đặt Lại"}
-            </button>
-          </div>
-        </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          <Link
-            href="/login"
-            className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
-          >
-            Quay lại Đăng nhập
-          </Link>
-        </p>
+              Quay lại Đăng nhập
+            </Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </GuestGuard>
   );
 }

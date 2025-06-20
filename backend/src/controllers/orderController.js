@@ -840,7 +840,9 @@ const getAllOrders = asyncHandler(async (req, res) => {
     .sort(sort)
     .skip(skip)
     .limit(limit)
-    .select("-orderItems.variant")
+    .select(
+      "_id user guestOrderEmail shippingAddress status totalPrice createdAt isPaid paidAt orderItems isStockRestored"
+    )
     .lean();
 
   const totalOrdersQuery = Order.countDocuments(filter);
@@ -1259,10 +1261,15 @@ const restockOrderItems = asyncHandler(async (req, res) => {
     throw new Error("ID đơn hàng không hợp lệ.");
   }
 
-  const order = await Order.findById(orderId).lean();
+  const order = await Order.findById(orderId)
   if (!order) {
     res.status(404);
     throw new Error("Không tìm thấy đơn hàng.");
+  }
+
+  if (order.isStockRestored) {
+    res.status(400);
+    throw new Error("Đơn hàng này đã được khôi phục tồn kho trước đó.");
   }
 
   // Chỉ nên cho phép restock nếu đơn hàng thực sự đã bị hủy hoặc hoàn tiền
@@ -1274,55 +1281,60 @@ const restockOrderItems = asyncHandler(async (req, res) => {
   }
 
   // --- Logic khôi phục tồn kho ---
-  console.log(`[Restock] Bắt đầu khôi phục tồn kho cho Order ${orderId}`);
-  const bulkOps = [];
-  for (const item of order.orderItems) {
-    const incrementAmount = item.quantity;
-    if (item.variant?.variantId) {
-      // Tăng tồn kho biến thể
-      bulkOps.push({
-        updateOne: {
-          filter: { _id: item.product, "variants._id": item.variant.variantId },
-          update: { $inc: { "variants.$.stockQuantity": +incrementAmount } },
-        },
-      });
-    } else {
-      // Tăng tồn kho sản phẩm chính
-      bulkOps.push({
-        updateOne: {
-          filter: { _id: item.product },
-          update: { $inc: { stockQuantity: +incrementAmount } },
-        },
-      });
-    }
-  }
+  // --- Bắt đầu Transaction để đảm bảo tính toàn vẹn ---
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // Thực thi cập nhật
-  if (bulkOps.length > 0) {
-    try {
-      const result = await Product.bulkWrite(bulkOps);
-      console.log(
-        "[Restock] Kết quả khôi phục tồn kho:",
-        JSON.stringify(result)
-      );
-      // Kiểm tra kết quả nếu cần
-      if (result.modifiedCount === 0 && result.matchedCount > 0) {
-        console.warn(
-          "[Restock] Có thể một số sản phẩm/variant không tìm thấy để khôi phục stock."
-        );
+  try {
+    const bulkOps = [];
+    for (const item of order.orderItems) {
+      const incrementAmount = item.quantity;
+      if (item.variant?.variantId) {
+        // Tăng tồn kho biến thể
+        bulkOps.push({
+          updateOne: {
+            filter: {
+              _id: item.product,
+              "variants._id": item.variant.variantId,
+            },
+            update: { $inc: { "variants.$.stockQuantity": +incrementAmount } },
+          },
+        });
+      } else {
+        // Tăng tồn kho sản phẩm chính
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: item.product },
+            update: { $inc: { stockQuantity: +incrementAmount } },
+          },
+        });
       }
-      res.status(200).json({
-        message: `Đã khôi phục tồn kho cho ${result.modifiedCount} mục sản phẩm.`,
-      });
-    } catch (error) {
-      console.error("[Restock] Lỗi khi khôi phục tồn kho:", error);
-      res.status(500);
-      throw new Error("Có lỗi xảy ra khi khôi phục tồn kho.");
     }
-  } else {
-    res.status(400).json({
-      message: "Không có mục nào trong đơn hàng để khôi phục tồn kho.",
+
+    if (bulkOps.length > 0) {
+      await Product.bulkWrite(bulkOps, { session });
+    }
+
+    order.isStockRestored = true;
+    order.adminNotes =
+      (order.adminNotes || "") +
+      `\n[System] Tồn kho đã được khôi phục lúc ${new Date().toLocaleString(
+        "vi-VN"
+      )}.`;
+    await order.save({ session });
+
+    await session.commitTransaction();
+
+    res.status(200).json({
+      message: `Đã khôi phục tồn kho thành công cho đơn hàng.`,
+      order: order.toObject(), // Trả về đơn hàng đã cập nhật
     });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("[Restock] Lỗi khi khôi phục tồn kho:", error);
+    throw new Error("Có lỗi xảy ra khi khôi phục tồn kho.");
+  } finally {
+    session.endSession();
   }
 });
 

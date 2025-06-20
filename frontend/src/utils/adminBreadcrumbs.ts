@@ -5,6 +5,7 @@ const segmentToLabelMap: Record<string, string> = {
   products: "Sản phẩm",
   categories: "Danh mục",
   orders: "Đơn hàng",
+  attributes: "Thuộc tính",
   users: "Người dùng",
   coupons: "Mã giảm giá",
   reviews: "Đánh giá",
@@ -14,9 +15,10 @@ const segmentToLabelMap: Record<string, string> = {
 };
 
 // Dữ liệu động có thể được truyền vào
-interface AdminDynamicData {
+export interface AdminDynamicData {
   productName?: string;
   orderId?: string;
+  userName?: string;
   // Thêm các dữ liệu khác nếu cần
 }
 
@@ -63,6 +65,8 @@ export const generateAdminBreadcrumbs = (
       label = dynamicData.productName || `Sản phẩm #${segment.slice(-6)}`;
     } else if (prevSegment === "orders" && segment !== "create") {
       label = dynamicData.orderId || `Đơn hàng #${segment.slice(-6)}`;
+    } else if (prevSegment === "users" && segment !== "create") {
+      label = dynamicData.userName || `Người dùng #${segment.slice(-6)}`;
     }
 
     breadcrumbs.push({

@@ -29,6 +29,14 @@ const protect = async (req, res, next) => {
         });
       }
 
+      // Sau khi tìm thấy user, kiểm tra xem tài khoản có đang hoạt động không
+      if (!req.user.isActive) {
+        res.status(403); // 403 Forbidden - Token hợp lệ nhưng user không có quyền
+        throw new Error(
+          "Tài khoản của bạn đã bị đình chỉ. Vui lòng đăng xuất và liên hệ quản trị viên."
+        );
+      }
+
       next(); // Proceed to the next middleware/route handler
     } catch (error) {
       console.error("Token verification failed:", error.message);
@@ -68,7 +76,9 @@ const isAdmin = (req, res, next) => {
 // --- Hàm protectOptional ---
 // Mục đích: Cố gắng xác thực token nếu có, nhưng không báo lỗi nếu thiếu/sai. Luôn gọi next().
 const protectOptional = asyncHandler(async (req, res, next) => {
-  console.log(`[Protect Optional] Method: ${req.method}, URL: ${req.originalUrl}`);
+  console.log(
+    `[Protect Optional] Method: ${req.method}, URL: ${req.originalUrl}`
+  );
   let token;
   req.user = null;
 

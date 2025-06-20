@@ -52,7 +52,7 @@ export const getUserReviewForProductApi = async (
   try {
     const { data } = await axiosInstance.get<Review | null>(
       `/reviews/my-review`,
-      { params: { productId } }
+      { params: { productId } },
     );
     return data;
   } catch (err: unknown) {
@@ -92,4 +92,64 @@ export const deleteMyReviewApi = async (
   } catch (err: unknown) {
     throw new Error(getErrorMessage(err, "Xóa đánh giá thất bại."));
   }
+};
+
+// --- ADMIN APIs ---
+
+export interface GetAllReviewsAdminParams extends GetProductReviewsParams {
+  productId?: string;
+  userId?: string;
+  isApproved?: boolean;
+}
+
+export const getAllReviewsAdminApi = async (
+  params?: GetAllReviewsAdminParams,
+): Promise<PaginatedReviewsResponse> => {
+  try {
+    const { data } = await axiosInstance.get<PaginatedReviewsResponse>(
+      `reviews`,
+      { params },
+    );
+    return data;
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, "Không thể tải danh sách đánh giá."));
+  }
+};
+
+export const approveReviewAdminApi = async (
+  reviewId: string,
+): Promise<Review> => {
+  const { data } = await axiosInstance.put<{ message: string; review: Review }>(
+    `/reviews/${reviewId}/approve`,
+  );
+  return data.review;
+};
+
+export const rejectReviewAdminApi = async (
+  reviewId: string,
+): Promise<Review> => {
+  const { data } = await axiosInstance.put<{ message: string; review: Review }>(
+    `/reviews/${reviewId}/reject`,
+  );
+  return data.review;
+};
+
+export const deleteReviewAdminApi = async (
+  reviewId: string,
+): Promise<{ message: string }> => {
+  const { data } = await axiosInstance.delete<{ message: string }>(
+    `/reviews/${reviewId}`,
+  );
+  return data;
+};
+
+export const addAdminReplyApi = async (
+  reviewId: string,
+  payload: { comment: string },
+): Promise<Review> => {
+  const { data } = await axiosInstance.post<{
+    message: string;
+    review: Review;
+  }>(`/reviews/${reviewId}/reply`, payload);
+  return data.review;
 };

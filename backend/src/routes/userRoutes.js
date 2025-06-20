@@ -3,8 +3,8 @@ const {
   getUserProfile,
   updateUserProfile,
   getUsers, // Admin
-  getUserById, // Admin
-  deleteUser, // Admin
+  getUserDetailsById, // Admin
+  updateUserStatus, // Admin
   getUserAddresses,
   addAddress,
   updateAddress,
@@ -16,6 +16,7 @@ const validateRequest = require("../middlewares/validationMiddleware");
 const {
   updateProfileSchema,
   addressSchemaValidation,
+  updateUserStatusSchema,
 } = require("../validations/validationSchemas");
 
 const router = express.Router();
@@ -44,9 +45,15 @@ router.route("/addresses/:addressId/default").put(protect, setDefaultAddress); /
 // Admin specific routes (require login + admin role)
 router.route("/").get(protect, isAdmin, getUsers); // Phải là admin
 
+router.route("/:id").get(protect, isAdmin, getUserDetailsById);
+
 router
-  .route("/:id")
-  .get(protect, isAdmin, getUserById)
-  .delete(protect, isAdmin, deleteUser); // Phải là admin
+  .route("/:id/status")
+  .put(
+    protect,
+    isAdmin,
+    validateRequest(updateUserStatusSchema),
+    updateUserStatus
+  );
 
 module.exports = router;

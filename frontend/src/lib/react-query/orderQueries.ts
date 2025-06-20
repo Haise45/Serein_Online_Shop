@@ -335,7 +335,7 @@ export const useApproveRequestAdmin = (
     mutationFn: ({ orderId, type }) => approveRequestAdminApi(orderId, type),
     onSuccess: (data, variables, context) => {
       toast.success(data.message);
-      queryClient.setQueryData(orderKeys.detail(variables.orderId), data.order);
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(variables.orderId) });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
@@ -371,7 +371,7 @@ export const useRejectRequestAdmin = (
       rejectRequestAdminApi(orderId, type, payload),
     onSuccess: (data, variables, context) => {
       toast.success(data.message);
-      queryClient.setQueryData(orderKeys.detail(variables.orderId), data.order);
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(variables.orderId) });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
@@ -385,11 +385,11 @@ export const useRejectRequestAdmin = (
 
 // Hook for restock (Admin)
 export const useRestockOrderItemsAdmin = (
-  options?: MutationOptions<{ message: string }, string>,
+  options?: MutationOptions<{ message: string, order: Order }, string>,
 ) => {
   const queryClient = useQueryClient();
   return useMutation<
-    { message: string },
+    { message: string, order: Order },
     AxiosError<{ message?: string }>,
     string
   >({
@@ -398,7 +398,9 @@ export const useRestockOrderItemsAdmin = (
     onSuccess: (data, orderId, context) => {
       toast.success(data.message);
       // Invalidate product details or lists if stock changes are significant for other views
-      queryClient.invalidateQueries({ queryKey: ["products"] }); // Broad invalidation
+      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId) });
+
       options?.onSuccess?.(data, orderId, context);
     },
     onError: (error, variables, context) => {

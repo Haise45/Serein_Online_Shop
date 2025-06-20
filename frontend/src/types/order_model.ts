@@ -77,14 +77,28 @@ export interface Order {
   paidAt?: string | Date | null;
   isDelivered: boolean;
   deliveredAt?: string | Date | null;
+  isStockRestored?: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
 }
 
 // Cho danh sách đơn hàng (có thể chỉ lấy một số trường)
-export interface OrderSummary
-  extends Pick<Order, "_id" | "status" | "totalPrice" | "createdAt"> {
-  orderItems: Pick<OrderItem, "name" | "image">[]; // Chỉ lấy tên và ảnh của item đầu tiên chẳng hạn
+export interface OrderSummary {
+  _id: string;
+  status: string;
+  totalPrice: number;
+  createdAt: string | Date;
+  orderItems: OrderItem[]; // Chỉ lấy một phần của orderItems
+
+  // Thêm các trường đã được populate từ API
+  user?: Pick<User, "_id" | "name" | "email" | "phone"> | null;
+  guestOrderEmail?: string | null;
+  isPaid: boolean;
+  paidAt?: string | Date | null;
+
+  // Thêm shippingAddress.fullName để hiển thị tên guest
+  shippingAddress: Pick<OrderShippingAddress, "fullName">;
+  isStockRestored?: boolean;
 }
 
 export interface PaginatedOrdersResponse {
