@@ -479,7 +479,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
   // Admin cần xem nhiều thông tin hơn
   const reviewsQuery = Review.find(filter)
     .populate("user", "name email") // Lấy đầy đủ thông tin user
-    .populate("product", "name slug sku") // Lấy đủ thông tin product
+    .populate("product", "name slug sku images") // Lấy đủ thông tin product
     .populate("approvedBy", "name") // Admin nào đã duyệt
     .populate("adminReply.user", "name") // Admin nào đã phản hồi
     .sort(sort)

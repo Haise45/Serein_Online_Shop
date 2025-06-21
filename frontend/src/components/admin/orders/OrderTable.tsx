@@ -231,6 +231,7 @@ const OrderTable: React.FC<OrderTableProps> = ({
                           alt={firstItem.name}
                           width={40}
                           height={40}
+                          quality={100}
                           className="rounded border object-cover object-top"
                           style={{ aspectRatio: "1/1" }}
                         />
@@ -382,8 +383,9 @@ const OrderTable: React.FC<OrderTableProps> = ({
                         alt={item.name}
                         width={60}
                         height={60}
-                        className="rounded border object-cover"
-                        style={{ aspectRatio: "1 / 1" }}
+                        quality={100}
+                        className="rounded border object-cover object-top"
+                        style={{ aspectRatio: "1/1" }}
                       />
                     </CTableDataCell>
                     <CTableDataCell>
