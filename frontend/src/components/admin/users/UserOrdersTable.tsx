@@ -117,7 +117,8 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                             alt={firstItem.name}
                             width={40}
                             height={40}
-                            className="rounded border object-cover"
+                            quality={100}
+                            className="rounded border object-cover object-top"
                             style={{ aspectRatio: "1/1" }}
                           />
                         </div>

@@ -38,7 +38,7 @@ import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
 
 // Helper hiển thị icon cho từng loại notification
-const getNotificationIcon = (type: Notification["type"]) => {
+export const getNotificationIcon = (type: Notification["type"]) => {
   const iconMap: Partial<
     Record<
       Notification["type"],

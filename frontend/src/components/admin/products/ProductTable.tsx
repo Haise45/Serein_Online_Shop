@@ -97,7 +97,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
               Mã SP
             </CTableHeaderCell>
             <CTableHeaderCell
-              style={{ width: "60px" }}
+              style={{ width: "80px" }}
               className="fw-semibold text-center"
             >
               Ảnh
@@ -197,7 +197,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
                       alt={product.name}
                       width={45}
                       height={45}
-                      className="rounded border object-cover"
+                      quality={100}
+                      className="rounded border object-cover object-top"
                       style={{ aspectRatio: "1/1" }}
                     />
                   </div>
