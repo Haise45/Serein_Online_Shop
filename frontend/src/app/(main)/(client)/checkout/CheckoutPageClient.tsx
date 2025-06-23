@@ -1,6 +1,8 @@
 "use client";
 
-import CheckoutForm from "@/components/client/checkout/CheckoutForm";
+import CheckoutForm, {
+  PAYMENT_METHODS,
+} from "@/components/client/checkout/CheckoutForm";
 import CheckoutOrderSummary from "@/components/client/checkout/CheckoutOrderSummary";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetCart } from "@/lib/react-query/cartQueries";
@@ -18,7 +20,7 @@ import toast from "react-hot-toast";
 import { FiAlertCircle, FiLoader } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 
-// Helper Function: Lấy tổ tiên của category (giữ nguyên logic của bạn)
+// Helper Function: Lấy tổ tiên của category
 const getAncestors = (
   categoryId: string,
   categoryMap: Map<string, Category>,
@@ -54,6 +56,7 @@ export default function CheckoutPageClient() {
     (state: RootState) => state.checkout.selectedItemIdsForCheckout,
   );
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].id);
 
   // --- DATA FETCHING ---
   const {
@@ -78,7 +81,10 @@ export default function CheckoutPageClient() {
       ),
     staleTime: 1000 * 60 * 60,
   });
+  const { data: allAttributes, isLoading: isLoadingAttributes } =
+    useGetAttributes();
 
+  // --- MEMOIZED VALUES ---
   const categoryMap = useMemo(() => {
     const map = new Map<string, Category>();
     if (allCategories?.categories) {
@@ -88,9 +94,6 @@ export default function CheckoutPageClient() {
     }
     return map;
   }, [allCategories]);
-
-  const { data: allAttributes, isLoading: isLoadingAttributes } =
-    useGetAttributes();
 
   const attributeMap = useMemo(() => {
     const map = new Map<
@@ -281,7 +284,8 @@ export default function CheckoutPageClient() {
     }
     const finalPayload: OrderCreationPayload = {
       ...formData,
-      selectedCartItemIds: selectedCartItemIds,
+      paymentMethod,
+      selectedCartItemIds: selectedCartItemIds, // Lấy từ Redux selector ở trên
     };
     createOrderMutation.mutate(finalPayload);
   };
@@ -298,7 +302,6 @@ export default function CheckoutPageClient() {
       }
     }
   };
-
 
   // --- RENDER LOGIC ---
   const isLoading =
@@ -355,6 +358,8 @@ export default function CheckoutPageClient() {
             user={user as User | null}
             userAddresses={userAddresses || []}
             isLoadingAddresses={isLoadingUserAddresses}
+            paymentMethod={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
             onSubmitOrder={handlePlaceOrder}
             isSubmittingOrder={createOrderMutation.isPending}
           />
@@ -368,6 +373,7 @@ export default function CheckoutPageClient() {
             shippingFee={0}
             finalTotal={orderSummaryValues.finalTotal}
             isPlacingOrder={createOrderMutation.isPending}
+            paymentMethod={paymentMethod}
             onPlaceOrderTriggerFromSummary={handleTriggerFormSubmit}
             attributeMap={attributeMap}
             stockError={stockErrorInCheckout}

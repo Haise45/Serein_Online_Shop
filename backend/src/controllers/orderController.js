@@ -11,7 +11,13 @@ const orderShippedTemplate = require("../utils/emailTemplates/orderShippedTempla
 const orderDeliveredTemplate = require("../utils/emailTemplates/orderDeliveredTemplate");
 const requestAdminNotificationTemplate = require("../utils/emailTemplates/requestAdminNotificationTemplate");
 const requestStatusUpdateTemplate = require("../utils/emailTemplates/requestStatusUpdateTemplate");
+const paymentSuccessTemplate = require("../utils/emailTemplates/paymentSuccessTemplate");
 const { createAdminNotification } = require("../utils/notificationUtils");
+const {
+  createPayPalOrder,
+  capturePayPalOrder,
+  refundPayPalOrder,
+} = require("../utils/paypalClient");
 
 require("dotenv").config();
 
@@ -170,6 +176,127 @@ const cleanupCart = async (cartId, processedItemIds, session) => {
     );
   }
 };
+
+// @desc    Tạo một đơn hàng PayPal (chưa lưu vào DB, chỉ tạo trên PayPal)
+// @route   POST /api/v1/orders/create-paypal-order
+// @access  Public (sử dụng protectOptional)
+const createPayPalOrderController = asyncHandler(async (req, res) => {
+  // 1. Lấy dữ liệu cần thiết từ body của request
+  const { selectedCartItemIds, shippingAddress } = req.body;
+
+  // Kiểm tra đầu vào cơ bản
+  if (
+    !selectedCartItemIds ||
+    !Array.isArray(selectedCartItemIds) ||
+    selectedCartItemIds.length === 0
+  ) {
+    res.status(400);
+    throw new Error("Vui lòng chọn sản phẩm để thanh toán.");
+  }
+  if (!shippingAddress) {
+    res.status(400);
+    throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
+  }
+
+  // 2. Xác định người dùng (tương tự hàm createOrder)
+  const loggedInUser = req.user;
+  const cartGuestId = req.cookies.cartGuestId;
+  let cartIdentifier;
+  if (loggedInUser) {
+    cartIdentifier = { userId: loggedInUser._id };
+  } else if (cartGuestId) {
+    cartIdentifier = { guestId: cartGuestId };
+  } else {
+    throw new Error("Không tìm thấy thông tin giỏ hàng.");
+  }
+
+  // 3. Lấy và tính toán thông tin giỏ hàng cho các sản phẩm đã chọn
+  // Hàm getAndValidateCartForOrder sẽ trả về giá cuối cùng (đã sale) của mỗi sản phẩm
+  const { calculatedData } = await getAndValidateCartForOrder(
+    cartIdentifier,
+    selectedCartItemIds.map((id) => new mongoose.Types.ObjectId(id))
+  );
+
+  // 4. Chuẩn bị danh sách các sản phẩm với giá bằng VND để gửi cho paypalClient
+  // paypalClient sẽ tự động chuyển đổi sang USD
+  const itemsForPayPal = calculatedData.items.map((item) => ({
+    name: item.name,
+    quantity: item.quantity,
+    priceVND: item.price, // `price` từ `calculatedData` là giá cuối cùng của item (displayPrice)
+    sku: item.sku,
+    productId: item.productId.toString(),
+  }));
+
+  // 5. Gọi hàm helper để tạo đơn hàng trên PayPal
+  // Hàm này sẽ xử lý việc lấy tỷ giá, tính toán tổng tiền USD, và gọi API của PayPal
+  const paypalOrder = await createPayPalOrder({
+    items: itemsForPayPal,
+    shippingDetails: shippingAddress,
+  });
+
+  // 6. Trả về orderID của PayPal cho frontend
+  res.status(200).json({ orderID: paypalOrder.id });
+});
+
+// @desc    Capture thanh toán PayPal và cập nhật đơn hàng trong DB
+// @route   POST /api/v1/orders/:id/capture-paypal
+// @access  Public
+const capturePayPalOrderController = asyncHandler(async (req, res) => {
+  const { paypalOrderId } = req.body;
+  const orderId = req.params.id; // Đây là ID đơn hàng trong DB của bạn
+
+  // 1. Capture thanh toán trên PayPal
+  const captureData = await capturePayPalOrder(paypalOrderId);
+
+  // 2. Kiểm tra kết quả capture
+  if (captureData.status === "COMPLETED") {
+    // 3. Cập nhật đơn hàng trong DB
+    const order = await Order.findById(orderId);
+    if (order) {
+      order.isPaid = true;
+      order.paidAt = new Date();
+      const capture = captureData.purchase_units[0]?.payments?.captures?.[0];
+      order.paymentResult = {
+        // Giả sử bạn có trường này trong Order model
+        id: captureData.id,
+        status: captureData.status,
+        update_time: captureData.update_time,
+        email_address: captureData.payer.email_address,
+        captureId: capture?.id,
+      };
+      await order.save();
+
+      // Có thể gửi email xác nhận thanh toán thành công ở đây
+      try {
+        await order.populate("user", "name email");
+        const customerName = order.user
+          ? order.user.name
+          : order.shippingAddress.fullName;
+        const emailHtml = paymentSuccessTemplate(customerName, order);
+        await sendEmail({
+          email: order.user ? order.user.email : order.guestOrderEmail,
+          subject: `Thanh toán thành công cho đơn hàng #${order._id
+            .toString()
+            .slice(-6)}`,
+          html: emailHtml,
+        });
+      } catch (emailError) {
+        console.error(
+          `Lỗi gửi email thanh toán thành công cho đơn ${order._id}:`,
+          emailError
+        );
+      }
+
+      res.status(200).json({ message: "Thanh toán thành công!", order });
+    } else {
+      res.status(404);
+      throw new Error("Không tìm thấy đơn hàng để cập nhật.");
+    }
+  } else {
+    res.status(400);
+    throw new Error("Thanh toán PayPal không thành công.");
+  }
+});
 
 // @desc    Tạo đơn hàng mới
 // @route   POST /api/v1/orders
@@ -1016,9 +1143,38 @@ const approveCancellation = asyncHandler(async (req, res) => {
     throw new Error("Đơn hàng này không có yêu cầu hủy đang chờ xử lý.");
   }
 
+  if (order.isPaid) {
+    // Chỉ thực hiện hoàn tiền nếu đơn hàng ĐÃ được thanh toán
+    if (order.paymentMethod === "PAYPAL") {
+      const captureId = order.paymentResult?.captureId;
+      if (!captureId) {
+        throw new Error(
+          "Không tìm thấy mã giao dịch PayPal (Capture ID) để hoàn tiền."
+        );
+      }
+      try {
+        await refundPayPalOrder(
+          captureId,
+          "Đơn hàng đã được hủy theo yêu cầu."
+        );
+        order.adminNotes =
+          (order.adminNotes || "") +
+          "\n[System] Đã hoàn tiền thành công qua PayPal.";
+      } catch (refundError) {
+        // Nếu hoàn tiền PayPal thất bại, không nên tiếp tục hủy đơn
+        throw new Error(`Hoàn tiền PayPal thất bại: ${refundError.message}`);
+      }
+    } else if (order.paymentMethod === "BANK_TRANSFER") {
+      // Đối với chuyển khoản, chỉ ghi chú lại
+      order.adminNotes =
+        (order.adminNotes || "") +
+        "\n[Action Required] Cần thực hiện hoàn tiền thủ công cho khách hàng.";
+    }
+  }
+  // Nếu isPaid = false (đơn COD), không cần làm gì cả.
   // Chuyển trạng thái sang Cancelled
   order.status = "Cancelled";
-  order.adminNotes = "Yêu cầu hủy được chấp nhận.";
+  order.adminNotes = (order.adminNotes || "") + "\nYêu cầu hủy được chấp nhận.";
 
   const updatedOrder = await order.save();
   await updatedOrder.populate("user", "name email phone");
@@ -1141,12 +1297,47 @@ const approveRefund = asyncHandler(async (req, res) => {
     throw new Error("Đơn hàng này không có yêu cầu hoàn tiền đang chờ xử lý.");
   }
 
+  if (order.isPaid) {
+    if (order.paymentMethod === "PAYPAL") {
+      const captureId = order.paymentResult?.captureId;
+      if (!captureId) {
+        throw new Error(
+          "Không tìm thấy mã giao dịch PayPal (Capture ID) để hoàn tiền."
+        );
+      }
+      try {
+        await refundPayPalOrder(
+          captureId,
+          "Chấp nhận yêu cầu trả hàng/hoàn tiền."
+        );
+        order.adminNotes =
+          (order.adminNotes || "") +
+          "\n[System] Đã hoàn tiền thành công qua PayPal.";
+      } catch (refundError) {
+        throw new Error(`Hoàn tiền PayPal thất bại: ${refundError.message}`);
+      }
+    } else if (
+      order.paymentMethod === "BANK_TRANSFER" ||
+      order.paymentMethod === "COD"
+    ) {
+      // Với COD đã giao (tức đã trả tiền) hoặc Chuyển khoản
+      order.adminNotes =
+        (order.adminNotes || "") +
+        "\n[Action Required] Cần thực hiện hoàn tiền thủ công cho khách hàng.";
+    }
+  } else {
+    // Trường hợp rất hiếm: yêu cầu refund trên đơn chưa thanh toán (vô lý)
+    console.warn(
+      `[Refund] Yêu cầu hoàn tiền cho đơn hàng chưa thanh toán ${orderId}. Chỉ cập nhật trạng thái.`
+    );
+  }
+
   // Chuyển trạng thái sang Refunded
   order.status = "Refunded";
-  // (Tùy chọn) Cập nhật isPaid = false, paidAt = null ? Tùy quy trình kế toán
+  order.adminNotes =
+    (order.adminNotes || "") + "\nYêu cầu hoàn tiền được chấp nhận.";
   order.isPaid = false;
   order.paidAt = null;
-  order.adminNotes = "Yêu cầu hoàn tiền được chấp nhận.";
 
   const updatedOrder = await order.save();
   await updatedOrder.populate("user", "name email phone");
@@ -1261,7 +1452,7 @@ const restockOrderItems = asyncHandler(async (req, res) => {
     throw new Error("ID đơn hàng không hợp lệ.");
   }
 
-  const order = await Order.findById(orderId)
+  const order = await Order.findById(orderId);
   if (!order) {
     res.status(404);
     throw new Error("Không tìm thấy đơn hàng.");
@@ -1339,6 +1530,8 @@ const restockOrderItems = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  createPayPalOrderController,
+  capturePayPalOrderController,
   createOrder,
   getMyOrders,
   getGuestOrderByTrackingToken,

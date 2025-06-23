@@ -1,5 +1,7 @@
 const express = require("express");
 const {
+  createPayPalOrderController,
+  capturePayPalOrderController,
   createOrder,
   getMyOrders,
   getGuestOrderByTrackingToken,
@@ -26,12 +28,24 @@ const { createOrderSchema } = require("../validations/validationSchemas");
 const router = express.Router();
 
 // --- User Routes ---
-// Đặt hàng mới (yêu cầu đăng nhập)
+// Đặt hàng mới
 router.post(
   "/",
   protectOptional,
   validateRequest(createOrderSchema),
   createOrder
+);
+
+// Thanh toán Paypal
+router.post(
+  "/create-paypal-order",
+  protectOptional,
+  createPayPalOrderController
+);
+router.post(
+  "/:id/capture-paypal",
+  protectOptional,
+  capturePayPalOrderController
 );
 
 // Lấy danh sách đơn hàng của tôi (yêu cầu đăng nhập)
@@ -43,7 +57,7 @@ router.put("/:id/deliver", protect, markOrderAsDelivered);
 // Guest Order Tracking
 router.get("/guest-track/:orderId/:token", getGuestOrderByTrackingToken);
 
-// Lấy chi tiết đơn hàng (yêu cầu đăng nhập, controller sẽ kiểm tra ownership hoặc admin)
+// Lấy chi tiết đơn hàng (controller sẽ kiểm tra ownership hoặc admin)
 router.get("/:id", protect, getOrderById);
 
 // Yêu cầu hủy đơn hàng (yêu cầu đăng nhập)
