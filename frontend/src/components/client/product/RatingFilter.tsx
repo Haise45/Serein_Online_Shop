@@ -1,4 +1,3 @@
-// src/app/(main)/products/components/filters/RatingFilter.tsx
 "use client";
 import classNames from "classnames";
 import { FiStar } from "react-icons/fi";
@@ -37,7 +36,9 @@ export default function RatingFilter({
                 ? "bg-indigo-100 font-semibold text-indigo-700" // Nổi bật hơn khi chọn
                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
             )}
-            aria-pressed={currentFilters.minRating === rating} // Accessibility
+            aria-pressed={
+              currentFilters.minRating === rating ? "true" : "false"
+            } // Accessibility
           >
             <span className="flex items-center">
               {[...Array(5)].map((_, i) => (

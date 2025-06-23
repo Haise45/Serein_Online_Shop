@@ -224,9 +224,9 @@ export const rejectRequestAdminApi = async (
 
 export const restockOrderItemsAdminApi = async (
   orderId: string,
-): Promise<{ message: string }> => {
+): Promise<{ message: string; order: Order }> => {
   try {
-    const { data } = await axiosInstance.post<{ message: string }>(
+    const { data } = await axiosInstance.post<{ message: string; order: Order }>(
       `orders/${orderId}/restock`,
     );
     return data;

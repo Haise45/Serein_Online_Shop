@@ -1,5 +1,5 @@
 "use client";
-import { Product } from "@/types";
+import { Attribute, Product } from "@/types";
 import ProductCard from "./ProductCard";
 
 interface ProductListProps {
@@ -7,6 +7,7 @@ interface ProductListProps {
   products: Product[];
   loading?: boolean;
   error?: string | null;
+  attributes: Attribute[];
 }
 
 export default function ProductList({
@@ -14,6 +15,7 @@ export default function ProductList({
   products,
   loading,
   error,
+  attributes,
 }: ProductListProps) {
   if (loading) {
     return (
@@ -24,7 +26,7 @@ export default function ProductList({
           </h2>
         )}
         {/* Điều chỉnh grid cho skeleton để khớp với grid sản phẩm thật */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
@@ -80,7 +82,7 @@ export default function ProductList({
       )}
       <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
-          <ProductCard key={product._id} product={product} />
+          <ProductCard key={product._id} product={product} attributes={attributes} />
         ))}
       </div>
     </div>

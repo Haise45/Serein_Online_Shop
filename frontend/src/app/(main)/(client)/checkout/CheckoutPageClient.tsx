@@ -2,112 +2,126 @@
 
 import CheckoutForm from "@/components/client/checkout/CheckoutForm";
 import CheckoutOrderSummary from "@/components/client/checkout/CheckoutOrderSummary";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetCart } from "@/lib/react-query/cartQueries";
 import { useCreateOrder } from "@/lib/react-query/orderQueries";
 import { useGetUserAddresses } from "@/lib/react-query/userQueries";
-import { getAllCategories } from "@/services/categoryService";
 import { AppDispatch, RootState } from "@/store";
 import { clearSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
-import { Category } from "@/types/category";
-import { Coupon } from "@/types/coupon";
+import { Attribute, Category, Coupon } from "@/types";
 import { OrderCreationPayload } from "@/types/order";
 import { User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { FiLoader } from "react-icons/fi";
+import { FiAlertCircle, FiLoader } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
+
+// Helper Function: Lấy tổ tiên của category (giữ nguyên logic của bạn)
+const getAncestors = (
+  categoryId: string,
+  categoryMap: Map<string, Category>,
+): string[] => {
+  const ancestors: string[] = [];
+  let currentId: string | null = categoryId;
+  for (let i = 0; i < 10; i++) {
+    // Giới hạn vòng lặp để tránh vô hạn
+    const category = categoryMap.get(currentId!);
+    if (category?.parent) {
+      const parentId =
+        typeof category.parent === "string"
+          ? category.parent
+          : category.parent._id;
+      ancestors.push(parentId);
+      currentId = parentId;
+    } else {
+      break;
+    }
+  }
+  return ancestors;
+};
 
 export default function CheckoutPageClient() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+
+  // --- STATE AND SELECTORS ---
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth,
   );
-
-  // Lấy selected IDs từ Redux store
-  const selectedIdsFromRedux = useSelector(
+  const selectedCartItemIds = useSelector(
     (state: RootState) => state.checkout.selectedItemIdsForCheckout,
   );
+  const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
 
-  // State selectedCartItemIds giờ được khởi tạo từ Redux
-  const [selectedCartItemIds, setSelectedCartItemIds] = useState<Set<string>>(
-    () => {
-      return new Set(selectedIdsFromRedux || []); // Khởi tạo trực tiếp
-    },
-  );
-
-  const [orderJustPlaced, setOrderJustPlaced] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Đồng bộ từ Redux
-    const newSet = new Set(selectedIdsFromRedux || []);
-    if (
-      newSet.size !== selectedCartItemIds.size ||
-      !Array.from(newSet).every((id) => selectedCartItemIds.has(id))
-    ) {
-      setSelectedCartItemIds(newSet);
-    }
-  }, [selectedCartItemIds, selectedIdsFromRedux]);
-
+  // --- DATA FETCHING ---
   const {
     data: fullCart,
     isLoading: isLoadingCart,
     isError: isCartError,
     error: cartError,
   } = useGetCart();
+
   const { data: userAddresses, isLoading: isLoadingUserAddresses } =
     useGetUserAddresses({ enabled: isAuthenticated });
-  const createOrderMutation = useCreateOrder();
 
-  // Fetch categories để tính toán lại discount cho selected items nếu cần
-  const { data: allActiveCategories, isLoading: isLoadingCategories } =
-    useQuery<Category[], Error>({
-      queryKey: ["allActiveCategoriesForCheckoutSummary"],
-      queryFn: () => getAllCategories({ isActive: true }),
-      staleTime: 1000 * 60 * 60, // Cache 1 giờ
-    });
+  // Dùng query này để xây dựng categoryMap, cần cho việc tính toán coupon
+  const { data: allCategories, isLoading: isLoadingCategories } = useQuery<
+    { categories: Category[] },
+    Error
+  >({
+    queryKey: ["allActiveCategoriesForCheckout"],
+    queryFn: () =>
+      import("@/services/categoryService").then((mod) =>
+        mod.getAllCategories({ isActive: true, limit: 1000 }),
+      ),
+    staleTime: 1000 * 60 * 60,
+  });
 
   const categoryMap = useMemo(() => {
     const map = new Map<string, Category>();
-    if (allActiveCategories) {
-      allActiveCategories.forEach((cat) => map.set(cat._id.toString(), cat));
+    if (allCategories?.categories) {
+      allCategories.categories.forEach((cat) =>
+        map.set(cat._id.toString(), cat),
+      );
     }
     return map;
-  }, [allActiveCategories]);
+  }, [allCategories]);
 
-  const getAncestorsFn = useCallback(
-    (categoryId: string, catMap: Map<string, Category>): string[] => {
-      if (!categoryId) return [];
-      const ancestors = [];
-      let currentId = categoryId;
-      for (let i = 0; i < 10 && currentId; i++) {
-        const category = catMap.get(currentId);
-        if (category && category.parent) {
-          const parentId =
-            typeof category.parent === "string"
-              ? category.parent
-              : category.parent._id.toString();
-          if (parentId) {
-            ancestors.push(parentId);
-            currentId = parentId;
-          } else {
-            currentId = "";
-          }
-        } else {
-          currentId = "";
-        }
-      }
-      return ancestors;
-    },
-    [],
-  );
+  const { data: allAttributes, isLoading: isLoadingAttributes } =
+    useGetAttributes();
 
+  const attributeMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { label: string; values: Map<string, string> }
+    >();
+    if (allAttributes) {
+      allAttributes.forEach((attr: Attribute) => {
+        const valueMap = new Map<string, string>();
+        attr.values.forEach((val) => valueMap.set(val._id, val.value));
+        map.set(attr._id, { label: attr.label, values: valueMap });
+      });
+    }
+    return map;
+  }, [allAttributes]);
+
+  // --- DERIVED STATE (Trạng thái được tính toán) ---
   const itemsToCheckout = useMemo(() => {
-    if (!fullCart || selectedCartItemIds.size === 0) return [];
-    return fullCart.items.filter((item) => selectedCartItemIds.has(item._id));
+    if (!fullCart || !selectedCartItemIds) return [];
+    const selectedIdsSet = new Set(selectedCartItemIds);
+    return fullCart.items.filter((item) => selectedIdsSet.has(item._id));
   }, [fullCart, selectedCartItemIds]);
+
+  const stockErrorInCheckout = useMemo(() => {
+    for (const item of itemsToCheckout) {
+      if (item.quantity > item.availableStock) {
+        return `Sản phẩm "${item.name}" không đủ tồn kho (còn ${item.availableStock}).`;
+      }
+    }
+    return null;
+  }, [itemsToCheckout]);
 
   const orderSummaryValues = useMemo(() => {
     if (itemsToCheckout.length === 0) {
@@ -130,69 +144,57 @@ export default function CheckoutPageClient() {
     let discount = 0;
     let currentAppliedCoupon: Coupon | null = null;
 
-    if (fullCart?.appliedCoupon) {
-      const coupon = fullCart.appliedCoupon; // Đây là object Coupon đầy đủ
-      currentAppliedCoupon = coupon; // Gán coupon hiện tại
-      let applicableSubtotalForCheckoutItems = 0;
-      let foundApplicableItem = false;
+    // Sử dụng optional chaining và nullish coalescing để kiểm tra an toàn
+    if (fullCart?.appliedCoupon?.code) {
+      const coupon = fullCart.appliedCoupon;
+      currentAppliedCoupon = coupon as Coupon;
 
       const trulyApplicableItems = itemsToCheckout.filter((item) => {
-        if (!coupon || !coupon.applicableIds)
-          return coupon.applicableTo === "all";
+        if (coupon.applicableTo === "all") return true;
+        if (!coupon.applicableIds?.length) return false;
+
         const itemProductIdStr =
           typeof item.productId === "string"
             ? item.productId
-            : item.productId._id.toString();
-        if (coupon.applicableTo === "all") return true;
+            : item.productId._id;
+
         if (coupon.applicableTo === "products") {
-          return coupon.applicableIds.some(
-            (appId) => appId.toString() === itemProductIdStr,
-          );
+          return coupon.applicableIds.includes(itemProductIdStr);
         }
-        if (coupon.applicableTo === "categories") {
-          if (
-            item.category &&
-            typeof item.category !== "string" &&
-            item.category._id
-          ) {
-            const itemCategoryIdStr = item.category._id.toString();
-            const itemCategoryAndItsAncestors = new Set([
-              itemCategoryIdStr,
-              ...getAncestorsFn(itemCategoryIdStr, categoryMap),
-            ]);
-            return coupon.applicableIds.some((appId) =>
-              itemCategoryAndItsAncestors.has(appId.toString()),
-            );
-          }
-          return false;
+        if (coupon.applicableTo === "categories" && item.category?._id) {
+          const itemCategoryAndAncestors = new Set([
+            item.category._id,
+            ...getAncestors(item.category._id, categoryMap),
+          ]);
+          return coupon.applicableIds.some((appId) =>
+            itemCategoryAndAncestors.has(appId),
+          );
         }
         return false;
       });
 
       if (trulyApplicableItems.length > 0) {
-        foundApplicableItem = true;
-        applicableSubtotalForCheckoutItems = trulyApplicableItems.reduce(
-          (sum, i) => sum + i.price * i.quantity,
+        const applicableSubtotal = trulyApplicableItems.reduce(
+          (sum, i) => sum + i.lineTotal,
           0,
         );
-      }
 
-      if (
-        foundApplicableItem &&
-        applicableSubtotalForCheckoutItems >= (coupon.minOrderValue || 0)
-      ) {
-        if (coupon.discountType === "percentage") {
+        // Cung cấp giá trị mặc định cho các trường optional
+        const minOrderValue = coupon.minOrderValue ?? 0;
+        const discountValue = coupon.discountValue ?? 0;
+
+        if (applicableSubtotal >= minOrderValue) {
           discount =
-            (applicableSubtotalForCheckoutItems * coupon.discountValue) / 100;
+            coupon.discountType === "percentage"
+              ? (applicableSubtotal * discountValue) / 100
+              : discountValue;
+
+          discount = Math.min(Math.round(discount), applicableSubtotal);
         } else {
-          discount = coupon.discountValue;
+          currentAppliedCoupon = null; // Không đủ điều kiện minOrderValue
         }
-        discount = Math.min(
-          Math.round(discount),
-          applicableSubtotalForCheckoutItems,
-        );
       } else {
-        currentAppliedCoupon = null; // Coupon không áp dụng được cho các item đã chọn
+        currentAppliedCoupon = null; // Không có sản phẩm nào áp dụng được
       }
     }
     const finalTotal = subtotal - discount;
@@ -203,90 +205,85 @@ export default function CheckoutPageClient() {
       totalQuantity,
       appliedCoupon: currentAppliedCoupon,
     };
-  }, [itemsToCheckout, fullCart?.appliedCoupon, categoryMap, getAncestorsFn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemsToCheckout, fullCart?.appliedCoupon, categoryMap, getAncestors]);
 
+  // --- MUTATIONS ---
+  const createOrderMutation = useCreateOrder({
+    onSuccess: (createdOrder) => {
+      setIsRedirecting(true);
+      dispatch(clearSelectedItemsForCheckout());
+
+      const successRoute = createdOrder.user
+        ? `/profile/orders/${createdOrder._id}`
+        : createdOrder.guestOrderTrackingToken
+          ? `/track-order/${createdOrder._id}/${createdOrder.guestOrderTrackingToken}`
+          : `/order-success?orderId=${createdOrder._id}`;
+
+      router.push(successRoute);
+    },
+  });
+
+  // --- SIDE EFFECTS ---
   useEffect(() => {
-    if (orderJustPlaced) {
-      // Nếu đơn hàng vừa đặt xong, không thực hiện logic điều hướng này nữa
+    // Chỉ chạy logic này khi các query đã hoàn tất và chưa có lệnh chuyển hướng nào
+    if (isLoadingCart || isLoadingCategories || isRedirecting) {
       return;
     }
 
-    const hasAttemptedLoad =
-      !isLoadingCart && !isCartError && !isLoadingCategories; // Chờ tất cả data cần thiết
+    // Nếu load xong mà giỏ hàng không tồn tại, hoặc không có item nào được chọn từ trước
+    if (!fullCart || selectedCartItemIds.length === 0) {
+      toast.error("Vui lòng chọn sản phẩm từ giỏ hàng để thanh toán.", {
+        id: "checkout-no-selection",
+      });
+      router.replace("/cart");
+      return;
+    }
 
-    if (hasAttemptedLoad) {
-      // Chỉ thực hiện kiểm tra khi các query chính đã xong
-      if (selectedCartItemIds.size === 0) {
-        // Trường hợp này xảy ra nếu selectedIdsFromRedux rỗng, hoặc user truy cập trực tiếp /checkout
-        // mà không có gì trong Redux state.
-        if (fullCart && fullCart.items.length > 0) {
-          // Nếu giỏ hàng có đồ nhưng không có gì được chọn để checkout
-          toast("Vui lòng chọn sản phẩm từ giỏ hàng để thanh toán.");
-        }
-        router.push("/cart");
-      } else if (itemsToCheckout.length === 0 && selectedCartItemIds.size > 0) {
-        // Có ID được chọn trong Redux, nhưng không tìm thấy item tương ứng trong giỏ hàng thực tế
-        toast.error(
-          "Một số sản phẩm bạn chọn không còn khả dụng. Vui lòng kiểm tra lại giỏ hàng.",
-        );
-        router.push("/cart");
-        dispatch(clearSelectedItemsForCheckout()); // Xóa state Redux không hợp lệ
-      }
+    // Nếu các ID được chọn không tìm thấy trong giỏ hàng thực tế (dữ liệu stale)
+    if (itemsToCheckout.length !== selectedCartItemIds.length) {
+      toast.error(
+        "Một số sản phẩm đã thay đổi. Vui lòng kiểm tra lại giỏ hàng.",
+        { id: "checkout-stale-items" },
+      );
+      router.replace("/cart");
+      return;
+    }
+
+    // Nếu có lỗi tồn kho, chuyển người dùng về giỏ hàng để họ tự sửa
+    if (stockErrorInCheckout) {
+      toast.error(stockErrorInCheckout, { id: "checkout-stock-error" });
+      router.replace("/cart");
     }
   }, [
-    isLoadingCart,
-    isCartError,
-    isLoadingCategories,
-    itemsToCheckout.length,
-    selectedCartItemIds.size,
     fullCart,
+    itemsToCheckout.length,
+    selectedCartItemIds.length,
+    isLoadingCart,
+    isLoadingCategories,
+    isRedirecting,
+    stockErrorInCheckout,
     router,
-    dispatch,
-    orderJustPlaced,
   ]);
 
-  const handlePlaceOrder = async (
+  // --- HANDLERS ---
+  const handlePlaceOrder = (
     formData: Omit<OrderCreationPayload, "selectedCartItemIds">,
   ) => {
-    if (itemsToCheckout.length === 0 || selectedCartItemIds.size === 0) {
-      toast.error("Không có sản phẩm nào được chọn để đặt hàng.");
+    if (stockErrorInCheckout) {
+      toast.error(stockErrorInCheckout);
+      router.push("/cart");
       return;
     }
-
+    if (itemsToCheckout.length === 0) {
+      toast.error("Không có sản phẩm để đặt hàng.");
+      return;
+    }
     const finalPayload: OrderCreationPayload = {
       ...formData,
-      selectedCartItemIds: Array.from(selectedCartItemIds), // Lấy từ state
+      selectedCartItemIds: selectedCartItemIds,
     };
-
-    createOrderMutation.mutate(finalPayload, {
-      onSuccess: (createdOrder) => {
-        setOrderJustPlaced(true);
-        dispatch(clearSelectedItemsForCheckout()); // Xóa selected items khỏi Redux sau khi đặt hàng thành công
-        if (
-          createdOrder.user &&
-          typeof createdOrder.user === "object" &&
-          createdOrder.user._id
-        ) {
-          // User đã đăng nhập và có thông tin user đầy đủ
-          router.push(`/profile/orders/${createdOrder._id}`);
-        } else if (!createdOrder.user && createdOrder.guestOrderTrackingToken) {
-          // Guest order và có tracking token
-          router.push(
-            `/track-order/${createdOrder._id}/${createdOrder.guestOrderTrackingToken}`,
-          );
-        } else {
-          router.push(`/order-success?orderId=${createdOrder._id}`);
-        }
-      },
-      onError: (error) => {
-        // Nếu API tạo đơn hàng lỗi, reset cờ
-        setOrderJustPlaced(false);
-        // Toast lỗi đã được xử lý trong useCreateOrder hook
-        toast.error(
-          error.message || "Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.",
-        );
-      },
-    });
+    createOrderMutation.mutate(finalPayload);
   };
 
   const handleTriggerFormSubmit = () => {
@@ -302,42 +299,47 @@ export default function CheckoutPageClient() {
     }
   };
 
-  if (
+
+  // --- RENDER LOGIC ---
+  const isLoading =
     isLoadingCart ||
     (isAuthenticated && isLoadingUserAddresses) ||
-    isLoadingCategories
-  ) {
+    isLoadingCategories ||
+    isLoadingAttributes;
+
+  if (isLoading || isRedirecting) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center">
+      <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
         <FiLoader className="h-12 w-12 animate-spin text-indigo-600" />
+        {isRedirecting && (
+          <p className="text-lg text-gray-700">Đang hoàn tất đơn hàng...</p>
+        )}
       </div>
     );
   }
 
   if (isCartError) {
     return (
-      <div className="py-20 text-center text-red-600">
-        Lỗi tải giỏ hàng: {cartError?.message}
+      <div className="my-20 flex flex-col items-center justify-center text-center">
+        <FiAlertCircle className="h-12 w-12 text-red-400" />
+        <p className="mt-4 text-lg font-semibold text-red-700">
+          Lỗi tải giỏ hàng
+        </p>
+        <p className="mt-1 text-gray-600">
+          {cartError?.message ||
+            "Không thể lấy thông tin giỏ hàng để thanh toán."}
+        </p>
       </div>
     );
   }
 
-  if (
-    !orderJustPlaced &&
-    ((selectedCartItemIds.size > 0 && itemsToCheckout.length === 0) ||
-      selectedCartItemIds.size === 0)
-  ) {
-    if (!isLoadingCart && !isCartError && !isLoadingCategories) {
-      return (
-        <div className="py-20 text-center">
-          Đang xử lý hoặc không có sản phẩm nào được chọn. Vui lòng đợi hoặc
-          quay lại giỏ hàng.
-        </div>
-      );
-    }
+  // Nếu sau tất cả các kiểm tra, vẫn không có item nào (trường hợp hiếm)
+  if (itemsToCheckout.length === 0) {
+    // useEffect sẽ xử lý chuyển hướng, component này chỉ hiển thị trạng thái chờ
     return (
-      <div className="flex min-h-[300px] items-center justify-center">
+      <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
         <FiLoader className="h-12 w-12 animate-spin text-indigo-600" />
+        <p className="text-lg text-gray-700">Đang kiểm tra giỏ hàng...</p>
       </div>
     );
   }
@@ -350,7 +352,7 @@ export default function CheckoutPageClient() {
       <div className="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-12">
         <div className="lg:col-span-7 xl:col-span-8">
           <CheckoutForm
-            user={user as User | null} // Cast user từ authSlice
+            user={user as User | null}
             userAddresses={userAddresses || []}
             isLoadingAddresses={isLoadingUserAddresses}
             onSubmitOrder={handlePlaceOrder}
@@ -367,6 +369,8 @@ export default function CheckoutPageClient() {
             finalTotal={orderSummaryValues.finalTotal}
             isPlacingOrder={createOrderMutation.isPending}
             onPlaceOrderTriggerFromSummary={handleTriggerFormSubmit}
+            attributeMap={attributeMap}
+            stockError={stockErrorInCheckout}
           />
         </div>
       </div>

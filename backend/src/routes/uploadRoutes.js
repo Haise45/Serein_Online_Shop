@@ -37,8 +37,7 @@ const upload = multer({
 router.post(
   "/images/:area",
   protect, // Yêu cầu đăng nhập
-  isAdmin, // Yêu cầu quyền Admin
-  upload.array("images", 20), // Middleware xử lý upload nhiều file (tối đa 10), field name là 'images'
+  upload.array("images", 20), // Middleware xử lý upload nhiều file (tối đa 20), field name là 'images'
   (req, res, next) => {
     // Middleware xử lý lỗi cụ thể từ multer trước khi vào controller
     if (req.multerError) {

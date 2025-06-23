@@ -1,8 +1,9 @@
 import axiosInstance from "@/lib/axiosInstance";
 import {
   Address,
+  PaginatedUsersResponse,
   UpdateUserProfilePayload,
-  User,
+  UserDetailsResponse,
   UserProfile,
 } from "@/types/user";
 import { AxiosError } from "axios";
@@ -101,28 +102,58 @@ export const setDefaultAddressApi = async (
   }
 };
 
-// === Admin: User Management (Ví dụ) ===
+// === Admin: User Management ===
 export const getAllUsersAdminApi = async (params?: {
   page?: number;
   limit?: number;
   search?: string;
-}): Promise<{
-  users: User[];
-  totalUsers: number;
-  totalPages: number;
-  currentPage: number;
-}> => {
+  role?: string;
+  isActive?: boolean;
+}): Promise<PaginatedUsersResponse> => {
   try {
-    const { data } = await axiosInstance.get<{
-      users: User[];
-      totalUsers: number;
-      totalPages: number;
-      currentPage: number;
-    }>("users", { params }); // Endpoint của Admin
+    const { data } = await axiosInstance.get<PaginatedUsersResponse>("users", {
+      params,
+    });
     return data;
   } catch (err: unknown) {
     throw new Error(
       getErrorMessage(err, "Không thể tải danh sách người dùng."),
     );
+  }
+};
+
+export const updateUserStatusAdminApi = async (
+  userId: string,
+  payload: {
+    isActive: boolean;
+    reason?: string;
+    suspensionEndDate?: string | null;
+  },
+): Promise<{ message: string }> => {
+  try {
+    const { data } = await axiosInstance.put<{ message: string }>(
+      `users/${userId}/status`,
+      payload,
+    );
+    return data;
+  } catch (err: unknown) {
+    throw new Error(
+      getErrorMessage(err, "Cập nhật trạng thái người dùng thất bại."),
+    );
+  }
+};
+
+export const getUserDetailsByIdAdminApi = async (
+  userId: string,
+  params?: { page?: number; limit?: number },
+): Promise<UserDetailsResponse> => {
+  try {
+    const { data } = await axiosInstance.get<UserDetailsResponse>(
+      `users/${userId}`,
+      { params },
+    );
+    return data;
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, "Không thể tải chi tiết người dùng."));
   }
 };

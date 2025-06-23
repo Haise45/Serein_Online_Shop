@@ -37,6 +37,25 @@ const setRefreshTokenCookie = (res, token) => {
   res.cookie("refreshToken", token, cookieOptions);
 };
 
+// Tiện ích chuyển đổi thời gian
+function formatDateToVietnamese(dateString) {
+  const date = new Date(dateString);
+
+  // Đảm bảo là một ngày hợp lệ
+  if (isNaN(date.getTime())) return "không xác định";
+
+  return date.toLocaleString("vi-VN", {
+    weekday: "short",
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+}
+
 // @desc    Register a new user
 // @route   POST /api/v1/auth/register
 // @access  Public
@@ -274,6 +293,22 @@ const loginUserAccessTokenOnly = asyncHandler(async (req, res) => {
 
   // 2. Check if user exists and password matches
   if (user && (await user.matchPassword(password))) {
+    // 3. Kiểm tra xem tài khoản có đang hoạt động không
+    if (!user.isActive && user.suspensionEndDate) {
+      const formattedDate = formatDateToVietnamese(user.suspensionEndDate);
+      res.status(403);
+      throw new Error(
+        `Tài khoản của bạn đã bị đình chỉ tạm thời đến ${formattedDate} do vi phạm quy định. Mọi thắc mắc, vui lòng liên hệ quản trị viên.`
+      );
+    }
+
+    if (!user.isActive) {
+      res.status(403);
+      throw new Error(
+        "Tài khoản của bạn đã bị đình chỉ vô thời hạn do vi phạm quy định nhiều lần hoặc nghiêm trọng. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ quản trị viên."
+      );
+    }
+
     const accessToken = generateAccessToken(user._id);
 
     // Liên kết các đơn hàng guest cũ (nếu có)
@@ -346,6 +381,22 @@ const loginUserWithRefreshToken = asyncHandler(async (req, res) => {
 
   // 2. Check if user exists and password matches
   if (user && (await user.matchPassword(password))) {
+    // 3. Kiểm tra xem tài khoản có đang hoạt động không
+    if (!user.isActive && user.suspensionEndDate) {
+      const formattedDate = formatDateToVietnamese(user.suspensionEndDate);
+      res.status(403);
+      throw new Error(
+        `Tài khoản của bạn đã bị đình chỉ tạm thời đến ${formattedDate} do vi phạm quy định. Mọi thắc mắc, vui lòng liên hệ quản trị viên.`
+      );
+    }
+
+    if (!user.isActive) {
+      res.status(403);
+      throw new Error(
+        "Tài khoản của bạn đã bị đình chỉ vô thời hạn do vi phạm quy định nhiều lần hoặc nghiêm trọng. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ quản trị viên."
+      );
+    }
+
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 

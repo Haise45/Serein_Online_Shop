@@ -1,6 +1,6 @@
-// src/app/(auth)/login/page.tsx (hoặc đường dẫn LoginPage của bạn)
 "use client";
 
+import GuestGuard from "@/app/GuestGuard";
 import { loginUser, loginUserWithRefresh } from "@/services/authService";
 import { AppDispatch } from "@/store";
 import {
@@ -32,29 +32,14 @@ export default function LoginPage() {
   // Lấy URL redirect từ query params khi component mount
   useEffect(() => {
     const redirect = searchParams.get("redirect");
-    console.log("[LoginPage] Raw redirect param from URL:", redirect); // DEBUG
     if (redirect && redirect.startsWith("/")) {
       try {
         const decodedRedirect = decodeURIComponent(redirect);
         setRedirectUrl(decodedRedirect);
-        console.log(
-          "[LoginPage] Decoded and set redirectUrl to:",
-          decodedRedirect,
-        ); // DEBUG
-      } catch (e) {
-        console.error(
-          "[LoginPage] Error decoding redirect URL:",
-          e,
-          "Raw redirect:",
-          redirect,
-        );
+      } catch {
         setRedirectUrl("/"); // Fallback
       }
     } else if (redirect) {
-      console.warn(
-        "[LoginPage] Invalid or non-internal redirect parameter received:",
-        redirect,
-      );
       setRedirectUrl("/"); // Fallback cho redirect không hợp lệ
     }
     // Nếu không có redirect param, redirectUrl sẽ giữ giá trị mặc định là "/"
@@ -101,12 +86,6 @@ export default function LoginPage() {
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
       await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
 
-      console.log(
-        "[LoginPage] Login successful. Current redirectUrl state:",
-        redirectUrl,
-      ); // DEBUG
-      console.log("[LoginPage] User data from API:", data);
-
       if (!data.isEmailVerified) {
         // Nếu email chưa xác thực, chuyển đến trang xác thực và mang theo redirectUrl
         router.push(
@@ -116,8 +95,8 @@ export default function LoginPage() {
         router.push("/admin/dashboard");
       } else {
         // Chuyển hướng về redirectUrl đã lưu (hoặc trang mặc định nếu redirectUrl không hợp lệ)
-        const finalRedirect = redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
-        console.log("[LoginPage] User is customer, redirecting to finalRedirect:", finalRedirect); // DEBUG
+        const finalRedirect =
+          redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
         router.push(finalRedirect);
       }
     } catch (err) {
@@ -134,128 +113,130 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-xl bg-white py-8 px-6 shadow-xl sm:p-10">
-        {/* ... Tiêu đề và form ... */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Đăng Nhập
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">Chào mừng trở lại!</p>
-        </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* ... Inputs for email, password ... */}
-          <div>
-            <label
-              className="mb-1.5 block text-sm font-medium text-gray-700"
-              htmlFor="email"
-            >
-              Email của bạn
-            </label>
-            <input
-              className="input-field"
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <GuestGuard>
+      <div className="flex items-center justify-center bg-gray-100">
+        <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
+          {/* ... Tiêu đề và form ... */}
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              Đăng Nhập
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">Chào mừng trở lại!</p>
           </div>
-          <div>
-            <div className="flex items-center justify-between">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            {/* ... Inputs for email, password ... */}
+            <div>
               <label
                 className="mb-1.5 block text-sm font-medium text-gray-700"
-                htmlFor="password"
+                htmlFor="email"
               >
-                Mật khẩu
+                Email của bạn
               </label>
-            </div>
-            <input
-              className="input-field"
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
               <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                className="input-field"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                Ghi nhớ tôi
-              </label>
             </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <label
+                  className="mb-1.5 block text-sm font-medium text-gray-700"
+                  htmlFor="password"
+                >
+                  Mật khẩu
+                </label>
+              </div>
+              <input
+                className="input-field"
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-700"
+                >
+                  Ghi nhớ tôi
+                </label>
+              </div>
+              <Link
+                href="/forgot-password" // Trang forgot-password sẽ tự xử lý redirect nếu cần
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+              >
+                Quên mật khẩu?
+              </Link>
+            </div>
+            <div>
+              <button
+                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                type="submit"
+                disabled={loading}
+              >
+                {/* ... Loading state ... */}
+                {loading ? (
+                  <>
+                    <svg
+                      className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  "Đăng Nhập"
+                )}
+              </button>
+            </div>
+          </form>
+          <p className="mt-8 text-center text-sm text-gray-600">
+            Chưa có tài khoản?{" "}
             <Link
-              href="/forgot-password" // Trang forgot-password sẽ tự xử lý redirect nếu cần
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+              href={`/register${redirectUrl && redirectUrl !== "/" ? `?redirect=${encodeURIComponent(redirectUrl)}` : ""}`}
+              className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
             >
-              Quên mật khẩu?
+              Đăng ký ngay
             </Link>
-          </div>
-          <div>
-            <button
-              className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
-              type="submit"
-              disabled={loading}
-            >
-              {/* ... Loading state ... */}
-              {loading ? (
-                <>
-                  <svg
-                    className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Đang xử lý...
-                </>
-              ) : (
-                "Đăng Nhập"
-              )}
-            </button>
-          </div>
-        </form>
-        <p className="mt-8 text-center text-sm text-gray-600">
-          Chưa có tài khoản?{" "}
-          <Link
-            href={`/register${redirectUrl && redirectUrl !== "/" ? `?redirect=${encodeURIComponent(redirectUrl)}` : ""}`}
-            className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
-          >
-            Đăng ký ngay
-          </Link>
-        </p>
+          </p>
+        </div>
       </div>
-    </div>
+    </GuestGuard>
   );
 }

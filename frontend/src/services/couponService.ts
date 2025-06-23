@@ -1,24 +1,80 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { Coupon } from "@/types/coupon";
+import { AxiosError } from "axios";
+import {
+  Coupon,
+  CouponFormData,
+  PaginatedCouponsResponse,
+} from "@/types/coupon";
 
-interface GetCouponsParams {
-  validNow?: boolean;
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  const error = err as AxiosError<{ message?: string }>;
+  return error.response?.data?.message || error.message || fallback;
+};
+
+// Định nghĩa các tham số có thể có cho API GET /coupons
+export interface GetCouponsParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  code?: string;
   isActive?: boolean;
-  // Thêm các params filter khác nếu cần cho trang giỏ hàng
-  // Ví dụ: có thể gửi subtotal của giỏ hàng để backend lọc coupon theo minOrderValue
-}
-interface PaginatedCoupons {
-  coupons: Coupon[];
+  discountType?: "percentage" | "fixed_amount";
+  expired?: boolean;
+  validNow?: boolean;
+  // Thêm các params khác nếu API backend hỗ trợ
+  applicableTo?: "all" | "products" | "categories";
+  applicableId?: string;
 }
 
-// Lấy các coupon khả dụng cho giỏ hàng
-export const getApplicableCoupons = async (
+// Hàm lấy danh sách coupon (có thể dùng cho cả admin và client với params phù hợp)
+// API backend GET /api/v1/coupons của bạn trả về PaginatedCouponsResponse
+export const getCouponsApi = async (
   params?: GetCouponsParams,
-): Promise<Coupon[]> => {
-  // Gọi API GET /v1/coupons với params
-  // API getCoupons của bạn trả về object có key là 'coupons'
-  const { data } = await axiosInstance.get<PaginatedCoupons>("coupons", {
-    params,
-  });
-  return data.coupons;
+): Promise<PaginatedCouponsResponse> => {
+  try {
+    const { data } = await axiosInstance.get<PaginatedCouponsResponse>(
+      "/coupons",
+      {
+        // Endpoint /coupons
+        params,
+      },
+    );
+    return data; // Trả về toàn bộ object PaginatedCouponsResponse
+  } catch (err: unknown) {
+    console.error("Lỗi khi lấy danh sách coupon:", err);
+    throw new Error(
+      getErrorMessage(err, "Không thể tải danh sách mã giảm giá."),
+    );
+  }
+};
+
+export const getCouponByIdApi = async (id: string): Promise<Coupon> => {
+  const { data } = await axiosInstance.get<Coupon>(`/coupons/${id}`);
+  return data;
+};
+
+export const createCouponApi = async (
+  payload: Partial<CouponFormData>,
+): Promise<Coupon> => {
+  const { data } = await axiosInstance.post<Coupon>("/coupons", payload);
+  return data;
+};
+
+export const updateCouponApi = async (
+  id: string,
+  payload: Partial<CouponFormData>,
+): Promise<Coupon> => {
+  const { data } = await axiosInstance.put<Coupon>(`/coupons/${id}`, payload);
+  return data;
+};
+
+// Đổi tên để rõ ràng hơn là cho Admin
+export const deleteCouponAdminApi = async (
+  id: string,
+): Promise<{ message: string }> => {
+  const { data } = await axiosInstance.delete<{ message: string }>(
+    `/coupons/${id}`,
+  );
+  return data;
 };

@@ -1,20 +1,25 @@
-// src/app/(main)/products/components/ProductFiltersSidebar.tsx
 "use client";
 import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
+import SearchSuggestionList from "@/components/shared/SearchSuggestionList";
+import useDebounce from "@/hooks/useDebounce";
+import { useGetProducts } from "@/lib/react-query/productQueries";
+import { GetProductsParams } from "@/services/productService";
+import { Attribute } from "@/types";
 import { Category } from "@/types/category";
+import { useEffect, useMemo, useState } from "react";
+import { FiSearch, FiXCircle } from "react-icons/fi";
+import AttributeFilter from "./AttributeFilter";
 import CategoryFilter from "./CategoryFilter";
 import PriceFilter from "./PriceFilter";
-import AttributeFilter from "./AttributeFilter";
-import RatingFilter from "./RatingFilter"; // Sẽ tạo
-import { FiSearch, FiXCircle } from "react-icons/fi";
-import { useState, useEffect } from "react";
+import RatingFilter from "./RatingFilter";
 
 interface ProductFiltersSidebarProps {
   filters: ProductFilters;
   onFilterChange: (newFilters: ProductFilters) => void;
   categories: Category[];
   isLoadingCategories: boolean;
-  availableAttributes: Record<string, string[]>; // Các giá trị thuộc tính khả dụng
+  attributes: Attribute[];
+  isLoadingAttributes: boolean;
   onSearchChange: (searchTerm: string) => void; // Hàm callback khi tìm kiếm
   currentSearchTerm: string;
   onClearAllFilters: () => void;
@@ -25,11 +30,35 @@ export default function ProductFiltersSidebar({
   onFilterChange,
   categories,
   isLoadingCategories,
+  attributes,
+  isLoadingAttributes,
   onSearchChange,
   currentSearchTerm,
-  onClearAllFilters
+  onClearAllFilters,
 }: ProductFiltersSidebarProps) {
   const [localSearchTerm, setLocalSearchTerm] = useState(currentSearchTerm);
+
+  // === LOGIC GỢI Ý TÌM KIẾM ===
+  const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
+  const [isSuggestionBoxOpen, setIsSuggestionBoxOpen] = useState(false);
+
+  const searchSuggestionParams: GetProductsParams = useMemo(
+    () => ({
+      search: debouncedSearchTerm,
+      limit: 5, // Hiển thị 5 gợi ý trong sidebar
+    }),
+    [debouncedSearchTerm],
+  );
+
+  const { data: suggestedProductsData, isLoading: isLoadingSuggestions } =
+    useGetProducts(searchSuggestionParams, {
+      enabled:
+        !!debouncedSearchTerm &&
+        debouncedSearchTerm.length > 1 &&
+        isSuggestionBoxOpen,
+    });
+  const suggestedProducts = suggestedProductsData?.products || [];
+  // === KẾT THÚC LOGIC GỢI Ý TÌM KIẾM ===
 
   useEffect(() => {
     setLocalSearchTerm(currentSearchTerm);
@@ -38,29 +67,41 @@ export default function ProductFiltersSidebar({
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSearchChange(localSearchTerm);
+    setIsSuggestionBoxOpen(false);
+  };
+
+  const handleViewAll = () => {
+    onSearchChange(localSearchTerm);
+    setIsSuggestionBoxOpen(false);
   };
 
   const hasActiveFilters =
-    Object.keys(filters).some(key => {
-        if (key === 'attributes') return Object.keys(filters.attributes || {}).length > 0;
-        return filters[key as keyof ProductFilters] !== undefined && filters[key as keyof ProductFilters] !== '';
+    Object.keys(filters).some((key) => {
+      if (key === "attributes")
+        return Object.keys(filters.attributes || {}).length > 0;
+      return (
+        filters[key as keyof ProductFilters] !== undefined &&
+        filters[key as keyof ProductFilters] !== ""
+      );
     }) || currentSearchTerm !== "";
-
 
   return (
     <div className="divide-y divide-gray-200">
       {/* Search Input */}
       <div className="pb-6">
         <form onSubmit={handleSearchSubmit} className="relative">
-          <label htmlFor="search-filter" className="sr-only">Tìm kiếm sản phẩm</label>
+          <label htmlFor="search-filter" className="sr-only">
+            Tìm kiếm sản phẩm
+          </label>
           <input
             type="search"
             name="search-filter"
             id="search-filter"
             value={localSearchTerm}
             onChange={(e) => setLocalSearchTerm(e.target.value)}
+            onFocus={() => setIsSuggestionBoxOpen(true)}
             placeholder="Tìm theo tên, SKU..."
-            className="input-field w-full pr-10" // Thêm pr-10 cho nút search
+            className="input-field w-full bg-white pr-10"
           />
           <button
             type="submit"
@@ -69,6 +110,17 @@ export default function ProductFiltersSidebar({
           >
             <FiSearch className="h-5 w-5" />
           </button>
+          {isSuggestionBoxOpen && debouncedSearchTerm.length > 1 && (
+            <div className="absolute top-full left-0 z-10 mt-2 w-full rounded-md border border-gray-400 bg-white shadow-lg">
+              <SearchSuggestionList
+                suggestions={suggestedProducts}
+                isLoading={isLoadingSuggestions}
+                searchTerm={debouncedSearchTerm}
+                onSuggestionClick={() => setIsSuggestionBoxOpen(false)}
+                onViewAllClick={handleViewAll}
+              />
+            </div>
+          )}
         </form>
       </div>
 
@@ -78,14 +130,12 @@ export default function ProductFiltersSidebar({
         currentFilters={filters}
         onFilterChange={onFilterChange}
       />
-      <PriceFilter
-        currentFilters={filters}
-        onFilterChange={onFilterChange}
-      />
+      <PriceFilter currentFilters={filters} onFilterChange={onFilterChange} />
       <AttributeFilter
         currentFilters={filters}
         onFilterChange={onFilterChange}
-        // availableAttributes={availableAttributes} // Truyền xuống nếu dùng
+        attributes={attributes}
+        isLoading={isLoadingAttributes}
       />
       <RatingFilter // Sẽ tạo component này
         currentFilters={filters}

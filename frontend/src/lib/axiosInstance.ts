@@ -1,11 +1,29 @@
 import { logout, setAccessToken, store } from "@/store";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
+// Xác định xem code đang chạy ở client hay server
+const IS_SERVER = typeof window === "undefined";
+
+let apiBaseUrl: string;
+
+if (IS_SERVER) {
+  // Khi ở server, chúng ta cần URL tuyệt đối đến backend API
+  // Đảm bảo các biến môi trường này được set đúng cho môi trường server của Next.js
+  if (process.env.NODE_ENV === "development") {
+    apiBaseUrl =
+      process.env.INTERNAL_API_BASE_URL || "http://localhost:8080/api/v1"; // URL backend API mà server Next.js có thể gọi
+  } else {
+    apiBaseUrl =
+      process.env.INTERNAL_API_BASE_URL ||
+      "https://online-store-pb1l.onrender.com/api/v1"; // URL backend API cho production
+  }
+} else {
+  // Khi ở client, chúng ta có thể dùng path tương đối '/api' để Next.js rewrites xử lý
+  apiBaseUrl = "/api";
+}
+
 const axiosInstance = axios.create({
-  baseURL: '/api',
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
 
@@ -15,9 +33,20 @@ axiosInstance.interceptors.request.use(
     const token = store.getState().auth.accessToken;
     // Chỉ thêm Authorization header nếu token tồn tại VÀ request không phải là đến endpoint refresh
     // Các endpoint như login, register thường không cần token này
-    if (token && config.headers && !config.url?.endsWith("api/auth/refresh")) {
+    if (token && config.headers && !config.url?.endsWith("auth/refresh")) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Nếu data là FormData, Axios sẽ tự động set Content-Type đúng.
+    // Nếu data là object JSON, Axios cũng sẽ tự động set Content-Type là application/json nếu không có gì khác được chỉ định.
+    if (
+      !(config.data instanceof FormData) &&
+      config.headers &&
+      !config.headers["Content-Type"]
+    ) {
+      config.headers["Content-Type"] = "application/json";
+    }
+
     return config;
   },
   (error: AxiosError) => {
@@ -55,6 +84,30 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+    // --- LOGIC TỰ ĐỘNG LOGOUT KHI GẶP LỖI 403 (Forbidden) ---
+    // Đây là trường hợp tài khoản bị đình chỉ hoặc không có quyền admin.
+    if (error.response?.status === 403) {
+      // Hiển thị thông báo cho người dùng biết lý do
+      const apiErrorData = error.response.data as { message?: string };
+      const errorMessage =
+        apiErrorData?.message ||
+        "Bạn không có quyền thực hiện hành động này. Đang đăng xuất.";
+
+      // Dispatch action logout để xóa state và token
+      store.dispatch(logout());
+
+      // Chuyển hướng về trang đăng nhập
+      // if (typeof window !== "undefined") {
+      //   // Chỉ chuyển hướng ở client-side
+      //   window.location.href = "/login";
+      // }
+
+      // Reject promise để dừng chuỗi xử lý hiện tại
+      return Promise.reject(new Error(errorMessage));
+    }
+    // --- KẾT THÚC LOGIC TỰ ĐỘNG LOGOUT ---
+
+    // *** BƯỚC 1: Xử lý lỗi 401 để refresh token ***
     if (
       error.response?.status === 401 &&
       originalRequest &&
@@ -62,10 +115,6 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry &&
       originalRequest.headers?.Authorization
     ) {
-      console.log(
-        "[Axios Interceptor] Detected 401 on a protected route. Attempting token refresh for:",
-        originalRequest.url,
-      );
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -84,20 +133,16 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log("[Axios Interceptor] Calling /auth/refresh...");
-        // Tạo một instance axios mới cho việc refresh token để tránh interceptor của chính nó
-        // gây ra vòng lặp nếu endpoint /auth/refresh cũng yêu cầu Authorization header (dù không nên)
         const refreshAxiosInstance = axios.create({
           withCredentials: true,
         });
         const { data } = await refreshAxiosInstance.post<{
           accessToken: string;
         }>(
-          `auth/refresh`,
-          {}, // Không cần body cho refresh token nếu backend đọc từ cookie
+          `${apiBaseUrl}/auth/refresh`, // Đảm bảo URL tuyệt đối
+          {},
         );
         const newAccessToken = data.accessToken;
-        console.log("[Axios Interceptor] Token refreshed successfully.");
 
         store.dispatch(setAccessToken(newAccessToken));
         if (originalRequest.headers)
@@ -110,30 +155,33 @@ axiosInstance.interceptors.response.use(
           "[Axios Interceptor] Refresh token failed:",
           axiosRefreshError.response?.data || axiosRefreshError.message,
         );
-        // Chỉ logout nếu lỗi thực sự từ endpoint refresh
         if (axiosRefreshError.config?.url?.endsWith("auth/refresh")) {
           store.dispatch(logout());
         }
         processQueue(axiosRefreshError, null);
-        // Không nên tự động chuyển hướng ở đây, để component cha xử lý
         return Promise.reject(axiosRefreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Nếu là lỗi 401 từ /auth/login hoặc /auth/register, hoặc các lỗi khác, thì không refresh.
-    // Chỉ trả về lỗi gốc.
-    if (
-      error.response?.status === 401 &&
-      (originalRequest.url?.endsWith("auth/login") ||
-        originalRequest.url?.endsWith("auth/register"))
-    ) {
-      console.log(
-        `[Axios Interceptor] 401 error from ${originalRequest.url}, not attempting refresh.`,
-      );
+    // *** BƯỚC 2: XỬ LÝ CÁC LỖI KHÁC (ví dụ 400, 404, 500) ***
+    // Khối này được thêm vào để trích xuất thông điệp lỗi từ backend
+    if (error.response) {
+      // Lấy dữ liệu lỗi từ body của response
+      const apiErrorData = error.response.data as { message?: string };
+
+      // Nếu có trường `message` trong dữ liệu lỗi, tạo một Error object mới
+      // với thông điệp đó. Đây là thông điệp mà người dùng sẽ thấy.
+      if (apiErrorData && typeof apiErrorData.message === "string") {
+        const customError = new Error(apiErrorData.message);
+        console.error("[API Error Message]:", customError.message);
+        return Promise.reject(customError);
+      }
     }
 
+    // *** BƯỚC 3: Trả về lỗi gốc nếu không rơi vào các trường hợp trên ***
+    // (Ví dụ: lỗi mạng, lỗi CORS, hoặc lỗi không có `message` trong body)
     return Promise.reject(error);
   },
 );

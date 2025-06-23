@@ -1,13 +1,13 @@
-// src/app/(main)/products/components/ProductGrid.tsx
 "use client";
 import ProductCard from "@/components/client/product/ProductCard";
-import { Product } from "@/types";
+import { Attribute, Product } from "@/types";
 import { FiAlertCircle } from "react-icons/fi";
 import PaginationControls from "./PaginationControls";
 import SortDropdown from "./SortDropdown";
 
 interface ProductGridProps {
   products: Product[];
+  attributes: Attribute[];
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -23,6 +23,7 @@ interface ProductGridProps {
 
 export default function ProductGrid({
   products,
+  attributes,
   isLoading,
   isError,
   error,
@@ -42,7 +43,7 @@ export default function ProductGrid({
         <div className="mb-6 flex justify-end">
           <div className="h-10 w-48 animate-pulse rounded bg-gray-200"></div>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(limit)].map(
             (
               _,
@@ -113,7 +114,11 @@ export default function ProductGrid({
       <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-4">
         {/* Điều chỉnh số cột ở đây cho phù hợp với layout mới (filter sidebar chiếm nhiều hơn) */}
         {products.map((product) => (
-          <ProductCard key={product._id} product={product} />
+          <ProductCard
+            key={product._id}
+            product={product}
+            attributes={attributes}
+          />
         ))}
       </div>
 

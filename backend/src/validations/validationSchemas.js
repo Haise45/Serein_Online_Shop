@@ -18,12 +18,18 @@ const registerSchema = Joi.object({
     "string.email": `"Email" không đúng định dạng`,
     "any.required": `"Email" là trường bắt buộc`,
   }),
-  password: Joi.string().min(6).required().messages({
-    "string.base": `"Mật khẩu" phải là chuỗi`,
-    "string.empty": `"Mật khẩu" không được để trống`,
-    "string.min": `"Mật khẩu" phải có ít nhất {#limit} ký tự`,
-    "any.required": `"Mật khẩu" là trường bắt buộc`,
-  }),
+  password: Joi.string()
+    .min(6)
+    .required()
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
+    .messages({
+      "string.base": `"Mật khẩu" phải là chuỗi`,
+      "string.empty": `"Mật khẩu" không được để trống`,
+      "string.min": `"Mật khẩu" phải có ít nhất {#limit} ký tự`,
+      "any.required": `"Mật khẩu" là trường bắt buộc`,
+      "string.pattern.base":
+        "Mật khẩu mới phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt.",
+    }),
   // confirmPassword: Joi.string().valid(Joi.ref('password')).required().messages({
   //    'any.only': '"Xác nhận mật khẩu" không khớp',
   //    'any.required': '"Xác nhận mật khẩu" là trường bắt buộc',
@@ -80,8 +86,26 @@ const updateProfileSchema = Joi.object({
     // Cho phép cập nhật SĐT
     "string.pattern.base": `"Số điện thoại" không đúng định dạng Việt Nam.`,
   }),
-  // Thêm các trường khác cho phép cập nhật nếu cần
-}).min(1); // Yêu cầu ít nhất một trường được cung cấp để cập nhật
+  // Cho phép password và currentPassword, nhưng chỉ yêu cầu currentPassword nếu password có mặt
+  currentPassword: Joi.string().when("password", {
+    // Chỉ yêu cầu/validate currentPassword KHI password (mới) tồn tại
+    is: Joi.exist(),
+    then: Joi.string().required().messages({
+      "any.required": "Mật khẩu hiện tại là bắt buộc khi đổi mật khẩu mới.",
+    }),
+    otherwise: Joi.string().optional().allow("", null), // Nếu không đổi mk thì không cần
+  }),
+  password: Joi.string()
+    .min(6)
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
+    .messages({
+      "string.min": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+      "string.pattern.base":
+        "Mật khẩu mới phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt.",
+    }),
+})
+  .min(1) // Yêu cầu ít nhất một trường được cung cấp để cập nhật
+  .or("name", "email", "phone", "password");
 
 const addressSchemaValidation = Joi.object({
   fullName: Joi.string().trim().min(2).max(100).required().messages({
@@ -189,58 +213,39 @@ const updateCategorySchema = Joi.object({
   isActive: Joi.boolean().optional(),
 }).min(1); // Yêu cầu ít nhất một trường được cung cấp để cập nhật
 
+const objectIdSchema = Joi.string().hex().length(24).messages({
+  "string.length": "ID không hợp lệ",
+  "string.hex": "ID không hợp lệ",
+});
+
 // Schema cho một giá trị thuộc tính của biến thể
 const variantOptionValueSchema = Joi.object({
-  attributeName: Joi.string()
-    .required()
-    .messages({ "any.required": "Tên thuộc tính của biến thể là bắt buộc" }),
-  value: Joi.string().required().messages({
-    "any.required": "Giá trị thuộc tính của biến thể là bắt buộc",
+  attribute: objectIdSchema.required().messages({
+    "any.required": "ID thuộc tính của biến thể là bắt buộc",
+  }),
+  value: objectIdSchema.required().messages({
+    "any.required": "ID giá trị thuộc tính của biến thể là bắt buộc",
   }),
 });
 
 // Schema cho một biến thể
 const variantSchemaValidation = Joi.object({
-  sku: Joi.string().trim().optional().allow(null, "").messages({
-    // Cho phép rỗng, model sẽ tự tạo
-    // Có thể thêm các ràng buộc khác nếu người dùng nhập, ví dụ:
-    "string.min":
-      "SKU biến thể phải có ít nhất {#limit} ký tự nếu được cung cấp.",
-    "string.max":
-      "SKU biến thể không được vượt quá {#limit} ký tự nếu được cung cấp.",
-  }),
+  sku: Joi.string().trim().optional().allow(null, ""),
   price: Joi.number().min(0).required().messages({
     "any.required": "Giá của biến thể là bắt buộc",
     "number.min": "Giá biến thể không được âm",
   }),
-  salePrice: Joi.number()
-    .min(0)
-    .optional()
-    .allow(null)
-    .messages({ "number.min": "Giá sale biến thể không được âm" }),
-  salePriceEffectiveDate: Joi.date()
-    .optional()
-    .allow(null)
-    .messages({ "date.base": "Ngày bắt đầu sale biến thể không hợp lệ" }),
+  salePrice: Joi.number().min(0).optional().allow(null),
+  salePriceEffectiveDate: Joi.date().optional().allow(null),
   salePriceExpiryDate: Joi.date()
     .greater(Joi.ref("salePriceEffectiveDate"))
     .optional()
-    .allow(null)
-    .messages({
-      "date.base": "Ngày kết thúc sale biến thể không hợp lệ",
-      "date.greater": "Ngày kết thúc sale biến thể phải sau ngày bắt đầu",
-    }),
+    .allow(null),
   stockQuantity: Joi.number().integer().min(0).required().messages({
     "any.required": "Số lượng tồn kho của biến thể là bắt buộc",
     "number.min": "Số lượng tồn kho không được âm",
   }),
-  images: Joi.array()
-    .items(Joi.string().uri())
-    .optional()
-    .default([])
-    .messages({
-      "string.uri": "Mỗi ảnh của biến thể phải là một URL hợp lệ.",
-    }),
+  images: Joi.array().items(Joi.string().uri()).optional().default([]),
   optionValues: Joi.array()
     .items(variantOptionValueSchema)
     .min(1)
@@ -253,10 +258,10 @@ const variantSchemaValidation = Joi.object({
 
 // Schema cho một thuộc tính định nghĩa trên sản phẩm
 const productAttributeSchema = Joi.object({
-  name: Joi.string()
-    .required()
-    .messages({ "any.required": "Tên thuộc tính là bắt buộc" }),
-  values: Joi.array().items(Joi.string()).min(1).required().messages({
+  attribute: objectIdSchema.required().messages({
+    "any.required": "ID thuộc tính là bắt buộc",
+  }),
+  values: Joi.array().items(objectIdSchema).min(1).required().messages({
     "any.required": "Thuộc tính phải có ít nhất một giá trị",
     "array.min": "Thuộc tính phải có ít nhất một giá trị",
   }),
@@ -492,6 +497,17 @@ const createOrderSchema = Joi.object({
       "Vui lòng chọn địa chỉ đã lưu HOẶC nhập địa chỉ mới, không chọn cả hai hoặc bỏ trống.",
   });
 
+// Schema cho Admin nhập lý do và thời hạn đình chỉ
+const updateUserStatusSchema = Joi.object({
+  isActive: Joi.boolean().required(),
+  reason: Joi.string().when("isActive", {
+    is: false,
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  suspensionEndDate: Joi.date().allow(null).optional(),
+});
+
 // Schema cho User tạo/sửa review
 const reviewSchemaValidation = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required().messages({
@@ -518,6 +534,22 @@ const reviewSchemaValidation = Joi.object({
       // <<< Validate ảnh user gửi
       "string.uri": "Mỗi ảnh phải là một URL hợp lệ.",
     }),
+});
+
+// Schema cho update review
+const updateReviewSchemaValidation = Joi.object({
+  rating: Joi.number().min(1).max(5).optional().messages({
+    "number.base": "Đánh giá phải là một số.",
+    "number.min": "Đánh giá phải từ 1 đến 5 sao.",
+    "number.max": "Đánh giá phải từ 1 đến 5 sao.",
+  }),
+  comment: Joi.string().trim().max(1000).allow("").optional().messages({
+    "string.max": "Bình luận không được vượt quá 1000 ký tự.",
+  }),
+  userImages: Joi.array().items(Joi.string().uri()).max(5).optional().messages({
+    "array.max": "Bạn chỉ có thể tải lên tối đa 5 hình ảnh.",
+    "string.uri": "URL hình ảnh không hợp lệ.",
+  }),
 });
 
 // Schema cho Admin phản hồi review
@@ -547,6 +579,8 @@ module.exports = {
   createCouponSchema,
   updateCouponSchema,
   createOrderSchema,
+  updateUserStatusSchema,
   reviewSchemaValidation,
+  updateReviewSchemaValidation,
   adminReplySchemaValidation,
 };

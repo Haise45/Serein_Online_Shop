@@ -5,10 +5,13 @@ import {
   useRemoveCartItem,
   useUpdateCartItem,
 } from "@/lib/react-query/cartQueries";
+import { getVariantDisplayNameClient } from "@/lib/utils";
+import { AppDispatch } from "@/store";
 import { CartItem } from "@/types/cart";
 import {
   Dialog,
   DialogPanel,
+  DialogTitle,
   Transition,
   TransitionChild,
 } from "@headlessui/react";
@@ -24,6 +27,10 @@ import {
   FiTrash2,
   FiX,
 } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
+import toast from "react-hot-toast";
 
 const formatCurrency = (amount: number | undefined) => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";
@@ -33,15 +40,20 @@ const formatCurrency = (amount: number | undefined) => {
 interface CartPreviewModalProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  attributeMap: Map<string, { label: string; values: Map<string, string> }>;
 }
 
 export default function CartPreviewModal({
   isOpen,
   setIsOpen,
+  attributeMap,
 }: CartPreviewModalProps) {
   const { data: cartData, isLoading, isError, error, refetch } = useGetCart();
   const removeCartItemMutation = useRemoveCartItem();
   const updateCartItemMutation = useUpdateCartItem();
+
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
 
   const closeModal = () => setIsOpen(false);
 
@@ -65,12 +77,26 @@ export default function CartPreviewModal({
     }
   };
 
+  const handleProceedToCheckout = () => {
+    if (!cartData || !cartData.items || cartData.items.length === 0) {
+      toast.error("Giỏ hàng của bạn đang trống.");
+      return;
+    }
+
+    const allItemIds = cartData.items.map((item) => item._id);
+    dispatch(setSelectedItemsForCheckout(allItemIds));
+
+    // Đóng modal và chuyển trang
+    closeModal();
+    router.push("/checkout");
+  };
+
   const handleRetryFetchCart = () => {
     if (refetch) {
       refetch();
     }
   };
-  
+
   let content;
   if (isLoading) {
     content = (
@@ -129,105 +155,123 @@ export default function CartPreviewModal({
         {/* Danh sách sản phẩm */}
         <div className="flow-root">
           <ul role="list" className="-my-4 divide-y divide-gray-200 px-1">
-            {cartData.items.map((item: CartItem) => (
-              <li key={item._id} className="flex py-4 last:mb-4">
-                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                  <Image
-                    src={item.image || "/placeholder-image.jpg"}
-                    alt={item.name}
-                    width={80}
-                    height={80}
-                    className="h-full w-full object-cover object-center"
-                  />
-                </div>
+            {cartData.items.map((item: CartItem) => {
+              const variantDisplayName = item.variantInfo
+                ? getVariantDisplayNameClient(
+                    item.variantInfo.options,
+                    attributeMap,
+                  )
+                : null;
 
-                <div className="ml-4 flex flex-1 flex-col">
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-gray-900">
-                      <h3>
-                        <Link
-                          href={`/products/${item.slug}`}
-                          onClick={closeModal}
-                          className="hover:text-indigo-600"
-                        >
-                          {item.name}
-                        </Link>
-                      </h3>
-                      <p className="ml-4 whitespace-nowrap">
-                        {formatCurrency(item.price)}
-                      </p>
-                    </div>
-                    {item.variantInfo &&
-                      item.variantInfo.options.length > 0 && (
+              const hasStockError = item.quantity > item.availableStock;
+
+              return (
+                <li key={item._id} className="flex py-4 last:mb-4">
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <Image
+                      src={item.image || "/placeholder-image.jpg"}
+                      alt={item.name}
+                      width={80}
+                      height={80}
+                      quality={100}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+
+                  <div className="ml-4 flex flex-1 flex-col">
+                    <div>
+                      <div className="flex justify-between text-sm font-medium text-gray-900">
+                        <h3>
+                          <Link
+                            href={`/products/${item.slug}${item.variantInfo?._id ? `?variant=${item.variantInfo._id}` : ""}`}
+                            onClick={closeModal}
+                            className="hover:text-indigo-600"
+                          >
+                            {item.name}
+                          </Link>
+                        </h3>
+                        <p className="ml-4 whitespace-nowrap">
+                          {formatCurrency(item.price)}
+                        </p>
+                      </div>
+                      {variantDisplayName && (
                         <p className="mt-1 truncate text-xs text-gray-500">
-                          {item.variantInfo.options
-                            .map((opt) => `${opt.attributeName}: ${opt.value}`)
-                            .join(" / ")}
+                          {variantDisplayName}
                         </p>
                       )}
-                  </div>
-                  <div className="mt-2 flex flex-1 items-end justify-between text-sm">
-                    <div className="flex items-center rounded-md border border-gray-300">
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(item._id, item.quantity, -1)
-                        }
-                        disabled={
-                          updateCartItemMutation.isPending &&
-                          updateCartItemMutation.variables?.itemId === item._id
-                        }
-                        className="rounded-s-md p-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
-                        aria-label={`Giảm số lượng sản phẩm ${item.name}`}
-                      >
-                        <FiMinus className="h-3.5 w-3.5" />
-                      </button>
-                      <input
-                        type="text"
-                        readOnly
-                        value={item.quantity}
-                        className="w-10 border-x border-y-0 border-gray-300 p-1 text-center text-sm text-gray-700 focus:outline-none"
-                        aria-label={`Số lượng hiện tại của ${item.name}`}
-                        title={`Số lượng ${item.name}`}
-                      />
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(item._id, item.quantity, 1)
-                        }
-                        disabled={
-                          (updateCartItemMutation.isPending &&
-                            updateCartItemMutation.variables?.itemId ===
-                              item._id) ||
-                          item.quantity >= item.availableStock
-                        }
-                        className="rounded-e-md p-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-70"
-                        aria-label={`Tăng số lượng sản phẩm ${item.name}`}
-                      >
-                        <FiPlus className="h-3.5 w-3.5" />
-                      </button>
                     </div>
+                    <div className="mt-2 flex flex-1 items-end justify-between text-sm">
+                      <div className="inline-flex items-center overflow-hidden rounded-md border border-gray-300">
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item._id, item.quantity, -1)
+                          }
+                          disabled={
+                            item.quantity <= 1 ||
+                            (updateCartItemMutation.isPending &&
+                              updateCartItemMutation.variables?.itemId ===
+                                item._id)
+                          }
+                          aria-label={`Giảm số lượng sản phẩm ${item.name}`}
+                          className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
+                        >
+                          <FiMinus className="h-4 w-4 text-gray-600" />
+                        </button>
 
-                    <div className="flex">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(item._id)}
-                        disabled={
-                          removeCartItemMutation.isPending &&
-                          removeCartItemMutation.variables === item._id
-                        }
-                        className="p-1.5 font-medium text-gray-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-70"
-                        title={`Xóa ${item.name} khỏi giỏ hàng`}
-                      >
-                        <FiTrash2 className="h-4 w-4" />
-                      </button>
+                        <input
+                          type="text"
+                          readOnly
+                          value={item.quantity}
+                          aria-label={`Số lượng hiện tại của ${item.name}`}
+                          title={`Số lượng ${item.name}`}
+                          className="w-10 border-x border-gray-200 bg-white text-center text-sm font-medium text-gray-800 select-none focus:outline-none"
+                        />
+
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item._id, item.quantity, 1)
+                          }
+                          disabled={
+                            (updateCartItemMutation.isPending &&
+                              updateCartItemMutation.variables?.itemId ===
+                                item._id) ||
+                            item.quantity >= item.availableStock
+                          }
+                          aria-label={`Tăng số lượng sản phẩm ${item.name}`}
+                          className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
+                        >
+                          <FiPlus className="h-4 w-4 text-gray-600" />
+                        </button>
+                      </div>
+
+                      <div className="flex">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(item._id)}
+                          disabled={
+                            removeCartItemMutation.isPending &&
+                            removeCartItemMutation.variables === item._id
+                          }
+                          className="p-1.5 font-medium text-gray-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-70"
+                          title={`Xóa ${item.name} khỏi giỏ hàng`}
+                        >
+                          <FiTrash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
+                    {hasStockError && (
+                      <p className="mt-1.5 text-right text-xs font-semibold text-red-600">
+                        Tồn kho chỉ còn: {item.availableStock}
+                      </p>
+                    )}
+                    {/* Hiển thị tổng tiền của item này (nếu muốn) */}
+                    <p className="mt-1 text-right text-xs font-medium text-indigo-600">
+                      Tổng: {formatCurrency(item.price * item.quantity)}
+                    </p>
                   </div>
-                  {/* Hiển thị tổng tiền của item này (nếu muốn) */}
-                  <p className="mt-1 text-right text-xs font-medium text-indigo-600">
-                    Tổng: {formatCurrency(item.price * item.quantity)}
-                  </p>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -264,13 +308,13 @@ export default function CartPreviewModal({
             >
               Xem chi tiết giỏ hàng
             </Link>
-            <Link
-              href="/checkout"
-              onClick={closeModal}
+            <button
+              type="button"
+              onClick={handleProceedToCheckout}
               className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
               Tiến hành thanh toán
-            </Link>
+            </button>
           </div>
         </div>
       </>
@@ -307,11 +351,11 @@ export default function CartPreviewModal({
                   <div className="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
                     {/* Header */}
                     <div className="flex min-h-0 flex-1 flex-col overflow-y-scroll">
-                      <div className="bg-indigo-700 px-4 py-5 sm:px-6">
+                      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-5 sm:px-6">
                         <div className="flex items-center justify-between">
-                          <Dialog.Title className="text-lg font-semibold text-white">
+                          <DialogTitle className="text-lg font-semibold text-white">
                             Giỏ hàng của bạn
-                          </Dialog.Title>
+                          </DialogTitle>
                           <div className="ml-3 flex h-7 items-center">
                             <button
                               type="button"

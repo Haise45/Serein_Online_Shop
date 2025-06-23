@@ -1,5 +1,6 @@
 "use client";
 
+import GuestGuard from "@/app/GuestGuard";
 import {
   resendVerificationEmail,
   verifyEmailOTP,
@@ -10,6 +11,7 @@ import { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -22,7 +24,7 @@ export default function VerifyEmailPage() {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]); // Mảng 6 ký tự
   const [emailFromQuery, setEmailFromQuery] = useState<string>("");
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
-
+  const [redirectUrl, setRedirectUrl] = useState<string>("/");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,6 +34,8 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const email = searchParams.get("email");
     const message = searchParams.get("message");
+    const redirect = searchParams.get("redirect");
+
     if (email) {
       setEmailFromQuery(email);
     } else {
@@ -42,7 +46,16 @@ export default function VerifyEmailPage() {
     if (message) {
       setInitialMessage(decodeURIComponent(message));
     }
-  }, [searchParams, router]);
+    if (redirect && redirect.startsWith("/")) {
+      try {
+        setRedirectUrl(decodeURIComponent(redirect));
+      } catch {
+        setRedirectUrl("/");
+      }
+    } else if (redirect) {
+      setRedirectUrl("/");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -55,7 +68,7 @@ export default function VerifyEmailPage() {
   const handleOtpChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const { value } = e.target;
     // Chỉ cho phép nhập số và chỉ 1 ký tự
-    if (/^[0-9]$/.test(value) || value === "") {
+    if (/^[0-9]*$/.test(value) && value.length <= 1) {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
@@ -72,6 +85,19 @@ export default function VerifyEmailPage() {
           .previousElementSibling as HTMLInputElement | null;
         previousSibling?.focus();
       }
+    }
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+      // Nếu ô hiện tại rỗng và nhấn Backspace, chuyển về ô trước
+      const currentInput = e.target as HTMLInputElement;
+      const previousSibling =
+        currentInput.previousElementSibling as HTMLInputElement | null;
+      previousSibling?.focus();
     }
   };
 
@@ -93,8 +119,15 @@ export default function VerifyEmailPage() {
     setError(null);
     setSuccessMessage(null);
     const enteredOtp = otp.join("");
-    if (enteredOtp.length !== 6 || !emailFromQuery) {
-      setError("Vui lòng nhập đủ 6 số OTP và đảm bảo có email.");
+
+    if (!emailFromQuery) {
+      setError(
+        "Không có thông tin email. Vui lòng thử lại từ trang đăng nhập/đăng ký.",
+      );
+      return;
+    }
+    if (enteredOtp.length !== 6) {
+      setError("Vui lòng nhập đủ 6 số OTP.");
       return;
     }
 
@@ -107,6 +140,7 @@ export default function VerifyEmailPage() {
       setSuccessMessage(
         data.message || "Xác thực email thành công! Đang chuyển hướng...",
       );
+      setOtp(["", "", "", "", "", ""]);
 
       // Tự động đăng nhập user
       dispatch(
@@ -122,13 +156,17 @@ export default function VerifyEmailPage() {
           accessToken: data.accessToken,
         }),
       );
+      toast.success("Xác thực thành công!");
 
       // Chuyển hướng sau khi thành công
       setTimeout(() => {
+        // Ưu tiên redirectUrl đã lấy từ query param
+        const finalRedirect =
+          redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
         if (data.role === "admin") {
           router.push("/admin/dashboard");
         } else {
-          router.push("/"); // Hoặc trang profile client
+          router.push(finalRedirect);
         }
       }, 2000); // Đợi 2s để user đọc message
     } catch (err: unknown) {
@@ -169,81 +207,87 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
-        <h1 className="mb-4 text-center text-3xl font-bold text-gray-800">
-          Xác Thực Email
-        </h1>
-        {initialMessage && (
-          <p className="mb-4 rounded-md bg-green-50 p-3 text-center text-sm text-green-600">
-            {initialMessage}
+    <GuestGuard>
+      <div className="flex items-center justify-center bg-gray-100">
+        <div className="w-full max-w-md rounded-xl bg-white px-6 py-8 shadow-xl sm:p-10">
+          <h1 className="mb-4 text-center text-3xl font-bold text-gray-800">
+            Xác Thực Email
+          </h1>
+          {initialMessage && (
+            <p className="mb-4 rounded-md bg-green-50 p-3 text-center text-sm text-green-600">
+              {initialMessage}
+            </p>
+          )}
+          <p className="mb-6 text-center text-sm text-gray-600">
+            Một mã OTP gồm 6 chữ số đã được gửi đến{" "}
+            <strong>{emailFromQuery || "email của bạn"}</strong>. Vui lòng nhập
+            mã vào bên dưới.
           </p>
-        )}
-        <p className="mb-6 text-center text-sm text-gray-600">
-          Một mã OTP gồm 6 chữ số đã được gửi đến{" "}
-          <strong>{emailFromQuery || "email của bạn"}</strong>. Vui lòng nhập mã
-          vào bên dưới.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <p className="rounded-md bg-red-100 p-3 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-          {successMessage && !error && (
-            <p className="rounded-md bg-green-100 p-3 text-sm text-green-600">
-              {successMessage}
-            </p>
-          )}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <p className="rounded-md bg-red-100 p-3 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            {successMessage && !error && (
+              <p className="rounded-md bg-green-100 p-3 text-sm text-green-600">
+                {successMessage}
+              </p>
+            )}
 
-          <div className="flex justify-center space-x-1.5 sm:space-x-2" onPaste={handlePaste}>
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                type="text" // Dùng text để dễ dàng style và xử lý hơn number
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(e, index)}
-                onFocus={(e) => e.target.select()} // Chọn toàn bộ text khi focus
-                className="h-12 w-9 sm:h-14 sm:w-12 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                disabled={loading}
-                aria-label={`Ký tự OTP thứ ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          <div>
-            <button
-              className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
-              type="submit"
-              disabled={loading || otp.join("").length !== 6}
+            <div
+              className="flex justify-center space-x-1.5 sm:space-x-2"
+              onPaste={handlePaste}
             >
-              {loading ? "Đang xác thực..." : "Xác Thực Mã OTP"}
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text" // Dùng text để dễ dàng style và xử lý hơn number
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(e, index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  onFocus={(e) => e.target.select()} // Chọn toàn bộ text khi focus
+                  className="h-12 w-9 rounded-md border border-gray-300 text-center text-2xl font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:h-14 sm:w-12"
+                  disabled={loading}
+                  aria-label={`Ký tự OTP thứ ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <div>
+              <button
+                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 text-sm font-medium text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none ${loading ? "cursor-not-allowed bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                type="submit"
+                disabled={loading || otp.join("").length !== 6}
+              >
+                {loading ? "Đang xác thực..." : "Xác Thực Mã OTP"}
+              </button>
+            </div>
+          </form>
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleResendOtp}
+              disabled={resendLoading || resendCooldown > 0 || !emailFromQuery}
+              className={`text-sm font-medium ${!emailFromQuery || resendCooldown > 0 ? "cursor-not-allowed text-gray-400" : "text-indigo-600 hover:text-indigo-500"}`}
+            >
+              {resendLoading
+                ? "Đang gửi lại..."
+                : resendCooldown > 0
+                  ? `Gửi lại sau (${resendCooldown}s)`
+                  : "Chưa nhận được mã? Gửi lại OTP"}
             </button>
           </div>
-        </form>
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleResendOtp}
-            disabled={resendLoading || resendCooldown > 0 || !emailFromQuery}
-            className={`text-sm font-medium ${!emailFromQuery || resendCooldown > 0 ? "cursor-not-allowed text-gray-400" : "text-indigo-600 hover:text-indigo-500"}`}
-          >
-            {resendLoading
-              ? "Đang gửi lại..."
-              : resendCooldown > 0
-                ? `Gửi lại sau (${resendCooldown}s)`
-                : "Chưa nhận được mã? Gửi lại OTP"}
-          </button>
+          <p className="mt-4 text-center text-sm text-gray-600">
+            <Link
+              href="/login"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              Quay lại Đăng nhập
+            </Link>
+          </p>
         </div>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          <Link
-            href="/login"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Quay lại Đăng nhập
-          </Link>
-        </p>
       </div>
-    </div>
+    </GuestGuard>
   );
 }

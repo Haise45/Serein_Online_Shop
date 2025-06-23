@@ -1,17 +1,19 @@
 "use client";
-import { CartItem as CartItemType } from "@/types/cart";
+import { CartItem as CartItemType } from "@/types";
 import CartItemRow from "./CartItemRow";
 
 interface CartItemListProps {
   items: CartItemType[];
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, isSelected: boolean) => void;
+  attributeMap: Map<string, { label: string; values: Map<string, string> }>;
 }
 
 export default function CartItemList({
   items,
   selectedItemIds,
   onSelectItem,
+  attributeMap,
 }: CartItemListProps) {
   return (
     <ul
@@ -24,6 +26,7 @@ export default function CartItemList({
           item={item}
           isSelected={selectedItemIds.has(item._id)} // Truyền trạng thái selected
           onSelectItem={onSelectItem} // Truyền hàm callback
+          attributeMap={attributeMap}
         />
       ))}
     </ul>
