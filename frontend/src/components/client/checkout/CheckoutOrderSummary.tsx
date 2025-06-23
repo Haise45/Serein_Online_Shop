@@ -21,6 +21,7 @@ interface CheckoutOrderSummaryProps {
   onPlaceOrderTriggerFromSummary: () => void; // Hàm để trigger submit form ở CheckoutForm
   attributeMap: Map<string, { label: string; values: Map<string, string> }>;
   stockError: string | null;
+  paymentMethod: string;
 }
 
 export default function CheckoutOrderSummary({
@@ -34,6 +35,7 @@ export default function CheckoutOrderSummary({
   onPlaceOrderTriggerFromSummary,
   attributeMap,
   stockError,
+  paymentMethod,
 }: CheckoutOrderSummaryProps) {
   const numberOfItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -177,25 +179,29 @@ export default function CheckoutOrderSummary({
             </div>
           )}
 
-          <div className="mt-8">
-            <button
-              type="button" // Để không submit form cha nếu có
-              onClick={onPlaceOrderTriggerFromSummary}
-              disabled={isButtonDisabled}
-              className={classNames(
-                "flex w-full items-center justify-center rounded-md border border-transparent px-6 py-3 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",
-                items.length === 0
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
-                { "cursor-wait opacity-70": isPlacingOrder },
-              )}
-            >
-              {isPlacingOrder && (
-                <FiLoader className="mr-3 -ml-1 h-5 w-5 animate-spin text-white" />
-              )}
-              {isPlacingOrder ? "Đang xử lý..." : `Đặt Hàng (${numberOfItems})`}
-            </button>
-          </div>
+          {paymentMethod !== "PAYPAL" && (
+            <div className="mt-8">
+              <button
+                type="button" // Để không submit form cha nếu có
+                onClick={onPlaceOrderTriggerFromSummary}
+                disabled={isButtonDisabled}
+                className={classNames(
+                  "flex w-full items-center justify-center rounded-md border border-transparent px-6 py-3 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",
+                  items.length === 0
+                    ? "cursor-not-allowed bg-gray-400"
+                    : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
+                  { "cursor-wait opacity-70": isPlacingOrder },
+                )}
+              >
+                {isPlacingOrder && (
+                  <FiLoader className="mr-3 -ml-1 h-5 w-5 animate-spin text-white" />
+                )}
+                {isPlacingOrder
+                  ? "Đang xử lý..."
+                  : `Đặt Hàng (${numberOfItems})`}
+              </button>
+            </div>
+          )}
           <div className="mt-4 text-center">
             <Link
               href="/cart"
