@@ -1,6 +1,8 @@
 import {
   approveRequestAdminApi,
+  capturePayPalOrderApi,
   createOrderApi,
+  createPayPalOrderApi,
   getAllOrdersAdminApi,
   GetAllOrdersAdminParams,
   getGuestOrderByTokenApi,
@@ -15,7 +17,11 @@ import {
   updateOrderStatusAdminApi,
   UpdateOrderStatusAdminPayload,
 } from "@/services/orderService";
-import { OrderCreationPayload, OrderRequestPayload } from "@/types/order";
+import {
+  OrderCreationPayload,
+  OrderRequestPayload,
+  ShippingAddressData,
+} from "@/types/order";
 import { Order, PaginatedOrdersResponse } from "@/types/order_model";
 import {
   useMutation,
@@ -84,7 +90,7 @@ export const useCreateOrder = (
       // Gọi lại onSuccess gốc nếu có
       options?.onSuccess?.(newOrder, variables, context);
     },
-    
+
     onError: (error, variables, context) => {
       toast.error(
         error.response?.data?.message || error.message || "Đặt hàng thất bại.",
@@ -97,14 +103,14 @@ export const useCreateOrder = (
       // 1. Invalidate query giỏ hàng.
       // Invalidate sẽ đánh dấu là stale và refetch ở lần tiếp theo component active.
       queryClient.invalidateQueries({ queryKey: cartKeys.cart });
-      
+
       // 2. Invalidate danh sách đơn hàng để nó được làm mới.
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
 
       // Gọi lại onSettled gốc nếu có
       options?.onSettled?.(data, error, variables, context);
     },
-    
+
     ...options,
   });
 };
@@ -335,7 +341,9 @@ export const useApproveRequestAdmin = (
     mutationFn: ({ orderId, type }) => approveRequestAdminApi(orderId, type),
     onSuccess: (data, variables, context) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: orderKeys.detail(variables.orderId) });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(variables.orderId),
+      });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
@@ -371,7 +379,9 @@ export const useRejectRequestAdmin = (
       rejectRequestAdminApi(orderId, type, payload),
     onSuccess: (data, variables, context) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: orderKeys.detail(variables.orderId) });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(variables.orderId),
+      });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
@@ -385,11 +395,11 @@ export const useRejectRequestAdmin = (
 
 // Hook for restock (Admin)
 export const useRestockOrderItemsAdmin = (
-  options?: MutationOptions<{ message: string, order: Order }, string>,
+  options?: MutationOptions<{ message: string; order: Order }, string>,
 ) => {
   const queryClient = useQueryClient();
   return useMutation<
-    { message: string, order: Order },
+    { message: string; order: Order },
     AxiosError<{ message?: string }>,
     string
   >({
@@ -412,5 +422,38 @@ export const useRestockOrderItemsAdmin = (
       options?.onError?.(error, variables, context);
     },
     ...options,
+  });
+};
+
+// --- Hook: Tạo một đơn hàng trên hệ thống PayPal (chưa lưu vào DB) ---
+export const useCreatePayPalOrder = () => {
+  return useMutation<
+    { orderID: string }, // Kiểu dữ liệu trả về từ API
+    Error, // Kiểu lỗi
+    { selectedCartItemIds: string[]; shippingAddress: ShippingAddressData } // Kiểu dữ liệu đầu vào (payload)
+  >({
+    mutationFn: createPayPalOrderApi,
+  });
+};
+
+// --- Hook: Capture thanh toán PayPal và cập nhật đơn hàng trong DB ---
+export const useCapturePayPalOrder = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    { message: string; order: Order },
+    Error,
+    { orderId: string; paypalOrderId: string }
+  >({
+    mutationFn: ({ orderId, paypalOrderId }) =>
+      capturePayPalOrderApi(orderId, paypalOrderId),
+    onSuccess: (data) => {
+      // Invalidate các query liên quan để làm mới dữ liệu
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      queryClient.invalidateQueries({ queryKey: cartKeys.cart });
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Xác nhận thanh toán thất bại.");
+    },
   });
 };
