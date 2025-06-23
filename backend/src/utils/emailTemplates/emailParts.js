@@ -13,7 +13,7 @@ const generateOrderItemsHTML = (items) => {
 
   let itemsHtml = `
     <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px;">Chi tiết sản phẩm</h3>
-    <table style="width: 100%; margin-bottom: 20px; font-size: 14px;">
+    <table class="product-table" style="width: 100%; margin-bottom: 20px; font-size: 14px; border-collapse: collapse;">
         <thead>
             <tr>
                 <th style="background-color: #f1f1f1; padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Sản phẩm</th>
@@ -32,7 +32,7 @@ const generateOrderItemsHTML = (items) => {
 
     itemsHtml += `
             <tr>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #eee; display: flex; align-items: center;">
+                <td class="product-cell" style="padding: 12px 10px; border-bottom: 1px solid #eee; display: flex; align-items: center;">
                     <img src="${
                       item.image || "https://via.placeholder.com/60"
                     }" alt="${
@@ -47,15 +47,19 @@ const generateOrderItemsHTML = (items) => {
                         }
                     </div>
                 </td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${
-                  item.quantity
-                }</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${formatCurrency(
-                  item.price
-                )}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${formatCurrency(
-                  item.price * item.quantity
-                )}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+                    <span class="mobile-label">Số lượng</span>${item.quantity}
+                </td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
+                    <span class="mobile-label">Đơn giá</span>${formatCurrency(
+                      item.price
+                    )}
+                </td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">
+                    <span class="mobile-label">Thành tiền</span>${formatCurrency(
+                      item.price * item.quantity
+                    )}
+                </td>
             </tr>
         `;
   });

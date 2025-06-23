@@ -21,12 +21,17 @@ import {
   FiTruck,
 } from "react-icons/fi";
 import { SiPaypal } from "react-icons/si";
+import PayPalButtonsWrapper from "./PayPalButtonsWrapper";
 
 interface CheckoutFormProps {
   user: User | null;
   userAddresses: Address[];
   isLoadingAddresses: boolean;
-  onSubmitOrder: (payload: OrderCreationPayload) => void;
+  paymentMethod: string;
+  setPaymentMethod: (method: string) => void;
+  onSubmitOrder: (
+    formData: Omit<OrderCreationPayload, "selectedCartItemIds">,
+  ) => void;
   isSubmittingOrder: boolean;
 }
 
@@ -263,6 +268,8 @@ export default function CheckoutForm({
   user,
   userAddresses,
   isLoadingAddresses,
+  paymentMethod,
+  setPaymentMethod,
   onSubmitOrder,
   isSubmittingOrder,
 }: CheckoutFormProps) {
@@ -277,7 +284,6 @@ export default function CheckoutForm({
   const [newAddressData, setNewAddressData] = useState<
     Partial<ShippingAddressData>
   >({});
-  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].id);
   const [notes, setNotes] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [addressToEditInModal, setAddressToEditInModal] =
@@ -382,63 +388,69 @@ export default function CheckoutForm({
     [],
   );
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (isSubmittingOrder) return;
-
-    // 1. Xác định object địa chỉ cuối cùng để gửi đi
+  // *** Thu thập và Validate dữ liệu form ***
+  const getFormDataForPayPal = (): Omit<
+    OrderCreationPayload,
+    "selectedCartItemIds"
+  > | null => {
+    // 1. Xác định object địa chỉ cuối cùng
     let finalShippingAddress: Partial<ShippingAddressData> | null = null;
-
     if (isAuthenticated && selectedAddressId) {
-      // Nếu user đã login và CHỌN một địa chỉ
       finalShippingAddress =
         userAddresses.find(
           (addr) => addr._id?.toString() === selectedAddressId,
         ) || null;
     } else if (isEditingNewAddress || !isAuthenticated) {
-      // Nếu user đang NHẬP một địa chỉ mới (cả guest và user đã login)
       finalShippingAddress = newAddressData;
     }
 
     // 2. Validate email cho guest
     if (!isAuthenticated && !email.trim()) {
-      toast.error("Vui lòng nhập email của bạn.");
-      return;
+      toast.error("Vui lòng nhập email của bạn để tiếp tục.");
+      return null; // Trả về null nếu không hợp lệ
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!isAuthenticated && email.trim() && !emailRegex.test(email)) {
       toast.error("Địa chỉ email không hợp lệ.");
-      return;
+      return null;
     }
 
     // 3. Validate object địa chỉ cuối cùng
     if (
       !finalShippingAddress ||
-      !finalShippingAddress.fullName ||
-      !finalShippingAddress.phone ||
-      !finalShippingAddress.street ||
+      !finalShippingAddress.fullName?.trim() ||
+      !finalShippingAddress.phone?.trim() ||
+      !finalShippingAddress.street?.trim() ||
       !finalShippingAddress.provinceCode ||
       !finalShippingAddress.districtCode ||
-      !finalShippingAddress.communeCode ||
-      !finalShippingAddress.provinceName ||
-      !finalShippingAddress.districtName ||
-      !finalShippingAddress.communeName
+      !finalShippingAddress.communeCode
     ) {
       toast.error("Vui lòng điền đầy đủ thông tin địa chỉ giao hàng.");
-      return;
+      return null;
     }
 
-    // 4. Tạo payload cuối cùng
-    // Backend bây giờ sẽ LUÔN nhận được object `shippingAddress`
-    const payload: OrderCreationPayload = {
-      shippingAddress: finalShippingAddress as ShippingAddressData, // Gửi object địa chỉ đầy đủ
+    // 4. Nếu mọi thứ hợp lệ, trả về object payload
+    return {
+      shippingAddress: finalShippingAddress as ShippingAddressData,
       paymentMethod,
       notes,
       email: isAuthenticated ? undefined : email,
-      selectedCartItemIds: [], // Sẽ được điền ở component cha
     };
+  };
 
-    onSubmitOrder(payload);
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingOrder || paymentMethod === "PAYPAL") {
+      return;
+    }
+
+    // Tái sử dụng hàm getFormData để lấy và validate dữ liệu
+    const formData = getFormDataForPayPal();
+
+    // Nếu formData là null, có nghĩa là có lỗi validation và toast đã được hiển thị
+    if (formData) {
+      onSubmitOrder(formData);
+    }
   };
 
   return (
@@ -630,6 +642,19 @@ export default function CheckoutForm({
             );
           })}
         </div>
+        {/* HIỂN THỊ NÚT PAYPAL HOẶC NÚT ĐẶT HÀNG THÔNG THƯỜNG */}
+        {paymentMethod === "PAYPAL" ? (
+          <div className="mx-auto mt-8">
+            <PayPalButtonsWrapper getFormData={getFormDataForPayPal} />
+          </div>
+        ) : (
+          <div className="hidden pt-4">
+            {/* Ẩn nút submit mặc định, việc submit sẽ được trigger từ summary */}
+            <button type="submit" disabled={isSubmittingOrder}>
+              {isSubmittingOrder ? "Đang xử lý..." : "Hoàn tất đặt hàng"}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Phần Ghi chú */}

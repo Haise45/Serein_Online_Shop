@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { generateOrderItemsHTML } = require("./emailParts"); // Đảm bảo bạn đã có file này
+const { generateOrderItemsHTML } = require("./emailParts");
 
 const orderConfirmationTemplate = (
   userName,
@@ -13,13 +13,9 @@ const orderConfirmationTemplate = (
 
   let trackingSection = "";
   if (guestTrackingUrl) {
-    trackingSection = `
-      <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 15px;">Bạn có thể theo dõi tình trạng đơn hàng bằng cách nhấp vào nút sau:</p>
-      <p style="text-align: center; margin: 30px 0;"><a href="${guestTrackingUrl}" target="_blank" style="background-color: #0d6efd; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 500; display: inline-block;">Theo dõi đơn hàng</a></p>`;
+    trackingSection = `<p style="text-align: center; margin: 30px 0;"><a href="${guestTrackingUrl}" target="_blank" class="button" style="background-color: #0d6efd; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 500; display: inline-block;">Theo dõi đơn hàng</a></p>`;
   } else if (order.user) {
-    trackingSection = `
-      <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 15px;">Xem chi tiết và theo dõi đơn hàng trong tài khoản của bạn:</p>
-      <p style="text-align: center; margin: 30px 0;"><a href="${orderDetailUrl}" target="_blank" style="background-color: #0d6efd; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 500; display: inline-block;">Xem đơn hàng của tôi</a></p>`;
+    trackingSection = `<p style="text-align: center; margin: 30px 0;"><a href="${orderDetailUrl}" target="_blank" class="button" style="background-color: #0d6efd; color: white !important; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 500; display: inline-block;">Xem đơn hàng của tôi</a></p>`;
   }
 
   return `
@@ -36,6 +32,22 @@ const orderConfirmationTemplate = (
        .footer { text-align: center; padding: 20px; margin-top: 30px; font-size: 12px; color: #6c757d; }
        .order-summary { margin-top: 20px; font-size: 14px; }
        .order-summary td { padding: 6px 0; }
+       .mobile-label { display: none; }
+
+       @media screen and (max-width: 600px) {
+           .content { padding: 20px 15px !important; width: 100% !important; box-sizing: border-box; }
+           .product-table thead { display: none !important; }
+           .product-table tr, .product-table td { display: block !important; width: 100% !important; box-sizing: border-box; }
+           .product-table tr { border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-bottom: 15px; }
+           .product-table tbody tr:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+           .product-table td { border: none !important; padding: 8px 0 !important; text-align: right !important; overflow: auto; }
+           .product-table td.product-cell { display: block !important; padding-top: 0 !important; padding-bottom: 10px !important; text-align: left !important; }
+           .product-table td.product-cell img { margin-bottom: 10px; }
+           .mobile-label { display: inline-block !important; font-weight: bold; float: left; }
+           .order-summary-wrapper { display: block !important; }
+           .order-summary { width: 100% !important; max-width: 100% !important; }
+           .button { width: 100% !important; box-sizing: border-box; text-align: center; }
+       }
     </style>
 </head>
 <body>
@@ -54,11 +66,9 @@ const orderConfirmationTemplate = (
                 <p>Cảm ơn bạn đã đặt hàng tại <strong>${shopName}</strong>! Đơn hàng #${order._id
     .toString()
     .slice(-6)} của bạn đã được ghi nhận và đang chờ xử lý.</p>
-                
                 ${generateOrderItemsHTML(order.orderItems)}
-
-                <div style="display: flex; justify-content: flex-end;">
-                  <table class="order-summary" style="width:100%; max-width: 380px;">
+                <div class="order-summary-wrapper" style="display: flex; justify-content: flex-end;">
+                  <table class="order-summary" style="width:100%; max-width: 380px; margin-left: auto;">
                       <tr><td>Tạm tính:</td><td style="text-align:right;">${formatCurrency(
                         order.itemsPrice
                       )}</td></tr>
@@ -79,7 +89,6 @@ const orderConfirmationTemplate = (
                       )}</td></tr>
                   </table>
                 </div>
-
                 <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px;">Thông tin giao hàng</h3>
                 <p><strong>Người nhận:</strong> ${
                   order.shippingAddress.fullName
@@ -100,9 +109,7 @@ const orderConfirmationTemplate = (
                      }[order.paymentMethod] || order.paymentMethod
                    }
                 </p>
-                
                 ${trackingSection}
-                
                 <p style="margin-top: 25px;">Chúng tôi sẽ gửi thông báo tiếp theo khi đơn hàng được vận chuyển.</p>
             </div>
             <div class="footer">© ${new Date().getFullYear()} ${shopName}.</div>

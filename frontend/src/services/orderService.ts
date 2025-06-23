@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { OrderCreationPayload, OrderRequestPayload } from "@/types/order";
+import { OrderCreationPayload, OrderRequestPayload, ShippingAddressData } from "@/types/order";
 import { Order, PaginatedOrdersResponse } from "@/types/order_model";
 import { AxiosError } from "axios";
 
@@ -226,11 +226,34 @@ export const restockOrderItemsAdminApi = async (
   orderId: string,
 ): Promise<{ message: string; order: Order }> => {
   try {
-    const { data } = await axiosInstance.post<{ message: string; order: Order }>(
-      `orders/${orderId}/restock`,
-    );
+    const { data } = await axiosInstance.post<{
+      message: string;
+      order: Order;
+    }>(`orders/${orderId}/restock`);
     return data;
   } catch (err: unknown) {
     throw new Error(getErrorMessage(err, "Khôi phục tồn kho thất bại."));
   }
+};
+
+export const createPayPalOrderApi = async (payload: {
+  selectedCartItemIds: string[];
+  shippingAddress: ShippingAddressData;
+}): Promise<{ orderID: string }> => {
+  const { data } = await axiosInstance.post<{ orderID: string }>(
+    "/orders/create-paypal-order",
+    payload,
+  );
+  return data;
+};
+
+export const capturePayPalOrderApi = async (
+  orderId: string,
+  paypalOrderId: string,
+): Promise<{ message: string; order: Order }> => {
+  const { data } = await axiosInstance.post<{ message: string; order: Order }>(
+    `/orders/${orderId}/capture-paypal`,
+    { paypalOrderId },
+  );
+  return data;
 };

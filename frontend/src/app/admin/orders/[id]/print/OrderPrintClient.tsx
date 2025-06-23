@@ -11,6 +11,13 @@ interface OrderPrintClientProps {
   orderId: string;
 }
 
+const SHOP_NAME = process.env.NEXT_PUBLIC_SHOP_NAME || "Serein Shop";
+const SHOP_ADDRESS =
+  process.env.NEXT_PUBLIC_SHOP_ADDRESS ||
+  "123 Đường ABC, Phường X, Quận Y, TP.HCM";
+const SHOP_PHONE = process.env.NEXT_PUBLIC_SHOP_PHONE || "0909.123.456";
+const SHOP_EMAIL = process.env.NEXT_PUBLIC_SHOP_EMAIL || "hotro@serein.com";
+
 const OrderPrintClient: React.FC<OrderPrintClientProps> = ({ orderId }) => {
   const { data: order, isLoading, isError } = useGetOrderById(orderId);
 
@@ -68,11 +75,12 @@ const OrderPrintClient: React.FC<OrderPrintClientProps> = ({ orderId }) => {
       <header className="flex items-start justify-between border-b-2 border-black pb-4">
         <div>
           <h1 className="text-3xl font-bold tracking-wider uppercase">
-            Serein Shop
+            {SHOP_NAME}
           </h1>
-          <p className="mt-1">Địa chỉ: 123 Đường ABC, Quận 1, TP. HCM</p>
-          <p>Hotline: 0987 654 321</p>
-          <p>Website: serein.shop</p>
+          <p className="mt-1">{SHOP_ADDRESS}</p>
+          <p>Hotline: {SHOP_PHONE}</p>
+          <p>Email: {SHOP_EMAIL}</p>
+          <p>Website: online-store-delta-seven.vercel.app</p>
         </div>
         <div className="text-right">
           <h2 className="text-2xl font-bold">PHIẾU GIAO HÀNG</h2>

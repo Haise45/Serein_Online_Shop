@@ -196,7 +196,25 @@ const AdminOrderDetailClient: React.FC<AdminOrderDetailClientProps> = ({
                     </div>
                   )}
                 </div>
-
+                {order.isPaid && order.paymentResult && (
+                  <div className="rounded-md border border-green-200 bg-green-50 p-2 text-xs">
+                    <p className="font-semibold text-green-800">
+                      Chi tiết thanh toán:
+                    </p>
+                    <p className="break-all">
+                      <strong>ID Giao dịch:</strong> {order.paymentResult.id}
+                    </p>
+                    <p>
+                      <strong>Trạng thái:</strong> {order.paymentResult.status}
+                    </p>
+                    {order.paymentResult.captureId && (
+                      <p>
+                        <strong>Capture ID:</strong>{" "}
+                        {order.paymentResult.captureId}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <div className="border-t pt-4">
                   <CButton
                     color="secondary"

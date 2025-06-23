@@ -66,6 +66,18 @@ const requestSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Sub-schema lưu kết quả thanh toán
+const paymentResultSchema = new mongoose.Schema(
+  {
+    id: { type: String }, // ID giao dịch từ PayPal hoặc cổng thanh toán khác
+    status: { type: String }, // Ví dụ: 'COMPLETED' từ PayPal
+    update_time: { type: String }, // Thời gian cập nhật từ PayPal
+    email_address: { type: String }, // Email người trả tiền từ PayPal
+    captureId: { type: String },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     user: {
@@ -112,6 +124,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, "Vui lòng chọn phương thức thanh toán"],
       enum: ["COD", "BANK_TRANSFER", "PAYPAL"],
+    },
+    paymentResult: {
+      type: paymentResultSchema,
+      default: null,
     },
     shippingMethod: {
       type: String,
@@ -219,7 +235,7 @@ const orderSchema = new mongoose.Schema(
     isStockRestored: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   {
     timestamps: true,
