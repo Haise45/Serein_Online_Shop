@@ -12,7 +12,8 @@ const segmentToLabelMap: Record<string, string> = {
   settings: "Cài đặt",
   create: "Thêm mới",
   edit: "Chỉnh sửa",
-  notifications: "Thông báo"
+  notifications: "Thông báo",
+  reports: "Thống kê",
 };
 
 // Dữ liệu động có thể được truyền vào

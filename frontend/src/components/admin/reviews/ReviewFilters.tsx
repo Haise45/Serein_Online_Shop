@@ -1,6 +1,6 @@
 "use client";
 
-import { cilFilter } from "@coreui/icons";
+import { cilFilterX } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import { CButton, CCol, CFormInput, CFormSelect, CRow } from "@coreui/react";
 import React from "react";
@@ -67,7 +67,7 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
             onClick={clearFilters}
             title="Xóa bộ lọc"
           >
-            <CIcon icon={cilFilter} className="me-1" />
+            <CIcon icon={cilFilterX} className="me-1" />
             Xóa lọc
           </CButton>
         </CCol>

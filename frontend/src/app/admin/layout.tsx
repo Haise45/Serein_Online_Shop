@@ -1,4 +1,3 @@
-// src/app/admin/layout.tsx
 "use client";
 
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -164,7 +163,9 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="d-flex">
+    // [FIX] Đã xóa className="d-flex". Container này chỉ cần là một div đơn giản.
+    // Layout sẽ được xử lý bằng position:fixed cho sidebar và margin-left cho wrapper.
+    <div>
       {/* Sidebar với position fixed */}
       <AdminSidebar
         sidebarVisible={sidebarVisible}
@@ -175,11 +176,14 @@ export default function AdminLayout({
 
       {/* Container cho phần nội dung chính với margin-left động */}
       <div
-        className="wrapper d-flex flex-column bg-light flex-grow-1"
+        // [FIX] Đã xóa flex-grow-1 vì parent không còn là flex container.
+        className="wrapper d-flex flex-column bg-light"
         style={{
           marginLeft: getContentMarginLeft(),
           transition: "margin-left 0.15s ease-in-out",
           minWidth: 0,
+          // [FIX] Thêm minHeight để đảm bảo wrapper luôn chiếm toàn bộ chiều cao màn hình.
+          minHeight: "100vh",
         }}
       >
         <AdminHeader
@@ -189,11 +193,8 @@ export default function AdminLayout({
 
         <AdminBreadcrumb items={breadcrumbItems} />
 
-        {/* Đây là phần body chính, nó sẽ co giãn và có thanh cuộn */}
-        <div
-          className="body min-h-screen flex-grow-1 px-3"
-          style={{ overflowY: "auto" }}
-        >
+        {/* [FIX] Đã xóa min-h-screen vì wrapper đã có minHeight và body có flex-grow-1. */}
+        <div className="body flex-grow-1 px-3" style={{ overflowY: "auto" }}>
           {children}
         </div>
 

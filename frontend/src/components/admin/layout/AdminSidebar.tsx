@@ -2,6 +2,7 @@
 import "@/app/globals.css";
 import {
   cilCart,
+  cilChartPie,
   cilCommentSquare,
   cilPuzzle,
   cilSettings,
@@ -101,6 +102,12 @@ const adminNavigation: NavigationItem[] = [
     name: "Đánh giá",
     to: "/admin/reviews",
     icon: <CIcon icon={cilCommentSquare} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: "Thống kê",
+    to: "/admin/reports",
+    icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
   },
   { component: CNavTitle, name: "Hệ thống" },
   {
