@@ -16,12 +16,14 @@ import toast from "react-hot-toast";
 interface PayPalButtonsWrapperProps {
   // Dữ liệu form (địa chỉ, ghi chú,...) để tạo đơn hàng trong DB
   getFormData: () => Omit<OrderCreationPayload, "selectedCartItemIds"> | null;
+  setIsProcessing: (isProcessing: boolean) => void;
 }
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
 const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
   getFormData,
+  setIsProcessing,
 }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -53,6 +55,8 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
   };
 
   const handleOnApprove = async (data: { orderID: string }): Promise<void> => {
+    setIsProcessing(true);
+
     try {
       const formData = getFormData();
       if (!formData) {
@@ -98,6 +102,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
         err.message ||
           "Đã xảy ra lỗi khi xác nhận thanh toán. Vui lòng liên hệ hỗ trợ.",
       );
+      setIsProcessing(false);
     }
   };
 
@@ -132,6 +137,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
             onApprove={handleOnApprove}
             onError={() => {
               toast.error("Đã xảy ra lỗi trong quá trình thanh toán PayPal.");
+              setIsProcessing(false);
             }}
             // Thêm forceReRender để tránh caching issues
             forceReRender={[selectedCartItemIds]}

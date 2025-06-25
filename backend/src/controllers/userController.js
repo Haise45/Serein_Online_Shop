@@ -238,7 +238,7 @@ const getUsers = asyncHandler(async (req, res) => {
         isEmailVerified: 1,
         isActive: 1,
         createdAt: 1,
-        orderCount: { $size: "$orders" },
+        orderCount: { $size: "$completedOrders" },
         totalSpent: { $sum: "$completedOrders.totalPrice" },
       },
     },

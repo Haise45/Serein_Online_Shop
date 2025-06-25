@@ -33,6 +33,7 @@ interface CheckoutFormProps {
     formData: Omit<OrderCreationPayload, "selectedCartItemIds">,
   ) => void;
   isSubmittingOrder: boolean;
+  setIsProcessingPayPal: (isProcessing: boolean) => void;
 }
 
 export const PAYMENT_METHODS = [
@@ -272,6 +273,7 @@ export default function CheckoutForm({
   setPaymentMethod,
   onSubmitOrder,
   isSubmittingOrder,
+  setIsProcessingPayPal,
 }: CheckoutFormProps) {
   const isAuthenticated = !!user;
   const [email, setEmail] = useState("");
@@ -307,12 +309,10 @@ export default function CheckoutForm({
       } else {
         setIsEditingNewAddress(true);
         setSelectedAddressId(null);
-        setNewAddressData({});
       }
     } else {
       setIsEditingNewAddress(true);
       setSelectedAddressId(null);
-      setNewAddressData({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, userAddresses]);
@@ -645,7 +645,10 @@ export default function CheckoutForm({
         {/* HIỂN THỊ NÚT PAYPAL HOẶC NÚT ĐẶT HÀNG THÔNG THƯỜNG */}
         {paymentMethod === "PAYPAL" ? (
           <div className="mx-auto mt-8">
-            <PayPalButtonsWrapper getFormData={getFormDataForPayPal} />
+            <PayPalButtonsWrapper
+              getFormData={getFormDataForPayPal}
+              setIsProcessing={setIsProcessingPayPal}
+            />
           </div>
         ) : (
           <div className="hidden pt-4">
