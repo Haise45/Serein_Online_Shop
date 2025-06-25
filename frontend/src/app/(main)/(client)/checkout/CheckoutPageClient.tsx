@@ -56,6 +56,7 @@ export default function CheckoutPageClient() {
     (state: RootState) => state.checkout.selectedItemIdsForCheckout,
   );
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
+  const [isProcessingPayPal, setIsProcessingPayPal] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].id);
 
   // --- DATA FETCHING ---
@@ -230,7 +231,12 @@ export default function CheckoutPageClient() {
   // --- SIDE EFFECTS ---
   useEffect(() => {
     // Chỉ chạy logic này khi các query đã hoàn tất và chưa có lệnh chuyển hướng nào
-    if (isLoadingCart || isLoadingCategories || isRedirecting) {
+    if (
+      isLoadingCart ||
+      isLoadingCategories ||
+      isRedirecting ||
+      isProcessingPayPal
+    ) {
       return;
     }
 
@@ -267,6 +273,7 @@ export default function CheckoutPageClient() {
     isRedirecting,
     stockErrorInCheckout,
     router,
+    isProcessingPayPal,
   ]);
 
   // --- HANDLERS ---
@@ -310,13 +317,15 @@ export default function CheckoutPageClient() {
     isLoadingCategories ||
     isLoadingAttributes;
 
-  if (isLoading || isRedirecting) {
+  if (isLoading || isRedirecting || isProcessingPayPal) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
         <FiLoader className="h-12 w-12 animate-spin text-indigo-600" />
-        {isRedirecting && (
-          <p className="text-lg text-gray-700">Đang hoàn tất đơn hàng...</p>
-        )}
+        <p className="text-lg text-gray-700">
+          {isRedirecting || isProcessingPayPal
+            ? "Đang hoàn tất đơn hàng..."
+            : "Đang tải..."}
+        </p>
       </div>
     );
   }
@@ -362,6 +371,7 @@ export default function CheckoutPageClient() {
             setPaymentMethod={setPaymentMethod}
             onSubmitOrder={handlePlaceOrder}
             isSubmittingOrder={createOrderMutation.isPending}
+            setIsProcessingPayPal={setIsProcessingPayPal}
           />
         </div>
         <div className="lg:col-span-5 xl:col-span-4">

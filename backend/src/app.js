@@ -22,6 +22,8 @@ const { productReviewRouter, reviewRouter } = require("./routes/reviewRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const attrttributeRoutes = require("./routes/attributeRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
 // Import error handler middleware
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
@@ -75,6 +77,7 @@ app.get("/api/v1", (req, res) => {
 app.use("/api/v1/cart", protectOptional, identifyCartUser);
 app.use("/api/v1/wishlist", protectOptional, identifyWishlistUser);
 
+app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/locations", locationRoutes);
@@ -89,6 +92,7 @@ app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/attributes", attrttributeRoutes);
+app.use("/api/v1/reports", reportRoutes);
 
 // Custom Error Handling Middlewares
 app.use(notFound);
