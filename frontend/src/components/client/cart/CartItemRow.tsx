@@ -10,6 +10,7 @@ import {
   Attribute,
   AttributeValue,
   CartItem as CartItemType,
+  ExchangeRates,
   ProductAttribute,
   VariantOptionValue,
 } from "@/types";
@@ -21,6 +22,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import classNames from "classnames";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useState } from "react";
@@ -42,6 +44,7 @@ interface CartItemRowProps {
   onSelectItem: (itemId: string, isSelected: boolean) => void;
   // Nhận vào bộ đệm tra cứu để dịch ID sang tên một cách hiệu quả
   attributeMap: Map<string, { label: string; values: Map<string, string> }>;
+  currencyOptions: { currency: "VND" | "USD"; rates: ExchangeRates | null };
 }
 
 export default function CartItemRow({
@@ -49,10 +52,12 @@ export default function CartItemRow({
   isSelected,
   onSelectItem,
   attributeMap,
+  currencyOptions,
 }: CartItemRowProps) {
   // --- Hooks ---
   const updateCartItemMutation = useUpdateCartItem();
   const removeCartItemMutation = useRemoveCartItem();
+  const t = useTranslations("CartItemRow");
 
   const productIdOrSlug =
     typeof item.productId === "string" ? item.productId : item.productId._id;
@@ -103,7 +108,7 @@ export default function CartItemRow({
         payload: { quantity: newQuantity },
       });
     } else if (newQuantity > item.availableStock) {
-      toast.error(`Chỉ còn ${item.availableStock} sản phẩm tồn kho.`);
+      toast.error(t("stockErrorToast", { stock: item.availableStock }));
       // Vẫn cập nhật số lượng về mức tối đa có thể
       updateCartItemMutation.mutate({
         itemId: item._id,
@@ -157,11 +162,11 @@ export default function CartItemRow({
         // Nếu chọn lại chính nó thì không làm gì cả
       } else {
         // 4. Nếu không tìm thấy biến thể nào khớp -> đây là tổ hợp không tồn tại
-        toast.error("Phiên bản này không có sẵn hoặc đã hết hàng.");
+        toast.error(t("variantUnavailableToast"));
         // Không cập nhật `selectedOptions` để UI giữ nguyên lựa chọn cũ hợp lệ
       }
     },
-    [productDetails, selectedOptions, item, updateCartItemMutation],
+    [productDetails, selectedOptions, item, updateCartItemMutation, t],
   );
 
   // --- Render Logic ---
@@ -190,17 +195,17 @@ export default function CartItemRow({
         <FiAlertCircle className="mr-3 h-6 w-6 flex-shrink-0 text-red-500" />
         <div className="flex-grow">
           <p className="font-medium text-red-700">
-            Lỗi tải thông tin cho sản phẩm &quot;{item.name}&quot;
+            {t("loadingErrorTitle", { name: item.name })}
           </p>
           <p className="text-xs text-gray-600">
-            {productErrorData?.message || "Sản phẩm có thể đã bị xóa hoặc ẩn."}
+            {productErrorData?.message || t("loadingErrorSubtitle")}
           </p>
         </div>
         <button
           onClick={() => refetchProduct()}
           className="ml-4 text-xs whitespace-nowrap text-indigo-600 hover:underline"
         >
-          Thử lại
+          {t("retryButton")}
         </button>
       </li>
     );
@@ -222,7 +227,7 @@ export default function CartItemRow({
             className="h-5 w-5 rounded-md border-gray-300 text-indigo-600 focus:ring-indigo-500"
             checked={isSelected}
             onChange={(e) => onSelectItem(item._id, e.target.checked)}
-            aria-label={`Chọn sản phẩm ${item.name}`}
+            aria-label={t("selectItemLabel", { name: item.name })}
           />
         </div>
         <div className="order-1 mb-4 flex-shrink-0 sm:mr-6 sm:mb-0 md:order-2">
@@ -248,7 +253,7 @@ export default function CartItemRow({
               </Link>
             </h3>
             <p className="ml-4 text-base font-medium whitespace-nowrap text-gray-900 sm:text-lg">
-              {formatCurrency(item.price * quantity)}
+              {formatCurrency(item.price * quantity, currencyOptions)}
             </p>
           </div>
 
@@ -261,7 +266,7 @@ export default function CartItemRow({
             </p>
           )}
           <p className="mt-1 text-sm text-gray-500">
-            Đơn giá: {formatCurrency(item.price)}
+            {t("unitPriceLabel")} {formatCurrency(item.price, currencyOptions)}
           </p>
 
           {(hasStockError || isOutOfStock) && (
@@ -275,16 +280,15 @@ export default function CartItemRow({
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-red-800">
-                    {isOutOfStock
-                      ? "Sản phẩm đã hết hàng"
-                      : "Sản phẩm không đủ"}
+                    {isOutOfStock ? t("outOfStock") : t("insufficientStock")}
                   </h3>
                   {!isOutOfStock && hasStockError && (
                     <div className="mt-1 text-xs text-red-700">
                       <p>
-                        Bạn đang chọn {item.quantity} sản phẩm, nhưng hiện chỉ
-                        còn {item.availableStock} sản phẩm. Vui lòng cập nhật số
-                        lượng hoặc chọn sản phẩm khác. Xin cảm ơn
+                        {t("stockWarningMessage", {
+                          quantity: item.quantity,
+                          availableStock: item.availableStock,
+                        })}
                       </p>
                     </div>
                   )}
@@ -327,7 +331,9 @@ export default function CartItemRow({
                               {attributeMap
                                 .get(attribute._id)
                                 ?.values.get(currentSelectedValueId) ||
-                                `Chọn ${attribute.label}`}
+                                t("selectAttributePlaceholder", {
+                                  label: attribute.label,
+                                })}
                             </span>
                             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                               <FiChevronDown
@@ -397,7 +403,9 @@ export default function CartItemRow({
         <div className="mt-4 flex items-center justify-between pt-2 sm:pt-0">
           {isOutOfStock ? (
             <div className="flex-grow">
-              <p className="text-sm font-semibold text-red-700">Đã hết hàng</p>
+              <p className="text-sm font-semibold text-red-700">
+                {t("outOfStock")}
+              </p>
             </div>
           ) : (
             <div
@@ -412,7 +420,7 @@ export default function CartItemRow({
                 type="button"
                 onClick={() => handleQuantityChange(quantity - 1)}
                 disabled={quantity <= 1 || updateCartItemMutation.isPending}
-                aria-label="Giảm số lượng"
+                aria-label={t("decreaseQuantityLabel")}
                 className="flex items-center justify-center px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <FiMinus className="h-5 w-5 text-gray-600" />
@@ -421,7 +429,7 @@ export default function CartItemRow({
                 type="text"
                 readOnly
                 value={quantity}
-                aria-label={`Số lượng của ${item.name}`}
+                aria-label={t("quantityAriaLabel", { name: item.name })}
                 className={classNames(
                   "w-12 border-x border-x-gray-400 text-center text-base font-medium select-none focus:outline-none",
                   hasStockError ? "text-red-500" : "text-gray-600",
@@ -434,7 +442,7 @@ export default function CartItemRow({
                   quantity >= item.availableStock ||
                   updateCartItemMutation.isPending
                 }
-                aria-label="Tăng số lượng"
+                aria-label={t("increaseQuantityLabel")}
                 className="flex items-center justify-center px-3 py-2 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <FiPlus className="h-5 w-5 text-gray-600" />
@@ -453,7 +461,7 @@ export default function CartItemRow({
             ) : (
               <FiTrash2 className="h-5 w-5" />
             )}
-            <span className="ml-2 hidden sm:inline">Xóa</span>
+            <span className="ml-2 hidden sm:inline">{t("removeButton")}</span>
           </button>
         </div>
       </div>

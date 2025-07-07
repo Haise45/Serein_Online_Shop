@@ -1,9 +1,11 @@
 "use client";
 
-import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
+import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
 import { Category } from "@/types/category"; // Cần Category để lấy tên từ slug
 import { formatCurrency } from "@/lib/utils"; // Giả sử bạn có hàm này
 import { FiX } from "react-icons/fi";
+import { ExchangeRates } from "@/types";
+import { useTranslations } from "next-intl";
 
 interface ActiveFiltersDisplayProps {
   filters: ProductFilters;
@@ -12,6 +14,8 @@ interface ActiveFiltersDisplayProps {
   onFilterChange: (newFilters: ProductFilters) => void;
   onSearchChange: (searchTerm: string) => void;
   onClearAllFilters: () => void; // Hàm để xóa tất cả filter
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 interface FilterTag {
@@ -28,14 +32,19 @@ export default function ActiveFiltersDisplay({
   onFilterChange,
   onSearchChange,
   onClearAllFilters,
+  displayCurrency,
+  rates,
 }: ActiveFiltersDisplayProps) {
+  const t = useTranslations("ProductPage");
+  const f = useTranslations("ProductFilters");
   const activeFilterTags: FilterTag[] = [];
+  const currencyOptions = { currency: displayCurrency, rates };
 
   // 1. Search Term
   if (searchTerm) {
     activeFilterTags.push({
       type: "search",
-      keyDisplay: "Tìm kiếm",
+      keyDisplay: f("searchLabel"),
       valueDisplay: searchTerm,
       onRemove: () => onSearchChange(""),
     });
@@ -48,7 +57,7 @@ export default function ActiveFiltersDisplay({
       filters.category;
     activeFilterTags.push({
       type: "category",
-      keyDisplay: "Danh mục",
+      keyDisplay: f("categoryTitle"),
       valueDisplay: categoryName,
       onRemove: () => onFilterChange({ ...filters, category: undefined }),
     });
@@ -58,16 +67,16 @@ export default function ActiveFiltersDisplay({
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     let priceDisplay = "";
     if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-      priceDisplay = `${formatCurrency(filters.minPrice)} - ${formatCurrency(filters.maxPrice)}`;
+      priceDisplay = `${formatCurrency(filters.minPrice, currencyOptions)} - ${formatCurrency(filters.maxPrice, currencyOptions)}`;
     } else if (filters.minPrice !== undefined) {
-      priceDisplay = `Từ ${formatCurrency(filters.minPrice)}`;
+      priceDisplay = `${f("fromPlaceholder")} ${formatCurrency(filters.minPrice, currencyOptions)}`;
     } else if (filters.maxPrice !== undefined) {
-      priceDisplay = `Dưới ${formatCurrency(filters.maxPrice)}`;
+      priceDisplay = `${f("toPlaceholder")} ${formatCurrency(filters.maxPrice, currencyOptions)}`;
     }
     if (priceDisplay) {
       activeFilterTags.push({
         type: "minPrice", // Hoặc "maxPrice", không quan trọng lắm vì xóa cả hai
-        keyDisplay: "Giá",
+        keyDisplay: f("priceTitle"),
         valueDisplay: priceDisplay,
         onRemove: () =>
           onFilterChange({
@@ -123,8 +132,8 @@ export default function ActiveFiltersDisplay({
   if (filters.minRating !== undefined && filters.minRating > 0) {
     activeFilterTags.push({
       type: "rating",
-      keyDisplay: "Đánh giá",
-      valueDisplay: `Từ ${filters.minRating} sao`,
+      keyDisplay: f("ratingTitle"),
+      valueDisplay: f("fromXStars", { count: filters.minRating }),
       onRemove: () => onFilterChange({ ...filters, minRating: undefined }),
     });
   }
@@ -137,27 +146,27 @@ export default function ActiveFiltersDisplay({
     <div className="mb-4 pt-1">
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm font-medium text-gray-700">
-          Đang lọc theo:
+          {t("activeFiltersLabel")}
         </span>
         {activeFilterTags.map((tag, index) => (
           <span
             key={`${tag.type}-${tag.keyDisplay}-${tag.valueDisplay}-${index}`} // Key phức tạp hơn để đảm bảo duy nhất
             className="inline-flex items-center rounded-full bg-indigo-100 py-1 pr-1 pl-2.5 text-xs font-medium text-indigo-700"
           >
-            {tag.keyDisplay !== "search" &&
-              tag.keyDisplay !== "category" &&
-              tag.keyDisplay !== "Giá" &&
-              tag.keyDisplay !== "Đánh giá" && (
-                <span className="mr-1 font-normal text-indigo-500">
-                  {tag.keyDisplay}:
-                </span>
-              )}
+            {tag.type !== "search" && (
+              <span className="mr-1.5 font-normal text-indigo-500">
+                {tag.keyDisplay}:
+              </span>
+            )}
             {tag.valueDisplay}
             <button
               type="button"
               onClick={tag.onRemove}
               className="ml-1.5 inline-flex flex-shrink-0 rounded-full p-0.5 text-indigo-500 hover:bg-indigo-200 hover:text-indigo-600 focus:bg-indigo-500 focus:text-white focus:outline-none"
-              aria-label={`Xóa filter ${tag.keyDisplay}: ${tag.valueDisplay}`}
+              aria-label={t("removeFilterAriaLabel", {
+                keyDisplay: tag.keyDisplay,
+                valueDisplay: tag.valueDisplay,
+              })}
             >
               <FiX className="h-3 w-3" />
             </button>
@@ -168,7 +177,7 @@ export default function ActiveFiltersDisplay({
             onClick={onClearAllFilters}
             className="ml-2 text-xs text-gray-500 hover:text-red-600 hover:underline"
           >
-            Xóa tất cả
+            {t("clearAllButton")}
           </button>
         )}
       </div>

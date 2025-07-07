@@ -9,6 +9,7 @@ import {
   MenuItems,
   Transition,
 } from "@headlessui/react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
   useSearchParams as useNextSearchParamsHook,
@@ -23,6 +24,7 @@ import {
   FiUser,
   FiUserPlus,
 } from "react-icons/fi";
+import { MdDashboard } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function UserMenu() {
@@ -30,6 +32,8 @@ export default function UserMenu() {
     (state: RootState) => state.auth,
   );
   const dispatch = useDispatch<AppDispatch>();
+
+  const t = useTranslations("UserMenu");
 
   // Lấy thông tin URL hiện tại
   const pathname = usePathname();
@@ -52,9 +56,7 @@ export default function UserMenu() {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton
-          className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        <MenuButton className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
           <span className="sr-only">Mở menu người dùng</span>
           <FiUser className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
         </MenuButton>
@@ -74,17 +76,29 @@ export default function UserMenu() {
             <>
               <div className="px-4 py-3">
                 <p className="text-sm font-medium text-gray-900">
-                  Chào, {user.name}!
+                  {t("greeting", { name: user.name })}
                 </p>
                 <p className="truncate text-xs text-gray-500">{user.email}</p>
               </div>
+              {/* Nếu là admin thì hiện đường dẫn đến dashboard */}
+              {user.role === "admin" && (
+                <MenuItem as={Fragment}>
+                  <Link
+                    href="/admin/dashboard"
+                    className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                  >
+                    <MdDashboard className="mr-3 inline-block h-4 w-4" />
+                    {t("dashboard")}
+                  </Link>
+                </MenuItem>
+              )}
               <MenuItem as={Fragment}>
                 <Link
                   href="/profile"
                   className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiSettings className="mr-2 inline-block h-4 w-4" /> Thông tin
-                  cá nhân
+                  <FiSettings className="mr-2 inline-block h-4 w-4" />{" "}
+                  {t("profile")}
                 </Link>
               </MenuItem>
               <MenuItem as={Fragment}>
@@ -92,8 +106,8 @@ export default function UserMenu() {
                   href="/profile/orders"
                   className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiFileText className="mr-2 inline-block h-4 w-4" /> Đơn hàng
-                  của tôi
+                  <FiFileText className="mr-2 inline-block h-4 w-4" />{" "}
+                  {t("my_orders")}
                 </Link>
               </MenuItem>
               <MenuItem>
@@ -101,7 +115,8 @@ export default function UserMenu() {
                   onClick={handleLogout}
                   className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiLogOut className="mr-2 inline-block h-4 w-4" /> Đăng xuất
+                  <FiLogOut className="mr-2 inline-block h-4 w-4" />{" "}
+                  {t("logout")}
                 </button>
               </MenuItem>
             </>
@@ -113,7 +128,7 @@ export default function UserMenu() {
                   href={`/login?redirect=${encodeURIComponent(redirectUrl)}`}
                   className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiLogIn className="mr-2 inline-block h-4 w-4" /> Đăng nhập
+                  <FiLogIn className="mr-2 inline-block h-4 w-4" /> {t("login")}
                 </Link>
               </MenuItem>
               <MenuItem as={Fragment}>
@@ -122,7 +137,8 @@ export default function UserMenu() {
                   href={`/register?redirect=${encodeURIComponent(redirectUrl)}`}
                   className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                 >
-                  <FiUserPlus className="mr-2 inline-block h-4 w-4" /> Đăng ký
+                  <FiUserPlus className="mr-2 inline-block h-4 w-4" />{" "}
+                  {t("register")}
                 </Link>
               </MenuItem>
             </>

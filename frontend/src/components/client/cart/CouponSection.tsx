@@ -3,6 +3,7 @@ import { useApplyCoupon, useRemoveCoupon } from "@/lib/react-query/cartQueries";
 import { useGetCoupons } from "@/lib/react-query/couponQueries";
 import { formatCurrency } from "@/lib/utils";
 import { GetCouponsParams } from "@/services/couponService";
+import { ExchangeRates } from "@/types";
 import { AppliedCouponInfo, CartItem as CartItemType } from "@/types/cart";
 import { Category } from "@/types/category";
 import { Coupon } from "@/types/coupon";
@@ -14,6 +15,7 @@ import {
   FiTag,
   FiXCircle,
 } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface CouponSectionProps {
   cartSubtotal: number;
@@ -24,6 +26,7 @@ interface CouponSectionProps {
     categoryId: string,
     categoryMap: Map<string, Category>,
   ) => string[];
+  currencyOptions: { currency: "VND" | "USD"; rates: ExchangeRates | null };
 }
 
 export default function CouponSection({
@@ -32,7 +35,9 @@ export default function CouponSection({
   selectedItems,
   categoryMap,
   getAncestorsFn,
+  currencyOptions,
 }: CouponSectionProps) {
+  const t = useTranslations("CouponSection");
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [showApplicableCoupons, setShowApplicableCoupons] = useState(true);
 
@@ -228,7 +233,7 @@ export default function CouponSection({
               type="text"
               value={couponCodeInput}
               onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
-              placeholder="Nhập mã giảm giá"
+              placeholder={t("inputPlaceholder")}
               className="block w-full rounded-md border-gray-300 px-3 py-1.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               disabled={applyCouponMutation.isPending}
             />
@@ -243,7 +248,7 @@ export default function CouponSection({
               applyCouponMutation.variables === couponCodeInput.trim() ? (
                 <FiLoader className="h-5 w-5 animate-spin" />
               ) : (
-                "Áp dụng"
+                t("applyButton")
               )}
             </button>
           </form>
@@ -254,7 +259,7 @@ export default function CouponSection({
           <div className="mt-3 text-center">
             <FiLoader className="inline-block h-5 w-5 animate-spin text-gray-400" />
             <span className="ml-2 text-xs text-gray-500">
-              Đang tải mã giảm giá...
+              {t("loadingCoupons")}
             </span>
           </div>
         )}
@@ -268,7 +273,9 @@ export default function CouponSection({
                 className="flex w-full items-center justify-between text-left text-xs font-medium text-indigo-600 hover:text-indigo-800"
               >
                 <span>
-                  Xem mã giảm giá khả dụng ({displayableCoupons.length})
+                  {t("viewAvailableCoupons", {
+                    count: displayableCoupons.length,
+                  })}
                 </span>
                 {showApplicableCoupons ? (
                   <FiChevronUp className="h-4 w-4" />
@@ -288,10 +295,22 @@ export default function CouponSection({
                           {coupon.code}
                           <p className="text-[10px] leading-tight font-normal text-gray-500">
                             {coupon.discountType === "percentage"
-                              ? `Giảm ${coupon.discountValue}%`
-                              : `Giảm ${formatCurrency(coupon.discountValue)}`}
+                              ? t("discountPercentage", {
+                                  value: coupon.discountValue,
+                                })
+                              : t("discountFixed", {
+                                  value: formatCurrency(
+                                    coupon.discountValue,
+                                    currencyOptions,
+                                  ),
+                                })}
                             {coupon.minOrderValue > 0 &&
-                              `, cho đơn từ ${formatCurrency(coupon.minOrderValue)}`}
+                              t("forOrdersFrom", {
+                                value: formatCurrency(
+                                  coupon.minOrderValue,
+                                  currencyOptions,
+                                ),
+                              })}
                           </p>
                         </div>
                         {coupon.code !== appliedCouponFull?.code && (
@@ -307,20 +326,24 @@ export default function CouponSection({
                             applyCouponMutation.variables === coupon.code ? (
                               <FiLoader className="h-3 w-3 animate-spin" />
                             ) : (
-                              "Áp dụng"
+                              t("applyButton")
                             )}
                           </button>
                         )}
                       </div>
                       <p className="mt-1 text-[10px] text-gray-500">
-                        HSD:{" "}
-                        {new Date(coupon.expiryDate).toLocaleDateString(
-                          "vi-VN",
-                        )}
+                        {t("expiryDate", {
+                          date: new Date(coupon.expiryDate).toLocaleDateString(
+                            "vi-VN",
+                          ),
+                        })}
                         {coupon.maxUsage != null &&
                           coupon.usageCount != null && (
                             <>
-                              (Còn {coupon.maxUsage - coupon.usageCount} lượt)
+                              {" "}
+                              {t("usesLeft", {
+                                count: coupon.maxUsage - coupon.usageCount,
+                              })}
                             </>
                           )}
                       </p>

@@ -37,6 +37,26 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Lấy locale hiện tại từ URL của trình duyệt client-side
+    // Chúng ta không thể dùng hook ở đây vì đây là một file JS/TS thông thường
+    if (typeof window !== "undefined") {
+      const pathSegments = window.location.pathname.split("/");
+      // Giả sử locale luôn là segment đầu tiên sau domain, ví dụ /en/products
+      // Hoặc nếu không có, nó là ngôn ngữ mặc định
+      const potentialLocale = pathSegments[1];
+      const supportedLocales = ["vi", "en"]; // Đồng bộ với middleware của bạn
+
+      let currentLocale = "vi"; // Mặc định
+      if (supportedLocales.includes(potentialLocale)) {
+        currentLocale = potentialLocale;
+      }
+
+      // Gắn vào header
+      if (config.headers) {
+        config.headers["Accept-Language"] = currentLocale;
+      }
+    }
+
     // Nếu data là FormData, Axios sẽ tự động set Content-Type đúng.
     // Nếu data là object JSON, Axios cũng sẽ tự động set Content-Type là application/json nếu không có gì khác được chỉ định.
     if (

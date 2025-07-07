@@ -1,3 +1,4 @@
+import { useSettings } from "@/app/SettingsContext";
 import { formatCurrency, getVariantDisplayName } from "@/lib/utils";
 import { Attribute, Product, Variant } from "@/types";
 import {
@@ -56,6 +57,9 @@ const ProductTable: React.FC<ProductTableProps> = ({
   setViewingVariantsForProduct,
   queryString,
 }) => {
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
+
   // Tạo một map để tra cứu tên thuộc tính/giá trị từ ID một cách hiệu quả
   const attributeMap = useMemo(() => {
     const map = new Map<
@@ -247,14 +251,14 @@ const ProductTable: React.FC<ProductTableProps> = ({
 
                 <CTableDataCell className="text-end">
                   <span className="fw-semibold text-gray-800">
-                    {formatCurrency(product.displayPrice)}
+                    {formatCurrency(product.displayPrice, { currency: displayCurrency, rates })}
                   </span>
                   {product.isOnSale && (
                     <CTooltip
-                      content={`Giá gốc: ${formatCurrency(product.price)}`}
+                      content={`Giá gốc: ${formatCurrency(product.price, { currency: displayCurrency, rates })}`}
                     >
                       <div className="text-xs text-gray-500 line-through">
-                        {formatCurrency(product.price)}
+                        {formatCurrency(product.price, { currency: displayCurrency, rates })}
                       </div>
                     </CTooltip>
                   )}
@@ -488,11 +492,11 @@ const ProductTable: React.FC<ProductTableProps> = ({
                     </CTableDataCell>
                     <CTableDataCell className="text-end">
                       <div className="fw-semibold text-gray-800">
-                        {formatCurrency(variant.salePrice)}
+                        {formatCurrency(variant.salePrice, { currency: displayCurrency, rates })}
                       </div>
                       {viewingVariantsForProduct?.isOnSale && (
                         <div className="text-xs text-gray-400 line-through">
-                          {formatCurrency(variant.price)}
+                          {formatCurrency(variant.price, { currency: displayCurrency, rates })}
                         </div>
                       )}
                     </CTableDataCell>

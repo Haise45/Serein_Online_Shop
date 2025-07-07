@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
 
 // Sub-schema cho địa chỉ giao hàng (snapshot)
 const shippingAddressSchema = new mongoose.Schema(
@@ -18,18 +19,21 @@ const shippingAddressSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Sub-schema cho một tùy chọn của biến thể trong snapshot
+const orderItemVariantOptionSchema = new mongoose.Schema(
+  {
+    attributeName: i18nStringSchema,
+    value: i18nStringSchema,
+  },
+  { _id: false }
+);
+
 // Sub-schema cho thông tin biến thể (snapshot)
 const orderItemVariantSchema = new mongoose.Schema(
   {
     variantId: { type: mongoose.Schema.Types.ObjectId, required: true },
     sku: { type: String },
-    options: [
-      {
-        _id: false,
-        attributeName: { type: String, required: true },
-        value: { type: String, required: true },
-      },
-    ],
+    options: [orderItemVariantOptionSchema],
   },
   { _id: false }
 );
@@ -37,7 +41,7 @@ const orderItemVariantSchema = new mongoose.Schema(
 // Sub-schema cho một item trong đơn hàng (snapshot)
 const orderItemSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // Tên sản phẩm lúc đặt
+    name: { type: i18nStringSchema, required: true }, // Tên sản phẩm lúc đặt
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true }, // Giá MỘT sản phẩm lúc đặt
     image: { type: String }, // URL ảnh chính hoặc ảnh variant lúc đặt

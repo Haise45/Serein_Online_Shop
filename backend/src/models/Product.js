@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
 
 // === SUB-SCHEMA MỚI CHO THUỘC TÍNH CỦA SẢN PHẨM ===
 // Lưu trữ tham chiếu đến thuộc tính và các giá trị đã chọn
@@ -73,14 +74,13 @@ const variantSchema = new mongoose.Schema(
 const productSchema = new mongoose.Schema(
   {
     name: {
-      type: String,
+      type: i18nStringSchema,
       required: [true, "Vui lòng nhập tên sản phẩm"],
       trim: true,
       maxlenght: [200, "Tên sản phẩm không được quá 200 ký tự"],
-      text: true,
     },
     slug: { type: String, unique: true, index: true },
-    description: { type: String, trim: true },
+    description: { type: i18nStringSchema, trim: true },
     price: {
       type: Number,
       required: [true, "Vui lòng nhập giá sản phẩm"],
@@ -181,8 +181,13 @@ productSchema.virtual("isConsideredNew").get(function () {
 
 // Middleware tạo slug tự động
 productSchema.pre("save", function (next) {
-  if (this.isModified("name")) {
-    this.slug = slugify(this.name, { lower: true, strict: true, locale: "vi" });
+  // Chỉ tạo slug nếu tên Tiếng Việt được thay đổi
+  if (this.isModified("name.vi")) {
+    this.slug = slugify(this.name.vi, {
+      lower: true,
+      strict: true,
+      locale: "vi",
+    });
   }
   next();
 });
@@ -207,18 +212,23 @@ productSchema.pre("save", function (next) {
 // Index cho tìm kiếm text
 productSchema.index(
   {
-    name: "text", // Trường tên sản phẩm
-    sku: "text", // SKU
-    description: "text", // Mô tả
+    "name.vi": "text",
+    "name.en": "text",
+    "description.vi": "text",
+    "description.en": "text",
+    sku: "text",
+    "variants.sku": "text",
   },
   {
     weights: {
-      name: 10, // Ưu tiên rất cao cho tên sản phẩm
-      sku: 7, // SKU cũng quan trọng
-      description: 2, // Mô tả ít quan trọng hơn
-      // ... các weights khác nếu bạn thêm trường
+      "name.vi": 10, // Tên sản phẩm có trọng số cao nhất
+      "name.en": 10,
+      sku: 8,
+      "variants.sku": 8,
+      "description.vi": 2,
+      "description.en": 2,
     },
-    name: "ProductTextSearchIndex", // Đặt tên cụ thể cho index
+    name: "ProductSearchIndex", // Đặt tên cụ thể cho index
   }
 );
 

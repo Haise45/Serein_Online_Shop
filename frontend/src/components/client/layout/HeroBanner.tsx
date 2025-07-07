@@ -92,6 +92,7 @@ export default function HeroBanner() {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1200px"
               style={{ objectFit: "cover" }}
               priority={slide.id === 1}
+              quality={100}
               className="transition-all duration-500 group-hover:brightness-70 object-center"
             />
             {/* Container cho text và button */}

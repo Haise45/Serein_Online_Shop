@@ -9,6 +9,7 @@ import {
   FiMaximize2,
   FiX,
 } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface ImageGalleryProps {
   images: string[];
@@ -21,6 +22,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   productName,
   className = "",
 }) => {
+  const t = useTranslations("ImageGallery");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({
@@ -90,7 +92,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               />
             </svg>
           </div>
-          <p className="text-gray-500">Không có ảnh</p>
+          <p className="text-gray-500">{t("noImages")}</p>
         </div>
       </div>
     );
@@ -107,14 +109,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               <button
                 onClick={handlePrevious}
                 className="absolute top-1/2 left-3 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white hover:shadow-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                aria-label="Ảnh trước"
+                aria-label={t("prevImage")}
               >
                 <FiChevronLeft className="h-6 w-6" />
               </button>
               <button
                 onClick={handleNext}
                 className="absolute top-1/2 right-3 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white hover:shadow-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                aria-label="Ảnh tiếp theo"
+                aria-label={t("nextImage")}
               >
                 <FiChevronRight className="h-6 w-6" />
               </button>
@@ -125,7 +127,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           <button
             onClick={() => setIsFullscreen(true)}
             className="absolute top-4 right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white hover:shadow-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            aria-label="Xem toàn màn hình"
+            aria-label={t("fullscreen")}
           >
             <FiMaximize2 className="h-5 w-5" />
           </button>
@@ -133,7 +135,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           {/* Image Counter */}
           {images.length > 1 && (
             <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/70 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
-              {selectedImageIndex + 1} / {images.length}
+              {t("imageCounter", {
+                current: selectedImageIndex + 1,
+                total: images.length,
+              })}
             </div>
           )}
 
@@ -141,7 +146,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           <Image
             key={selectedImageIndex}
             src={images[selectedImageIndex]}
-            alt={`${productName} - Ảnh chính`}
+            alt={t("mainImageAlt", { name: productName })}
             fill
             priority={selectedImageIndex === 0}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 70vw, 60vw"
@@ -174,11 +179,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                         selectedImageIndex !== index,
                     },
                   )}
-                  aria-label={`Xem ảnh ${index + 1}`}
+                  aria-label={t("viewThumbnail", { index: index + 1 })}
                 >
                   <Image
                     src={image}
-                    alt={`${productName} - Thumbnail ${index + 1}`}
+                    alt={t("thumbnailAlt", {
+                      name: productName,
+                      index: index + 1,
+                    })}
                     fill
                     sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 96px"
                     className="object-cover transition-all duration-300 group-hover:scale-105"
@@ -218,7 +226,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           <button
             onClick={() => setIsFullscreen(false)}
             className="absolute top-6 right-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white transition-all duration-200 hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none"
-            aria-label="Đóng"
+            aria-label={t("close")}
           >
             <FiX className="h-6 w-6" />
           </button>
@@ -232,7 +240,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   handlePrevious();
                 }}
                 className="absolute top-1/2 left-6 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white transition-all duration-200 hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none"
-                aria-label="Ảnh trước"
+                aria-label={t("prevImage")}
               >
                 <FiChevronLeft className="h-7 w-7" />
               </button>
@@ -242,7 +250,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   handleNext();
                 }}
                 className="absolute top-1/2 right-6 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white transition-all duration-200 hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none"
-                aria-label="Ảnh tiếp theo"
+                aria-label={t("nextImage")}
               >
                 <FiChevronRight className="h-7 w-7" />
               </button>
@@ -256,7 +264,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           >
             <Image
               src={images[selectedImageIndex]}
-              alt={`${productName} - Ảnh ${selectedImageIndex + 1}`}
+              alt={t("fullscreenImageAlt", {
+                name: productName,
+                index: selectedImageIndex + 1,
+              })}
               fill
               sizes="90vw"
               className="object-contain"
@@ -267,7 +278,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           {/* Image Counter in Fullscreen */}
           {images.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/20 px-6 py-3 font-medium text-white backdrop-blur-sm">
-              {selectedImageIndex + 1} / {images.length}
+              {t("imageCounter", {
+                current: selectedImageIndex + 1,
+                total: images.length,
+              })}
             </div>
           )}
 
@@ -290,11 +304,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                         selectedImageIndex !== index,
                     },
                   )}
-                  aria-label={`Xem ảnh ${index + 1}`}
+                  aria-label={t("viewThumbnail", { index: index + 1 })}
                 >
                   <Image
                     src={image}
-                    alt={`${productName} - Thumbnail ${index + 1}`}
+                    alt={t("thumbnailAlt", {
+                      name: productName,
+                      index: index + 1,
+                    })}
                     width={80}
                     height={80}
                     className="h-full w-full object-cover"

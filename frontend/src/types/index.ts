@@ -12,3 +12,4 @@ export * from "./order_model";
 export * from "./wishlist";
 export * from "./coupon";
 export * from "./attribute";
+export * from "./setting";

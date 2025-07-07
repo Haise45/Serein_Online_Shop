@@ -1,7 +1,7 @@
 "use client";
 
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Coupon } from "@/types";
+import { Coupon, ExchangeRates } from "@/types";
 import { cilCheckCircle, cilPen, cilTrash, cilXCircle } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import {
@@ -21,14 +21,19 @@ interface CouponTableProps {
   coupons: Coupon[];
   onDeleteClick: (couponId: string, couponCode: string) => void;
   onEditClick: (couponId: string) => void;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 const CouponTable: React.FC<CouponTableProps> = ({
   coupons,
   onDeleteClick,
   onEditClick,
+  displayCurrency,
+  rates,
 }) => {
   const now = new Date();
+  const currencyOptions = { currency: displayCurrency, rates };
 
   return (
     <CTable hover responsive className="align-middle text-sm">
@@ -71,14 +76,14 @@ const CouponTable: React.FC<CouponTableProps> = ({
                 <div className="fw-semibold text-success">
                   {coupon.discountType === "percentage"
                     ? `${coupon.discountValue}%`
-                    : formatCurrency(coupon.discountValue)}
+                    : formatCurrency(coupon.discountValue, currencyOptions)}
                 </div>
               </CTableDataCell>
               <CTableDataCell>
                 <div className="text-xs">
                   {coupon.minOrderValue > 0 && (
                     <div>
-                      ĐH tối thiểu: {formatCurrency(coupon.minOrderValue)}
+                      ĐH tối thiểu: {formatCurrency(coupon.minOrderValue, currencyOptions)}
                     </div>
                   )}
                   <div>

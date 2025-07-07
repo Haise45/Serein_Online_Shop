@@ -20,6 +20,7 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 import { FiCamera, FiLoader, FiX } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface OrderActionRequestModalProps {
   isOpen: boolean;
@@ -44,6 +45,7 @@ export default function OrderActionRequestModal({
   onSubmitRequest,
   isSubmittingRequest,
 }: OrderActionRequestModalProps) {
+  const t = useTranslations("OrderActionModal");
   const [reason, setReason] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]); // Mảng các đối tượng File
   const [imagePreviews, setImagePreviews] = useState<string[]>([]); // Mảng các URL preview (tạo bằng URL.createObjectURL)
@@ -51,16 +53,15 @@ export default function OrderActionRequestModal({
 
   const uploadImagesMutation = useUploadImages(); // Hook để upload ảnh qua backend
 
-  const modalTitleText =
-    actionType === "cancellation"
-      ? "Yêu cầu hủy đơn hàng"
-      : "Yêu cầu trả hàng/hoàn tiền";
-  const reasonLabel =
-    actionType === "cancellation"
-      ? "Lý do hủy đơn"
-      : "Lý do trả hàng/hoàn tiền";
-  const submitButtonText =
-    actionType === "cancellation" ? "Gửi yêu cầu hủy" : "Gửi yêu cầu trả hàng";
+  const modalTitleText = t(
+    actionType === "cancellation" ? "cancelTitle" : "refundTitle",
+  );
+  const reasonLabel = t(
+    actionType === "cancellation" ? "cancelReasonLabel" : "refundReasonLabel",
+  );
+  const submitButtonText = t(
+    actionType === "cancellation" ? "submitCancelButton" : "submitRefundButton",
+  );
 
   const isProcessing = isSubmittingRequest || uploadImagesMutation.isPending; // Trạng thái loading chung
 
@@ -73,17 +74,17 @@ export default function OrderActionRequestModal({
 
       for (const file of files) {
         if (filesToAdd.length + currentTotalFiles >= MAX_IMAGES) {
-          toast.error(`Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} hình ảnh.`);
+          toast.error(t("maxImagesError", { count: MAX_IMAGES }));
           break; // Dừng nếu đã đủ số lượng tối đa
         }
         if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
           toast.error(
-            `Kích thước ảnh "${file.name}" quá lớn (Tối đa ${MAX_FILE_SIZE_MB}MB).`,
+            t("fileTooLargeError", { name: file.name, size: MAX_FILE_SIZE_MB }),
           );
           continue;
         }
         if (!file.type.startsWith("image/")) {
-          toast.error(`Tệp "${file.name}" không phải là hình ảnh.`);
+          toast.error(t("notAnImageError", { name: file.name }));
           continue;
         }
         filesToAdd.push(file);
@@ -109,7 +110,7 @@ export default function OrderActionRequestModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error("Vui lòng nhập lý do.");
+      toast.error(t("reasonRequiredError"));
       return;
     }
     if (isProcessing) return;
@@ -131,7 +132,7 @@ export default function OrderActionRequestModal({
 
       await onSubmitRequest(orderId, payload); // Gọi hàm submit chính (từ UserOrdersClient)
     } catch (error) {
-      console.error(`Lỗi trong quá trình gửi yêu cầu ${actionType}:`, error);
+      console.error(`Failed for request ${actionType}:`, error);
     }
   };
 
@@ -198,7 +199,7 @@ export default function OrderActionRequestModal({
                     onClick={() => !isProcessing && onClose()}
                     className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
                     disabled={isProcessing}
-                    title="Đóng cửa sổ"
+                    title={t("closeButtonTitle")}
                   >
                     <FiX />
                   </button>
@@ -219,7 +220,7 @@ export default function OrderActionRequestModal({
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
                       className="input-field w-full resize-none"
-                      placeholder="Mô tả chi tiết lý do của bạn..."
+                      placeholder={t("reasonPlaceholder")}
                       required
                       disabled={isProcessing}
                     />
@@ -227,12 +228,12 @@ export default function OrderActionRequestModal({
 
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Hình ảnh thực tế (Tối đa {MAX_IMAGES} ảnh)
+                      {t("imagesLabel", { count: MAX_IMAGES })}
                     </label>
                     <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6 transition-colors hover:border-indigo-500">
                       <div className="space-y-1 text-center">
                         <FiCamera className="mx-auto h-10 w-10 text-gray-400" />
-                        <div className="flex text-sm text-gray-600 justify-center">
+                        <div className="flex justify-center text-sm text-gray-600">
                           <label
                             htmlFor={`file-upload-${actionType}`}
                             className={classNames(
@@ -244,7 +245,7 @@ export default function OrderActionRequestModal({
                               },
                             )}
                           >
-                            <span>Tải ảnh lên</span>
+                            <span>{t("uploadButton")}</span>
                             <input
                               id={`file-upload-${actionType}`}
                               name="file-upload"
@@ -259,10 +260,10 @@ export default function OrderActionRequestModal({
                               }
                             />
                           </label>
-                          <p className="pl-1">hoặc kéo thả</p>
+                          <p className="pl-1">{t("orDragAndDrop")}</p>
                         </div>
                         <p className="text-xs text-gray-500">
-                          PNG, JPG, GIF, WEBP (Tối đa {MAX_FILE_SIZE_MB}MB/ảnh)
+                          {t("fileTypes", { size: MAX_FILE_SIZE_MB })}
                         </p>
                       </div>
                     </div>
@@ -285,7 +286,7 @@ export default function OrderActionRequestModal({
                               onClick={() => removeImage(index)}
                               disabled={isProcessing}
                               className="absolute top-0.5 right-0.5 z-10 rounded-full bg-red-600 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700 focus:opacity-100 disabled:cursor-not-allowed disabled:bg-gray-300"
-                              aria-label="Xóa ảnh"
+                              aria-label={t("removeImage")}
                             >
                               <FiX className="h-3 w-3" />
                             </button>
@@ -297,7 +298,7 @@ export default function OrderActionRequestModal({
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isProcessing}
                             className="flex aspect-square items-center justify-center rounded-md border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-indigo-500 hover:text-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label="Thêm ảnh"
+                            aria-label={t("addImage")}
                           >
                             <FiCamera className="h-6 w-6" />
                           </button>
@@ -318,7 +319,7 @@ export default function OrderActionRequestModal({
                       )}
                       disabled={isProcessing}
                     >
-                      Hủy
+                      {t("cancelFormButton")}
                     </button>
                     <button
                       type="submit"
@@ -335,7 +336,7 @@ export default function OrderActionRequestModal({
                       {isProcessing && (
                         <FiLoader className="mr-2 h-4 w-4 animate-spin" />
                       )}
-                      {isProcessing ? "Đang xử lý" : submitButtonText}
+                      {isProcessing ? t("processing") : submitButtonText}
                     </button>
                   </div>
                 </form>

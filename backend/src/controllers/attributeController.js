@@ -1,6 +1,18 @@
 const Attribute = require("../models/Attribute");
 const asyncHandler = require("../middlewares/asyncHandler");
 
+// --- Helper: "Làm phẳng" các trường đa ngôn ngữ của một object ---
+const flattenI18nObject = (obj, locale, fields) => {
+  if (!obj) return obj;
+  const newObj = { ...obj };
+  for (const field of fields) {
+    if (newObj[field] && typeof newObj[field] === "object") {
+      newObj[field] = newObj[field][locale] || newObj[field].vi;
+    }
+  }
+  return newObj;
+};
+
 // @desc    Tạo thuộc tính mới (VD: "Màu sắc", "Size")
 // @route   POST /api/v1/attributes
 // @access  Private/Admin
@@ -14,8 +26,23 @@ const createAttribute = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/attributes
 // @access  Private/Admin
 const getAttributes = asyncHandler(async (req, res) => {
-  const attributes = await Attribute.find({}).sort({ name: 1 });
-  res.status(200).json(attributes);
+  const locale = req.locale || "vi";
+  const attributes = await Attribute.find({}).sort({ name: 1 }).lean();
+  // *** "LÀM PHẲNG" DỮ LIỆU ***
+  const flattenedAttributes = attributes.map((attr) => {
+    const flatAttr = flattenI18nObject(attr, locale, ["label"]);
+    // Chỉ thực hiện map nếu flatAttr.values là một mảng
+    if (Array.isArray(flatAttr.values)) {
+      flatAttr.values = flatAttr.values.map((val) =>
+        flattenI18nObject(val, locale, ["value"])
+      );
+    } else {
+      // Nếu không có values, gán nó là một mảng rỗng để đảm bảo tính nhất quán
+      flatAttr.values = [];
+    }
+    return flatAttr;
+  });
+  res.status(200).json(flattenedAttributes);
 });
 
 // @desc    Thêm một giá trị mới vào một thuộc tính đã có
@@ -32,10 +59,12 @@ const addAttributeValue = asyncHandler(async (req, res) => {
   }
 
   // Kiểm tra xem giá trị đã tồn tại chưa
-  const valueExists = attribute.values.some((v) => v.value === value);
+  const valueExists = attribute.values.some(
+    (v) => v.value.vi === value.vi || v.value.en === value.en
+  );
   if (valueExists) {
     res.status(400);
-    throw new Error(`Giá trị "${value}" đã tồn tại trong thuộc tính này.`);
+    throw new Error(`Giá trị "${value.vi}" hoặc "${value.en}" đã tồn tại.`);
   }
 
   // Thêm giá trị mới vào mảng
@@ -66,8 +95,8 @@ const updateAttributeValue = asyncHandler(async (req, res) => {
     throw new Error("Không tìm thấy giá trị thuộc tính.");
   }
 
-  valueToUpdate.value = value || valueToUpdate.value;
-  valueToUpdate.meta = meta || valueToUpdate.meta;
+  if (value) valueToUpdate.value = value;
+  if (meta) valueToUpdate.meta = meta;
 
   await attribute.save();
   res.status(200).json(valueToUpdate);

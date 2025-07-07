@@ -113,7 +113,7 @@ const adminNavigation: NavigationItem[] = [
   {
     component: CNavItem,
     name: "Cài đặt Shop",
-    to: "/admin/settings/shop",
+    to: "/admin/settings",
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
 ];

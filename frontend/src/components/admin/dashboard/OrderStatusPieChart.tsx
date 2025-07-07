@@ -4,6 +4,7 @@ import "@/components/shared/charts/ChartJsDefaults";
 import { ORDER_STATUSES } from "@/constants/orderConstants";
 import { OrderStatusDistributionItem } from "@/types/dashboard";
 import { CCard, CCardBody, CCardHeader, CSpinner } from "@coreui/react";
+import { TooltipItem } from "chart.js";
 import React from "react";
 import { Doughnut } from "react-chartjs-2";
 
@@ -44,18 +45,35 @@ const OrderStatusPieChart: React.FC<OrderStatusPieChartProps> = ({
     ],
   };
 
+  // *** TÙY CHỈNH TOOLTIP RIÊNG CHO BIỂU ĐỒ NÀY ***
+  const chartOptions = {
+    plugins: {
+      legend: {
+        position: "top" as const, // Thêm 'as const'
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<"doughnut">) {
+            const label = context.label || "";
+            const value = context.parsed;
+            return `${label}: ${value.toLocaleString("vi-VN")} đơn`;
+          },
+        },
+      },
+    },
+  };
+
   return (
     <CCard className="h-100 shadow-sm">
-      <CCardHeader>Phân phối trạng thái đơn hàng</CCardHeader>
+      <CCardHeader>Phân phối Trạng thái Đơn hàng</CCardHeader>
       <CCardBody className="flex items-center justify-center">
         {isLoading ? (
           <CSpinner />
+        ) : !data || data.length === 0 ? (
+          <p className="text-gray-500">Không có dữ liệu đơn hàng.</p>
         ) : (
           <div className="relative h-[300px] w-full">
-            <Doughnut
-              data={chartData}
-              options={{ plugins: { legend: { position: "top" } } }}
-            />
+            <Doughnut data={chartData} options={chartOptions} />
           </div>
         )}
       </CCardBody>

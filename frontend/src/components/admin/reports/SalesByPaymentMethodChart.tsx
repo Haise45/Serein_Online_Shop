@@ -1,15 +1,25 @@
 "use client";
 import "@/components/shared/charts/ChartJsDefaults";
 import { formatCurrency } from "@/lib/utils";
+import { ExchangeRates } from "@/types";
 import { SalesByPaymentMethod } from "@/types/report";
 import { CSpinner } from "@coreui/react";
 import { TooltipItem } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
-const SalesByPaymentMethodChart: React.FC<{
+interface SalesByPaymentMethodChartProps {
   data?: SalesByPaymentMethod[];
   isLoading: boolean;
-}> = ({ data, isLoading }) => {
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const SalesByPaymentMethodChart: React.FC<SalesByPaymentMethodChartProps> = ({
+  data,
+  isLoading,
+  displayCurrency,
+  rates,
+}) => {
   const chartData = {
     labels: data?.map((d) => d._id) || [],
     datasets: [
@@ -29,7 +39,9 @@ const SalesByPaymentMethodChart: React.FC<{
             const label = context.label || "";
             const value = context.parsed; // Giá trị số
             if (value !== null) {
-              return `${label}: ${formatCurrency(value)}`;
+              const originalValueVND =
+                data?.[context.dataIndex]?.totalValue || 0;
+              return `${label}: ${formatCurrency(originalValueVND, { currency: displayCurrency, rates })}`;
             }
             return label;
           },

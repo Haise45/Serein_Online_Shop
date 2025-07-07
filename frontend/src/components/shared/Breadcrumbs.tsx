@@ -1,5 +1,6 @@
 "use client";
 import { BreadcrumbItem } from "@/types"; // Import type đã tạo
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { FiChevronRight, FiHome } from "react-icons/fi";
 
@@ -12,6 +13,8 @@ export default function Breadcrumbs({
   items,
   showHomeIcon = true,
 }: BreadcrumbsProps) {
+  const t = useTranslations("Breadcrumbs");
+
   if (!items || items.length === 0) {
     return null;
   }
@@ -19,7 +22,7 @@ export default function Breadcrumbs({
   // Thêm item "Trang chủ" vào đầu nếu được yêu cầu và chưa có
   const breadcrumbItems = [...items];
   if (showHomeIcon && (items.length === 0 || items[0].href !== "/")) {
-    breadcrumbItems.unshift({ label: "Trang chủ", href: "/" });
+    breadcrumbItems.unshift({ label: t("home"), href: "/" });
   }
 
   return (

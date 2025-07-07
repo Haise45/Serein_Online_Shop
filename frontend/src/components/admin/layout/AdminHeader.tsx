@@ -1,5 +1,6 @@
 "use client";
 import "@/app/globals.css";
+import SettingsSwitcher from "@/components/shared/SettingsSwitcher";
 import { logoutUserApi } from "@/services/authService";
 import { AppDispatch, RootState } from "@/store";
 import { logout as logoutAction } from "@/store/slices/authSlice";
@@ -14,7 +15,6 @@ import {
   CNavLink,
 } from "@coreui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +31,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
-  const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = useCallback(async () => {
@@ -43,8 +42,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
     dispatch(logoutAction());
     queryClient.clear();
     toast.success("Đăng xuất thành công!");
-    router.push("/login");
-  }, [dispatch, queryClient, router]);
+    window.location.replace("/login");
+  }, [dispatch, queryClient]);
 
   return (
     <CHeader
@@ -67,6 +66,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
 
         <CHeaderNav className="ms-auto">
           {/* Thay thế toàn bộ code thông báo bằng component mới */}
+          <SettingsSwitcher />
           <NotificationBell />
         </CHeaderNav>
 
