@@ -11,6 +11,7 @@ import { OrderCreationPayload, ShippingAddressData } from "@/types/order";
 import { Address, User } from "@/types/user";
 import { useQueryClient } from "@tanstack/react-query";
 import classNames from "classnames";
+import { useTranslations } from "next-intl";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -63,6 +64,7 @@ const AddressInputFields: React.FC<{
   onDataChange: (field: keyof ShippingAddressData, value: string) => void;
   onFullDataChange: (data: Partial<ShippingAddressData>) => void;
 }> = ({ addressData, onDataChange, onFullDataChange }) => {
+  const t = useTranslations("AddressFormModal");
   const [currentProvinceCode, setCurrentProvinceCode] = useState(
     addressData.provinceCode || "",
   );
@@ -124,7 +126,7 @@ const AddressInputFields: React.FC<{
     <div className="mt-4 space-y-4 rounded-md border border-gray-200 bg-white px-4 py-6">
       <div>
         <label htmlFor="fullName" className="form-label">
-          Họ và tên người nhận <span className="text-red-500">*</span>
+          {t("fullNameLabel")}
         </label>
         <input
           type="text"
@@ -138,7 +140,7 @@ const AddressInputFields: React.FC<{
       </div>
       <div>
         <label htmlFor="phone" className="form-label">
-          Số điện thoại <span className="text-red-500">*</span>
+          {t("phoneLabel")}
         </label>
         <input
           type="tel"
@@ -153,7 +155,7 @@ const AddressInputFields: React.FC<{
       <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
         <div>
           <label htmlFor="provinceCode" className="form-label">
-            Tỉnh/Thành phố <span className="text-red-500">*</span>
+            {t("provinceLabel")}
           </label>
           <select
             name="provinceCode"
@@ -172,7 +174,9 @@ const AddressInputFields: React.FC<{
             disabled={isLoadingProvinces}
           >
             <option value="">
-              {isLoadingProvinces ? "Đang tải..." : "-- Chọn Tỉnh/Thành --"}
+              {isLoadingProvinces
+                ? t("loadingProvinces")
+                : `-- ${t("provincePlaceholder")} --`}
             </option>
             {provinces?.map((p) => (
               <option key={p.code} value={p.code}>
@@ -183,7 +187,7 @@ const AddressInputFields: React.FC<{
         </div>
         <div>
           <label htmlFor="districtCode" className="form-label">
-            Quận/Huyện <span className="text-red-500">*</span>
+            {t("districtLabel")}
           </label>
           <select
             name="districtCode"
@@ -203,8 +207,8 @@ const AddressInputFields: React.FC<{
           >
             <option value="">
               {isLoadingDistricts && currentProvinceCode
-                ? "Đang tải..."
-                : "-- Chọn Quận/Huyện --"}
+                ? t("loadingDistricts")
+                : `-- ${t("districtPlaceholder")} --`}
             </option>
             {districts?.map((d) => (
               <option key={d.code} value={d.code}>
@@ -216,7 +220,7 @@ const AddressInputFields: React.FC<{
       </div>
       <div>
         <label htmlFor="communeCode" className="form-label">
-          Phường/Xã <span className="text-red-500">*</span>
+          {t("communeLabel")}
         </label>
         <select
           name="communeCode"
@@ -236,8 +240,8 @@ const AddressInputFields: React.FC<{
         >
           <option value="">
             {isLoadingCommunes && currentDistrictCode
-              ? "Đang tải..."
-              : "-- Chọn Phường/Xã --"}
+              ? t("loadingCommunes")
+              : `-- ${t("communePlaceholder")} --`}
           </option>
           {communes?.map((c) => (
             <option key={c.code} value={c.code}>
@@ -248,8 +252,7 @@ const AddressInputFields: React.FC<{
       </div>
       <div>
         <label htmlFor="street" className="form-label">
-          Địa chỉ cụ thể (Số nhà, tên đường...){" "}
-          <span className="text-red-500">*</span>
+          {t("streetLabel")}
         </label>
         <input
           type="text"
@@ -275,6 +278,7 @@ export default function CheckoutForm({
   isSubmittingOrder,
   setIsProcessingPayPal,
 }: CheckoutFormProps) {
+  const t = useTranslations("CheckoutForm");
   const isAuthenticated = !!user;
   const [email, setEmail] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
@@ -300,6 +304,7 @@ export default function CheckoutForm({
     }
   }, [isAuthenticated, user?.email]);
 
+  // Chọn địa chỉ mặc định
   useEffect(() => {
     if (isAuthenticated && userAddresses.length > 0) {
       const defaultAddr = userAddresses.find((addr) => addr.isDefault);
@@ -353,7 +358,7 @@ export default function CheckoutForm({
     queryClient.invalidateQueries({ queryKey: userKeys.addresses() });
     queryClient.invalidateQueries({ queryKey: userKeys.profile() });
 
-    toast.success("Địa chỉ đã được cập nhật.");
+    toast.success(t("addressSavedToast"));
     setIsAddressModalOpen(false);
     setAddressToEditInModal(null);
     if (savedAddress._id) {
@@ -406,12 +411,12 @@ export default function CheckoutForm({
 
     // 2. Validate email cho guest
     if (!isAuthenticated && !email.trim()) {
-      toast.error("Vui lòng nhập email của bạn để tiếp tục.");
+      toast.error(t("emailValidationError"));
       return null; // Trả về null nếu không hợp lệ
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!isAuthenticated && email.trim() && !emailRegex.test(email)) {
-      toast.error("Địa chỉ email không hợp lệ.");
+      toast.error(t("emailValidationError"));
       return null;
     }
 
@@ -425,7 +430,7 @@ export default function CheckoutForm({
       !finalShippingAddress.districtCode ||
       !finalShippingAddress.communeCode
     ) {
-      toast.error("Vui lòng điền đầy đủ thông tin địa chỉ giao hàng.");
+      toast.error(t("addressValidationError"));
       return null;
     }
 
@@ -453,20 +458,35 @@ export default function CheckoutForm({
     }
   };
 
+  const paymentMethodsConfig = [
+    {
+      id: "COD",
+      icon: FiTruck,
+    },
+    {
+      id: "BANK_TRANSFER",
+      icon: FiCreditCard,
+    },
+    {
+      id: "PAYPAL",
+      icon: SiPaypal,
+    },
+  ];
+
   return (
     <form id="checkout-form" onSubmit={handleSubmit} className="space-y-8">
       {/* Phần Email cho Guest */}
       {!isAuthenticated && (
         <section>
           <h2 className="mb-3 text-lg font-medium text-gray-900">
-            Thông tin liên hệ
+            {t("contactInfoTitle")}
           </h2>
           <div>
             <label
               htmlFor="email-checkout"
               className="block text-base font-medium text-gray-700"
             >
-              Địa chỉ Email <span className="text-red-500">*</span>
+              {t("emailLabel")}
             </label>
             <div className="mt-1">
               <input
@@ -478,7 +498,7 @@ export default function CheckoutForm({
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="input-field w-full bg-white text-sm md:text-base"
-                placeholder="you@example.com"
+                placeholder={t("emailPlaceholder")}
               />
             </div>
           </div>
@@ -488,7 +508,7 @@ export default function CheckoutForm({
       {/* Phần Địa chỉ giao hàng */}
       <section>
         <h2 className="mb-3 text-lg font-medium text-gray-900">
-          Địa chỉ giao hàng
+          {t("shippingAddressTitle")}
         </h2>
         {isLoadingAddresses && isAuthenticated && (
           <div className="mb-6 space-y-3">
@@ -523,7 +543,7 @@ export default function CheckoutForm({
                         {address.fullName} - {address.phone}
                         {address.isDefault && (
                           <span className="ml-2 text-xs text-green-600">
-                            (Mặc định)
+                            {t("defaultLabel")}
                           </span>
                         )}
                       </p>
@@ -546,7 +566,9 @@ export default function CheckoutForm({
                           handleEditSavedAddress(address);
                         }}
                         className="p-1 text-xs text-indigo-600 hover:text-indigo-800"
-                        aria-label={`Sửa địa chỉ của ${address.fullName}`}
+                        aria-label={t("editAddressLabel", {
+                          name: address.fullName,
+                        })}
                       >
                         <FiEdit3 className="h-4 w-4" />
                       </button>
@@ -567,7 +589,7 @@ export default function CheckoutForm({
               disabled={isEditingNewAddress}
             >
               <FiPlusCircle className="mr-2 h-5 w-5" />
-              Nhập địa chỉ mới
+              {t("useNewAddressButton")}
             </button>
           </div>
         )}
@@ -576,7 +598,7 @@ export default function CheckoutForm({
           <>
             {isAuthenticated && userAddresses.length > 0 && (
               <p className="mb-4 text-sm text-gray-500">
-                Hoặc nhập địa chỉ mới dưới đây:
+                {t("orEnterNewAddress")}
               </p>
             )}
             <AddressInputFields
@@ -591,10 +613,10 @@ export default function CheckoutForm({
       {/* Phần Phương thức thanh toán */}
       <section>
         <h2 className="mb-3 text-lg font-medium text-gray-900">
-          Phương thức thanh toán
+          {t("paymentMethodTitle")}
         </h2>
         <div className="space-y-3">
-          {PAYMENT_METHODS.map((method) => {
+          {paymentMethodsConfig.map((method) => {
             const IconComponent = method.icon;
             return (
               <div
@@ -620,10 +642,10 @@ export default function CheckoutForm({
                   </div>
                   <div className="flex flex-1 flex-col">
                     <span className="block text-sm font-medium text-gray-900">
-                      {method.name}
+                      {t(`paymentMethods.${method.id}.name`)}
                     </span>
                     <span className="mt-1 text-xs text-gray-500">
-                      {method.description}
+                      {t(`paymentMethods.${method.id}.description`)}
                     </span>
                   </div>
                   <label className="flex items-center space-x-2">
@@ -635,14 +657,15 @@ export default function CheckoutForm({
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <span className="sr-only">{method.name}</span>
+                    <span className="sr-only">
+                      {t(`paymentMethods.${method.id}.name`)}
+                    </span>
                   </label>
                 </div>
               </div>
             );
           })}
         </div>
-        {/* HIỂN THỊ NÚT PAYPAL HOẶC NÚT ĐẶT HÀNG THÔNG THƯỜNG */}
         {paymentMethod === "PAYPAL" ? (
           <div className="mx-auto mt-8">
             <PayPalButtonsWrapper
@@ -652,9 +675,8 @@ export default function CheckoutForm({
           </div>
         ) : (
           <div className="hidden pt-4">
-            {/* Ẩn nút submit mặc định, việc submit sẽ được trigger từ summary */}
             <button type="submit" disabled={isSubmittingOrder}>
-              {isSubmittingOrder ? "Đang xử lý..." : "Hoàn tất đặt hàng"}
+              {isSubmittingOrder ? t("processingButton") : t("submitButton")}
             </button>
           </div>
         )}
@@ -663,18 +685,18 @@ export default function CheckoutForm({
       {/* Phần Ghi chú */}
       <section>
         <h2 className="mb-2 text-lg font-medium text-gray-900">
-          Ghi chú đơn hàng
+          {t("notesTitle")}
         </h2>
         <div className="bg-white">
           <label htmlFor="order-notes" className="sr-only">
-            Ghi chú
+            {t("notesTitle")}
           </label>
           <textarea
             id="order-notes"
             name="order-notes"
             rows={3}
             className="input-field h-30 w-full resize-none text-sm focus:outline-none md:text-base"
-            placeholder="Thêm ghi chú cho đơn hàng của bạn (tùy chọn)..."
+            placeholder={t("notesPlaceholder")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />

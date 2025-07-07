@@ -1,19 +1,21 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { OrderSummary } from "@/types/order_model";
 import Image from "next/image";
 import Link from "next/link";
 import {
-    FiCalendar,
-    FiCheck,
-    FiChevronRight,
-    FiDollarSign,
-    FiLoader,
-    FiPackage,
-    FiRotateCcw,
-    FiXCircle,
+  FiCalendar,
+  FiCheck,
+  FiChevronRight,
+  FiDollarSign,
+  FiLoader,
+  FiPackage,
+  FiRotateCcw,
+  FiXCircle,
 } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface OrderRowProps {
   order: OrderSummary;
@@ -30,6 +32,12 @@ const OrderRow: React.FC<OrderRowProps> = ({
   currentMarkingDeliveredId,
   openRequestModal,
 }) => {
+  // *** LẤY THÔNG TIN TIỀN TỆ TRONG COMPONENT CON ***
+  const { displayCurrency, rates } = useSettings();
+  const currencyOptions = { currency: displayCurrency, rates };
+  const t = useTranslations("OrderRow");
+  const tStatus = useTranslations("OrderStatus");
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
@@ -51,23 +59,19 @@ const OrderRow: React.FC<OrderRowProps> = ({
     }
   };
 
-  let statusLabel = order.status;
-  if (order.status === "Pending") statusLabel = "Chờ xác nhận";
-  else if (order.status === "Processing") statusLabel = "Đang xử lý";
-  else if (order.status === "Shipped") statusLabel = "Đang vận chuyển";
-  else if (order.status === "Delivered") statusLabel = "Đã giao";
-  else if (order.status === "Cancelled") statusLabel = "Đã hủy";
-  else if (order.status === "Refunded") statusLabel = "Đã hoàn tiền";
-  else if (order.status === "CancellationRequested")
-    statusLabel = "Yêu cầu hủy";
-  else if (order.status === "RefundRequested")
-    statusLabel = "Yêu cầu hoàn tiền";
+  const statusLabel = tStatus(order.status);
+
+  const deliveredAt = order.deliveredAt ? new Date(order.deliveredAt) : null;
+  const now = new Date();
 
   const canMarkAsDelivered = order.status === "Shipped";
   const canRequestCancellation = ["Pending", "Processing"].includes(
     order.status,
   );
-  const canRequestRefund = order.status === "Delivered";
+  const canRequestRefund =
+    order.status === "Delivered" &&
+    deliveredAt &&
+    (now.getTime() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24) <= 14;
 
   // Kiểm tra xem hành động loading có phải cho đơn hàng này không
   const isCurrentActionLoading =
@@ -82,15 +86,20 @@ const OrderRow: React.FC<OrderRowProps> = ({
       <div className="p-4 sm:p-6">
         <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <div className="mb-3 sm:mb-0">
-            <Link href={`/profile/orders/${order._id.toString()}`} className="group">
+            <Link
+              href={`/profile/orders/${order._id.toString()}`}
+              className="group"
+            >
               <p className="flex items-center text-sm font-semibold text-indigo-600 group-hover:text-indigo-500">
                 <FiPackage className="mr-2 h-4 w-4 text-indigo-500" />
-                Mã đơn hàng: #{order._id.toString().slice(-6).toUpperCase()}
+                {t("orderCode", {
+                  code: order._id.toString().slice(-6).toUpperCase(),
+                })}
               </p>
             </Link>
             <p className="mt-1 flex items-center text-xs text-gray-500">
               <FiCalendar className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-              Ngày đặt: {formatDate(order.createdAt)}
+              {t("orderDate", { date: formatDate(order.createdAt) })}
             </p>
           </div>
           <div
@@ -114,23 +123,23 @@ const OrderRow: React.FC<OrderRowProps> = ({
               <span className="flex-1 truncate">
                 {order.orderItems[0].name}
                 {order.orderItems.length > 1 &&
-                  ` và ${order.orderItems.length - 1} sản phẩm khác`}
+                  ` ${t("andXMoreProducts", { count: order.orderItems.length - 1 })}`}
               </span>
             </div>
           )}
           <div className="flex flex-col text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="flex items-center text-gray-700">
               <FiDollarSign className="mr-1.5 h-4 w-4 text-gray-400" />
-              Tổng tiền:{" "}
+              {t("totalAmount")}{" "}
               <span className="ml-1 font-semibold">
-                {formatCurrency(order.totalPrice)}
+                {formatCurrency(order.totalPrice, currencyOptions)}
               </span>
             </p>
             <Link
               href={`/profile/orders/${order._id.toString()}`}
               className="mt-2 inline-flex items-center font-medium text-indigo-600 hover:text-indigo-500 sm:mt-0"
             >
-              Xem chi tiết
+              {t("viewDetails")}
               <FiChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
@@ -139,43 +148,40 @@ const OrderRow: React.FC<OrderRowProps> = ({
         {/* Nút Actions */}
         {(canMarkAsDelivered || canRequestCancellation || canRequestRefund) && (
           <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-4">
-            {canMarkAsDelivered &&
-              onMarkAsDelivered && (
-                <button
-                  onClick={() => onMarkAsDelivered(order._id.toString())}
-                  disabled={isCurrentActionLoading}
-                  className="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 focus-visible:outline-offset-2 focus-visible:outline-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-                >
-                  {isCurrentActionLoading ? (
-                    <FiLoader className="mr-2 -ml-0.5 h-4 w-4 animate-spin" />
-                  ) : (
-                    <FiCheck className="mr-2 -ml-0.5 h-4 w-4" />
-                  )}
-                  Đã nhận hàng
-                </button>
-              )}
+            {canMarkAsDelivered && onMarkAsDelivered && (
+              <button
+                onClick={() => onMarkAsDelivered(order._id.toString())}
+                disabled={isCurrentActionLoading}
+                className="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 focus-visible:outline-offset-2 focus-visible:outline-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+              >
+                {isCurrentActionLoading ? (
+                  <FiLoader className="mr-2 -ml-0.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <FiCheck className="mr-2 -ml-0.5 h-4 w-4" />
+                )}
+                {t("markAsReceived")}
+              </button>
+            )}
             {canRequestCancellation && (
               <button
                 onClick={() =>
                   openRequestModal(order._id.toString(), "cancellation")
                 }
                 disabled={isCurrentActionLoading} // Disable nếu có action khác trên đơn hàng này đang chạy
-                className="inline-flex items-center rounded-md bg-orange-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-orange-600  focus-visible:outline-offset-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="inline-flex items-center rounded-md bg-orange-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-orange-600 focus-visible:outline-offset-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 <FiXCircle className="mr-2 -ml-0.5 h-4 w-4" />
-                Yêu cầu hủy
+                {t("requestCancellation")}
               </button>
             )}
             {canRequestRefund && (
               <button
-                onClick={() =>
-                  openRequestModal(order._id.toString(), "refund")
-                }
+                onClick={() => openRequestModal(order._id.toString(), "refund")}
                 disabled={isCurrentActionLoading} // Disable nếu có action khác trên đơn hàng này đang chạy
-                className="inline-flex items-center rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-600  focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="inline-flex items-center rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-600 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 <FiRotateCcw className="mr-2 -ml-0.5 h-4 w-4" />
-                Yêu cầu trả hàng
+                {t("requestRefund")}
               </button>
             )}
           </div>

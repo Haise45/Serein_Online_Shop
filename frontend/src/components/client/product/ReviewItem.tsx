@@ -1,13 +1,13 @@
-// src/components/client/product/ReviewItem.tsx
 "use client";
 
 import RatingStars from "@/components/shared/RatingStars";
 import { formatDate, sanitizeHtmlContent } from "@/lib/utils";
 import { Review } from "@/types/review";
 import Image from "next/image";
-import { FiCornerUpRight, FiZoomIn } from "react-icons/fi"; // Thay đổi icon zoom
+import { FiCornerUpRight, FiZoomIn } from "react-icons/fi";
 import { useState } from "react";
-import ReviewImageLightbox from "./ReviewImageLightbox"; // Import component modal mới
+import ReviewImageLightbox from "./ReviewImageLightbox";
+import { useTranslations } from "next-intl";
 
 interface ReviewItemProps {
   review: Review;
@@ -17,17 +17,17 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentImageIndexInLightbox, setCurrentImageIndexInLightbox] =
     useState(0);
+  const t = useTranslations("ReviewItem");
 
   const userName =
     typeof review.user === "object" && review.user !== null
       ? review.user.name
-      : "Người dùng ẩn danh";
+      : t("anonymousUser");
 
   const adminName =
-    typeof review.adminReply?.user === "object" &&
-    review.adminReply.user !== null
+    typeof review.adminReply?.user === "object" && review.adminReply.user !== null
       ? review.adminReply.user.name
-      : "Quản trị viên";
+      : t("adminUser");
 
   const handleImageClick = (index: number) => {
     setCurrentImageIndexInLightbox(index);
@@ -82,7 +82,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
                     key={idx}
                     className="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 shadow-sm transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none"
                     onClick={() => handleImageClick(idx)}
-                    aria-label={`Xem ảnh ${idx + 1} của ${userName} ở chế độ toàn màn hình`}
+                    aria-label={t("viewImageFullscreen", { index: idx + 1, user: userName })}
                   >
                     <Image
                       src={imgUrl}
@@ -114,7 +114,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline justify-between gap-x-2">
                       <p className="text-xs font-semibold text-indigo-700">
-                        Phản hồi từ {adminName}
+                        {t("adminReplyFrom", { name: adminName })}
                       </p>
                       <time
                         dateTime={

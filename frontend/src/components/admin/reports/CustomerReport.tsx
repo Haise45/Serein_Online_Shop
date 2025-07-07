@@ -8,11 +8,21 @@ import { CAvatar, CTableDataCell, CTableRow } from "@coreui/react";
 import Link from "next/link";
 import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
+import { ExchangeRates } from "@/types";
 
-const CustomerReport: React.FC<{ filters: CustomerReportParams }> = ({
+interface CustomerReportProps {
+  filters: CustomerReportParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const CustomerReport: React.FC<CustomerReportProps> = ({
   filters,
+  displayCurrency,
+  rates,
 }) => {
   const { data, isLoading } = useGetCustomerReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
 
   return (
     <div className="space-y-6">
@@ -62,7 +72,7 @@ const CustomerReport: React.FC<{ filters: CustomerReportParams }> = ({
               {item.orderCount}
             </CTableDataCell>
             <CTableDataCell className="text-end font-semibold text-green-600">
-              {formatCurrency(item.totalSpent)}
+              {formatCurrency(item.totalSpent, currencyOptions)}
             </CTableDataCell>
           </CTableRow>
         )}

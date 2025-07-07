@@ -8,16 +8,28 @@ import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
 import SalesByPaymentMethodChart from "./SalesByPaymentMethodChart";
 import ReportBlock from "./ReportBlock";
+import { ExchangeRates } from "@/types";
 
-const SalesReport: React.FC<{ filters: DateRangeParams }> = ({ filters }) => {
+interface SalesReportProps {
+  filters: DateRangeParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const SalesReport: React.FC<SalesReportProps> = ({
+  filters,
+  displayCurrency,
+  rates,
+}) => {
   const { data, isLoading } = useGetSalesReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <ReportStatCard
           title="Tổng Doanh thu"
-          value={formatCurrency(data?.summary.totalRevenue)}
+          value={formatCurrency(data?.summary.totalRevenue, currencyOptions)}
           isLoading={isLoading}
         />
         <ReportStatCard
@@ -32,7 +44,10 @@ const SalesReport: React.FC<{ filters: DateRangeParams }> = ({ filters }) => {
         />
         <ReportStatCard
           title="Giá trị ĐH Trung bình"
-          value={formatCurrency(data?.summary.averageOrderValue)}
+          value={formatCurrency(
+            data?.summary.averageOrderValue,
+            currencyOptions,
+          )}
           isLoading={isLoading}
         />
       </div>
@@ -61,7 +76,7 @@ const SalesReport: React.FC<{ filters: DateRangeParams }> = ({ filters }) => {
                   {item.count}
                 </CTableDataCell>
                 <CTableDataCell className="text-end font-semibold">
-                  {formatCurrency(item.totalValue)}
+                  {formatCurrency(item.totalValue, currencyOptions)}
                 </CTableDataCell>
               </CTableRow>
             )}
@@ -71,6 +86,8 @@ const SalesReport: React.FC<{ filters: DateRangeParams }> = ({ filters }) => {
           <SalesByPaymentMethodChart
             data={data?.byPaymentMethod}
             isLoading={isLoading}
+            displayCurrency={displayCurrency}
+            rates={rates}
           />
         )}
       />

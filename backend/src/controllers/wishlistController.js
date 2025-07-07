@@ -3,6 +3,22 @@ const Product = require("../models/Product");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 
+// --- Helper: "Làm phẳng" i18n ---
+const flattenI18nObject = (obj, locale, fields) => {
+  if (!obj) return obj;
+  const newObj = { ...obj }; // Tạo bản sao để không thay đổi object gốc
+  for (const field of fields) {
+    if (
+      newObj[field] &&
+      typeof newObj[field] === "object" &&
+      newObj[field][locale] !== undefined
+    ) {
+      newObj[field] = newObj[field][locale] || newObj[field].vi;
+    }
+  }
+  return newObj;
+};
+
 // --- Hàm helper tìm hoặc tạo Wishlist ---
 const findOrCreateWishlist = async (identifier) => {
   let wishlist;
@@ -50,21 +66,19 @@ const cleanupInvalidWishlistItems = async (wishlistId, invalidItemIds) => {
 // @route   GET /api/v1/wishlist
 // @access  Public
 const getWishlist = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi"; // Lấy locale từ middleware
   const identifier = req.wishlistIdentifier;
 
   if (!identifier || (!identifier.user && !identifier.guestId)) {
-    console.log(
-      "[Wishlist] getWishlist: No valid identifier (user/guest). Returning empty list."
-    );
     return res.json([]);
   }
 
+  // Lấy document đầy đủ, không dùng lean() để có thể tính virtuals
   const wishlist = await Wishlist.findOne(identifier).populate({
     path: "items.product",
     match: { isActive: true, isPublished: true },
-    select:
-      "name slug price salePrice salePriceEffectiveDate salePriceExpiryDate images category averageRating numReviews variants stockQuantity totalSold createdAt attributes",
-    populate: { path: "category", select: "name slug" },
+    // Không cần select nữa, lấy cả object để xử lý
+    populate: { path: "category", select: "name slug" }, // Vẫn populate category
   });
 
   if (!wishlist || !wishlist.items || wishlist.items.length === 0) {
@@ -75,102 +89,70 @@ const getWishlist = asyncHandler(async (req, res) => {
   const processedWishlistItems = [];
 
   for (const item of wishlist.items) {
-    // Kiểm tra xem item có hợp lệ không
-    if (!item) {
-      console.warn(`[Wishlist] getWishlist: Found null/undefined item`);
+    if (!item?.product) {
+      if (item.product) invalidItemIds.push(item.product);
       continue;
     }
 
-    // Kiểm tra xem product có được populate thành công không
-    if (
-      !item.product ||
-      typeof item.product !== "object" ||
-      Buffer.isBuffer(item.product)
-    ) {
-      console.warn(
-        `[Wishlist] getWishlist: Item has invalid product reference. Item:`,
-        {
-          productId: item.product,
-          variant: item.variant,
-          hasBuffer: Buffer.isBuffer(item.product),
-        }
-      );
+    // 1. Chuyển Mongoose doc thành object thuần túy VÀ lấy trường ảo
+    const productData = item.product.toObject({ virtuals: true });
 
-      // Thêm vào danh sách để clean up sau
-      if (item.product) {
-        invalidItemIds.push(item.product);
-      }
-      continue;
+    // 2. "Làm phẳng" dữ liệu đa ngôn ngữ
+    const flatProduct = flattenI18nObject(productData, locale, [
+      "name",
+      "description",
+    ]);
+    if (flatProduct.category) {
+      flatProduct.category = flattenI18nObject(flatProduct.category, locale, [
+        "name",
+      ]);
     }
 
-    // Kiểm tra xem product có _id không (đảm bảo đây là object được populate)
-    if (!item.product._id) {
-      console.warn(
-        `[Wishlist] getWishlist: Product object missing _id:`,
-        item.product
-      );
-      continue;
-    }
-
-    const productData = item.product;
     let displayInfo = {
-      _id: productData._id,
-      name: productData.name,
-      slug: productData.slug,
-      images: productData.images,
-      price: productData.price,
-      salePrice: productData.salePrice,
-      salePriceEffectiveDate: productData.salePriceEffectiveDate,
-      salePriceExpiryDate: productData.salePriceExpiryDate,
-      displayPrice: productData.displayPrice,
-      isOnSale: productData.isOnSale,
-      stockQuantity: productData.stockQuantity,
-      averageRating: productData.averageRating,
-      numReviews: productData.numReviews,
-      category: productData.category,
-      totalSold: productData.totalSold,
-      isNew: productData.isNew,
+      _id: flatProduct._id,
+      name: flatProduct.name, // Tên đã được dịch
+      slug: flatProduct.slug,
+      images: flatProduct.images,
+      price: flatProduct.price,
+      displayPrice: flatProduct.displayPrice, // Virtual field
+      isOnSale: flatProduct.isOnSale, // Virtual field
+      stockQuantity: flatProduct.stockQuantity,
+      averageRating: flatProduct.averageRating,
+      numReviews: flatProduct.numReviews,
+      category: flatProduct.category,
+      totalSold: flatProduct.totalSold,
+      isNew: flatProduct.isConsideredNew, // Sửa tên virtual field
       wishlistedVariantId: item.variant,
       variantDetails: null,
     };
 
-    // Xử lý variant nếu có
+    // 3. Xử lý thông tin biến thể nếu có
     if (
       item.variant &&
-      productData.variants &&
-      productData.variants.length > 0
+      flatProduct.variants &&
+      flatProduct.variants.length > 0
     ) {
-      const specificVariant = productData.variants.find(
-        (v) =>
-          v &&
-          v._id &&
-          item.variant &&
-          v._id.toString() === item.variant.toString()
+      const specificVariant = flatProduct.variants.find(
+        (v) => v?._id && v._id.toString() === item.variant.toString()
       );
 
       if (specificVariant) {
+        // Ghi đè thông tin sản phẩm chính bằng thông tin của biến thể
         displayInfo.images =
           specificVariant.images && specificVariant.images.length > 0
             ? specificVariant.images
-            : productData.images;
+            : flatProduct.images;
         displayInfo.price = specificVariant.price;
-        displayInfo.salePrice = specificVariant.salePrice;
-        displayInfo.salePriceEffectiveDate =
-          specificVariant.salePriceEffectiveDate;
-        displayInfo.salePriceExpiryDate = specificVariant.salePriceExpiryDate;
         displayInfo.displayPrice = specificVariant.displayPrice;
         displayInfo.isOnSale = specificVariant.isOnSale;
         displayInfo.stockQuantity = specificVariant.stockQuantity;
+        // Không cần làm phẳng optionValues ở đây vì getProductByIdOrSlug đã làm
+        // Nếu muốn an toàn, cần populate và làm phẳng cả attributes
         displayInfo.variantDetails = {
           _id: specificVariant._id,
           sku: specificVariant.sku,
           optionValues: specificVariant.optionValues,
-          images: specificVariant.images,
-          price: specificVariant.price,
-          salePrice: specificVariant.salePrice,
-          displayPrice: specificVariant.displayPrice,
-          isOnSale: specificVariant.isOnSale,
-          stockQuantity: specificVariant.stockQuantity,
+          // ... các trường khác của variant đã được ghi đè ở trên
         };
       }
     }
@@ -178,7 +160,6 @@ const getWishlist = asyncHandler(async (req, res) => {
     processedWishlistItems.push(displayInfo);
   }
 
-  // Clean up invalid items in background (không chờ kết quả)
   if (invalidItemIds.length > 0) {
     cleanupInvalidWishlistItems(wishlist._id, invalidItemIds).catch(
       console.error

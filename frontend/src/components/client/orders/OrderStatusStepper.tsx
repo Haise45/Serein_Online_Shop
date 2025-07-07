@@ -12,44 +12,48 @@ import {
   FiTruck,
   FiXCircle,
 } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface OrderStatusStepperProps {
   currentStatus: Order["status"];
 }
 
-const STEPS_CONFIG = [
-  {
-    id: "Pending",
-    label: "Chờ xác nhận",
-    icon: FiCircle,
-    relevantStatuses: ["Pending", "CancellationRequested"],
-  },
-  {
-    id: "Processing",
-    label: "Đang xử lý",
-    icon: FiPackage,
-    relevantStatuses: ["Processing", "CancellationRequested"],
-  },
-  {
-    id: "Shipped",
-    label: "Đang giao",
-    icon: FiTruck,
-    relevantStatuses: ["Shipped", "RefundRequested"], // Giữ nguyên, Delivered xử lý riêng
-  },
-  {
-    id: "Delivered",
-    label: "Đã giao",
-    icon: FiCheckCircle, // Icon này có thể không dùng trực tiếp trong vòng lặp nếu Delivered là bước cuối cùng
-    relevantStatuses: ["Delivered"], // Chỉ Delivered
-  },
-];
-
-const CANCELLED_STATUSES = ["Cancelled", "Refunded"];
-const REQUEST_STATUSES = ["CancellationRequested", "RefundRequested"];
-
 export default function OrderStatusStepper({
   currentStatus,
 }: OrderStatusStepperProps) {
+  const tStatus = useTranslations("OrderStatus");
+  const tStepper = useTranslations("OrderStatusStepper");
+
+  const STEPS_CONFIG = [
+    {
+      id: "Pending",
+      label: tStatus("Pending"),
+      icon: FiCircle,
+      relevantStatuses: ["Pending", "CancellationRequested"],
+    },
+    {
+      id: "Processing",
+      label: tStatus("Processing"),
+      icon: FiPackage,
+      relevantStatuses: ["Processing", "CancellationRequested"],
+    },
+    {
+      id: "Shipped",
+      label: tStatus("Shipped"),
+      icon: FiTruck,
+      relevantStatuses: ["Shipped", "RefundRequested"],
+    },
+    {
+      id: "Delivered",
+      label: tStatus("Delivered"),
+      icon: FiCheckCircle,
+      relevantStatuses: ["Delivered"],
+    },
+  ];
+
+  const CANCELLED_STATUSES = ["Cancelled", "Refunded"];
+  const REQUEST_STATUSES = ["CancellationRequested", "RefundRequested"];
+
   // Tìm index của bước hiện tại dựa trên relevantStatuses,
   // nhưng ưu tiên Delivered nếu đó là trạng thái hiện tại.
   let currentStepIndex = STEPS_CONFIG.findIndex((step) =>
@@ -66,24 +70,16 @@ export default function OrderStatusStepper({
   const isCancelledOrRefunded = CANCELLED_STATUSES.includes(currentStatus);
   const isRequestStatus = REQUEST_STATUSES.includes(currentStatus);
 
-  let statusLabel = currentStatus;
-  if (currentStatus === "Pending") statusLabel = "Chờ xác nhận";
-  else if (currentStatus === "Processing") statusLabel = "Đang xử lý";
-  else if (currentStatus === "Shipped") statusLabel = "Đang vận chuyển";
-  else if (currentStatus === "Delivered") statusLabel = "Đã giao thành công";
-  else if (currentStatus === "Cancelled") statusLabel = "Đã hủy";
-  else if (currentStatus === "Refunded") statusLabel = "Đã hoàn tiền";
-  else if (currentStatus === "CancellationRequested")
-    statusLabel = "Yêu cầu hủy đang chờ";
-  else if (currentStatus === "RefundRequested")
-    statusLabel = "Yêu cầu hoàn tiền đang chờ";
+  const statusLabel = tStatus(currentStatus);
 
   if (isCancelledOrRefunded) {
     return (
       <div className="my-4 rounded-md border border-red-200 bg-red-50 p-4 text-center sm:my-6 md:my-8">
         <FiXCircle className="mx-auto mb-2 h-10 w-10 text-red-500" />
         <p className="text-lg font-semibold text-red-700">
-          Đơn hàng {currentStatus === "Cancelled" ? "Đã Hủy" : "Đã Hoàn Tiền"}
+          {currentStatus === "Cancelled"
+            ? tStepper("cancelledMessage")
+            : tStepper("refundedMessage")}
         </p>
       </div>
     );
@@ -96,11 +92,11 @@ export default function OrderStatusStepper({
         <FiRefreshCw className="mx-auto mb-2 h-10 w-10 animate-spin text-yellow-500" />
         <p className="text-lg font-semibold text-yellow-700">
           {currentStatus === "CancellationRequested"
-            ? "Đang Yêu Cầu Hủy Đơn"
-            : "Đang Yêu Cầu Hoàn Tiền"}
+            ? tStepper("cancellationPendingMessage")
+            : tStepper("refundPendingMessage")}
         </p>
         <p className="mt-1 text-sm text-yellow-600">
-          Yêu cầu của bạn đang được xử lý.
+          {tStepper("pendingMessage")}
         </p>
       </div>
     );
@@ -114,12 +110,12 @@ export default function OrderStatusStepper({
 
   return (
     <div className="my-4 sm:my-6 md:my-8">
-      <h3 className="sr-only">Theo dõi đơn hàng</h3>
+      <h3 className="sr-only">{tStepper("trackOrder")}</h3>
       {showRefundRequestMessageWithStepper && (
         <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-center">
           <FiRefreshCw className="mx-auto mb-1 h-6 w-6 text-yellow-500" />
           <p className="text-sm font-semibold text-yellow-700">
-            Đang Yêu Cầu Hoàn Tiền
+            {tStepper("refundPendingMessage")}
           </p>
         </div>
       )}
@@ -190,8 +186,12 @@ export default function OrderStatusStepper({
         </ul>
       </div>
       <p className="mt-4 text-center text-xs text-gray-600 sm:text-sm">
-        Trạng thái hiện tại:{" "}
-        <span className="font-semibold text-indigo-700">{statusLabel}</span>
+        {tStepper.rich("currentStatus", {
+          status: statusLabel,
+          bold: (chunks) => (
+            <span className="font-semibold text-indigo-700">{chunks}</span>
+          ),
+        })}
       </p>
     </div>
   );

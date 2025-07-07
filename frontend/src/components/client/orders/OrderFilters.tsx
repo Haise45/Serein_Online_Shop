@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent } from "react";
+import { useTranslations } from "next-intl";
 
 interface OrderStatusOption {
   value: string;
@@ -18,11 +19,13 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
   onStatusFilterChange,
   orderStatusOptions,
 }) => {
+  const t = useTranslations("OrderFilters");
+
   return (
     <div className="mb-6 flex justify-start">
       <div className="w-full sm:w-auto sm:max-w-xs">
         <label htmlFor="status-filter" className="sr-only">
-          Lọc theo trạng thái
+          {t("filterByStatus")}
         </label>
         <select
           id="status-filter"

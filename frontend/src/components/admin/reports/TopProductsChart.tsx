@@ -1,16 +1,27 @@
 "use client";
 import "@/components/shared/charts/ChartJsDefaults";
 import { formatCurrency } from "@/lib/utils";
+import { ExchangeRates } from "@/types";
 import { ProductReportItem } from "@/types/report";
 import { CSpinner } from "@coreui/react";
 import { TooltipItem } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
-const TopProductsChart: React.FC<{
+interface TopProductsChartProps {
   data?: ProductReportItem[];
   isLoading: boolean;
   dataKey: "totalSold" | "revenue";
-}> = ({ data, isLoading, dataKey }) => {
+  displayCurrency?: "VND" | "USD";
+  rates?: ExchangeRates | null;
+}
+
+const TopProductsChart: React.FC<TopProductsChartProps> = ({
+  data,
+  isLoading,
+  dataKey,
+  displayCurrency,
+  rates,
+}) => {
   const chartData = {
     labels: data?.map((p) => p.name.substring(0, 20) + "...") || [],
     datasets: [
@@ -39,7 +50,10 @@ const TopProductsChart: React.FC<{
             const value = context.parsed.x; // Lấy giá trị từ trục x cho biểu đồ cột ngang
             if (value !== null) {
               if (dataKey === "revenue") {
-                label += formatCurrency(value);
+                label += formatCurrency(value, {
+                  currency: displayCurrency,
+                  rates,
+                });
               } else {
                 label += value;
               }

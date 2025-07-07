@@ -12,6 +12,26 @@ const {
 
 const LOW_STOCK_THRESHOLD = 10; // Ngưỡng cảnh báo tồn kho thấp
 
+// --- HELPER: "Làm phẳng" các trường đa ngôn ngữ ---
+/**
+ * Chuyển đổi một document Mongoose có các trường i18n thành một object thường
+ * với các trường đã được chọn đúng ngôn ngữ.
+ * @param {Document} doc - Document Mongoose (sản phẩm, danh mục, etc.).
+ * @param {string} locale - Ngôn ngữ cần lấy ('vi' hoặc 'en').
+ * @param {Array<string>} fields - Mảng các trường cần làm phẳng.
+ * @returns {object} Object đã được làm phẳng.
+ */
+const flattenI18n = (doc, locale, fields) => {
+  if (!doc) return null;
+  const obj = doc.toObject ? doc.toObject() : { ...doc }; // Hoạt động với cả lean object
+  for (const field of fields) {
+    if (obj[field]) {
+      obj[field] = obj[field][locale] || obj[field].vi; // Lấy ngôn ngữ yêu cầu, fallback về tiếng Việt
+    }
+  }
+  return obj;
+};
+
 // =================================================================
 // --- HELPER FUNCTIONS ---
 // =================================================================
@@ -22,7 +42,7 @@ const LOW_STOCK_THRESHOLD = 10; // Ngưỡng cảnh báo tồn kho thấp
  * @param {boolean} isAdmin - Cờ xác định quyền admin.
  * @returns {Promise<object>} - Object filter cho Mongoose.
  */
-const buildFilter = async (query, isAdmin = false) => {
+const buildFilter = async (query, isAdmin = false, locale = "vi") => {
   const andConditions = [];
 
   // --- 1. Lọc cơ bản (dựa trên quyền) ---
@@ -79,7 +99,9 @@ const buildFilter = async (query, isAdmin = false) => {
   if (query.attributes && typeof query.attributes === "object") {
     for (const attrLabel in query.attributes) {
       // Tìm Attribute document dựa trên label (VD: "Màu sắc")
-      const attributeDoc = await Attribute.findOne({ label: attrLabel }).lean();
+      const attributeDoc = await Attribute.findOne({
+        $or: [{ "label.vi": attrLabel }, { "label.en": attrLabel }],
+      }).lean();
       if (!attributeDoc) continue;
 
       const valueStrings = String(query.attributes[attrLabel])
@@ -92,15 +114,21 @@ const buildFilter = async (query, isAdmin = false) => {
         // Tạo một mảng các điều kiện $or cho regex
         // Ví dụ: valueStrings = ["Hồng", "Xanh"]
         // -> orConditions = [ { value: /^Hồng/i }, { value: /^Xanh/i } ]
-        const orConditions = valueStrings.map((v) => ({
-          // Regex: Bắt đầu bằng (^) chuỗi tìm kiếm, không phân biệt hoa thường (i)
-          value: { $regex: new RegExp(`^${v}`, "i") },
-        }));
+        const orConditions = valueStrings.map((v) => {
+          const searchRegex = new RegExp(`^${v}`, "i");
+          return {
+            $or: [{ "value.vi": searchRegex }, { "value.en": searchRegex }],
+          };
+        });
 
         // Tìm tất cả các giá trị con khớp với bất kỳ điều kiện regex nào
         const matchingValues = attributeDoc.values.filter((subDoc) => {
-          return orConditions.some((cond) =>
-            cond.value.$regex.test(subDoc.value)
+          return orConditions.some((condition) =>
+            condition.$or.some(
+              (orCond) =>
+                orCond["value.vi"]?.test(subDoc.value.vi) ||
+                orCond["value.en"]?.test(subDoc.value.en)
+            )
           );
         });
 
@@ -138,39 +166,30 @@ const buildFilter = async (query, isAdmin = false) => {
   }
 
   // --- 6. Tìm kiếm Text ($text index) ---
-  if (query.search) {
-    let searchTerm = query.search.trim();
-    if (searchTerm) {
-      // Để tìm kiếm chính xác cụm từ, chúng ta cần bao nó trong dấu nháy kép.
-      // Cần escape bất kỳ dấu nháy kép nào đã có sẵn trong chuỗi tìm kiếm.
-      const exactPhraseSearchTerm = `"${searchTerm.replace(/"/g, '\\"')}"`;
-
-      console.log(
-        `[Filter Debug] Thêm điều kiện tìm kiếm cụm từ chính xác: ${exactPhraseSearchTerm}`
-      );
-
-      // Thêm điều kiện $text vào mảng andConditions để kết hợp đúng
-      andConditions.push({ $text: { $search: exactPhraseSearchTerm } });
-    }
+  if (query.search && query.search.trim()) {
+    // Bọc chuỗi tìm kiếm trong dấu ngoặc kép để tìm kiếm chính xác cụm từ
+    const searchTerm = `"${query.search.trim()}"`;
+    andConditions.push({
+      $text: {
+        $search: searchTerm,
+      },
+    });
   }
 
   // --- 7. Kết hợp cuối cùng (Logic này cần được làm gọn lại) ---
-  if (andConditions.length === 0) {
-    // Nếu không có điều kiện lọc nào, trả về object rỗng để lấy tất cả sản phẩm.
-    return {};
-  }
-
-  // Nếu có điều kiện, gộp tất cả vào một mệnh đề $and duy nhất.
-  return { $and: andConditions };
+  return andConditions.length > 0 ? { $and: andConditions } : {};
 };
 
 /**
- * Xây dựng đối tượng sắp xếp MongoDB từ query params.
+ * Xây dựng đối tượng sắp xếp MongoDB từ query params, hỗ trợ đa ngôn ngữ.
  * @param {object} query - req.query từ Express.
+ * @param {string} locale - Ngôn ngữ hiện tại ('vi' hoặc 'en'), mặc định là 'vi'.
  * @returns {object} - Object sort cho Mongoose.
  */
-const buildSort = (query) => {
+const buildSort = (query, locale = "vi") => {
   const sort = {};
+
+  // Danh sách các trường được phép sắp xếp
   const allowedSortFields = [
     "price",
     "name",
@@ -179,22 +198,32 @@ const buildSort = (query) => {
     "averageRating",
   ];
 
-  // 1. Nếu có tìm kiếm text
+  const sortByField = query.sortBy;
+  const sortOrder = query.sortOrder === "asc" ? 1 : -1;
+
+  // 1. Nếu có tìm kiếm bằng text ($text index), ưu tiên sắp xếp theo độ liên quan
   if (query.search && query.search.trim()) {
-    if (query.sortBy && allowedSortFields.includes(query.sortBy)) {
-      sort[query.sortBy] = query.sortOrder === "asc" ? 1 : -1;
-    } else {
-      // Mặc định sắp xếp theo ngày tạo mới nhất khi tìm kiếm
-      sort.createdAt = -1;
+    sort.score = { $meta: "textScore" };
+    // Bạn vẫn có thể thêm một tiêu chí sắp xếp phụ sau độ liên quan
+    if (sortByField && allowedSortFields.includes(sortByField)) {
+      // Nếu trường sắp xếp là 'name', hãy dùng trường ngôn ngữ tương ứng
+      const i18nSortField =
+        sortByField === "name" ? `name.${locale}` : sortByField;
+      sort[i18nSortField] = sortOrder;
     }
+    return sort;
   }
-  // 2. Nếu không có tìm kiếm, nhưng có sortBy
-  else if (query.sortBy && allowedSortFields.includes(query.sortBy)) {
-    sort[query.sortBy] = query.sortOrder === "asc" ? 1 : -1;
+
+  // 2. Nếu không có tìm kiếm, sắp xếp theo trường được chỉ định
+  if (sortByField && allowedSortFields.includes(sortByField)) {
+    // Nếu trường sắp xếp là 'name', hãy dùng trường ngôn ngữ tương ứng
+    const i18nSortField =
+      sortByField === "name" ? `name.${locale}` : sortByField;
+    sort[i18nSortField] = sortOrder;
   }
-  // 3. Mặc định cuối cùng
+  // 3. Mặc định cuối cùng nếu không có sortBy nào được chỉ định
   else {
-    sort.createdAt = -1;
+    sort.createdAt = -1; // Mặc định sắp xếp theo sản phẩm mới nhất
   }
 
   return sort;
@@ -346,28 +375,29 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/products
 // @access  Public
 const getProducts = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1; // Lấy trang hiện tại, mặc định là 1
-  const limit = parseInt(req.query.limit, 10) || 10; // Lấy số lượng item mỗi trang, mặc định là 10
-  const skip = (page - 1) * limit; // Tính số lượng bỏ qua
-
-  // Xác định xem người dùng có phải admin không (có thể dùng để hiển thị/ẩn sản phẩm nháp)
-  // Middleware protect không bắt buộc cho route này, nên cần check req.user tồn tại
+  // 1. LẤY CÁC THAM SỐ
+  const locale = req.locale || "vi"; // Lấy locale từ middleware, mặc định là 'vi'
   const isAdmin = req.user?.role === "admin";
 
-  // --- Xây dựng bộ lọc và sắp xếp ---
-  const filter = await buildFilter(req.query, isAdmin); // Chờ vì có thể query Category
-  const sortOptions = buildSort(req.query); // Hàm helper đã tạo
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 12; // Mặc định 12 sản phẩm/trang
+  const skip = (page - 1) * limit;
 
-  // Các trường cần thiết để hiển thị trên danh sách
+  // 2. XÂY DỰNG BỘ LỌC VÀ SẮP XẾP
+  const filter = await buildFilter(req.query, isAdmin, locale); // Truyền locale vào helper
+  const sortOptions = buildSort(req.query, locale); // Truyền locale vào helper
+
+  // 3. XÁC ĐỊNH CÁC TRƯỜNG CẦN LẤY (PROJECTION)
+  // Tên và mô tả sẽ được lấy dưới dạng object để làm phẳng sau
   const projection = {
-    name: 1,
+    name: 1, // Lấy cả object {vi, en}
     slug: 1,
     price: 1,
     salePrice: 1,
     salePriceEffectiveDate: 1,
     salePriceExpiryDate: 1,
     sku: 1,
-    images: { $slice: 2 },
+    images: { $slice: 2 }, // Chỉ lấy 2 ảnh đầu tiên
     category: 1,
     averageRating: 1,
     numReviews: 1,
@@ -386,50 +416,82 @@ const getProducts = asyncHandler(async (req, res) => {
     "variants._id": 1,
   };
 
-  // Nếu có tìm kiếm text, thêm trường 'score' vào projection
-  if (req.query.search) {
-    projection.score = { $meta: "textScore" };
-  }
-
-  // --- Thực hiện Query ---
-  // Query lấy danh sách sản phẩm
-  let productsQuery = Product.find(filter) // Áp dụng bộ lọc
-    .populate("category", "name slug parent") // Lấy thông tin 'name' và 'slug' của category liên kết
+  // 4. THỰC THI QUERY
+  const productsQuery = Product.find(filter)
+    .populate({
+      path: "category",
+      select: "name slug parent", // Lấy cả name object {vi, en}
+    })
     .select(projection)
     .sort(sortOptions)
-    .skip(skip) // Bỏ qua các sản phẩm của trang trước
-    .limit(limit); // Giới hạn số lượng sản phẩm trên trang này
+    .skip(skip)
+    .limit(limit);
 
-  // Áp dụng collation NẾU sắp xếp theo tên VÀ KHÔNG phải là tìm kiếm text (vì textScore đã ưu tiên)
+  // Áp dụng collation nếu sắp xếp theo tên
   if (req.query.sortBy === "name") {
-    productsQuery = productsQuery.collation({
-      locale: "vi", // Hoặc "en", tùy ngôn ngữ tên sản phẩm
-      strength: 2, // Điều chỉnh strength nếu cần (1, 2, hoặc 3)
+    productsQuery.collation({
+      locale: locale === "vi" ? "vi" : "en",
+      strength: 2,
     });
   }
 
-  const [products, totalProducts] = await Promise.all([
+  // Chạy song song query lấy sản phẩm và query đếm tổng số
+  const [productsFromDB, totalProducts] = await Promise.all([
     productsQuery.exec(),
     Product.countDocuments(filter),
   ]);
 
+  // 5. "LÀM PHẲNG" DỮ LIỆU ĐA NGÔN NGỮ
+  const flattenedProducts = productsFromDB.map((p) => {
+    // 1. Chuyển Mongoose doc thành object thuần túy VÀ lấy trường ảo
+    const productObject = p.toObject({ virtuals: true });
+
+    // 2. Làm phẳng các trường đa ngôn ngữ
+    if (productObject.name) {
+      productObject.name = productObject.name[locale] || productObject.name.vi;
+    }
+    if (productObject.description) {
+      productObject.description =
+        productObject.description[locale] || productObject.description.vi;
+    }
+    if (
+      productObject.category &&
+      typeof productObject.category === "object" &&
+      productObject.category.name
+    ) {
+      productObject.category.name =
+        productObject.category.name[locale] || productObject.category.name.vi;
+    }
+
+    // 3. Giới hạn ảnh cho variants (nếu cần)
+    if (productObject.variants) {
+      productObject.variants.forEach((v) => {
+        if (v.images) v.images = v.images.slice(0, 2);
+      });
+    }
+
+    return productObject;
+  });
+
+  // 6. TRẢ VỀ RESPONSE
   res.json({
     currentPage: page,
     totalPages: Math.ceil(totalProducts / limit),
     totalProducts: totalProducts,
     limit: limit,
-    products: products,
+    products: flattenedProducts,
   });
 });
 
-// @desc    Lấy chi tiết một sản phẩm bằng ID hoặc Slug
+// @desc    Lấy chi tiết một sản phẩm bằng ID hoặc Slug (đã cập nhật cho i18n)
 // @route   GET /api/v1/products/:idOrSlug
 // @access  Public
 const getProductByIdOrSlug = asyncHandler(async (req, res) => {
   const { idOrSlug } = req.params;
   const isAdmin = req.user?.role === "admin";
+  const locale = req.locale || "vi"; // Lấy ngôn ngữ từ middleware, mặc định là 'vi'
 
-  // 1. Tìm sản phẩm gốc
+  // --- 1. Tìm sản phẩm gốc ---
   const initialFilter = {};
   if (mongoose.Types.ObjectId.isValid(idOrSlug)) {
     initialFilter._id = new mongoose.Types.ObjectId(idOrSlug);
@@ -440,14 +502,18 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
     initialFilter.isPublished = true;
   }
 
-  const product = await Product.findOne(initialFilter).lean();
+  // Lấy dữ liệu thô từ DB, dùng lean() để tăng tốc độ
+  const productDoc = await Product.findOne(initialFilter);
 
-  if (!product) {
+  if (!productDoc) {
     res.status(404);
     throw new Error("Không tìm thấy sản phẩm.");
   }
 
-  // 2. Thu thập tất cả các ID cần populate từ sản phẩm đã tìm thấy
+  // 1. Chuyển sang object và lấy virtuals ngay từ đầu
+  const product = productDoc.toObject({ virtuals: true });
+
+  // --- 2. Thu thập tất cả các ID cần populate ---
   const categoryId = product.category;
   const attributeIds = new Set();
   const valueIds = new Set();
@@ -464,7 +530,7 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
     });
   });
 
-  // 3. Thực hiện các truy vấn song song để lấy dữ liệu liên quan
+  // --- 3. Thực hiện các truy vấn song song để lấy dữ liệu liên quan ---
   const [categoryData, attributesData] = await Promise.all([
     Category.findById(categoryId).select("name slug image parent").lean(),
     Attribute.find({ _id: { $in: Array.from(attributeIds) } })
@@ -472,78 +538,110 @@ const getProductByIdOrSlug = asyncHandler(async (req, res) => {
       .lean(),
   ]);
 
-  // 4. Tạo các Map để tra cứu nhanh (tối ưu hóa)
+  // --- 4. "Làm phẳng" (Flatten) dữ liệu đa ngôn ngữ ---
+  // Làm phẳng tên sản phẩm và mô tả
+  product.name = product.name?.[locale] || product.name?.vi;
+  product.description =
+    product.description?.[locale] || product.description?.vi;
+
+  // Làm phẳng tên danh mục
+  if (categoryData?.name) {
+    categoryData.name = categoryData.name?.[locale] || categoryData.name?.vi;
+  }
+
+  // Làm phẳng tên thuộc tính (label) và giá trị thuộc tính (value)
+  attributesData.forEach((attr) => {
+    if (attr.label) attr.label = attr.label?.[locale] || attr.label?.vi;
+    if (attr.values) {
+      attr.values.forEach((val) => {
+        if (val.value && typeof val.value === "object") {
+          // Kiểm tra an toàn
+          val.value = val.value?.[locale] || val.value?.vi;
+        }
+      });
+    }
+  });
+
+  // --- 5. Tạo các Map để tra cứu nhanh từ dữ liệu đã được làm phẳng ---
   const attributeMap = new Map(
     attributesData.map((attr) => [attr._id.toString(), attr])
   );
   const valueMap = new Map();
   attributesData.forEach((attr) => {
     attr.values.forEach((val) => {
+      // Key là valueId, value là toàn bộ object value đã được làm phẳng
       valueMap.set(val._id.toString(), val);
     });
   });
 
-  // 5. "Làm giàu" (Hydrate) dữ liệu sản phẩm với thông tin đã populate
+  // --- 6. "Làm giàu" (Hydrate) dữ liệu sản phẩm với thông tin đã populate và làm phẳng ---
 
-  // 5.1 Hydrate Category
+  // 6.1 Hydrate Category
   product.category = categoryData;
 
-  // 5.2 Hydrate Attributes
+  // 6.2 Hydrate Attributes
   product.attributes = product.attributes
     .map((attr) => {
       const populatedAttribute = attributeMap.get(attr.attribute.toString());
-      if (!populatedAttribute) return null; // Bỏ qua nếu không tìm thấy attribute
+      if (!populatedAttribute) return null;
+
       const populatedValues = attr.values
         .map((valId) => valueMap.get(valId.toString()))
-        .filter(Boolean); // Lọc bỏ giá trị không tìm thấy
+        .filter(Boolean);
+
       return {
         attribute: populatedAttribute,
         values: populatedValues,
       };
     })
-    .filter(Boolean); // Lọc bỏ những thuộc tính null
+    .filter(Boolean);
 
-  // 5.3 Hydrate Variants
+  // 6.3 Hydrate Variants
   product.variants = product.variants.map((variant) => {
     const populatedOptions = variant.optionValues
       .map((opt) => {
         const populatedAttribute = attributeMap.get(opt.attribute.toString());
         const populatedValue = valueMap.get(opt.value.toString());
-        if (!populatedAttribute || !populatedValue) return null; // Bỏ qua nếu không hợp lệ
+        if (!populatedAttribute || !populatedValue) return null;
+
         return {
-          attribute: populatedAttribute,
-          value: populatedValue,
+          attribute: populatedAttribute, // Đã được làm phẳng
+          value: populatedValue, // Đã được làm phẳng
         };
       })
-      .filter(Boolean); // Lọc bỏ những option không hợp lệ
+      .filter(Boolean);
 
-    // Thêm virtuals cho từng biến thể
+    // Thêm các trường virtual cho biến thể
     const now = new Date();
     const isOnSale =
       variant.salePrice &&
       variant.salePrice < variant.price &&
       (!variant.salePriceEffectiveDate ||
-        variant.salePriceEffectiveDate <= now) &&
-      (!variant.salePriceExpiryDate || variant.salePriceExpiryDate >= now);
+        new Date(variant.salePriceEffectiveDate) <= now) &&
+      (!variant.salePriceExpiryDate ||
+        new Date(variant.salePriceExpiryDate) >= now);
     variant.isOnSale = isOnSale;
     variant.displayPrice = isOnSale ? variant.salePrice : variant.price;
 
     return { ...variant, optionValues: populatedOptions };
   });
 
-  // 6. Thêm virtuals cho sản phẩm chính
+  // --- 7. Thêm các trường virtual cho sản phẩm chính ---
   const now = new Date();
   const mainProductIsOnSale =
     product.salePrice &&
     product.salePrice < product.price &&
     (!product.salePriceEffectiveDate ||
-      product.salePriceEffectiveDate <= now) &&
-    (!product.salePriceExpiryDate || product.salePriceExpiryDate >= now);
-  
-  product.isOnSale = mainProductIsOnSale;
-  product.displayPrice = mainProductIsOnSale ? product.salePrice : product.price;
+      new Date(product.salePriceEffectiveDate) <= now) &&
+    (!product.salePriceExpiryDate ||
+      new Date(product.salePriceExpiryDate) >= now);
 
-  // 7. Trả về kết quả cuối cùng
+  product.isOnSale = mainProductIsOnSale;
+  product.displayPrice = mainProductIsOnSale
+    ? product.salePrice
+    : product.price;
+
+  // --- 8. Trả về kết quả cuối cùng ---
   res.json(product);
 });
 
@@ -901,6 +999,7 @@ const updateProductStock = asyncHandler(async (req, res) => {
 const updateVariantStock = asyncHandler(async (req, res) => {
   const { productId, variantId } = req.params; // Lấy ID sản phẩm và ID biến thể
   const { change, set } = req.body; // Dữ liệu: change hoặc set
+  const locale = req.locale || "vi"; // Lấy ngôn ngữ từ middleware, mặc định là 'vi'
 
   // --- 1. Validate Input ---
   if (
@@ -933,17 +1032,10 @@ const updateVariantStock = asyncHandler(async (req, res) => {
   }
 
   // --- 2. Tìm sản phẩm và biến thể ---
-  const product = await Product.findById(productId).populate({
-    path: "attributes.attribute",
-    select: "label values",
-  });
+  const product = await Product.findById(productId);
   if (!product) {
     res.status(404);
     throw new Error("Không tìm thấy sản phẩm.");
-  }
-  if (!product.variants || product.variants.length === 0) {
-    res.status(400);
-    throw new Error("Sản phẩm này không có biến thể.");
   }
 
   // Tìm sub-document variant bằng hàm id() của MongooseArray
@@ -976,54 +1068,81 @@ const updateVariantStock = asyncHandler(async (req, res) => {
   await product.save();
 
   // --- Gửi thông báo tồn kho cho biến thể ---
-  // 1. Tạo các Map để tra cứu tên thuộc tính và giá trị
-  const attributeMap = new Map();
-  product.attributes.forEach(attrWrapper => {
-      if(attrWrapper.attribute) { // Đảm bảo attribute được populate
-        const valueMap = new Map(attrWrapper.attribute.values.map(val => [val._id.toString(), val.value]));
+  if (
+    variant.stockQuantity <= 0 ||
+    variant.stockQuantity <= LOW_STOCK_THRESHOLD
+  ) {
+    // Chỉ thực hiện populate nếu cần gửi thông báo
+    const populatedProductForNotification = await Product.findById(productId)
+      .populate({
+        path: "attributes.attribute",
+        select: "label values",
+      })
+      .lean(); // Dùng lean() vì chỉ để đọc
+
+    // Tạo Map để tra cứu tên thuộc tính và giá trị
+    const attributeMap = new Map();
+    populatedProductForNotification.attributes.forEach((attrWrapper) => {
+      if (attrWrapper.attribute) {
+        const valueMap = new Map(
+          attrWrapper.attribute.values.map((val) => [
+            val._id.toString(),
+            val.value,
+          ])
+        );
         attributeMap.set(attrWrapper.attribute._id.toString(), {
-            label: attrWrapper.attribute.label,
-            values: valueMap
+          label: attrWrapper.attribute.label,
+          values: valueMap,
         });
       }
-  });
+    });
 
-  // 2. Xây dựng chuỗi tên hiển thị
-  const variantDisplayName = variant.optionValues
-    .map((opt) => {
-        const attrInfo = attributeMap.get(opt.attribute.toString());
-        if (!attrInfo) return '?';
-        const valueName = attrInfo.values.get(opt.value.toString());
-        return valueName || '?';
-    })
-    .join(" / ");
+    // Xây dựng chuỗi tên hiển thị cho biến thể theo đúng ngôn ngữ
+    const variantDisplayName = variant.optionValues
+      .map((opt) => {
+        const attrId = opt.attribute.toString();
+        const valueId = opt.value.toString();
+        const attrInfo = attributeMap.get(attrId);
+        if (!attrInfo) return "?";
 
-  const variantNameForNotification = `${product.name} (${variantDisplayName})`;
+        const valueObj = attrInfo.values.get(valueId);
+        // Ưu tiên ngôn ngữ của request, fallback về tiếng Việt
+        return valueObj?.[locale] || valueObj?.vi || "?";
+      })
+      .join(" / ");
 
-   if (variant.stockQuantity <= 0) {
-    await createAdminNotification(
-      "Biến thể hết hàng!",
-      `Biến thể "${variantNameForNotification}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" đã hết hàng (Tồn kho: 0).`,
-      "PRODUCT_OUT_OF_STOCK",
-      `/admin/products/${product._id}/edit`,
-      { productId: product._id, variantId: variant._id }
-    );
-  } else if (variant.stockQuantity <= LOW_STOCK_THRESHOLD) {
-    await createAdminNotification(
-      "Biến thể sắp hết hàng!",
-      `Biến thể "${variantNameForNotification}" (SKU: ${variant.sku}) của sản phẩm "${product.name}" sắp hết hàng (Tồn kho: ${variant.stockQuantity}).`,
-      "PRODUCT_LOW_STOCK",
-      `/admin/products/${product._id}/edit`,
-      { productId: product._id, variantId: variant._id }
-    );
+    // Lấy tên sản phẩm đúng ngôn ngữ
+    const productNameForNotification =
+      populatedProductForNotification.name?.[locale] ||
+      populatedProductForNotification.name?.vi;
+    const variantNameForNotification = `${productNameForNotification} (${variantDisplayName})`;
+
+    if (variant.stockQuantity <= 0) {
+      await createAdminNotification(
+        "Biến thể hết hàng!",
+        `Biến thể "${variantNameForNotification}" (SKU: ${variant.sku}) đã hết hàng (Tồn kho: 0).`,
+        "PRODUCT_OUT_OF_STOCK",
+        `/admin/products/${product._id}/edit`,
+        { productId: product._id, variantId: variant._id }
+      );
+    } else {
+      // Chỉ chạy else if nếu không hết hàng, vì hết hàng cũng là sắp hết hàng
+      await createAdminNotification(
+        "Biến thể sắp hết hàng!",
+        `Biến thể "${variantNameForNotification}" (SKU: ${variant.sku}) sắp hết hàng (Tồn kho: ${variant.stockQuantity}).`,
+        "PRODUCT_LOW_STOCK",
+        `/admin/products/${product._id}/edit`,
+        { productId: product._id, variantId: variant._id }
+      );
+    }
   }
 
-  // --- 4. Trả về kết quả ---
+  // --- 5. Trả về kết quả ---
   res.json({
     productId: product._id,
     variantId: variant._id,
-    variantSku: variant.sku, // Hiển thị SKU của biến thể
-    newStockQuantity: variant.stockQuantity, // Số lượng tồn kho mới của biến thể
+    variantSku: variant.sku,
+    newStockQuantity: variant.stockQuantity,
   });
 });
 
