@@ -1,5 +1,6 @@
 "use client";
 import { FiFilter } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface MobileFilterButtonProps {
   onClick: () => void;
@@ -10,6 +11,8 @@ export default function MobileFilterButton({
   onClick,
   activeFilterCount,
 }: MobileFilterButtonProps) {
+  const t = useTranslations("ProductPage");
+
   return (
     <button
       type="button"
@@ -20,7 +23,7 @@ export default function MobileFilterButton({
         className="mr-2 -ml-1 h-5 w-5 text-gray-400"
         aria-hidden="true"
       />
-      Bộ lọc
+      {t("filterButton")}
       {activeFilterCount && activeFilterCount > 0 && (
         <span className="ml-1.5 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700">
           {activeFilterCount}

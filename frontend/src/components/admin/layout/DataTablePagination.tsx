@@ -15,6 +15,7 @@ interface DataTablePaginationProps {
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
   itemType?: string; // Tên loại item, ví dụ: "sản phẩm"
+  defaultLimitFromSettings?: number;
 }
 
 const DataTablePagination: React.FC<DataTablePaginationProps> = ({
@@ -25,11 +26,25 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
   onPageChange,
   onLimitChange,
   itemType = "mục",
+  defaultLimitFromSettings,
 }) => {
   if (totalItems === 0) {
     return null;
   }
 
+  // --- LOGIC MỚI: TẠO DANH SÁCH TÙY CHỌN LIMIT ĐỘNG ---
+  const defaultLimitOptions = [10, 25, 50, 100];
+  const finalLimitOptions = [...defaultLimitOptions];
+
+  if (
+    defaultLimitFromSettings &&
+    !defaultLimitOptions.includes(defaultLimitFromSettings)
+  ) {
+    // Nếu có giá trị từ cài đặt và nó chưa tồn tại trong danh sách mặc định
+    // thì thêm nó vào và sắp xếp lại.
+    finalLimitOptions.push(defaultLimitFromSettings);
+    finalLimitOptions.sort((a, b) => a - b);
+  }
   return (
     <div className="border-top bg-light px-4 py-3">
       <CRow className="align-items-center gy-3">
@@ -50,14 +65,15 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
               <span className="text-muted text-sm">Hiển thị</span>
               <CFormSelect
                 size="sm"
-                style={{ width: "75px" }}
+                style={{ width: "85px" }}
                 value={limit}
                 onChange={(e) => onLimitChange(Number(e.target.value))}
               >
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
+                {finalLimitOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </CFormSelect>
               <span className="text-muted d-none d-sm-inline text-sm">
                 mục/trang

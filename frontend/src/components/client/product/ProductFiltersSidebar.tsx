@@ -1,10 +1,10 @@
 "use client";
-import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
+import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
 import SearchSuggestionList from "@/components/shared/SearchSuggestionList";
 import useDebounce from "@/hooks/useDebounce";
 import { useGetProducts } from "@/lib/react-query/productQueries";
 import { GetProductsParams } from "@/services/productService";
-import { Attribute } from "@/types";
+import { Attribute, ExchangeRates } from "@/types";
 import { Category } from "@/types/category";
 import { useEffect, useMemo, useState } from "react";
 import { FiSearch, FiXCircle } from "react-icons/fi";
@@ -12,6 +12,7 @@ import AttributeFilter from "./AttributeFilter";
 import CategoryFilter from "./CategoryFilter";
 import PriceFilter from "./PriceFilter";
 import RatingFilter from "./RatingFilter";
+import { useTranslations } from "next-intl";
 
 interface ProductFiltersSidebarProps {
   filters: ProductFilters;
@@ -23,6 +24,8 @@ interface ProductFiltersSidebarProps {
   onSearchChange: (searchTerm: string) => void; // Hàm callback khi tìm kiếm
   currentSearchTerm: string;
   onClearAllFilters: () => void;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 export default function ProductFiltersSidebar({
@@ -35,7 +38,10 @@ export default function ProductFiltersSidebar({
   onSearchChange,
   currentSearchTerm,
   onClearAllFilters,
+  displayCurrency,
+  rates,
 }: ProductFiltersSidebarProps) {
+  const t = useTranslations("ProductFilters");
   const [localSearchTerm, setLocalSearchTerm] = useState(currentSearchTerm);
 
   // === LOGIC GỢI Ý TÌM KIẾM ===
@@ -91,7 +97,7 @@ export default function ProductFiltersSidebar({
       <div className="pb-6">
         <form onSubmit={handleSearchSubmit} className="relative">
           <label htmlFor="search-filter" className="sr-only">
-            Tìm kiếm sản phẩm
+            {t("searchLabel")}
           </label>
           <input
             type="search"
@@ -100,13 +106,13 @@ export default function ProductFiltersSidebar({
             value={localSearchTerm}
             onChange={(e) => setLocalSearchTerm(e.target.value)}
             onFocus={() => setIsSuggestionBoxOpen(true)}
-            placeholder="Tìm theo tên, SKU..."
+            placeholder={t("searchPlaceholder")}
             className="input-field w-full bg-white pr-10"
           />
           <button
             type="submit"
             className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-gray-400 hover:text-indigo-600"
-            aria-label="Tìm kiếm"
+            aria-label={t("searchButtonLabel")}
           >
             <FiSearch className="h-5 w-5" />
           </button>
@@ -130,7 +136,12 @@ export default function ProductFiltersSidebar({
         currentFilters={filters}
         onFilterChange={onFilterChange}
       />
-      <PriceFilter currentFilters={filters} onFilterChange={onFilterChange} />
+      <PriceFilter
+        currentFilters={filters}
+        onFilterChange={onFilterChange}
+        displayCurrency={displayCurrency}
+        rates={rates}
+      />
       <AttributeFilter
         currentFilters={filters}
         onFilterChange={onFilterChange}
@@ -150,7 +161,7 @@ export default function ProductFiltersSidebar({
             className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
           >
             <FiXCircle className="mr-2 h-4 w-4 text-gray-400" />
-            Xóa tất cả bộ lọc
+            {t("clearAllFiltersButton")}
           </button>
         </div>
       )}

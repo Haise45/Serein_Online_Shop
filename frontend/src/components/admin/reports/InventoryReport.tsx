@@ -11,11 +11,21 @@ import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useMemo } from "react";
+import { ExchangeRates } from "@/types";
 
-const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
+interface InventoryReportProps {
+  filters: InventoryReportParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const InventoryReport: React.FC<InventoryReportProps> = ({
   filters,
+  displayCurrency,
+  rates,
 }) => {
   const { data, isLoading } = useGetInventoryReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
   const { data: attributes } = useGetAttributes();
 
   // *** Lấy attribute map để dịch tên biến thể ***
@@ -59,7 +69,7 @@ const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
         <CTableDataCell>
           <Link
             href={`/admin/products/${item.productId}/edit`}
-            className="flex items-center gap-3 text-decoration-none"
+            className="text-decoration-none flex items-center gap-3"
           >
             <Image
               src={
@@ -91,7 +101,7 @@ const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <ReportStatCard
           title="Tổng giá trị kho"
-          value={formatCurrency(data?.totalInventoryValue)}
+          value={formatCurrency(data?.totalInventoryValue, currencyOptions)}
           isLoading={isLoading}
         />
         <ReportStatCard

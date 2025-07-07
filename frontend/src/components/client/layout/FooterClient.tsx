@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import {
@@ -9,7 +10,7 @@ import {
 } from "react-icons/fa6";
 import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
 
-// Giữ nguyên các hằng số và biến môi trường của bạn
+// Giữ nguyên các biến môi trường
 const SHOP_NAME = process.env.NEXT_PUBLIC_SHOP_NAME || "Serein Shop";
 const SHOP_ADDRESS =
   process.env.NEXT_PUBLIC_SHOP_ADDRESS ||
@@ -21,54 +22,44 @@ const SOCIAL_LINKS = {
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "#",
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "#",
   youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL || "#",
-  //   tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "#",
   x: process.env.NEXT_PUBLIC_X_URL || "#",
 };
 
-interface FooterLink {
-  href: string;
-  label: string;
-}
-
-interface FooterSection {
-  title: string;
-  links: FooterLink[];
-}
-
-const footerLinkSections: FooterSection[] = [
-  {
-    title: "Hỗ Trợ Khách Hàng",
-    links: [
-      { href: "/help-center", label: "Trung Tâm Trợ Giúp" },
-      { href: "/how-to-buy", label: "Hướng Dẫn Mua Hàng" },
-      { href: "/payment-methods", label: "Phương Thức Thanh Toán" },
-      { href: "/shipping-policy", label: "Chính Sách Vận Chuyển" },
-      { href: "/faqs", label: "Câu Hỏi Thường Gặp" },
-    ],
-  },
-  {
-    title: "Chính Sách",
-    links: [
-      { href: "/return-policy", label: "Chính Sách Đổi Trả" },
-      { href: "/warranty-policy", label: "Chính Sách Bảo Hành" },
-      { href: "/privacy-policy", label: "Chính Sách Bảo Mật" },
-      { href: "/terms-of-service", label: "Điều Khoản Dịch Vụ" },
-    ],
-  },
-];
-
-// Danh sách các link cho cột "Về Chúng Tôi"
-const aboutUsLinks: FooterLink[] = [
-  { href: "/about-us", label: "Giới Thiệu" },
-  { href: "/careers", label: "Tuyển Dụng" },
-  { href: "/store-locations", label: "Hệ Thống Cửa Hàng" },
-  { href: "/contact-us", label: "Liên Hệ" },
-];
-
 export default function FooterClient() {
+  const t = useTranslations("Footer");
   const [newsletterEmail, setNewsletterEmail] = useState<string>("");
   const [newsletterMessage, setNewsletterMessage] = useState<string>("");
   const [newsletterLoading, setNewsletterLoading] = useState<boolean>(false);
+
+  // Lấy dữ liệu link từ file ngôn ngữ
+  const footerLinkSections = [
+    {
+      title: t("customerSupportTitle"),
+      links: [
+        { href: "/help-center", label: t("links.helpCenter") },
+        { href: "/how-to-buy", label: t("links.howToBuy") },
+        { href: "/payment-methods", label: t("links.paymentMethods") },
+        { href: "/shipping-policy", label: t("links.shippingPolicy") },
+        { href: "/faqs", label: t("links.faqs") },
+      ],
+    },
+    {
+      title: t("policiesTitle"),
+      links: [
+        { href: "/return-policy", label: t("links.returnPolicy") },
+        { href: "/warranty-policy", label: t("links.warrantyPolicy") },
+        { href: "/privacy-policy", label: t("links.privacyPolicy") },
+        { href: "/terms-of-service", label: t("links.termsOfService") },
+      ],
+    },
+  ];
+
+  const aboutUsLinks = [
+    { href: "/about-us", label: t("links.aboutUs") },
+    { href: "/careers", label: t("links.careers") },
+    { href: "/store-locations", label: t("links.storeLocations") },
+    { href: "/contact-us", label: t("links.contactUs") },
+  ];
 
   const handleNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -76,11 +67,8 @@ export default function FooterClient() {
     setNewsletterLoading(true);
     setNewsletterMessage("");
     console.log("Đăng ký nhận tin với email:", newsletterEmail);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    setNewsletterMessage(
-      `Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi thông tin đến ${newsletterEmail}.`,
-    );
+    setNewsletterMessage(t("newsletterSuccess", { email: newsletterEmail }));
     setNewsletterEmail("");
     setNewsletterLoading(false);
   };
@@ -88,12 +76,9 @@ export default function FooterClient() {
   return (
     <footer className="bg-gray-900 pt-16 pb-10 text-gray-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Phần trên của Footer: Logo, Links, Newsletter */}
         <div className="mb-10 grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-12">
-          {/* Cột 1 & 2: Logo và Thông tin liên hệ (chiếm 4/12 cột trên LG) */}
           <div className="md:col-span-1 lg:col-span-3">
             <Link href="/" className="mb-6 inline-block">
-              {/* Logo của bạn (có thể là ảnh hoặc text) */}
               <span className="text-4xl font-bold text-white italic">
                 SEREIN
               </span>
@@ -124,7 +109,6 @@ export default function FooterClient() {
             </address>
           </div>
 
-          {/* Cột 3 & 4: Các mục link (mỗi mục chiếm 2/12 cột trên LG) */}
           {footerLinkSections.map((section) => (
             <div key={section.title} className="md:col-span-1 lg:col-span-2">
               <h3 className="mb-5 text-sm font-semibold tracking-wider text-gray-200 uppercase">
@@ -145,10 +129,9 @@ export default function FooterClient() {
             </div>
           ))}
 
-          {/* Cột 5: Về chúng tôi (chiếm 2/12 cột trên LG) */}
           <div className="md:col-span-1 lg:col-span-2">
             <h3 className="mb-5 text-sm font-semibold tracking-wider text-gray-200 uppercase">
-              Về {SHOP_NAME}
+              {t("aboutUsTitle", { shopName: SHOP_NAME })}
             </h3>
             <ul className="space-y-3">
               {aboutUsLinks.map((link) => (
@@ -164,21 +147,20 @@ export default function FooterClient() {
             </ul>
           </div>
 
-          {/* Cột 6: Đăng ký nhận tin (chiếm 2/12 cột trên LG) */}
           <div className="md:col-span-2 lg:col-span-3">
             <div>
               <h3 className="mb-5 text-sm font-semibold tracking-wider text-gray-200 uppercase">
-                Đăng Ký Nhận Tin
+                {t("newsletterTitle")}
               </h3>
               <p className="mb-4 text-sm text-gray-400">
-                Nhận thông tin sản phẩm mới và khuyến mãi đặc biệt.
+                {t("newsletterSubtitle")}
               </p>
               <form
                 onSubmit={handleNewsletterSubmit}
                 className="flex flex-col gap-2 sm:flex-row sm:items-start"
               >
                 <label htmlFor="newsletter-email" className="sr-only">
-                  Địa chỉ email
+                  {t("emailLabel")}
                 </label>
                 <input
                   id="newsletter-email"
@@ -188,14 +170,16 @@ export default function FooterClient() {
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   className="w-full flex-grow appearance-none rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                  placeholder="Email của bạn"
+                  placeholder={t("emailPlaceholder")}
                 />
                 <button
                   type="submit"
                   disabled={newsletterLoading}
                   className={`flex-shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:outline-none ${newsletterLoading ? "cursor-not-allowed opacity-70" : ""}`}
                 >
-                  {newsletterLoading ? "Đang..." : "Gửi"}
+                  {newsletterLoading
+                    ? t("submitButtonLoading")
+                    : t("submitButton")}
                 </button>
               </form>
               {newsletterMessage && (
@@ -205,7 +189,6 @@ export default function FooterClient() {
               )}
             </div>
 
-            {/* Social Media Icons */}
             <div className="mt-8">
               <div className="flex space-x-4">
                 {SOCIAL_LINKS.facebook && SOCIAL_LINKS.facebook !== "#" && (
@@ -214,7 +197,7 @@ export default function FooterClient() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-700 hover:text-white"
-                    aria-label="Facebook"
+                    aria-label={t("socials.facebook")}
                   >
                     <FaFacebookF className="h-5 w-5 transform transition-transform duration-300 ease-in-out group-hover:scale-110" />
                   </Link>
@@ -225,7 +208,7 @@ export default function FooterClient() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-700 hover:text-white"
-                    aria-label="Instagram"
+                    aria-label={t("socials.instagram")}
                   >
                     <FaInstagram className="h-5 w-5 transform transition-transform duration-300 ease-in-out group-hover:scale-110" />
                   </Link>
@@ -236,7 +219,7 @@ export default function FooterClient() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-700 hover:text-white"
-                    aria-label="YouTube"
+                    aria-label={t("socials.youtube")}
                   >
                     <FaYoutube className="h-5 w-5 transform transition-transform duration-300 ease-in-out group-hover:scale-110" />
                   </Link>
@@ -247,33 +230,23 @@ export default function FooterClient() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-700 hover:text-white"
-                    aria-label="X (Twitter)"
+                    aria-label={t("socials.x")}
                   >
                     <FaXTwitter className="h-5 w-5 transform transition-transform duration-300 ease-in-out group-hover:scale-110" />
                   </Link>
                 )}
-                {/* {SOCIAL_LINKS.tiktok && SOCIAL_LINKS.tiktok !== "#" && (
-                <Link
-                  href={SOCIAL_LINKS.tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-700 hover:text-white"
-                  aria-label="TikTok"
-                >
-                  <FaTiktok className="h-5 w-5 transform transition-transform duration-300 ease-in-out group-hover:scale-110" />
-                </Link>
-              )} */}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Đường kẻ ngang và phần Copyright/Social */}
         <div className="mt-10 border-t border-gray-700 pt-8">
           <div className="flex flex-col items-center justify-between gap-y-6 md:flex-row">
-            {/* Copyright */}
             <p className="text-sm text-gray-500">
-              © {new Date().getFullYear()} {SHOP_NAME}. Mọi quyền được bảo lưu.
+              {t("copyright", {
+                year: new Date().getFullYear(),
+                shopName: SHOP_NAME,
+              })}
             </p>
           </div>
         </div>

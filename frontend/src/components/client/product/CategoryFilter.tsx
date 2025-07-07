@@ -1,11 +1,11 @@
-
 "use client";
-import { Category } from '@/types/category';
-import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
-import FilterDisclosure from './FilterDisclosure';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import classNames from 'classnames';
+import { Category } from "@/types/category";
+import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
+import FilterDisclosure from "./FilterDisclosure";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import classNames from "classnames";
+import { useTranslations } from "next-intl";
 
 interface CategoryFilterProps {
   categories: Category[];
@@ -14,8 +14,14 @@ interface CategoryFilterProps {
   onFilterChange: (newFilters: ProductFilters) => void;
 }
 
-export default function CategoryFilter({ categories, isLoading, currentFilters, onFilterChange }: CategoryFilterProps) {
+export default function CategoryFilter({
+  categories,
+  isLoading,
+  currentFilters,
+  onFilterChange,
+}: CategoryFilterProps) {
   const pathname = usePathname(); // Để tạo link giữ nguyên các filter khác
+  const t = useTranslations("ProductFilters");
 
   const handleCategorySelect = (categorySlug: string | undefined) => {
     onFilterChange({ ...currentFilters, category: categorySlug });
@@ -25,28 +31,37 @@ export default function CategoryFilter({ categories, isLoading, currentFilters, 
   const createCategoryLink = (slug?: string) => {
     const params = new URLSearchParams();
     // Thêm các filter hiện tại (trừ category) vào params
-    if (currentFilters.minPrice) params.set('minPrice', String(currentFilters.minPrice));
-    if (currentFilters.maxPrice) params.set('maxPrice', String(currentFilters.maxPrice));
-    if (currentFilters.minRating) params.set('minRating', String(currentFilters.minRating));
+    if (currentFilters.minPrice)
+      params.set("minPrice", String(currentFilters.minPrice));
+    if (currentFilters.maxPrice)
+      params.set("maxPrice", String(currentFilters.maxPrice));
+    if (currentFilters.minRating)
+      params.set("minRating", String(currentFilters.minRating));
     if (currentFilters.attributes) {
-        Object.entries(currentFilters.attributes).forEach(([key, values]) => {
-            if (values.length > 0) params.set(`attributes[${key}]`, values.map(v => encodeURIComponent(v)).join(','));
-        });
+      Object.entries(currentFilters.attributes).forEach(([key, values]) => {
+        if (values.length > 0)
+          params.set(
+            `attributes[${key}]`,
+            values.map((v) => encodeURIComponent(v)).join(","),
+          );
+      });
     }
     // Thêm category mới (nếu có)
     if (slug) {
-        params.set('category', slug);
+      params.set("category", slug);
     }
     return `${pathname}?${params.toString()}`;
-  }
-
+  };
 
   if (isLoading) {
     return (
       <FilterDisclosure title="Danh mục" defaultOpen={true}>
         <div className="space-y-2">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-5 w-3/4 rounded bg-gray-200 animate-pulse"></div>
+            <div
+              key={i}
+              className="h-5 w-3/4 animate-pulse rounded bg-gray-200"
+            ></div>
           ))}
         </div>
       </FilterDisclosure>
@@ -56,10 +71,17 @@ export default function CategoryFilter({ categories, isLoading, currentFilters, 
   // Xây dựng cây danh mục (ví dụ đơn giản, bạn có thể làm phức tạp hơn)
   const buildCategoryTree = (parentId: string | null = null): Category[] => {
     return categories
-      .filter(cat => (cat.parent ? (typeof cat.parent === 'string' ? cat.parent : cat.parent._id.toString()) : null) === parentId)
-      .map(cat => ({
+      .filter(
+        (cat) =>
+          (cat.parent
+            ? typeof cat.parent === "string"
+              ? cat.parent
+              : cat.parent._id.toString()
+            : null) === parentId,
+      )
+      .map((cat) => ({
         ...cat,
-        children: buildCategoryTree(cat._id.toString())
+        children: buildCategoryTree(cat._id.toString()),
       }));
   };
 
@@ -67,51 +89,53 @@ export default function CategoryFilter({ categories, isLoading, currentFilters, 
 
   const renderCategoryList = (cats: Category[], level = 0) => (
     <ul className={classNames("space-y-1", { "pl-4": level > 0 })}>
-      {cats.map(cat => (
+      {cats.map((cat) => (
         <li key={cat._id.toString()}>
           <Link
             href={createCategoryLink(cat.slug)}
             onClick={(e) => {
-                e.preventDefault(); // Ngăn điều hướng mặc định
-                handleCategorySelect(currentFilters.category === cat.slug ? undefined : cat.slug);
+              e.preventDefault(); // Ngăn điều hướng mặc định
+              handleCategorySelect(
+                currentFilters.category === cat.slug ? undefined : cat.slug,
+              );
             }}
             className={classNames(
-              "block px-2 py-1.5 text-sm rounded-md transition-colors",
+              "block rounded-md px-2 py-1.5 text-sm transition-colors",
               currentFilters.category === cat.slug
-                ? "bg-indigo-100 text-indigo-700 font-medium"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                ? "bg-indigo-100 font-medium text-indigo-700"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
             )}
           >
             {cat.name}
           </Link>
-          {cat.children && cat.children.length > 0 && renderCategoryList(cat.children as Category[], level + 1)}
+          {cat.children &&
+            cat.children.length > 0 &&
+            renderCategoryList(cat.children as Category[], level + 1)}
         </li>
       ))}
     </ul>
   );
 
-
   return (
-    <FilterDisclosure title="Danh mục" defaultOpen={true}>
-        <div className="space-y-2">
-            <Link
-                 href={createCategoryLink(undefined)} // Link xóa filter category
-                 onClick={(e) => {
-                    e.preventDefault();
-                    handleCategorySelect(undefined);
-                }}
-                className={classNames(
-                    "block px-2 py-1.5 text-sm rounded-md transition-colors font-medium",
-                    !currentFilters.category
-                    ? "bg-indigo-100 text-indigo-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                )}
-            >
-                Tất cả danh mục
-            </Link>
-            {renderCategoryList(categoryTree)}
-        </div>
-
+    <FilterDisclosure title={t("categoryTitle")} defaultOpen={true}>
+      <div className="space-y-2">
+        <Link
+          href={createCategoryLink(undefined)} // Link xóa filter category
+          onClick={(e) => {
+            e.preventDefault();
+            handleCategorySelect(undefined);
+          }}
+          className={classNames(
+            "block rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
+            !currentFilters.category
+              ? "bg-indigo-100 text-indigo-700"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+          )}
+        >
+          {t("allCategories")}
+        </Link>
+        {renderCategoryList(categoryTree)}
+      </div>
     </FilterDisclosure>
   );
 }

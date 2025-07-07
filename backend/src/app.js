@@ -7,6 +7,7 @@ require("dotenv").config();
 const { protectOptional } = require("./middlewares/authMiddleware");
 const identifyCartUser = require("./middlewares/identifyCartUser");
 const identifyWishlistUser = require("./middlewares/identifyWishlistUser");
+const setLocale = require("./middlewares/localeMiddleware");
 
 // Import routes
 const authRoutes = require("./routes/authRoutes");
@@ -24,6 +25,7 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const attrttributeRoutes = require("./routes/attributeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const settingRoutes = require("./routes/settingRoutes");
 
 // Import error handler middleware
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
@@ -60,6 +62,7 @@ app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser());
 app.set("query parser", "extended");
+app.use(setLocale);
 
 // Serve static files (hình ảnh upload)
 // Request đến /uploads/... sẽ tìm file trong thư mục public/uploads
@@ -93,6 +96,7 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/attributes", attrttributeRoutes);
 app.use("/api/v1/reports", reportRoutes);
+app.use("/api/v1/settings", settingRoutes);
 
 // Custom Error Handling Middlewares
 app.use(notFound);

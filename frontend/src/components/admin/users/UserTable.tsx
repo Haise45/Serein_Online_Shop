@@ -1,5 +1,6 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import { formatCurrency, maskString, timeAgo } from "@/lib/utils";
 import { User } from "@/types";
 import { cilCheckCircle, cilPen, cilTrash } from "@coreui/icons";
@@ -29,6 +30,9 @@ const UserTable: React.FC<UserTableProps> = ({
   onStatusChangeClick,
   queryString,
 }) => {
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
+  
   return (
     <CTable hover responsive className="align-middle">
       <CTableHead>
@@ -83,7 +87,7 @@ const UserTable: React.FC<UserTableProps> = ({
             </CTableDataCell>
             <CTableDataCell className="text-end">
               <span className="fw-semibold text-gray-800">
-                {formatCurrency(user.totalSpent ?? 0)}
+                {formatCurrency(user.totalSpent ?? 0, { currency: displayCurrency, rates })}
               </span>
             </CTableDataCell>
             <CTableDataCell className="text-center">

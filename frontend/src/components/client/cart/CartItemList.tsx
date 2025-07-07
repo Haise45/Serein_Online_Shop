@@ -1,5 +1,5 @@
 "use client";
-import { CartItem as CartItemType } from "@/types";
+import { CartItem as CartItemType, ExchangeRates } from "@/types";
 import CartItemRow from "./CartItemRow";
 
 interface CartItemListProps {
@@ -7,6 +7,7 @@ interface CartItemListProps {
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, isSelected: boolean) => void;
   attributeMap: Map<string, { label: string; values: Map<string, string> }>;
+  currencyOptions: { currency: "VND" | "USD"; rates: ExchangeRates | null };
 }
 
 export default function CartItemList({
@@ -14,6 +15,7 @@ export default function CartItemList({
   selectedItemIds,
   onSelectItem,
   attributeMap,
+  currencyOptions,
 }: CartItemListProps) {
   return (
     <ul
@@ -27,6 +29,7 @@ export default function CartItemList({
           isSelected={selectedItemIds.has(item._id)} // Truyền trạng thái selected
           onSelectItem={onSelectItem} // Truyền hàm callback
           attributeMap={attributeMap}
+          currencyOptions={currencyOptions}
         />
       ))}
     </ul>

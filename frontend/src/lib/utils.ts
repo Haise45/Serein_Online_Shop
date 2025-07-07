@@ -1,5 +1,6 @@
 import { Category, VariantOptionValue } from "@/types";
 import DOMPurify from "isomorphic-dompurify";
+import { ExchangeRates } from "@/types/setting";
 
 export const buildCategoryTree = (
   categories: Category[],
@@ -47,28 +48,61 @@ export const flattenTreeForSelect = (
 };
 
 /**
- * Định dạng số thành chuỗi tiền tệ VND.
- * @param amount Số tiền cần định dạng.
- * @param defaultValue Giá trị trả về nếu amount không hợp lệ (mặc định là chuỗi rỗng).
- * @returns Chuỗi tiền tệ đã định dạng hoặc giá trị mặc định.
+ * Định dạng và chuyển đổi số tiền sang một loại tiền tệ cụ thể.
+ * @param amountVND - Số tiền gốc, luôn là VND.
+ * @param options - Các tùy chọn để định dạng và chuyển đổi.
+ * @param options.currency - Loại tiền tệ muốn hiển thị ('VND' hoặc 'USD'). Mặc định là 'VND'.
+ * @param options.rates - Object chứa tỷ giá hối đoái. Cần thiết khi chuyển đổi sang USD.
+ * @param options.defaultValue - Giá trị trả về nếu amountVND không hợp lệ.
+ * @returns Chuỗi tiền tệ đã được định dạng và chuyển đổi.
  */
 export const formatCurrency = (
-  amount?: number | null,
-  includeCurrencySymbol: boolean = true, // Thêm tham số này
-  defaultValue: string = "Liên hệ",
+  amountVND?: number | null,
+  options?: {
+    currency?: "VND" | "USD";
+    rates?: ExchangeRates | null;
+    defaultValue?: string;
+  },
 ): string => {
-  // Kiểm tra xem amount có phải là số hợp lệ không
-  if (typeof amount !== "number" || isNaN(amount)) {
-    return defaultValue; // Trả về giá trị mặc định nếu không phải số
+  // Gán giá trị mặc định cho các options
+  const {
+    currency = "VND",
+    rates = null,
+    defaultValue = "Liên hệ",
+  } = options || {};
+
+  // Kiểm tra đầu vào
+  if (typeof amountVND !== "number" || isNaN(amountVND)) {
+    return defaultValue;
   }
+
+  let finalAmount = amountVND;
+  let currencyToDisplay: "VND" | "USD" = "VND";
+  let locale = "vi-VN";
+
+  // Thực hiện chuyển đổi nếu cần
+  if (currency === "USD" && rates?.rates?.USD) {
+    finalAmount = amountVND * rates.rates.USD;
+    currencyToDisplay = "USD";
+    locale = "en-US";
+  }
+
   try {
-    return amount.toLocaleString("vi-VN", {
-      style: includeCurrencySymbol ? "currency" : "decimal", // Thay đổi style
-      currency: "VND",
+    return finalAmount.toLocaleString(locale, {
+      style: "currency",
+      currency: currencyToDisplay,
+      // Tùy chỉnh để hiển thị đẹp hơn
+      minimumFractionDigits: currencyToDisplay === "USD" ? 2 : 0,
+      maximumFractionDigits: currencyToDisplay === "USD" ? 2 : 0,
     });
   } catch (error) {
-    console.error("Lỗi khi định dạng tiền tệ:", error, "Với giá trị:", amount);
-    return defaultValue; // Trả về giá trị mặc định nếu có lỗi xảy ra
+    console.error(
+      `Lỗi khi định dạng tiền tệ (${currencyToDisplay}):`,
+      error,
+      "Với giá trị:",
+      finalAmount,
+    );
+    return defaultValue;
   }
 };
 

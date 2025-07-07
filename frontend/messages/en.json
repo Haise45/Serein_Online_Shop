@@ -1,0 +1,1003 @@
+{
+  "Metadata": {
+    "root": {
+      "title": "Official Homepage | Serein Shop",
+      "description": "Shop for quality men's and women's fashion."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password | Serein Shop",
+      "description": "Request a password reset for your Serein Shop account."
+    },
+    "login": {
+      "title": "Log In | Serein Shop",
+      "description": "Log in to your Serein Shop account to continue shopping and manage orders."
+    },
+    "register": {
+      "title": "Create Account | Serein Shop",
+      "description": "Create a new account at Serein Shop to receive many attractive offers."
+    },
+    "resetPassword": {
+      "title": "Reset Password | Serein Shop",
+      "description": "Create a new password for your Serein Shop account."
+    },
+    "verifyEmail": {
+      "title": "Verify Email | Serein Shop",
+      "description": "Complete the verification of your email address."
+    },
+    "wishlist": {
+      "title": "Your Wishlist | Serein Shop",
+      "description": "View and manage the products you've liked at Serein Shop."
+    },
+    "cart": {
+      "title": "Your Cart | Serein Shop",
+      "description": "Review products in your cart and proceed to checkout at Serein Shop."
+    },
+    "checkout": {
+      "title": "Checkout | Serein Shop",
+      "description": "Complete your order information at Serein Shop."
+    },
+    "products": {
+      "title": "All Products | Serein Shop",
+      "description": "Explore the diverse product collection at Serein Shop."
+    },
+    "productNotFound": {
+      "title": "Product Not Found | Serein Shop"
+    },
+    "product": {
+      "title": "{name} | Serein Shop",
+      "description": "Buy {name} at Serein Shop."
+    },
+    "profile": {
+      "title": "Account Information | Serein Shop",
+      "description": "Manage your personal information and password settings."
+    },
+    "addresses": {
+      "title": "Address Book | Serein Shop",
+      "description": "Manage your shipping addresses."
+    },
+    "orders": {
+      "title": "Order History | Serein Shop",
+      "description": "Review the orders you have placed at Serein Shop."
+    },
+    "orderDetails": {
+      "title": "Order Details #{id} | Serein Shop",
+      "description": "View details for your order #{id} at Serein Shop."
+    },
+    "vouchers": {
+      "title": "Voucher Wallet | Serein Shop",
+      "description": "View and manage your discount codes and vouchers."
+    }
+  },
+
+  "NavbarClient": {
+    "searchPlaceholder": "What are you looking for today?",
+    "wishlist": "Wishlist",
+    "cart": "Cart",
+    "search": "Search",
+    "setting": "Settings"
+  },
+
+  "SettingDropdown": {
+    "language": "Language",
+    "currency": "Currency",
+    "vi": "Vietnamese",
+    "en": "English"
+  },
+
+  "UserMenu": {
+    "greeting": "Hi, {name}!",
+    "dashboard": "Dashboard",
+    "profile": "Profile Information",
+    "my_orders": "My Orders",
+    "logout": "Log Out",
+    "login": "Log In",
+    "register": "Register"
+  },
+
+  "FeatureBar": {
+    "title": "Why Choose {shopName}?",
+    "subtitle": "We are committed to bringing you the best shopping experience.",
+    "features": {
+      "delivery": {
+        "title": "Nationwide Delivery",
+        "subtitle": "Free shipping for orders over 500K"
+      },
+      "returns": {
+        "title": "Flexible Returns",
+        "subtitle": "Within 7 days, simple procedures"
+      },
+      "genuine": {
+        "title": "100% Genuine Products",
+        "subtitle": "Commitment to quality and origin"
+      },
+      "support": {
+        "title": "Customer Support",
+        "subtitle": "24/7 Hotline: 1900.1234"
+      }
+    }
+  },
+
+  "AppLoadingManager": {
+    "loadingMessage": "Please wait a moment..."
+  },
+
+  "GuestGuard": {
+    "redirectingTitle": "You are already logged in",
+    "redirectingSubtitle": "Redirecting..."
+  },
+
+  "HomePage": {
+    "newestProductsTitle": "#NewestProducts",
+    "popularProductsTitle": "#BestSellers",
+    "viewAllButton": "View All Products",
+    "errorNewToast": "Error loading new products.",
+    "errorPopularToast": "Error loading popular products."
+  },
+
+  "Breadcrumbs": {
+    "home": "Home",
+    "login": "Log In",
+    "register": "Register",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "verifyEmail": "Verify Email",
+    "cart": "Shopping Cart",
+    "checkout": "Checkout",
+    "wishlist": "Wishlist",
+    "products": "Products",
+    "productDetails": "Product Details",
+    "profile": "Profile Information"
+  },
+
+  "ProfileBreadcrumbs": {
+    "home": "Home",
+    "account": "Account",
+    "myOrders": "My Orders",
+    "orderDetails": "Details for #{orderId}",
+    "addressBook": "Address Book",
+    "voucherWallet": "Voucher Wallet"
+  },
+
+  "SideDrawer": {
+    "closeMenu": "Close menu",
+    "discoverAll": "DISCOVER ALL {categoryName}",
+    "noSubcategories": "No subcategories available.",
+    "noCategories": "No categories to display."
+  },
+
+  "Footer": {
+    "customerSupportTitle": "Customer Support",
+    "policiesTitle": "Policies",
+    "aboutUsTitle": "About {shopName}",
+    "newsletterTitle": "Subscribe to our Newsletter",
+    "newsletterSubtitle": "Get updates on new products and special promotions.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Your email",
+    "submitButton": "Submit",
+    "submitButtonLoading": "Sending...",
+    "newsletterSuccess": "Thank you for subscribing! We will send updates to {email}.",
+    "copyright": "© {year} {shopName}. All rights reserved.",
+    "links": {
+      "helpCenter": "Help Center",
+      "howToBuy": "How to Buy",
+      "paymentMethods": "Payment Methods",
+      "shippingPolicy": "Shipping Policy",
+      "faqs": "FAQs",
+      "returnPolicy": "Return Policy",
+      "warrantyPolicy": "Warranty Policy",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "aboutUs": "About Us",
+      "careers": "Careers",
+      "storeLocations": "Store Locations",
+      "contactUs": "Contact Us"
+    },
+    "socials": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "x": "X (Twitter)"
+    }
+  },
+
+  "SearchSuggestion": {
+    "loading": "Searching...",
+    "noResults": "No products found matching \"{searchTerm}\".",
+    "viewAll": "View all results for \"{searchTerm}\""
+  },
+
+  "CategoryMenu": {
+    "all": "All {categoryName}",
+    "newProducts": "New Products",
+    "bestSellers": "Best Sellers",
+    "noSubcategories": "No subcategories available."
+  },
+
+  "ForgotPasswordPage": {
+    "title": "Forgot Password",
+    "instructions": "Enter your registered email address. We will send you a link (or OTP code) to reset your password.",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "Enter your email",
+    "submitButton": "Send Reset Request",
+    "submitButtonLoading": "Sending...",
+    "successMessage": "Request has been sent. Please check your email.",
+    "failureMessage": "Failed to send request. Please try again.",
+    "backToLoginLink": "Back to Log In"
+  },
+
+  "LoginPage": {
+    "title": "Log In",
+    "subtitle": "Welcome back!",
+    "emailLabel": "Your Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Remember me",
+    "forgotPasswordLink": "Forgot password?",
+    "submitButton": "Log In",
+    "submitButtonLoading": "Processing...",
+    "registerPrompt": "Don't have an account?",
+    "registerLink": "Register now",
+    "invalidEmailToast": "Invalid email address.",
+    "loginSuccessToast": "Login successful!",
+    "loginFailureToast": "Login failed. Please check again."
+  },
+
+  "RegisterPage": {
+    "title": "Create Account",
+    "fullNameLabel": "Full Name *",
+    "fullNamePlaceholder": "Your full name",
+    "emailLabel": "Email *",
+    "emailPlaceholder": "Your email",
+    "phoneLabel": "Phone Number *",
+    "phonePlaceholder": "Your phone number",
+    "passwordLabel": "Password *",
+    "passwordPlaceholder": "••••••••",
+    "confirmPasswordLabel": "Confirm Password *",
+    "confirmPasswordPlaceholder": "••••••••",
+    "passwordHint": {
+      "length": "At least 6 characters",
+      "uppercase": "At least 1 uppercase letter (A-Z)",
+      "lowercase": "At least 1 lowercase letter (a-z)",
+      "number": "At least 1 number (0-9)",
+      "special": "At least 1 special character (!@#$%^&*)"
+    },
+    "submitButton": "Register",
+    "submitButtonLoading": "Processing...",
+    "loginPrompt": "Already have an account?",
+    "loginLink": "Log in",
+    "validation": {
+      "required": "Please enter your {field}.",
+      "invalidEmail": "Invalid email address.",
+      "invalidPhone": "Invalid phone number.",
+      "passwordMismatch": "Password and confirmation do not match.",
+      "passwordComplexity": "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)."
+    },
+    "registerSuccessMessage": "Registration successful. Please check your email to verify."
+  },
+
+  "ResetPasswordPage": {
+    "title": "Reset Password",
+    "newPasswordLabel": "New Password *",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPasswordLabel": "Confirm New Password *",
+    "confirmPasswordPlaceholder": "Re-enter new password",
+    "submitButton": "Reset Password",
+    "submitButtonLoading": "Processing...",
+    "successMessage": "Your password has been reset successfully!",
+    "goToLoginButton": "Go to Log In",
+    "passwordMismatch": "Passwords do not match.",
+    "passwordLengthError": "Password must be at least 6 characters.",
+    "invalidTokenError": "Invalid or expired password reset token.",
+    "tokenErrorTitle": "Token Error",
+    "requestNewLinkButton": "Request a new link"
+  },
+
+  "VerifyEmailPage": {
+    "title": "Verify Email",
+    "initialMessage": "A 6-digit OTP code has been sent to <strong>{email}</strong>. Please enter the code below.",
+    "defaultEmail": "your email",
+    "otpInputLabel": "OTP digit {index}",
+    "submitButton": "Verify OTP",
+    "submitButtonLoading": "Verifying...",
+    "resendButton": "Didn't receive the code? Resend OTP",
+    "resendButtonLoading": "Resending...",
+    "resendButtonCooldown": "Resend in ({seconds}s)",
+    "backToLoginLink": "Back to Log In",
+    "successMessage": "Email verification successful! Redirecting...",
+    "failureMessage": "OTP verification failed.",
+    "resendSuccessMessage": "A new OTP has been sent. Please check your email.",
+    "resendFailureMessage": "Failed to resend OTP.",
+    "missingEmailError": "Email information not found for verification.",
+    "invalidOtpError": "Please enter a 6-digit OTP."
+  },
+
+  "WishlistPage": {
+    "loading": "Loading wishlist...",
+    "errorTitle": "Error loading wishlist",
+    "errorMessage": "An unexpected error occurred.",
+    "retryButton": "Retry",
+    "emptyTitle": "Your wishlist is empty",
+    "emptySubtitle": "Looks like you haven't added any products here. Start exploring and save the items you love!",
+    "exploreButton": "Explore Products",
+    "pageTitle": "Wishlist",
+    "itemCount": "{count} products"
+  },
+
+  "WishlistItemCard": {
+    "outOfStock": "Out of stock",
+    "saleBadge": "-{percentage}%",
+    "removeFromWishlist": "Remove from wishlist",
+    "attributeLabel": "{label}: {value}",
+    "defaultAttribute": "Attribute",
+    "outOfStockToast": "This product is currently out of stock.",
+    "addToCartSuccess": "Added \"{name}\" to cart!",
+    "addToCartButton": "Add to Cart",
+    "outOfStockButton": "Out of Stock"
+  },
+
+  "CartPage": {
+    "loadingErrorTitle": "Error loading cart",
+    "retryButton": "Retry",
+    "emptyCartTitle": "Your shopping cart is empty",
+    "emptyCartSubtitle": "Looks like you haven't added any products yet.",
+    "startShoppingButton": "Start Shopping",
+    "pageTitle": "Shopping Cart",
+    "selectAllLabel": "Select all",
+    "srOnlyTitle": "Items in your shopping cart"
+  },
+
+  "AddedToCartPopup": {
+    "closeButtonLabel": "Close",
+    "successTitle": "Added to cart successfully!",
+    "quantityLabel": "Quantity: {quantity}",
+    "viewCartButton": "View Cart",
+    "continueShoppingButton": "Continue Shopping"
+  },
+
+  "CartItemRow": {
+    "stockErrorToast": "Only {stock} products left in stock.",
+    "variantUnavailableToast": "This version is not available or is out of stock.",
+    "loadingErrorTitle": "Error loading info for \"{name}\"",
+    "loadingErrorSubtitle": "The product may have been deleted or hidden.",
+    "retryButton": "Retry",
+    "selectItemLabel": "Select product {name}",
+    "unitPriceLabel": "Unit price:",
+    "outOfStock": "Out of stock",
+    "insufficientStock": "Insufficient stock",
+    "stockWarningMessage": "You are selecting {quantity} products, but only {availableStock} are available. Please update the quantity or choose another product. Thank you.",
+    "selectAttributePlaceholder": "Select {label}",
+    "decreaseQuantityLabel": "Decrease quantity",
+    "quantityAriaLabel": "Quantity of {name}",
+    "increaseQuantityLabel": "Increase quantity",
+    "removeButton": "Remove"
+  },
+
+  "CartPreviewModal": {
+    "loading": "Loading...",
+    "loadingErrorTitle": "Error loading cart",
+    "loadingErrorSubtitle": "An error occurred while loading your cart information.",
+    "errorDetails": "Details: {message}",
+    "retryButton": "Retry",
+    "emptyCartTitle": "Your cart is empty",
+    "emptyCartSubtitle": "Add products to your cart to start shopping!",
+    "continueShoppingButton": "Continue Shopping",
+    "decreaseQuantityLabel": "Decrease quantity of {name}",
+    "currentQuantityLabel": "Current quantity of {name}",
+    "increaseQuantityLabel": "Increase quantity of {name}",
+    "removeItemTitle": "Remove {name} from cart",
+    "stockRemaining": "Only {stock} left",
+    "lineTotalLabel": "Total:",
+    "subtotalLabel": "Subtotal ({count} items)",
+    "discountLabel": "Discount ({code})",
+    "totalLabel": "Total",
+    "shippingFeeNotice": "Shipping fees will be calculated at checkout.",
+    "viewCartDetailsButton": "View Cart Details",
+    "proceedToCheckoutButton": "Proceed to Checkout",
+    "modalTitle": "Your Cart",
+    "closeModalLabel": "Close cart",
+    "itemCountMessage": "There are {count} products.",
+    "emptyCartToast": "Your cart is empty."
+  },
+
+  "CartSummary": {
+    "title": "Order Summary",
+    "subtotalLabel": "Subtotal ({lineCount} types, {quantityCount} items)",
+    "discountLabel": "Discount ({code})",
+    "totalLabel": "Total",
+    "stockErrorNotice": "The products you selected have an invalid quantity. Please check the items highlighted in red in your cart.",
+    "proceedToCheckoutButton": "Proceed to Checkout ({count})",
+    "continueShoppingLink": "Or continue shopping",
+    "stockErrorToast": "Some products you selected have a quantity exceeding the available stock. Please check again.",
+    "noItemsSelectedToast": "Please select at least one product to continue."
+  },
+
+  "CouponSection": {
+    "title": "Discount Code",
+    "inputPlaceholder": "Enter discount code",
+    "applyButton": "Apply",
+    "loadingCoupons": "Loading discount codes...",
+    "viewAvailableCoupons": "View available discount codes ({count})",
+    "discountPercentage": "Save {value}%",
+    "discountFixed": "Save {value}",
+    "forOrdersFrom": ", for orders from {value}",
+    "expiryDate": "Exp: {date}",
+    "usesLeft": "({count} left)"
+  },
+
+  "CheckoutPage": {
+    "loading": "Loading...",
+    "processingOrder": "Finalizing your order...",
+    "checkingCart": "Checking your cart...",
+    "pageTitle": "Checkout",
+    "loadingErrorTitle": "Error loading cart",
+    "loadingErrorMessage": "Could not retrieve cart information for checkout.",
+    "noItemsToCheckoutToast": "Please select products from your cart to checkout.",
+    "staleDataToast": "Some products have changed. Please review your cart.",
+    "stockErrorToast": "Product \"{name}\" is out of stock (only {stock} left)."
+  },
+
+  "AddressFormModal": {
+    "editTitle": "Edit Address",
+    "addTitle": "Add New Address",
+    "editDescription": "Update your shipping address information.",
+    "addDescription": "Add a new shipping address to your list.",
+    "closeButton": "Close",
+    "receiverInfoTitle": "Receiver Information",
+    "fullNameLabel": "Full Name *",
+    "fullNamePlaceholder": "Enter full name",
+    "phoneLabel": "Phone Number *",
+    "phonePlaceholder": "Enter phone number",
+    "shippingAddressTitle": "Shipping Address",
+    "provinceLabel": "Province/City *",
+    "provincePlaceholder": "Select Province/City",
+    "districtLabel": "District *",
+    "districtPlaceholder": "Select District",
+    "communeLabel": "Commune/Ward *",
+    "communePlaceholder": "Select Commune/Ward",
+    "streetLabel": "Street Address *",
+    "streetPlaceholder": "House number, street name, area...",
+    "isDefaultLabel": "Set as default address",
+    "isDefaultHint": "(This address will be selected by default for future orders)",
+    "cancelButton": "Cancel",
+    "saveChangesButton": "Save Changes",
+    "addAddressButton": "Add Address",
+    "loadingProvinces": "Loading provinces...",
+    "loadingDistricts": "Loading districts...",
+    "loadingCommunes": "Loading communes...",
+    "validationErrorToast": "Please select Province, District, and Commune."
+  },
+
+  "CheckoutForm": {
+    "contactInfoTitle": "Contact Information",
+    "emailLabel": "Email Address *",
+    "emailPlaceholder": "you@example.com",
+    "shippingAddressTitle": "Shipping Address",
+    "defaultLabel": "(Default)",
+    "editAddressLabel": "Edit address for {name}",
+    "useNewAddressButton": "Enter a new address",
+    "orEnterNewAddress": "Or enter a new address below:",
+    "paymentMethodTitle": "Payment Method",
+    "notesTitle": "Order Notes",
+    "notesPlaceholder": "Add a note for your order (optional)...",
+    "submitButton": "Complete Order",
+    "processingButton": "Processing...",
+    "addressValidationError": "Please fill in all required shipping address information.",
+    "emailValidationError": "Please enter a valid email address.",
+    "paymentMethods": {
+      "COD": {
+        "name": "Cash on Delivery (COD)",
+        "description": "Pay with cash when the shipper delivers."
+      },
+      "BANK_TRANSFER": {
+        "name": "Bank Transfer",
+        "description": "Bank transfer details will be provided after placing the order."
+      },
+      "PAYPAL": {
+        "name": "PayPal",
+        "description": "Pay quickly and securely via PayPal."
+      }
+    }
+  },
+
+  "CheckoutOrderSummary": {
+    "title": "Order Summary",
+    "noItemSelected": "No products selected for checkout.",
+    "backToCartLink": "Back to Cart",
+    "productQuantity": "Qty: {quantity} x {price}",
+    "subtotalLabel": "Subtotal ({count} items)",
+    "discountLabel": "Discount ({code})",
+    "shippingFeeLabel": "Shipping Fee",
+    "shippingFeeFree": "Free",
+    "totalLabel": "Total",
+    "couponNotApplicable": "The code \"{code}\" is not applicable to the selected products.",
+    "stockError": "Please return to the cart to adjust.",
+    "placeOrderButton": "Place Order ({count})",
+    "processingButton": "Processing...",
+    "continueShoppingLink": "Back to Cart",
+    "continueShoppingArrow": "→"
+  },
+
+  "PayPal": {
+    "configError": "Configuration Error: Cannot load PayPal payment method. Please try again later.",
+    "genericError": "An error occurred during the PayPal payment process.",
+    "createOrderError": "Could not create PayPal order. Please try again.",
+    "captureError": "An error occurred while confirming payment. Please contact support.",
+    "invalidFormError": "Please fill in all shipping information first."
+  },
+
+  "ProductPage": {
+    "allProductsTitle": "All Products",
+    "productsTitle": "Products",
+    "filterButton": "Filters",
+    "activeFiltersLabel": "Filtering by:",
+    "clearAllButton": "Clear all",
+    "removeFilterAriaLabel": "Remove filter {keyDisplay}: {valueDisplay}",
+    "loadingProducts": "Loading products...",
+    "errorLoadingProducts": "Error loading products",
+    "noProductsFound": "No products found",
+    "noProductsFoundSubtitle": "Please try adjusting the filters or searching with a different keyword.",
+    "showingResults": "Showing <bold>{from}</bold>-<bold>{to}</bold> of <bold>{total}</bold> products",
+    "closeFilters": "Close filters",
+    "viewResults": "View Results"
+  },
+
+  "ProductFilters": {
+    "searchLabel": "Search products",
+    "searchPlaceholder": "Search by name, SKU...",
+    "searchButtonLabel": "Search",
+    "categoryTitle": "Category",
+    "allCategories": "All Categories",
+    "priceTitle": "Price",
+    "applyButton": "Apply",
+    "fromPlaceholder": "From",
+    "toPlaceholder": "To",
+    "attributeTitle": "Color",
+    "sizeTitle": "Size",
+    "ratingTitle": "Rating",
+    "fromXStars": "From {count} star",
+    "fromXStars_plural": "From {count} stars",
+    "clearRatingFilter": "Clear rating filter",
+    "clearAllFiltersButton": "Clear All Filters"
+  },
+
+  "PriceRanges": {
+    "all": "All prices",
+    "under100k": "Under {value}",
+    "100kTo300k": "{min} - {max}",
+    "300kTo500k": "{min} - {max}",
+    "500kTo1m": "{min} - {max}",
+    "over1m": "Over {value}"
+  },
+
+  "SortDropdown": {
+    "options": {
+      "createdAt-desc": "Newest",
+      "totalSold-desc": "Best Sellers",
+      "price-asc": "Price: Low to High",
+      "price-desc": "Price: High to Low",
+      "averageRating-desc": "Highest Rated",
+      "name-asc": "Name: A-Z",
+      "name-desc": "Name: Z-A"
+    }
+  },
+
+  "ProductCard": {
+    "comingSoon": "Coming Soon",
+    "outOfStock": "Out of Stock",
+    "new": "New",
+    "bestSeller": "Best Seller",
+    "sale": "-{percentage}%",
+    "manageWishlist": "Manage Wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "selectVariantForWishlist": "Select a version to add to wishlist",
+    "versionInWishlist": "A version of this product is in your wishlist",
+    "removeFromWishlist": "Remove from Wishlist",
+    "addToCart": "Add to Cart",
+    "errorSelectVariant": "Please select a product version (e.g., color, size).",
+    "errorGeneric": "Could not identify the product.",
+    "errorOutOfStock": "This product is currently unavailable for purchase."
+  },
+
+  "ReviewFilters": {
+    "filterReviews": "Filter reviews:",
+    "ratingLabel": "Rating:",
+    "allRatings": "All",
+    "star": "{count, plural, one {# star} other {# stars}}",
+    "hasImagesLabel": "Has images"
+  },
+
+  "Pagination": {
+    "page": "Page <bold>{currentPage}</bold> of <bold>{totalPages}</bold>",
+    "previous": "Previous",
+    "next": "Next"
+  },
+
+  "ProductDetailsPage": {
+    "productNotFound": "Product Not Found",
+    "buyProduct": "Buy {name} at Serein Shop.",
+    "productDetails": "Product Details",
+    "loadingProduct": "Loading product...",
+    "errorLoadingProduct": "Error loading product",
+    "errorProductNotFound": "The product you are looking for may not exist or has been hidden. Please try again later.",
+    "backToProductsButton": "Back to products page",
+    "priceSaleBadge": "(-{percentage}%)",
+    "reviewsLink": "{count} reviews",
+    "noReviews": "No reviews yet",
+    "skuLabel": "SKU:",
+    "soldLabel": "Sold:",
+    "categoryLabel": "Category:",
+    "selectVariantError": "Please select all versions (color, size...).",
+    "outOfStockError": "This product is out of stock.",
+    "quantityLabel": "Quantity",
+    "stockRemaining": "Remaining: {count}",
+    "outOfStock": "Out of stock",
+    "addToCartButton": {
+      "default": "Add to Cart",
+      "adding": "Adding...",
+      "selectOptions": "Please select options",
+      "variantUnavailable": "Variant Unavailable",
+      "outOfStock": "Out of Stock"
+    },
+    "wishlistButton": {
+      "add": "Add to Wishlist",
+      "remove": "Remove from Wishlist",
+      "selectVariant": "Select a version to add to wishlist."
+    },
+    "description": {
+      "title": "Description",
+      "noDescription": "No description available for this product.",
+      "readMore": "Read More",
+      "collapse": "Collapse"
+    },
+    "reviews": {
+      "title": "Reviews ({count})",
+      "basedOn": "Based on {count} reviews",
+      "loading": "Loading reviews...",
+      "loadingError": "Error loading reviews. Please try again.",
+      "noReviews": "No reviews for this product yet",
+      "noReviewsWithFilter": "with the current filters",
+      "loadMore": "Load More Reviews"
+    }
+  },
+
+  "ImageGallery": {
+    "noImages": "No images available",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "fullscreen": "View fullscreen",
+    "imageCounter": "{current} / {total}",
+    "mainImageAlt": "{name} - Main image",
+    "fullscreenImageAlt": "{name} - Image {index}",
+    "thumbnailAlt": "{name} - Thumbnail {index}",
+    "viewThumbnail": "View image {index}",
+    "close": "Close"
+  },
+
+  "ReviewItem": {
+    "anonymousUser": "Anonymous User",
+    "adminUser": "Administrator",
+    "viewImageFullscreen": "View image {index} of {user} in fullscreen mode",
+    "adminReplyFrom": "Reply from {name}"
+  },
+
+  "ReviewLightbox": {
+    "close": "Close",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "mainImageAlt": "{user} - Review image {index}",
+    "imageCounter": "{current} / {total}",
+    "thumbnailAlt": "Thumbnail {index}",
+    "viewThumbnail": "View thumbnail {index}",
+    "title": "View image details"
+  },
+
+  "ProfileLayout": {
+    "loading": "Loading...",
+    "accountMenu": "Account Menu",
+    "closeMenu": "Close menu",
+    "myAccount": "My Account",
+    "manageAccount": "Manage account",
+    "logoutSuccess": "Logged out successfully!",
+    "logoutError": "Logout failed: {error}",
+    "navigation": {
+      "profile": {
+        "name": "Account Information",
+        "description": "Manage personal information"
+      },
+      "addresses": {
+        "name": "Address Book",
+        "description": "Manage shipping addresses"
+      },
+      "orders": {
+        "name": "Order History",
+        "description": "Track your orders"
+      },
+      "vouchers": {
+        "name": "Voucher Wallet",
+        "description": "Get the latest vouchers"
+      },
+      "logout": "Log Out"
+    }
+  },
+
+  "ProfileSettingsPage": {
+    "title": "Account Information",
+    "description": "Manage your personal information and account security.",
+    "personalInfoSectionTitle": "Personal Information",
+    "changePasswordSectionTitle": "Change Password",
+    "loadingError": "Error loading information: {error}",
+    "loadingProfileError": "Could not load account information. Please try again.",
+    "loginPrompt": "Please log in to view account information.",
+    "tokenError": "Could not find Access Token to update login status."
+  },
+
+  "UpdateInfoForm": {
+    "nameLabel": "Full Name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone Number",
+    "unupdated": "Not updated",
+    "editInfoButton": "Edit Information",
+    "saveChangesButton": "Save Changes",
+    "cancelButton": "Cancel",
+    "nameRequiredError": "Please enter your full name.",
+    "invalidPhoneError": "Invalid phone number.",
+    "invalidEmailError": "Invalid new email address.",
+    "noChangesToast": "No information has changed.",
+    "updateSuccessToast": "Personal information has been updated!",
+    "emailChangeNotice": "Changing your email will require you to re-verify the new email address.",
+    "emailVerificationNotice": "Information updated. Your email has changed, please verify the new email address."
+  },
+
+  "ChangePasswordForm": {
+    "currentPasswordLabel": "Current Password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm New Password",
+    "changePasswordButton": "Change Password",
+    "currentPasswordRequired": "Please enter your current password.",
+    "newPasswordMinLength": "New password must be at least 6 characters long.",
+    "passwordMismatch": "New password and confirmation password do not match.",
+    "newPasswordSameAsOld": "New password cannot be the same as the current password.",
+    "successToast": "Password changed successfully!"
+  },
+
+  "PasswordInput": {
+    "hidePassword": "Hide password",
+    "showPassword": "Show password"
+  },
+
+  "AddressPage": {
+    "title": "Address Book",
+    "description": "Manage your shipping addresses for faster checkout.",
+    "addAddressButton": "Add New Address",
+    "loadingError": "Error loading address list: {error}",
+    "noAddressesTitle": "No addresses yet",
+    "noAddressesSubtitle": "Add a new address for more convenient shipping.",
+    "deleteConfirmTitle": "Are you sure you want to delete this address?",
+    "deleteConfirmButton": "Confirm Delete",
+    "cancelButton": "Cancel"
+  },
+
+  "AddressCard": {
+    "defaultLabel": "Default",
+    "editButtonTitle": "Edit address",
+    "deleteButtonTitle": "Delete address",
+    "setAsDefaultButton": "Set as default"
+  },
+
+  "OrderListPage": {
+    "title": "Order History",
+    "description": "Track and manage all the orders you have placed.",
+    "loadingError": "Error loading order history: {error}",
+    "retryButton": "Retry",
+    "allStatuses": "All Statuses"
+  },
+
+  "OrderEmptyState": {
+    "noOrdersWithStatus": "No orders with status \"{status}\"",
+    "noOrdersYet": "You have no orders yet",
+    "tryAnotherStatus": "Try selecting another status or view all orders.",
+    "startShoppingPrompt": "Start shopping to see your order history here.",
+    "startShoppingButton": "Start Shopping"
+  },
+
+  "OrderFilters": {
+    "filterByStatus": "Filter by status"
+  },
+
+  "OrderActionModal": {
+    "cancelTitle": "Request Order Cancellation",
+    "refundTitle": "Request Return/Refund",
+    "cancelReasonLabel": "Reason for cancellation",
+    "refundReasonLabel": "Reason for return/refund",
+    "reasonPlaceholder": "Describe your reason in detail...",
+    "imagesLabel": "Actual Images (Max {count} images)",
+    "uploadButton": "Upload images",
+    "orDragAndDrop": "or drag and drop",
+    "fileTypes": "PNG, JPG, GIF, WEBP (Max {size}MB/image)",
+    "removeImage": "Remove image",
+    "addImage": "Add image",
+    "cancelFormButton": "Cancel",
+    "submitCancelButton": "Send Cancellation Request",
+    "submitRefundButton": "Send Return Request",
+    "processing": "Processing...",
+    "closeButtonTitle": "Close window",
+    "reasonRequiredError": "Please enter a reason.",
+    "maxImagesError": "You can only upload a maximum of {count} images.",
+    "fileTooLargeError": "Image size \"{name}\" is too large (Max {size}MB).",
+    "notAnImageError": "File \"{name}\" is not an image."
+  },
+
+  "OrderStatus": {
+    "Pending": "Pending",
+    "Processing": "Processing",
+    "Shipped": "Shipped",
+    "Delivered": "Delivered",
+    "Cancelled": "Cancelled",
+    "Refunded": "Refunded",
+    "CancellationRequested": "Cancellation Requested",
+    "RefundRequested": "Refund Requested",
+    "DeliveredSuccessfully": "Delivered Successfully",
+    "CancellationPending": "Cancellation Request Pending",
+    "RefundPending": "Refund Request Pending"
+  },
+  
+  "OrderRow": {
+    "orderCode": "Order Code: #{code}",
+    "orderDate": "Order Date: {date}",
+    "andXMoreProducts": "and {count} more product",
+    "andXMoreProducts_plural": "and {count} more products",
+    "totalAmount": "Total:",
+    "viewDetails": "View Details",
+    "markAsReceived": "Mark as Received",
+    "requestCancellation": "Request Cancellation",
+    "requestRefund": "Request Return"
+  },
+
+  "OrderStatusStepper": {
+    "trackOrder": "Track Order",
+    "currentStatus": "Current Status: <bold>{status}</bold>",
+    "cancelledMessage": "Order has been Cancelled",
+    "refundedMessage": "Order has been Refunded",
+    "cancellationPendingMessage": "Processing Cancellation Request",
+    "refundPendingMessage": "Processing Refund Request",
+    "pendingMessage": "Your request is being processed."
+  },
+
+  "OrderDetailPage": {
+    "loading": "Loading order details...",
+    "loadingError": "Could not load order details.",
+    "notFound": "Order Not Found",
+    "notFoundMessage": "The order you are looking for does not exist or you do not have permission to view it.",
+    "backToList": "Back to Order List",
+    "staleDataWarning": "There was an error updating the latest order information. The data shown may be outdated.",
+    "title": "Order Details"
+  },
+
+  "OrderSuccessPage": {
+    "title": "Order placed successfully!",
+    "orderCode": "Your order code is: <bold>#{code}</bold>",
+    "thankYou": "Thank you for shopping at Serein Shop. We will process your order as soon as possible.",
+    "emailConfirmation": "A confirmation email with order details has been sent to your email address.",
+    "continueShopping": "Continue Shopping"
+  },
+
+  "GuestTrackOrderPage": {
+    "loading": "Loading...",
+    "title": "Track Order",
+    "errorTitle": "Track Order Failed",
+    "errorMessage": "The tracking link is invalid, has expired, or the order does not exist.",
+    "backToHome": "Back to Home"
+  },
+
+  "OrderDetailsDisplay": {
+    "title": "Order Details",
+    "orderCodeMessage": "Your order code is: <bold>#{code}</bold>",
+    "shippingAddressTitle": "Shipping Address",
+    "paymentTitle": "Payment",
+    "paymentMethod": "Method: <bold>{method}</bold>",
+    "paymentStatus": "Status: ",
+    "paidStatus": "Paid ({date})",
+    "unpaidStatus": "Unpaid",
+    "orderInfoTitle": "Order Information",
+    "orderCodeLabel": "Order ID:",
+    "orderDateLabel": "Order Date:",
+    "customerLabel": "Customer:",
+    "phoneLabel": "Phone:",
+    "guestEmailLabel": "Guest Email:",
+    "unupdated": "Not updated",
+    "notesLabel": "Note: {notes}",
+    "orderedProductsTitle": "Ordered Products",
+    "costSummaryTitle": "Cost Summary",
+    "subtotal": "Subtotal",
+    "discount": "Discount ({code})",
+    "shippingFee": "Shipping Fee",
+    "shippingFeeFree": "Free",
+    "total": "Total",
+    "continueShopping": "Continue Shopping",
+    "viewMyOrders": "View My Orders"
+  },
+
+  "OrderItemRow": {
+    "quantity": "Qty: {count}",
+    "unitPrice": "Unit Price: {price}",
+    "checkingReview": "Checking review...",
+    "alreadyReviewed": "Reviewed ({rating} star)",
+    "pendingApproval": "(Pending)",
+    "editReview": "Edit",
+    "deleteReview": "Delete",
+    "writeReview": "Write a Review",
+    "deleteConfirmTitle": "Are you sure you want to delete this review?",
+    "deleteConfirmButton": "Confirm Delete",
+    "cancelButton": "Cancel",
+    "editReviewAriaLabel": "Edit review for {name}",
+    "deleteReviewAriaLabel": "Delete review for {name}",
+    "writeReviewAriaLabel": "Write a review for {name}"
+  },
+
+  "ReviewModal": {
+    "editTitle": "Edit review for {name}",
+    "createTitle": "Review product: {name}",
+    "submitEditButton": "Save Changes",
+    "submitCreateButton": "Submit Review",
+    "closeButton": "Close",
+    "yourRatingLabel": "Your rating *",
+    "ratingLabel": "{count}/5 stars",
+    "commentLabel": "Review content",
+    "commentOptional": "(Optional)",
+    "commentPlaceholder": "Share your detailed thoughts about this product...",
+    "imagesLabel": "Actual Images (Max {count} images)",
+    "uploadButton": "Upload images",
+    "orDragAndDrop": "or drag and drop",
+    "supportedFiles": "Supports: PNG, JPG, GIF, WEBP",
+    "selectedImages": "Selected images ({count}/{max}):",
+    "existingImageAlt": "Uploaded review image",
+    "newImagePreviewAlt": "New image preview {index}",
+    "removeExistingImage": "Remove current image",
+    "removeNewImage": "Remove new image",
+    "addImage": "Add image",
+    "cancelButton": "Cancel",
+    "processing": "Processing...",
+    "validation": {
+      "ratingRequired": "Please select a star rating.",
+      "maxImages": "You can only upload a maximum of {count} images.",
+      "fileTooLarge": "Image size \"{name}\" is too large (Max {size}MB).",
+      "notAnImage": "File \"{name}\" is not an image."
+    },
+    "noChangesToast": "No changes to save."
+  },
+
+  "VoucherPage": {
+    "title": "Your Voucher Wallet",
+    "description": "Discover deals and discount codes waiting for you.",
+    "availableCount": "You have <bold>{count}</bold> available discount codes.",
+    "loadingError": "Error loading voucher list",
+    "retryButton": "Retry",
+    "noVouchersTitle": "You have no vouchers yet",
+    "noVouchersSubtitle": "Follow Serein Shop to get exciting offers!",
+    "exploreButton": "Explore Products",
+    "loadingVouchers": "Loading vouchers..."
+  },
+
+  "VoucherCard": {
+    "expired": "Expired",
+    "inactive": "Inactive",
+    "available": "Available",
+    "discountPercentage": "Save {value}%",
+    "discountFixed": "Save {value}",
+    "minOrder": "Min. order: <bold>{value}</bold>",
+    "expiryDate": "Expires on: <bold>{date}</bold>",
+    "usesLeft": "Uses left: <bold>{count}</bold>",
+    "applicable": {
+      "all": "Applicable to all products.",
+      "products": "Applicable to certain products.",
+      "categories": "Applicable to certain categories."
+    },
+    "useNow": "Use Now",
+    "copyCodeTitle": "Copy code",
+    "copied": "Copied",
+    "copy": "Copy",
+    "copySuccess": "Code copied: {code}",
+    "copyError": "Could not copy code. Error: {error}"
+  }
+}

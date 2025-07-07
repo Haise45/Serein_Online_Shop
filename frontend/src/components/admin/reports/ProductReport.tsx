@@ -9,11 +9,21 @@ import Link from "next/link";
 import { CTableRow, CTableDataCell } from "@coreui/react";
 import ReportBlock from "./ReportBlock";
 import TopProductsChart from "./TopProductsChart";
+import { ExchangeRates } from "@/types";
 
-const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
+interface ProductReportProps {
+  filters: ProductReportParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const ProductReport: React.FC<ProductReportProps> = ({
   filters,
+  displayCurrency,
+  rates,
 }) => {
   const { data, isLoading } = useGetProductReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -90,7 +100,7 @@ const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
                   </Link>
                 </CTableDataCell>
                 <CTableDataCell className="text-end font-semibold text-green-600">
-                  {formatCurrency(item.revenue)}
+                  {formatCurrency(item.revenue, currencyOptions)}
                 </CTableDataCell>
               </CTableRow>
             )}
@@ -101,6 +111,8 @@ const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
             data={data?.topByRevenue}
             isLoading={isLoading}
             dataKey="revenue"
+            displayCurrency={displayCurrency}
+            rates={rates}
           />
         )}
       />

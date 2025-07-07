@@ -24,7 +24,8 @@ import {
 } from "react-icons/fi";
 import ReviewFilters from "./ReviewFilters";
 import ReviewItem from "./ReviewItem";
-import "@/app/globals.css"
+import "@/app/globals.css";
+import { useTranslations } from "next-intl";
 
 interface ProductDescriptionAndReviewsProps {
   product: Product; // Truyền thông tin sản phẩm vào
@@ -41,6 +42,7 @@ const ProductDescriptionAndReviews = forwardRef<
   ProductReviewsRef,
   ProductDescriptionAndReviewsProps
 >(({ product }, ref) => {
+  const t = useTranslations("ProductDetailsPage");
   const [selectedTab, setSelectedTab] = useState(0); // 0: Mô tả, 1: Đánh giá
   const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -103,8 +105,11 @@ const ProductDescriptionAndReviews = forwardRef<
   };
 
   const tabs = [
-    { name: "Mô tả sản phẩm", icon: FiFileText },
-    { name: `Đánh giá (${product.numReviews || 0})`, icon: FiMessageCircle },
+    { name: t("description.title"), icon: FiFileText },
+    {
+      name: t("reviews.title", { count: product.numReviews || 0 }),
+      icon: FiMessageCircle,
+    },
   ];
 
   const descriptionContainerRef = useRef<HTMLDivElement>(null);
@@ -183,7 +188,7 @@ const ProductDescriptionAndReviews = forwardRef<
         <TabPanels as={Fragment}>
           {/* Panel Mô tả sản phẩm */}
           <TabPanel className="py-8">
-            <h2 className="sr-only">Mô tả sản phẩm</h2>
+            <h2 className="sr-only">{t("description.title")}</h2>
             <div className="relative">
               <div
                 ref={descriptionContainerRef}
@@ -194,7 +199,7 @@ const ProductDescriptionAndReviews = forwardRef<
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtmlContent(
                     product.description ||
-                      "<p>Chưa có thông tin mô tả cho sản phẩm này.</p>",
+                      `<p>${t("description.noDescription")}</p>`,
                   ),
                 }}
               />
@@ -212,7 +217,9 @@ const ProductDescriptionAndReviews = forwardRef<
                     onClick={() => setShowFullDescription(!showFullDescription)}
                     className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none"
                   >
-                    {showFullDescription ? "Thu gọn" : "Xem thêm"}
+                    {showFullDescription
+                      ? t("description.collapse")
+                      : t("description.readMore")}
                     <FiChevronDown
                       className={classNames(
                         "ml-2 h-4 w-4 transition-transform",
@@ -227,7 +234,9 @@ const ProductDescriptionAndReviews = forwardRef<
 
           {/* Panel Đánh giá người dùng */}
           <TabPanel className="py-8">
-            <h2 className="sr-only">Đánh giá của khách hàng</h2>
+            <h2 className="sr-only">
+              {t("reviews.title", { count: product.numReviews })}
+            </h2>
             {product.numReviews > 0 && (
               <div className="mb-6 flex flex-col items-center gap-y-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center">
@@ -243,11 +252,10 @@ const ProductDescriptionAndReviews = forwardRef<
                       size="lg"
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      Dựa trên {product.numReviews} đánh giá
+                      {t("reviews.basedOn", { count: product.numReviews })}
                     </p>
                   </div>
                 </div>
-                {/* TODO: Thêm nút "Viết đánh giá" nếu user đủ điều kiện */}
               </div>
             )}
 
@@ -259,23 +267,23 @@ const ProductDescriptionAndReviews = forwardRef<
               <div className="py-10 text-center">
                 <FiLoader className="mx-auto h-8 w-8 animate-spin text-indigo-600" />
                 <p className="mt-2 text-sm text-gray-500">
-                  Đang tải đánh giá...
+                  {t("reviews.loading")}
                 </p>
               </div>
             )}
             {isErrorReviews && (
               <div className="py-10 text-center text-red-500">
-                Lỗi khi tải đánh giá. Vui lòng thử lại.
+                {t("reviews.loadingError")}
               </div>
             )}
 
             {!isLoadingReviews && allLoadedReviews.length === 0 && (
               <div className="py-10 text-center text-gray-500">
-                Chưa có đánh giá nào cho sản phẩm này
+                {t("reviews.noReviews")}
                 {Object.values(reviewFilters).some(
                   (val) =>
                     val !== undefined && val !== REVIEWS_PER_PAGE && val !== 1,
-                ) && <span> với bộ lọc hiện tại</span>}
+                ) && <span> {t("reviews.noReviewsWithFilter")} </span>}
                 .
               </div>
             )}
@@ -302,7 +310,7 @@ const ProductDescriptionAndReviews = forwardRef<
                     ) : (
                       <FiChevronDown className="mr-2 h-4 w-4" />
                     )}
-                    Xem thêm đánh giá
+                    {t("reviews.loadMore")}
                   </button>
                 </div>
               )}

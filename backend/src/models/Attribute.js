@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
 
 // Schema value
 const valueSchema = new mongoose.Schema({
   value: {
-    type: String,
+    type: i18nStringSchema,
     required: [true, "Vui lòng nhập giá trị"],
     trim: true,
   },
@@ -30,7 +31,7 @@ const attributeSchema = new mongoose.Schema(
     },
     // Label là tên hiển thị (VD: "Màu sắc")
     label: {
-      type: String,
+      type: i18nStringSchema,
       required: true,
     },
     // Mảng các giá trị được nhúng

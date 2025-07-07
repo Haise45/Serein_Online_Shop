@@ -49,7 +49,7 @@ async function getVndToUsdRate() {
     console.warn(
       "ExchangeRate-API key/url not found. Using default fallback rate."
     );
-    return 1 / 25400; // Tỷ giá dự phòng
+    return 1 / 26000; // Tỷ giá dự phòng
   }
   try {
     const url = `${EXCHANGE_RATE_API_URL}${EXCHANGE_RATE_API_KEY}/latest/VND`;
@@ -65,7 +65,7 @@ async function getVndToUsdRate() {
       "Failed to fetch exchange rate, using default fallback rate.",
       error.message
     );
-    return 1 / 25400; // Tỷ giá dự phòng
+    return 1 / 26000; // Tỷ giá dự phòng
   }
 }
 
@@ -228,4 +228,5 @@ module.exports = {
   createPayPalOrder,
   capturePayPalOrder,
   refundPayPalOrder,
+  getVndToUsdRate,
 };

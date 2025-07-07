@@ -3,6 +3,7 @@
 import { GetProductReviewsParams } from "@/types/review";
 import { ChangeEvent } from "react";
 import { FiStar, FiImage, FiFilter } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface ReviewFiltersProps {
   currentFilters: GetProductReviewsParams;
@@ -10,19 +11,21 @@ interface ReviewFiltersProps {
   totalReviews?: number; // Số lượng review hiện tại để hiển thị (nếu cần)
 }
 
-const ratingOptions = [
-  { value: 0, label: "Tất cả" },
-  { value: 5, label: "5 sao" },
-  { value: 4, label: "4 sao" },
-  { value: 3, label: "3 sao" },
-  { value: 2, label: "2 sao" },
-  { value: 1, label: "1 sao" },
-];
-
 const ReviewFilters: React.FC<ReviewFiltersProps> = ({
   currentFilters,
   onFilterChange,
 }) => {
+  const t = useTranslations("ReviewFilters");
+
+  const ratingOptions = [
+    { value: 0, label: t("allRatings") },
+    { value: 5, label: t("star", { count: 5 }) },
+    { value: 4, label: t("star", { count: 4 }) },
+    { value: 3, label: t("star", { count: 3 }) },
+    { value: 2, label: t("star", { count: 2 }) },
+    { value: 1, label: t("star", { count: 1 }) },
+  ];
+
   const handleRatingChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newRating = parseInt(e.target.value, 10);
     onFilterChange({
@@ -44,13 +47,13 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
     <div className="mb-6 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex md:items-center md:justify-between md:space-y-0">
       <div className="flex items-center text-sm font-medium text-gray-700 md:mb-0">
         <FiFilter className="mr-2 h-5 w-5 text-gray-500" />
-        Lọc đánh giá:
+        {t("filterReviews")}
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:flex md:gap-x-4">
         {/* Lọc theo Rating */}
         <div className="flex items-center">
           <label htmlFor="rating-filter" className="mr-2 text-sm text-gray-600 flex items-center">
-            <FiStar className="mr-1 inline h-4 w-4 text-yellow-500" /> Sao:
+            <FiStar className="mr-1 inline h-4 w-4 text-yellow-500" /> {t("ratingLabel")}
           </label>
           <select
             id="rating-filter"
@@ -79,8 +82,7 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
             htmlFor="has-images-filter"
             className="ml-2 flex items-center text-sm text-gray-600"
           >
-            <FiImage className="mr-1 inline h-4 w-4 text-gray-500" /> Có hình
-            ảnh
+            <FiImage className="mr-1 inline h-4 w-4 text-gray-500" /> {t("hasImagesLabel")}
           </label>
         </div>
       </div>

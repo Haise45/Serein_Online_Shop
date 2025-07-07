@@ -2,6 +2,7 @@
 
 import SearchSuggestionList from "@/components/shared/SearchSuggestionList";
 import useDebounce from "@/hooks/useDebounce";
+import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetCart } from "@/lib/react-query/cartQueries";
 import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import { useGetProducts } from "@/lib/react-query/productQueries";
@@ -10,6 +11,7 @@ import { buildCategoryTree } from "@/lib/utils";
 import { GetProductsParams } from "@/services/productService";
 import { Category } from "@/types";
 import { Transition } from "@headlessui/react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -25,7 +27,7 @@ import CartPreviewModal from "../cart/CartPreviewModal";
 import CategoryMenu from "../category/CategoryMenu";
 import SideDrawer from "./SideDrawer";
 import UserMenu from "./UserMenu";
-import { useGetAttributes } from "@/lib/react-query/attributeQueries";
+import SettingsSwitcher from "@/components/shared/SettingsSwitcher";
 
 export default function NavbarClient() {
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
@@ -39,6 +41,8 @@ export default function NavbarClient() {
     useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const t = useTranslations("NavbarClient");
 
   const {
     data: categoriesData,
@@ -98,15 +102,18 @@ export default function NavbarClient() {
   const { data: attributes } = useGetAttributes();
   const attributeMap = useMemo(() => {
     if (!attributes) return new Map();
-    const map = new Map<string, { label: string; values: Map<string, string> }>();
-    attributes.forEach(attr => {
+    const map = new Map<
+      string,
+      { label: string; values: Map<string, string> }
+    >();
+    attributes.forEach((attr) => {
       const valueMap = new Map<string, string>();
-      attr.values.forEach(val => valueMap.set(val._id, val.value));
+      attr.values.forEach((val) => valueMap.set(val._id, val.value));
       map.set(attr._id, { label: attr.label, values: valueMap });
     });
     return map;
   }, [attributes]);
-  
+
   useEffect(() => {
     setIsSearchBarActive(false);
     setSearchTerm("");
@@ -171,8 +178,8 @@ export default function NavbarClient() {
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
                 className={`rounded-md p-1.5 ${navIconColor} ${navHoverBgColor} ${navHoverTextColor} focus:outline-none md:hidden`}
-                aria-controls="mobile-menu"
-                aria-expanded={isDrawerOpen ? "true" : "false"}
+                aria-controls="mobile-menu-drawer"
+                aria-expanded={isDrawerOpen}
               >
                 <span className="sr-only">Mở menu chính</span>
                 <FiMenu className="h-6 w-6" />
@@ -212,7 +219,7 @@ export default function NavbarClient() {
               )}
             </div>
             {/* Right Section: Icons */}
-            <div className="flex items-center space-x-1 md:space-x-3">
+            <div className="flex items-center space-x-1 md:space-x-2">
               {/* Search Icon & Form */}
               <div className="relative">
                 <button
@@ -230,11 +237,11 @@ export default function NavbarClient() {
               <Link
                 href="/wishlist"
                 className={`relative rounded-full p-2 ${navIconColor} ${navHoverBgColor} ${navHoverTextColor}`}
-                title="Danh sách yêu thích"
+                title={t("wishlist")}
               >
                 <FiHeart className="h-5 w-5 md:h-6 md:w-6" />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex translate-x-1/3 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-bold text-red-100">
+                  <span className="absolute top-0 right-0 inline-flex translate-x-1/4 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-bold text-red-100">
                     {/* Điều chỉnh padding cho badge */}
                     {wishlistCount}
                   </span>
@@ -242,16 +249,22 @@ export default function NavbarClient() {
               </Link>
               <button
                 className={`relative rounded-full p-2 ${navIconColor} ${navHoverBgColor} ${navHoverTextColor}`}
-                title="Giỏ hàng"
+                title={t("cart")}
                 onClick={() => setIsCartModalOpen(true)}
               >
                 <FiShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
                 {cartItemCount > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex translate-x-1/3 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-bold text-red-100">
+                  <span className="absolute top-0 right-0 inline-flex translate-x-1/4 -translate-y-1/5 transform items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-bold text-red-100">
                     {cartItemCount}
                   </span>
                 )}
               </button>
+              <div className="hidden items-center md:flex">
+                <SettingsSwitcher />
+              </div>
+
+              {/* Thêm một đường kẻ dọc để phân tách */}
+              <div className="mx-2 hidden h-6 w-px bg-gray-200 md:block"></div>
               <UserMenu />
             </div>
           </div>
@@ -275,14 +288,14 @@ export default function NavbarClient() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Bạn muốn tìm gì hôm nay?"
+                  placeholder={t("searchPlaceholder")}
                   className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
                 />
                 <button
                   type="submit"
                   className="absolute inset-y-0 right-0 flex items-center justify-center px-4 text-indigo-600 hover:text-indigo-700 disabled:text-gray-400"
                   disabled={!searchTerm.trim()}
-                  aria-label="Tìm kiếm"
+                  aria-label={t("search")}
                 >
                   <FiSearch className="h-5 w-5" />
                 </button>

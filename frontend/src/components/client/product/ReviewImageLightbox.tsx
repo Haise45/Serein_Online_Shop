@@ -1,10 +1,10 @@
-// src/components/client/product/ReviewImageLightbox.tsx
 "use client";
 
 import Image from "next/image";
 import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useEffect, useRef, useCallback } from "react";
 import classNames from "classnames";
+import { useTranslations } from "next-intl";
 
 interface ReviewImageLightboxProps {
   isOpen: boolean;
@@ -25,6 +25,7 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
   userNameForAlt,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("ReviewLightbox");
 
   const handlePrevImage = useCallback(() => {
     if (images.length > 0) {
@@ -86,7 +87,7 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
       <button
         className="absolute top-3 right-3 z-20 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20 focus:ring-2 focus:ring-white focus:outline-none sm:top-4 sm:right-4"
         onClick={onClose}
-        aria-label="Đóng"
+        aria-label={t("close")}
       >
         <FiX className="h-6 w-6 sm:h-7 sm:w-7" />
       </button>
@@ -101,14 +102,14 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
             <button
               className="absolute top-1/2 left-1 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20 focus:ring-2 focus:ring-white focus:outline-none sm:-left-30 sm:p-3"
               onClick={handlePrevImage}
-              aria-label="Ảnh trước"
+              aria-label={t("prevImage")}
             >
               <FiChevronLeft className="h-6 w-6 sm:h-7 sm:w-7" />
             </button>
             <button
               className="absolute top-1/2 right-1 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20 focus:ring-2 focus:ring-white focus:outline-none sm:-right-30 sm:p-3"
               onClick={handleNextImage}
-              aria-label="Ảnh tiếp theo"
+              aria-label={t("nextImage")}
             >
               <FiChevronRight className="h-6 w-6 sm:h-7 sm:w-7" />
             </button>
@@ -118,7 +119,7 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
         <div className="relative h-full w-full">
           <Image
             src={images[currentIndex]}
-            alt={`${userNameForAlt} - Ảnh đánh giá ${currentIndex + 1}`}
+            alt={t("mainImageAlt", { user: userNameForAlt, index: currentIndex + 1 })}
             fill
             className="object-contain"
             sizes="90vw"
@@ -135,7 +136,7 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
       >
         {images.length > 1 && (
           <div className="mb-2 rounded-full bg-black/60 px-3 py-1.5 text-sm text-white sm:mb-3">
-            {currentIndex + 1} / {images.length}
+            {t("imageCounter", { current: currentIndex + 1, total: images.length })}
           </div>
         )}
         {images.length > 1 && (
@@ -150,11 +151,11 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
                     : "border-transparent opacity-60 hover:opacity-90 focus:border-white/50 focus:opacity-90",
                 )}
                 onClick={() => onNavigate(idx)}
-                aria-label={`Xem ảnh thumbnail ${idx + 1}`}
+                aria-label={t("viewThumbnail", { index: idx + 1 })}
               >
                 <Image
                   src={imgUrl}
-                  alt={`Thumbnail ${idx + 1}`}
+                  alt={t("thumbnailAlt", { index: idx + 1 })}
                   fill
                   className="object-cover"
                   quality={100}
@@ -167,7 +168,7 @@ const ReviewImageLightbox: React.FC<ReviewImageLightboxProps> = ({
       </div>
       {/* Để screen reader đọc được tiêu đề modal */}
       <h2 id="lightbox-title" className="sr-only">
-        Xem ảnh chi tiết
+        {t("title")}
       </h2>
     </div>
   );

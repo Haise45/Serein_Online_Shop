@@ -1,5 +1,6 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import { ORDER_STATUSES } from "@/constants/orderConstants";
 import { formatCurrency, timeAgo } from "@/lib/utils";
 import { Order, OrderItem } from "@/types";
@@ -48,6 +49,8 @@ const getStatusBadge = (status: string) => {
 const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
   // --- State and handlers for the items modal ---
   const router = useRouter();
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrderItems, setSelectedOrderItems] = useState<OrderItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -144,7 +147,10 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                   </CTableDataCell>
                   <CTableDataCell className="text-end">
                     <span className="fw-semibold text-gray-800">
-                      {formatCurrency(order.totalPrice)}
+                      {formatCurrency(order.totalPrice, {
+                        currency: displayCurrency,
+                        rates,
+                      })}
                     </span>
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
@@ -274,10 +280,16 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                       {item.quantity}
                     </CTableDataCell>
                     <CTableDataCell className="text-end">
-                      {formatCurrency(item.price)}
+                      {formatCurrency(item.price, {
+                        currency: displayCurrency,
+                        rates,
+                      })}
                     </CTableDataCell>
                     <CTableDataCell className="fw-semibold text-end">
-                      {formatCurrency(item.price * item.quantity)}
+                      {formatCurrency(item.price * item.quantity, {
+                        currency: displayCurrency,
+                        rates,
+                      })}
                     </CTableDataCell>
                   </CTableRow>
                 );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import { formatCurrency } from "@/lib/utils";
 import { OrderItem, Product } from "@/types";
 import { cilWarning } from "@coreui/icons";
@@ -21,6 +22,9 @@ interface OrderItemsTableProps {
 }
 
 const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
+
   return (
     <div className="overflow-x-auto">
       <CTable hover className="align-middle" style={{ minWidth: "700px" }}>
@@ -52,7 +56,8 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
                     alt={item.name}
                     width={64}
                     height={64}
-                    className="rounded border object-cover"
+                    quality={100}
+                    className="aspect-square rounded border object-cover object-top"
                   />
                 </CTableDataCell>
                 <CTableDataCell>
@@ -61,7 +66,7 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
                     <Link
                       href={`/products/${productData.slug}`}
                       target="_blank"
-                      className="font-medium text-gray-800 hover:text-indigo-600 text-decoration-none"
+                      className="text-decoration-none font-medium text-gray-800 hover:text-indigo-600"
                     >
                       {item.name}
                     </Link>
@@ -91,13 +96,19 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
                   )}
                 </CTableDataCell>
                 <CTableDataCell className="text-end">
-                  {formatCurrency(item.price)}
+                  {formatCurrency(item.price, {
+                    currency: displayCurrency,
+                    rates,
+                  })}
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
                   x {item.quantity}
                 </CTableDataCell>
                 <CTableDataCell className="text-end font-semibold">
-                  {formatCurrency(item.price * item.quantity)}
+                  {formatCurrency(item.price * item.quantity, {
+                    currency: displayCurrency,
+                    rates,
+                  })}
                 </CTableDataCell>
               </CTableRow>
             );

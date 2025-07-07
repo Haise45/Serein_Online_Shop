@@ -1,5 +1,6 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import { useRestockOrderItemsAdmin } from "@/lib/react-query/orderQueries";
 import { formatCurrency, timeAgo } from "@/lib/utils";
@@ -67,6 +68,8 @@ const OrderTable: React.FC<OrderTableProps> = ({
 }) => {
   // --- State ---
   const router = useRouter(); // Khởi tạo router
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrderItems, setSelectedOrderItems] = useState<OrderItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderSummary | null>(null);
@@ -257,7 +260,7 @@ const OrderTable: React.FC<OrderTableProps> = ({
                 </CTableDataCell>
                 <CTableDataCell className="text-end">
                   <span className="fw-semibold text-gray-800">
-                    {formatCurrency(order.totalPrice)}
+                    {formatCurrency(order.totalPrice, { currency: displayCurrency, rates })}
                   </span>
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
@@ -405,10 +408,10 @@ const OrderTable: React.FC<OrderTableProps> = ({
                       {item.quantity}
                     </CTableDataCell>
                     <CTableDataCell className="text-end">
-                      {formatCurrency(item.price)}
+                      {formatCurrency(item.price, { currency: displayCurrency, rates })}
                     </CTableDataCell>
                     <CTableDataCell className="fw-semibold text-end">
-                      {formatCurrency(item.price * item.quantity)}
+                      {formatCurrency(item.price * item.quantity, { currency: displayCurrency, rates })}
                     </CTableDataCell>
                   </CTableRow>
                 );
