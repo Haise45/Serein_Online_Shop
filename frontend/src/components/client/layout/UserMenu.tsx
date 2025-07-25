@@ -11,11 +11,8 @@ import {
 } from "@headlessui/react";
 import { useTranslations } from "next-intl";
 import { useSettings } from "@/app/SettingsContext";
-import { Link } from "@/i18n/navigation";
-import {
-  useSearchParams as useNextSearchParamsHook,
-  usePathname,
-} from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useSearchParams as useNextSearchParamsHook } from "next/navigation";
 import { Fragment } from "react";
 import {
   FiFileText,

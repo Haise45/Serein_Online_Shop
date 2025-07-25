@@ -3,8 +3,7 @@
 import { Category } from "@/types";
 import classNames from "classnames";
 import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 
