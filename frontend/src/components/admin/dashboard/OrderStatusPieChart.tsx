@@ -1,11 +1,12 @@
 "use client";
 
 import "@/components/shared/charts/ChartJsDefaults";
-import { ORDER_STATUSES } from "@/constants/orderConstants";
 import { OrderStatusDistributionItem } from "@/types/dashboard";
 import { CCard, CCardBody, CCardHeader, CSpinner } from "@coreui/react";
+import { TooltipItem } from "chart.js";
 import React from "react";
 import { Doughnut } from "react-chartjs-2";
+import { useTranslations } from "next-intl";
 
 interface OrderStatusPieChartProps {
   data: OrderStatusDistributionItem[] | undefined;
@@ -27,12 +28,11 @@ const OrderStatusPieChart: React.FC<OrderStatusPieChartProps> = ({
   data,
   isLoading,
 }) => {
+  const t = useTranslations("AdminDashboard.orderStatusChart");
+  const tStatus = useTranslations("OrderStatus");
+
   const chartData = {
-    labels:
-      data?.map(
-        (item) =>
-          ORDER_STATUSES.find((s) => s.value === item._id)?.label || item._id,
-      ) || [],
+    labels: data?.map((item) => tStatus(item._id)) || [],
     datasets: [
       {
         data: data?.map((item) => item.count) || [],
@@ -44,18 +44,35 @@ const OrderStatusPieChart: React.FC<OrderStatusPieChartProps> = ({
     ],
   };
 
+  // *** TÙY CHỈNH TOOLTIP RIÊNG CHO BIỂU ĐỒ NÀY ***
+  const chartOptions = {
+    plugins: {
+      legend: {
+        position: "top" as const, // Thêm 'as const'
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<"doughnut">) {
+            const label = context.label || "";
+            const value = context.parsed;
+            return t("tooltipLabel", { label, value });
+          },
+        },
+      },
+    },
+  };
+
   return (
     <CCard className="h-100 shadow-sm">
-      <CCardHeader>Phân phối trạng thái đơn hàng</CCardHeader>
+      <CCardHeader>{t("title")}</CCardHeader>
       <CCardBody className="flex items-center justify-center">
         {isLoading ? (
           <CSpinner />
+        ) : !data || data.length === 0 ? (
+          <p className="text-gray-500">{t("noData")}</p>
         ) : (
           <div className="relative h-[300px] w-full">
-            <Doughnut
-              data={chartData}
-              options={{ plugins: { legend: { position: "top" } } }}
-            />
+            <Doughnut data={chartData} options={chartOptions} />
           </div>
         )}
       </CCardBody>

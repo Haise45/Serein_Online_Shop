@@ -3,29 +3,46 @@
 import { useGetProductReport } from "@/lib/react-query/reportQueries";
 import ReportTable from "./ReportTable";
 import { ProductReportParams } from "@/services/reportService";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getLocalizedName } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { CTableRow, CTableDataCell } from "@coreui/react";
 import ReportBlock from "./ReportBlock";
 import TopProductsChart from "./TopProductsChart";
+import { ExchangeRates } from "@/types";
+import { useLocale, useTranslations } from "next-intl";
 
-const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
+interface ProductReportProps {
+  filters: ProductReportParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const ProductReport: React.FC<ProductReportProps> = ({
   filters,
+  displayCurrency,
+  rates,
 }) => {
+  const t = useTranslations("AdminReports.products");
+  const locale = useLocale() as "vi" | "en";
   const { data, isLoading } = useGetProductReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <ReportBlock
-        title="Top Sản phẩm Bán chạy (Số lượng)"
+        title={t("topByQuantity")}
         renderTable={() => (
           <ReportTable
             isLoading={isLoading}
             items={data?.topByQuantity || []}
             headers={[
-              { key: "product", label: "Sản phẩm" },
-              { key: "sold", label: "Đã bán", className: "text-center" },
+              { key: "product", label: t("tableColProduct") },
+              {
+                key: "sold",
+                label: t("tableColSold"),
+                className: "text-center",
+              },
             ]}
             renderRow={(item) => (
               <CTableRow key={item._id}>
@@ -42,7 +59,9 @@ const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
                       quality={100}
                       className="aspect-square rounded object-cover object-top"
                     />
-                    <span className="font-medium">{item.name}</span>
+                    <span className="font-medium">
+                      {getLocalizedName(item.name, locale)}
+                    </span>
                   </Link>
                 </CTableDataCell>
                 <CTableDataCell className="text-center font-bold">
@@ -61,15 +80,18 @@ const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
         )}
       />
       <ReportBlock
-        title="Top Sản phẩm Doanh thu Cao"
+        title={t("topByRevenue")}
         renderTable={() => (
           <ReportTable
-            title=""
             isLoading={isLoading}
             items={data?.topByRevenue || []}
             headers={[
-              { key: "product", label: "Sản phẩm" },
-              { key: "revenue", label: "Doanh thu", className: "text-end" },
+              { key: "product", label: t("tableColProduct") },
+              {
+                key: "revenue",
+                label: t("tableColRevenue"),
+                className: "text-end",
+              },
             ]}
             renderRow={(item) => (
               <CTableRow key={item._id}>
@@ -80,17 +102,19 @@ const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
                   >
                     <Image
                       src={item.image || "/placeholder-image.jpg"}
-                      alt={item.name}
+                      alt={getLocalizedName(item.name, locale)}
                       width={40}
                       height={40}
                       quality={100}
                       className="aspect-square rounded object-cover object-top"
                     />
-                    <span className="font-medium">{item.name}</span>
+                    <span className="font-medium">
+                      {getLocalizedName(item.name, locale)}
+                    </span>
                   </Link>
                 </CTableDataCell>
                 <CTableDataCell className="text-end font-semibold text-green-600">
-                  {formatCurrency(item.revenue)}
+                  {formatCurrency(item.revenue, currencyOptions)}
                 </CTableDataCell>
               </CTableRow>
             )}
@@ -101,6 +125,8 @@ const ProductReport: React.FC<{ filters: ProductReportParams }> = ({
             data={data?.topByRevenue}
             isLoading={isLoading}
             dataKey="revenue"
+            displayCurrency={displayCurrency}
+            rates={rates}
           />
         )}
       />

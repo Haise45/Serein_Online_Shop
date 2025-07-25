@@ -12,3 +12,9 @@ export * from "./order_model";
 export * from "./wishlist";
 export * from "./coupon";
 export * from "./attribute";
+export * from "./setting";
+
+export type I18nField = {
+  vi: string;
+  en: string;
+};

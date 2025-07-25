@@ -1,5 +1,5 @@
-import { VariantFormState } from "@/app/admin/products/create/AdminProductCreateClient";
-import { useGetAttributes } from "@/lib/react-query/attributeQueries";
+import { VariantFormState } from "@/app/[locale]/admin/products/create/AdminProductCreateClient";
+import { useGetAdminAttributes } from "@/lib/react-query/attributeQueries";
 import { ProductAttributeCreation } from "@/services/productService";
 import { cilCheckCircle, cilX } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
@@ -17,6 +17,9 @@ import {
 import classNames from "classnames";
 import Image from "next/image";
 import React, { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { getLocalizedName } from "@/lib/utils";
+import { I18nField } from "@/types";
 
 interface ProductAttributesCardProps {
   // Dữ liệu thuộc tính và biến thể hiện tại của sản phẩm
@@ -56,12 +59,15 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
   onRemoveVariant,
   onVariantChange,
 }) => {
+  const t = useTranslations("AdminProductForm.attributes");
+  const locale = useLocale() as "vi" | "en";
+
   // Fetch tất cả thuộc tính có sẵn trong hệ thống
   const {
     data: availableAttributes,
     isLoading: isLoadingAttributes,
     isError,
-  } = useGetAttributes();
+  } = useGetAdminAttributes();
 
   // === TẠO BỘ ĐỆM TRA CỨU (LOOKUP MAP) ĐỂ TỐI ƯU HÓA HIỆU SUẤT ===
   const attributeLookupMap = useMemo(() => {
@@ -70,11 +76,11 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
 
     const map = new Map<
       string,
-      { label: string; values: Map<string, string> }
+      { label: I18nField; values: Map<string, I18nField> }
     >();
 
     availableAttributes.forEach((attr) => {
-      const valueMap = new Map<string, string>();
+      const valueMap = new Map<string, I18nField>();
       attr.values.forEach((val) => {
         valueMap.set(val._id, val.value);
       });
@@ -96,18 +102,18 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
     return (
       <CCard>
         <CCardBody className="text-danger text-center">
-          Lỗi tải thuộc tính
+          {t("loadingError")}
         </CCardBody>
       </CCard>
     );
 
   return (
     <CCard className="mb-4">
-      <CCardHeader>Thuộc tính & Biến thể</CCardHeader>
+      <CCardHeader>{t("title")}</CCardHeader>
       <CCardBody>
         {/* --- 1. CHỌN CÁC THUỘC TÍNH ĐỂ ÁP DỤNG --- */}
         <div className="mb-4">
-          <h5 className="mb-2 font-semibold">Chọn thuộc tính cho sản phẩm</h5>
+          <h5 className="mb-2 font-semibold">{t("selectAttributes")}</h5>
           <div className="flex flex-wrap gap-3">
             {availableAttributes?.map((attr) => {
               const isSelected = selectedAttributes.some(
@@ -120,7 +126,8 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                   variant="outline"
                   onClick={() => onAttributeToggle(attr._id)}
                 >
-                  {attr.label} {isSelected && <CIcon icon={cilCheckCircle} />}
+                  {getLocalizedName(attr.label, locale)}{" "}
+                  {isSelected && <CIcon icon={cilCheckCircle} />}
                 </CButton>
               );
             })}
@@ -138,7 +145,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
             return (
               <div key={fullAttribute._id} className="mb-4 border-t pt-4">
                 <CFormLabel className="font-semibold">
-                  {fullAttribute.label}
+                  {getLocalizedName(fullAttribute.label, locale)}
                 </CFormLabel>
                 <div className="flex flex-wrap items-center gap-3">
                   {fullAttribute.values.map((value) => {
@@ -160,7 +167,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                       <button
                         key={value._id}
                         type="button"
-                        title={value.value}
+                        title={getLocalizedName(value.value, locale)}
                         onClick={() =>
                           onValueToggle(fullAttribute._id, value._id)
                         }
@@ -192,7 +199,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
           return (
             <div key={fullAttribute._id} className="mb-4 border-t pt-4">
               <CFormLabel className="font-semibold">
-                {fullAttribute.label}
+                {getLocalizedName(fullAttribute.label, locale)}
               </CFormLabel>
               <div className="flex flex-wrap gap-2">
                 {fullAttribute.values.map((value) => {
@@ -207,7 +214,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                         onValueToggle(fullAttribute._id, value._id)
                       }
                     >
-                      {value.value}
+                      {getLocalizedName(value.value, locale)}
                     </CButton>
                   );
                 })}
@@ -231,7 +238,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
 
           return (
             <div className="mt-4 border-t pt-4">
-              <h5 className="mb-3 font-semibold">Ảnh theo màu sắc</h5>
+              <h5 className="mb-3 font-semibold">{t("imagesByColor")}</h5>
               {selectedColorAttr.values.map((valueId) => {
                 const colorValue = colorAttribute.values.find(
                   (v) => v._id === valueId,
@@ -244,7 +251,9 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                     className="mb-3 rounded-lg border p-3"
                   >
                     <CFormLabel className="font-medium">
-                      Ảnh cho màu: {colorValue.value}
+                      {t("imagesForColor", {
+                        color: getLocalizedName(colorValue.value, locale),
+                      })}
                     </CFormLabel>
                     <CFormInput
                       type="file"
@@ -257,7 +266,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                         onColorImageUpload(
                           Array.from(e.target.files),
                           colorValue._id,
-                          colorValue.value,
+                          getLocalizedName(colorValue.value, locale),
                         )
                       }
                     />
@@ -297,7 +306,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
           <div className="mt-4 border-t pt-4">
             <div className="mb-3 flex items-center justify-between">
               <h5 className="m-0 font-semibold">
-                Danh sách biến thể ({variants.length})
+                {t("variantList", { count: variants.length })}
               </h5>
               <CButton
                 color="secondary"
@@ -305,7 +314,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                 size="sm"
                 onClick={onGenerateAllVariantSKUs}
               >
-                Tạo SKU hàng loạt
+                {t("generateSku")}
               </CButton>
             </div>
             <div className="space-y-3">
@@ -313,13 +322,20 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                 // --- TẠO TÊN HIỂN THỊ (DISPLAY NAME) TỪ CÁC ID ---
                 const displayName = variant.optionValues
                   .map((opt) => {
-                    // opt.attribute là ID của thuộc tính cha (vd: ID của "Màu sắc")
-                    // opt.value là ID của giá trị con (vd: ID của "Xanh Lá")
                     const attrInfo = attributeLookupMap.get(opt.attribute);
-                    const valueName = attrInfo
-                      ? attrInfo.values.get(opt.value)
-                      : null;
-                    return valueName || "N/A"; // Trả về 'N/A' nếu không tìm thấy
+                    if (!attrInfo) return "N/A"; // Fallback nếu không tìm thấy thuộc tính
+
+                    const localizedLabel = getLocalizedName(
+                      attrInfo.label,
+                      locale,
+                    );
+                    const valueObject = attrInfo.values.get(opt.value);
+                    const localizedValue = getLocalizedName(
+                      valueObject,
+                      locale,
+                    );
+
+                    return `${localizedLabel}: ${localizedValue}`;
                   })
                   .join(" / ");
 
@@ -332,20 +348,20 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                       >
                         {/* Hiển thị tên đã được xử lý */}
                         <CFormLabel className="mb-0 font-medium">
-                          Phiên bản: {displayName}
+                          {t("version", { name: displayName })}
                         </CFormLabel>
                         <CButton
                           color="danger"
                           variant="ghost"
                           size="sm"
                           onClick={() => onRemoveVariant(index)}
-                          title="Xóa biến thể"
+                          title={t("deleteVariant")}
                         >
                           <CIcon icon={cilX} />
                         </CButton>
                       </CCol>
                       <CCol xs={6} md={3}>
-                        <CFormLabel>SKU*</CFormLabel>
+                        <CFormLabel>{t("skuLabel")}</CFormLabel>
                         <CFormInput
                           size="sm"
                           value={variant.sku}
@@ -356,7 +372,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                         />
                       </CCol>
                       <CCol xs={6} md={3}>
-                        <CFormLabel>Giá*</CFormLabel>
+                        <CFormLabel>{t("priceLabel")}</CFormLabel>
                         <CFormInput
                           size="sm"
                           type="number"
@@ -367,7 +383,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                         />
                       </CCol>
                       <CCol xs={6} md={3}>
-                        <CFormLabel>Giá Sale</CFormLabel>
+                        <CFormLabel>{t("salePriceLabel")}</CFormLabel>
                         <CFormInput
                           size="sm"
                           type="number"
@@ -378,7 +394,7 @@ const ProductAttributesCard: React.FC<ProductAttributesCardProps> = ({
                         />
                       </CCol>
                       <CCol xs={6} md={3}>
-                        <CFormLabel>Tồn kho*</CFormLabel>
+                        <CFormLabel>{t("stockLabel")}</CFormLabel>
                         <CFormInput
                           size="sm"
                           type="number"

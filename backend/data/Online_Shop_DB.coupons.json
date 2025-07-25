@@ -1,0 +1,256 @@
+[{
+  "_id": {
+    "$oid": "6816303522f43306d21ff0d1"
+  },
+  "code": "WELCOME10",
+  "description": {
+    "vi": "Giảm 10% cho đơn hàng đầu tiên",
+    "en": "Giảm 10% cho đơn hàng đầu tiên"
+  },
+  "discountType": "percentage",
+  "discountValue": 10,
+  "minOrderValue": 0,
+  "maxUsage": null,
+  "usageCount": 2,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2025-12-31T23:59:59.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "all",
+  "applicableIds": [],
+  "createdAt": {
+    "$date": "2025-05-03T15:03:17.275Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-16T12:56:45.012Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6816304f22f43306d21ff0d5"
+  },
+  "code": "FORHER20",
+  "description": {
+    "vi": "Giảm 20% cho tất cả Thời trang Nữ",
+    "en": "Giảm 20% cho tất cả Thời trang Nữ"
+  },
+  "discountType": "percentage",
+  "discountValue": 20,
+  "minOrderValue": 300000,
+  "maxUsage": null,
+  "usageCount": 8,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2025-10-30T23:59:59.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "categories",
+  "applicableIds": [
+    {
+      "$oid": "64f1a0e8a9b8c2a5a4e8d1a2"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-05-03T15:03:43.531Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:32.224Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "681630e922f43306d21ff0dc"
+  },
+  "code": "BIGSPENDER50K",
+  "description": {
+    "vi": "Giảm 50k cho đơn hàng từ 500k",
+    "en": "Testing 1234"
+  },
+  "discountType": "fixed_amount",
+  "discountValue": 50000,
+  "minOrderValue": 500000,
+  "maxUsage": null,
+  "usageCount": 8,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2025-08-31T00:00:00.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "all",
+  "applicableIds": [],
+  "createdAt": {
+    "$date": "2025-05-03T15:06:17.869Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-16T13:09:52.939Z"
+  },
+  "__v": 0,
+  "startDate": {
+    "$date": "2025-07-15T00:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6816310b22f43306d21ff0e0"
+  },
+  "code": "CASUALSTYLE",
+  "description": {
+    "vi": "Giảm 30k cho Áo Thun Nam hoặc Quần Jeans Nữ",
+    "en": "Giảm 30k cho Áo Thun Nam hoặc Quần Jeans Nữ"
+  },
+  "discountType": "fixed_amount",
+  "discountValue": 30000,
+  "minOrderValue": 200000,
+  "maxUsage": null,
+  "usageCount": 1,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2025-10-15T23:59:59.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "categories",
+  "applicableIds": [
+    {
+      "$oid": "64f1a0e8a9b8c2a5a4e8d1c1"
+    },
+    {
+      "$oid": "64f1a0e8a9b8c2a5a4e8d1c7"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-05-03T15:06:51.853Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:32.224Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6816314a22f43306d21ff0e5"
+  },
+  "code": "PASTPROMO",
+  "description": {
+    "vi": "Coupon đã hết hạn",
+    "en": "Coupon đã hết hạn"
+  },
+  "discountType": "percentage",
+  "discountValue": 5,
+  "minOrderValue": 0,
+  "maxUsage": null,
+  "usageCount": 0,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2023-12-31T23:59:59.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "all",
+  "applicableIds": [],
+  "createdAt": {
+    "$date": "2025-05-03T15:07:54.637Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:32.224Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6816315422f43306d21ff0e9"
+  },
+  "code": "COMINGSOON",
+  "description": {
+    "vi": "Coupon chưa kích hoạt",
+    "en": "Coupon chưa kích hoạt"
+  },
+  "discountType": "fixed_amount",
+  "discountValue": 20000,
+  "minOrderValue": 0,
+  "maxUsage": null,
+  "usageCount": 0,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2025-01-31T23:59:59.000Z"
+  },
+  "isActive": false,
+  "applicableTo": "all",
+  "applicableIds": [],
+  "createdAt": {
+    "$date": "2025-05-03T15:08:04.993Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:32.224Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6816315f22f43306d21ff0ed"
+  },
+  "code": "LIMITED100",
+  "description": {
+    "vi": "Giảm 10%, giới hạn 100 lượt dùng toàn hệ thống",
+    "en": "Giảm 10%, giới hạn 100 lượt dùng toàn hệ thống"
+  },
+  "discountType": "percentage",
+  "discountValue": 10,
+  "minOrderValue": 0,
+  "maxUsage": 100,
+  "usageCount": 99,
+  "maxUsagePerUser": 1,
+  "expiryDate": {
+    "$date": "2025-12-20T00:00:00.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "all",
+  "applicableIds": [],
+  "createdAt": {
+    "$date": "2025-05-03T15:08:15.268Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:32.224Z"
+  },
+  "__v": 0,
+  "startDate": {
+    "$date": "2025-06-20T00:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "685538b68fb85238d2229da6"
+  },
+  "code": "GIAM10",
+  "description": {
+    "vi": "Đây là mã test 123",
+    "en": "This is a test"
+  },
+  "discountType": "percentage",
+  "discountValue": 10,
+  "minOrderValue": 300000,
+  "maxUsage": 10,
+  "usageCount": 1,
+  "maxUsagePerUser": 1,
+  "startDate": {
+    "$date": "2025-06-20T00:00:00.000Z"
+  },
+  "expiryDate": {
+    "$date": "2025-06-21T00:00:00.000Z"
+  },
+  "isActive": true,
+  "applicableTo": "products",
+  "applicableIds": [
+    {
+      "$oid": "684982fdde389073abc12d4a"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-20T10:32:22.447Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-16T10:31:15.743Z"
+  },
+  "__v": 1
+}]

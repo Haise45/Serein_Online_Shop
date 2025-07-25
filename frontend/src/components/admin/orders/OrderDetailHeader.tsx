@@ -22,6 +22,7 @@ import {
   CTooltip,
 } from "@coreui/react";
 import classNames from "classnames";
+import { useTranslations, useLocale } from "next-intl";
 
 interface OrderDetailHeaderProps {
   order: Order;
@@ -29,19 +30,25 @@ interface OrderDetailHeaderProps {
   isRestocking: boolean;
 }
 
-const getStatusConfig = (status: string) => {
-  const config: OrderStatusConfig = ORDER_STATUSES.find(
-    (s) => s.value === status,
-  ) || { value: status, label: status, color: "light" };
-  if (!config)
-    return {
-      label: status,
-      color: "secondary",
-      textColor: "text-gray-800",
-      ringColor: "ring-gray-300",
-    };
+const getStatusConfig = (
+  status: string,
+  t: ReturnType<typeof useTranslations>, // Định nghĩa kiểu cho hàm t
+): Omit<OrderStatusConfig, "label"> & {
+  label: string;
+  textColor: string;
+  ringColor: string;
+} => {
+  // Tìm config gốc từ hằng số để lấy `color`
+  const baseConfig = ORDER_STATUSES.find((s) => s.value === status) || {
+    value: status,
+    label: status, // Label này sẽ bị ghi đè
+    color: "light",
+  };
+  
+  // Dùng hàm `t` để dịch label
+  const translatedLabel = t(status as string);
 
-  // Thêm các class màu của Tailwind để dễ dàng tùy chỉnh
+  // Thêm các class màu (logic này không đổi)
   const colorMap: Record<string, { textColor: string; ringColor: string }> = {
     success: { textColor: "text-green-700", ringColor: "ring-green-600/20" },
     primary: { textColor: "text-blue-700", ringColor: "ring-blue-600/20" },
@@ -52,7 +59,11 @@ const getStatusConfig = (status: string) => {
     secondary: { textColor: "text-gray-600", ringColor: "ring-gray-500/20" },
   };
 
-  return { ...config, ...(colorMap[config.color] || colorMap.secondary) };
+  return {
+    ...baseConfig,
+    label: translatedLabel, // Ghi đè label bằng giá trị đã dịch
+    ...(colorMap[baseConfig.color] || colorMap.secondary),
+  };
 };
 
 const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
@@ -60,6 +71,9 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
   onRestockClick,
   isRestocking,
 }) => {
+  const locale = useLocale();
+  const t = useTranslations("AdminOrderDetail.header");
+  const tStatus = useTranslations("OrderStatus");
   const updateStatusMutation = useUpdateOrderStatusAdmin();
   const canRestock = ["Cancelled", "Refunded"].includes(order.status);
   const canTakeAction = !["Delivered", "Cancelled", "Refunded"].includes(
@@ -67,8 +81,8 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
   );
   const hasBeenRestored = order.isStockRestored;
   const restockTooltipText = hasBeenRestored
-    ? "Hành động này không thể thực hiện lại"
-    : "Khôi phục lại số lượng sản phẩm vào kho";
+    ? t("restockTooltipDone")
+    : t("restockTooltip");
 
   // Các trạng thái mà Admin có thể chủ động chuyển đến
   const targetStatuses: UpdateOrderStatusAdminPayload["status"][] = [
@@ -86,7 +100,7 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
     });
   };
 
-  const currentStatusConfig = getStatusConfig(order.status);
+  const currentStatusConfig = getStatusConfig(order.status, tStatus);
 
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -94,7 +108,7 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
       <div>
         <div className="flex items-center">
           <h2 className="text-xl font-bold text-gray-800">
-            Đơn hàng #{order._id.slice(-6).toUpperCase()}
+            {t("order", { id: order._id.slice(-6).toUpperCase() })}
           </h2>
           <CBadge
             color={currentStatusConfig.color}
@@ -108,7 +122,9 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
         </div>
         <p className="mt-1 flex items-center text-sm text-gray-500">
           <CIcon icon={cilClock} className="mr-1.5 h-4 w-4" />
-          Đặt lúc: {new Date(order.createdAt).toLocaleString("vi-VN")}
+          {t("placedAt", {
+            date: new Date(order.createdAt).toLocaleString(locale),
+          })}
         </p>
       </div>
       {/* Các nút hành động */}
@@ -123,7 +139,7 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
                 disabled={isRestocking || hasBeenRestored} // Vô hiệu hóa khi đang xử lý HOẶC đã được khôi phục
               >
                 <CIcon icon={cilLoopCircular} className="me-2" />
-                Khôi phục tồn kho
+                {t("restock")}
               </CButton>
             </span>
           </CTooltip>
@@ -132,7 +148,7 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
         {hasBeenRestored && (
           <div className="flex items-center gap-2 rounded-md bg-green-100 px-3 py-1.5 text-sm text-green-700">
             <CIcon icon={cilCheckCircle} />
-            <span>Đã khôi phục kho</span>
+            <span>{t("restored")}</span>
           </div>
         )}
         {/* Dropdown cập nhật trạng thái */}
@@ -148,11 +164,11 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
               ) : (
                 <CIcon icon={cilOptions} />
               )}
-              <span className="ms-2">Cập nhật trạng thái</span>
+              <span className="ms-2">{t("updateStatus")}</span>
             </CDropdownToggle>
             <CDropdownMenu>
               {targetStatuses.map((status) => {
-                const config = getStatusConfig(status);
+                const config = getStatusConfig(status, tStatus);
                 return (
                   <CDropdownItem
                     key={status}
@@ -163,7 +179,7 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
                     )}
                   >
                     {/* <CIcon icon={config.icon} className="me-2" /> */}
-                    Chuyển sang &quot;{config.label}&quot;
+                    {t("moveTo", { status: config.label })}
                   </CDropdownItem>
                 );
               })}

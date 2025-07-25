@@ -20,6 +20,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 // --- Query Keys for User ---
 export const userKeys = {
@@ -44,6 +45,7 @@ export const useGetUserProfile = (options?: { enabled?: boolean }) => {
 
 // --- Hook: Cập nhật User Profile ---
 export const useUpdateUserProfile = () => {
+  const t = useTranslations("reactQuery.user");
   const queryClient = useQueryClient();
   return useMutation<
     UserProfile,
@@ -55,11 +57,13 @@ export const useUpdateUserProfile = () => {
       queryClient.setQueryData(userKeys.profile(), updatedProfile);
       // Hoặc invalidate nếu muốn fetch lại toàn bộ
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      toast.success("Cập nhật thông tin thành công!");
+      toast.success(t("updateProfileSuccess"));
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || error.message || "Cập nhật thất bại.",
+        error.response?.data?.message ||
+          error.message ||
+          t("updateProfileError"),
       );
     },
   });
@@ -76,6 +80,7 @@ export const useGetUserAddresses = (options?: { enabled?: boolean }) => {
 
 // --- Hook: Thêm địa chỉ mới ---
 export const useAddAddress = () => {
+  const t = useTranslations("reactQuery.user");
   const queryClient = useQueryClient();
   return useMutation<
     Address[],
@@ -87,13 +92,11 @@ export const useAddAddress = () => {
       queryClient.setQueryData(userKeys.addresses(), updatedAddresses);
       // Cập nhật lại profile nếu địa chỉ mặc định thay đổi
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      toast.success("Thêm địa chỉ mới thành công!");
+      toast.success(t("addAddressSuccess"));
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Thêm địa chỉ thất bại.",
+        error.response?.data?.message || error.message || t("addAddressError"),
       );
     },
   });
@@ -105,6 +108,7 @@ interface UpdateAddressVariables {
   addressData: Partial<Omit<Address, "_id">>;
 }
 export const useUpdateAddress = () => {
+  const t = useTranslations("reactQuery.user");
   const queryClient = useQueryClient();
   return useMutation<
     Address[],
@@ -116,13 +120,13 @@ export const useUpdateAddress = () => {
     onSuccess: (updatedAddresses) => {
       queryClient.setQueryData(userKeys.addresses(), updatedAddresses);
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      toast.success("Cập nhật địa chỉ thành công!");
+      toast.success(t("updateAddressSuccess"));
     },
     onError: (error) => {
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Cập nhật địa chỉ thất bại.",
+          t("updateAddressError"),
       );
     },
   });
@@ -130,6 +134,7 @@ export const useUpdateAddress = () => {
 
 // --- Hook: Xóa địa chỉ ---
 export const useDeleteAddress = () => {
+  const t = useTranslations("reactQuery.user");
   const queryClient = useQueryClient();
   return useMutation<Address[], AxiosError<{ message?: string }>, string>({
     // string là addressId
@@ -137,13 +142,13 @@ export const useDeleteAddress = () => {
     onSuccess: (updatedAddresses) => {
       queryClient.setQueryData(userKeys.addresses(), updatedAddresses);
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      toast.success("Xóa địa chỉ thành công!");
+      toast.success(t("deleteAddressSuccess"));
     },
     onError: (error) => {
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Xóa địa chỉ thất bại.",
+          t("deleteAddressError"),
       );
     },
   });
@@ -151,6 +156,7 @@ export const useDeleteAddress = () => {
 
 // --- Hook: Đặt địa chỉ làm mặc định ---
 export const useSetDefaultAddress = () => {
+  const t = useTranslations("reactQuery.user");
   const queryClient = useQueryClient();
   return useMutation<Address[], AxiosError<{ message?: string }>, string>({
     // string là addressId
@@ -158,13 +164,13 @@ export const useSetDefaultAddress = () => {
     onSuccess: (updatedAddresses) => {
       queryClient.setQueryData(userKeys.addresses(), updatedAddresses);
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      toast.success("Đặt địa chỉ mặc định thành công!");
+      toast.success(t("setDefaultAddressSuccess"));
     },
     onError: (error) => {
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Đặt địa chỉ mặc định thất bại.",
+          t("setDefaultAddressError"),
       );
     },
   });
@@ -199,6 +205,7 @@ export const useGetUserDetailsAdmin = (
 };
 
 export const useUpdateUserStatusAdmin = () => {
+  const t = useTranslations("reactQuery.user");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string },
@@ -220,7 +227,7 @@ export const useUpdateUserStatusAdmin = () => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
     onError: (error) => {
-      toast.error(error.message || "Cập nhật trạng thái thất bại.");
+      toast.error(error.message || t("updateStatusError"));
     },
   });
 };

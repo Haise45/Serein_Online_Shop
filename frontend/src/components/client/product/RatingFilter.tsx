@@ -1,8 +1,9 @@
 "use client";
 import classNames from "classnames";
 import { FiStar } from "react-icons/fi";
-import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
+import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
 import FilterDisclosure from "./FilterDisclosure";
+import { useTranslations } from "next-intl";
 
 interface RatingFilterProps {
   currentFilters: ProductFilters;
@@ -15,6 +16,8 @@ export default function RatingFilter({
   currentFilters,
   onFilterChange,
 }: RatingFilterProps) {
+  const t = useTranslations("ProductFilters");
+
   const handleRatingSelect = (rating: number) => {
     // Nếu click lại rating đã chọn thì bỏ chọn (reset minRating)
     const newMinRating =
@@ -23,7 +26,7 @@ export default function RatingFilter({
   };
 
   return (
-    <FilterDisclosure title="Đánh giá" defaultOpen={false}>
+    <FilterDisclosure title={t("ratingTitle")} defaultOpen={false}>
       {/* Mặc định đóng */}
       <div className="space-y-2">
         {RATINGS.map((rating) => (
@@ -59,7 +62,7 @@ export default function RatingFilter({
                 "font-semibold": currentFilters.minRating === rating,
               })}
             >
-              {rating === 1 ? `Từ ${rating} sao` : `Từ ${rating} sao trở lên`}
+              {t("fromXStars", { count: rating })}
             </span>
           </button>
         ))}
@@ -70,7 +73,7 @@ export default function RatingFilter({
             } // Click lại để bỏ chọn
             className="mt-2 w-full rounded-md px-3 py-1.5 text-left text-xs text-red-600 hover:bg-red-50"
           >
-            Xóa bộ lọc đánh giá
+            {t("clearRatingFilter")}
           </button>
         )}
       </div>

@@ -20,6 +20,7 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 import { FiCamera, FiLoader, FiStar, FiX } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface ProductReviewModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export default function ProductReviewModal({
   onSubmitReview,
   isSubmitting,
 }: ProductReviewModalProps) {
+  const t = useTranslations("ReviewModal");
   const isEditMode = !!existingReview;
 
   const [rating, setRating] = useState(0);
@@ -61,9 +63,11 @@ export default function ProductReviewModal({
   const isProcessing = isSubmitting || uploadImagesMutation.isPending;
 
   const modalTitle = isEditMode
-    ? `Chỉnh sửa đánh giá cho ${product.name}`
-    : `Đánh giá sản phẩm: ${product.name}`;
-  const submitButtonText = isEditMode ? "Lưu thay đổi" : "Gửi đánh giá";
+    ? t("editTitle", { name: product.name })
+    : t("createTitle", { name: product.name });
+  const submitButtonText = isEditMode
+    ? t("submitEditButton")
+    : t("submitCreateButton");
 
   useEffect(() => {
     if (isOpen) {
@@ -93,17 +97,20 @@ export default function ProductReviewModal({
 
       for (const file of files) {
         if (filesToAdd.length + currentTotalImages >= MAX_IMAGES) {
-          toast.error(`Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} hình ảnh.`);
+          toast.error(t("validation.maxImages", { count: MAX_IMAGES }));
           break;
         }
         if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
           toast.error(
-            `Kích thước ảnh "${file.name}" quá lớn (Tối đa ${MAX_FILE_SIZE_MB}MB).`,
+            t("validation.fileTooLarge", {
+              name: file.name,
+              size: MAX_FILE_SIZE_MB,
+            }),
           );
           continue;
         }
         if (!file.type.startsWith("image/")) {
-          toast.error(`Tệp "${file.name}" không phải là hình ảnh.`);
+          toast.error(t("validation.notAnImage", { name: file.name }));
           continue;
         }
         filesToAdd.push(file);
@@ -130,7 +137,7 @@ export default function ProductReviewModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      toast.error("Vui lòng chọn số sao đánh giá.");
+      toast.error(t("validation.ratingRequired"));
       return;
     }
     if (isProcessing) return;
@@ -162,7 +169,7 @@ export default function ProductReviewModal({
           JSON.stringify(payload.userImages || []);
 
         if (!hasRatingChanged && !hasCommentChanged && !hasImagesChanged) {
-          toast("Không có thay đổi nào để lưu.");
+          toast(t("noChangesToast"));
           onClose();
           return;
         }
@@ -182,7 +189,7 @@ export default function ProductReviewModal({
       }
       onClose(); // Đóng modal sau khi submit thành công (hook đã toast và invalidate)
     } catch (error) {
-      console.error("Lỗi khi gửi đánh giá trong modal:", error);
+      console.error("Failed for send review:", error);
       // Toast lỗi đã được xử lý bởi hook mutation tương ứng
     }
   };
@@ -233,7 +240,7 @@ export default function ProductReviewModal({
                     onClick={() => !isProcessing && onClose()}
                     className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
                     disabled={isProcessing}
-                    aria-label="Đóng"
+                    aria-label={t("closeButton")}
                   >
                     <FiX className="h-5 w-5" />
                   </button>
@@ -242,7 +249,8 @@ export default function ProductReviewModal({
                 <form onSubmit={handleSubmit} className="mt-4 space-y-5">
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                      Đánh giá của bạn <span className="text-red-500">*</span>
+                      {t("yourRatingLabel")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="flex items-center space-x-1">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -258,7 +266,7 @@ export default function ProductReviewModal({
                           onClick={() => !isProcessing && setRating(star)}
                           className="rounded-full p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-1"
                           disabled={isProcessing}
-                          aria-label={`Đánh giá ${star} sao`}
+                          aria-label={t("ratingLabel", { count: star })}
                         >
                           <FiStar
                             className={classNames(
@@ -272,7 +280,7 @@ export default function ProductReviewModal({
                       ))}
                       {rating > 0 && (
                         <span className="ml-3 text-sm font-semibold text-yellow-500">
-                          {rating}/5 sao
+                          {t("ratingLabel", { count: rating })}
                         </span>
                       )}
                     </div>
@@ -283,8 +291,10 @@ export default function ProductReviewModal({
                       htmlFor={`review-comment-${product._id}`}
                       className="mb-1 block text-sm font-medium text-gray-700"
                     >
-                      Nội dung đánh giá{" "}
-                      <span className="text-xs text-gray-500">(Tùy chọn)</span>
+                      {t("commentLabel")}{" "}
+                      <span className="text-xs text-gray-500">
+                        {t("commentOptional")}
+                      </span>
                     </label>
                     <textarea
                       id={`review-comment-${product._id}`}
@@ -293,14 +303,14 @@ export default function ProductReviewModal({
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       className="input-field w-full"
-                      placeholder="Chia sẻ cảm nhận chi tiết của bạn về sản phẩm này..."
+                      placeholder={t("commentPlaceholder")}
                       disabled={isProcessing}
                     />
                   </div>
 
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Hình ảnh thực tế (Tối đa {MAX_IMAGES} ảnh)
+                      {t("imagesLabel", { count: MAX_IMAGES })}
                     </label>
                     <div className="mt-1">
                       <div className="flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6 transition-colors duration-150 hover:border-indigo-400">
@@ -320,7 +330,7 @@ export default function ProductReviewModal({
                                 },
                               )}
                             >
-                              <span>Tải ảnh lên</span>
+                              <span>{t("uploadButton")}</span>
                               <input
                                 id={`review-file-upload-${product._id}`}
                                 name="file-upload"
@@ -338,10 +348,10 @@ export default function ProductReviewModal({
                                 }
                               />
                             </label>
-                            <p className="pl-1">hoặc kéo thả</p>
+                            <p className="pl-1">{t("orDragAndDrop")}</p>
                           </div>
                           <p className="text-xs text-gray-500">
-                            Hỗ trợ: PNG, JPG, GIF, WEBP
+                            {t("supportedFiles")}
                           </p>
                         </div>
                       </div>
@@ -350,9 +360,10 @@ export default function ProductReviewModal({
                       imagePreviews.length > 0) && (
                       <div className="mt-4">
                         <p className="mb-1.5 text-xs font-medium text-gray-600">
-                          Ảnh đã chọn (
-                          {existingImageUrls.length + imageFiles.length}/
-                          {MAX_IMAGES}):
+                          {t("selectedImages", {
+                            count: existingImageUrls.length + imageFiles.length,
+                            max: MAX_IMAGES,
+                          })}
                         </p>
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
                           {existingImageUrls.map((url) => (
@@ -372,7 +383,7 @@ export default function ProductReviewModal({
                                 onClick={() => removeExistingImage(url)}
                                 disabled={isProcessing}
                                 className="absolute top-1 right-1 rounded-full bg-red-600 p-0.5 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 hover:bg-red-700 focus:opacity-100 disabled:bg-gray-300"
-                                aria-label="Xóa ảnh hiện tại"
+                                aria-label={t("removeExistingImage")}
                               >
                                 <FiX className="h-3 w-3" />{" "}
                               </button>
@@ -385,7 +396,9 @@ export default function ProductReviewModal({
                             >
                               <Image
                                 src={previewUrl}
-                                alt={`Xem trước ảnh mới ${index + 1}`}
+                                alt={t("newImagePreviewAlt", {
+                                  index: index + 1,
+                                })}
                                 fill
                                 className="rounded-md border border-gray-200 object-cover"
                               />
@@ -394,7 +407,7 @@ export default function ProductReviewModal({
                                 onClick={() => removeNewImage(index)}
                                 disabled={isProcessing}
                                 className="absolute top-1 right-1 rounded-full bg-red-600 p-0.5 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 hover:bg-red-700 focus:opacity-100 disabled:bg-gray-300"
-                                aria-label="Xóa ảnh mới chọn"
+                                aria-label={t("removeNewImage")}
                               >
                                 {" "}
                                 <FiX className="h-3 w-3" />{" "}
@@ -407,7 +420,7 @@ export default function ProductReviewModal({
                               onClick={() => fileInputRef.current?.click()}
                               disabled={isProcessing}
                               className="flex aspect-square items-center justify-center rounded-md border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-indigo-500 hover:text-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-label="Thêm ảnh"
+                              aria-label={t("addImage")}
                             >
                               <FiCamera className="h-6 w-6" />
                             </button>
@@ -429,7 +442,7 @@ export default function ProductReviewModal({
                       )}
                       disabled={isProcessing}
                     >
-                      Hủy
+                      {t("cancelButton")}
                     </button>
                     <button
                       type="submit"
@@ -446,7 +459,7 @@ export default function ProductReviewModal({
                       {isProcessing && (
                         <FiLoader className="mr-2 h-4 w-4 animate-spin" />
                       )}
-                      {isProcessing ? "Đang xử lý" : submitButtonText}
+                      {isProcessing ? t("processing") : submitButtonText}
                     </button>
                   </div>
                 </form>

@@ -3,6 +3,7 @@
 import { Address } from "@/types/user";
 import classNames from "classnames";
 import { FiCheckCircle, FiEdit3, FiLoader, FiTrash2 } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface AddressCardProps {
   address: Address;
@@ -25,6 +26,7 @@ const AddressCard: React.FC<AddressCardProps> = ({
   currentDeletingId,
   currentSettingDefaultId,
 }) => {
+  const t = useTranslations("AddressCard");
   // Check if this specific card is being processed
   const isThisCardDeleting =
     isDeleting && currentDeletingId === address._id?.toString();
@@ -51,7 +53,7 @@ const AddressCard: React.FC<AddressCardProps> = ({
             {address.phone}
             {address.isDefault && (
               <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                <FiCheckCircle className="mr-1 h-3 w-3" /> Mặc định
+                <FiCheckCircle className="mr-1 h-3 w-3" /> {t("defaultLabel")}
               </span>
             )}
           </p>
@@ -61,7 +63,7 @@ const AddressCard: React.FC<AddressCardProps> = ({
             onClick={() => onEdit(address)}
             disabled={isProcessingThisCard}
             className="p-1 text-gray-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
-            title="Sửa địa chỉ"
+            title={t("editButtonTitle")}
           >
             <FiEdit3 className="h-4 w-4" />
           </button>
@@ -70,7 +72,7 @@ const AddressCard: React.FC<AddressCardProps> = ({
               onClick={() => onDelete(address._id!.toString())}
               disabled={isProcessingThisCard}
               className="p-1 text-gray-400 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
-              title="Xóa địa chỉ"
+              title={t("deleteButtonTitle")}
             >
               {isThisCardDeleting ? (
                 <FiLoader className="h-4 w-4 animate-spin" />
@@ -97,7 +99,7 @@ const AddressCard: React.FC<AddressCardProps> = ({
           {isThisCardSettingDefault ? (
             <FiLoader className="mr-1 inline-block h-3 w-3 animate-spin" />
           ) : null}
-          Đặt làm mặc định
+          {t("setAsDefaultButton")}
         </button>
       )}
     </div>

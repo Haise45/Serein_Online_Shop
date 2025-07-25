@@ -12,6 +12,7 @@ import { addPopup } from "@/store/slices/notificationPopupSlice";
 import {
   Attribute,
   ColorMeta,
+  ExchangeRates,
   Product,
   Variant,
   VariantOptionValue,
@@ -26,13 +27,22 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FiHeart, FiLoader, FiShoppingCart } from "react-icons/fi";
 import { useDispatch } from "react-redux";
+import { useTranslations } from "next-intl";
 
 interface ProductCardProps {
   product: Product;
   attributes: Attribute[];
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
-export default function ProductCard({ product, attributes }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  attributes,
+  displayCurrency,
+  rates,
+}: ProductCardProps) {
+  const t = useTranslations("ProductCard");
   const MAX_VISIBLE_COLORS = 4;
   const dispatch: AppDispatch = useDispatch(); // Khởi tạo dispatch
   const addToCartMutation = useAddToCart();
@@ -152,10 +162,7 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
       !activeVariant &&
       isFavorite
     ) {
-      toast.success(
-        "Một phiên bản của sản phẩm này đã được yêu thích. Hãy chọn phiên bản để quản lý.",
-        { icon: "ℹ️" },
-      );
+      toast.success(t("versionInWishlist"), { icon: "ℹ️" });
       return;
     }
 
@@ -166,9 +173,7 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
       !activeVariant &&
       !isFavorite
     ) {
-      toast.error(
-        "Vui lòng chọn một phiên bản (ví dụ: màu sắc) để thêm vào yêu thích.",
-      );
+      toast.error(t("selectVariantForWishlist"));
       return;
     }
 
@@ -348,7 +353,7 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
     activeVariant?.displayPrice ?? product.displayPrice;
   const originalPriceToShow = activeVariant?.price ?? product.price;
   const isOnSaleToShow = activeVariant?.isOnSale ?? product.isOnSale;
-
+  const currencyOptions = { currency: displayCurrency, rates };
   const percentageDiscount = useMemo(() => {
     return isOnSaleToShow &&
       originalPriceToShow > 0 &&
@@ -370,17 +375,15 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
 
     // Thêm kiểm tra ở đây để chắc chắn
     if (!isPurchasable) {
-      toast.error("Sản phẩm này hiện không có sẵn để mua.");
+      toast.error(t("errorOutOfStock"));
       return;
     }
     if (!productIdToAdd) {
-      toast.error("Không xác định được sản phẩm.");
+      toast.error(t("errorGeneric"));
       return;
     }
     if (product.variants && product.variants.length > 0 && !activeVariant) {
-      toast.error(
-        "Vui lòng chọn một phiên bản sản phẩm (ví dụ: màu sắc, size).",
-      );
+      toast.error(t("errorSelectVariant"));
       return;
     }
 
@@ -444,7 +447,6 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
           } else {
             // Nếu giỏ hàng vẫn rỗng sau khi thêm (lạ), dùng thông tin sản phẩm hiện tại
             dispatch(addPopup(genericItemForPopup));
-            // toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`); // Vẫn có thể giữ toast này
           }
         }
       },
@@ -491,12 +493,12 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
           <div className="absolute top-2.5 left-2.5 z-10 flex flex-col items-start space-y-1.5 sm:top-3 sm:left-3">
             {isComingSoon && (
               <span className="rounded-md bg-blue-100 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-blue-700 uppercase sm:text-xs">
-                Sắp ra mắt
+                {t("comingSoon")}
               </span>
             )}
             {isOutOfStock && (
               <span className="rounded-md bg-gray-200 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-gray-700 uppercase sm:text-xs">
-                Hết hàng
+                {t("outOfStock")}
               </span>
             )}
             {/* Chỉ hiển thị các banger khác nếu sản phẩm mua được */}
@@ -504,19 +506,19 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
               <>
                 {product.isConsideredNew && (
                   <span className="rounded-md bg-green-100 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-green-700 uppercase sm:text-xs">
-                    Mới
+                    {t("new")}
                   </span>
                 )}
                 {isOnSaleToShow && percentageDiscount > 0 && (
                   <span className="rounded-md bg-red-100 px-2.5 py-1 text-[10px] font-semibold text-red-700 sm:text-xs">
-                    -{percentageDiscount}%
+                    {t("sale", { percentage: percentageDiscount })}
                   </span>
                 )}
                 {product.totalSold != null &&
                   product.totalSold > 30 &&
                   !product.isConsideredNew && (
                     <span className="rounded-md bg-orange-100 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-orange-700 uppercase sm:text-xs">
-                      Bán Chạy
+                      {t("bestSeller")}
                     </span>
                   )}
               </>
@@ -529,22 +531,22 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
               onClick={handleToggleWishlist}
               disabled={isLoadingWishlist || isWishlistActionPending}
               title={
-                // Title sẽ phức tạp hơn một chút
                 activeVariant && isFavorite
-                  ? "Xóa phiên bản này khỏi Yêu thích"
+                  ? t("removeFromWishlist")
                   : !activeVariant &&
                       isFavorite &&
                       product.variants &&
                       product.variants.length > 0
-                    ? "Một phiên bản được yêu thích"
+                    ? t("versionInWishlist")
                     : isFavorite
-                      ? "Xóa khỏi Yêu thích"
+                      ? t("removeFromWishlist")
                       : product.variants &&
                           product.variants.length > 0 &&
                           !activeVariant
-                        ? "Chọn phiên bản để yêu thích"
-                        : "Thêm vào Yêu thích"
+                        ? t("selectVariantForWishlist")
+                        : t("addToWishlist")
               }
+              aria-label={isFavorite ? t("manageWishlist") : t("addToWishlist")}
               className={classNames(
                 "flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-9 sm:w-9",
                 {
@@ -556,9 +558,6 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
                     isLoadingWishlist || isWishlistActionPending,
                 },
               )}
-              aria-label={
-                isFavorite ? "Quản lý Yêu thích" : "Thêm vào Yêu thích"
-              }
             >
               {isWishlistActionPending ? (
                 <FiLoader className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
@@ -577,7 +576,8 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
               <button
                 onClick={handleAddToCart}
                 disabled={addToCartMutation.isPending}
-                title="Thêm vào giỏ hàng"
+                title={t("addToCart")}
+                aria-label={t("addToCart")}
                 className={classNames(
                   "flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-indigo-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 sm:h-9 sm:w-9",
                   "opacity-0 group-hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
@@ -586,7 +586,6 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
                       addToCartMutation.isPending,
                   },
                 )}
-                aria-label="Thêm vào giỏ hàng"
               >
                 {addToCartMutation.isPending ? (
                   <FiLoader className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
@@ -680,11 +679,11 @@ export default function ProductCard({ product, attributes }: ProductCardProps) {
             {isPurchasable ? (
               <div className="flex flex-wrap items-baseline justify-start">
                 <span className="mr-2 text-base font-bold text-gray-900 sm:text-lg">
-                  {formatCurrency(displayPriceToShow)}
+                  {formatCurrency(displayPriceToShow, currencyOptions)}
                 </span>
                 {isOnSaleToShow && originalPriceToShow > displayPriceToShow && (
                   <span className="text-xs text-gray-500 line-through sm:text-sm">
-                    {formatCurrency(originalPriceToShow)}
+                    {formatCurrency(originalPriceToShow, currencyOptions)}
                   </span>
                 )}
               </div>

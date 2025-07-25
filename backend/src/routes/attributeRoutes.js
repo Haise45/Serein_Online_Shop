@@ -8,6 +8,7 @@ const {
 const {
   createAttribute,
   getAttributes,
+  getAdminAttributes,
   addAttributeValue,
   updateAttributeValue,
   deleteAttributeValue,
@@ -17,6 +18,9 @@ const router = express.Router();
 
 // GET /api/attributes => optional protect (cho phép public nhưng vẫn check nếu có token)
 router.get("/", protectOptional, getAttributes);
+
+// GET /api/attributes/admin => cần đăng nhập & là admin
+router.get("/admin", protect, isAdmin, getAdminAttributes);
 
 // POST /api/attributes => cần đăng nhập & là admin
 router.post("/", protect, isAdmin, createAttribute);

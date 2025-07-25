@@ -1,9 +1,10 @@
 "use client";
 import ProductCard from "@/components/client/product/ProductCard";
-import { Attribute, Product } from "@/types";
+import { Attribute, ExchangeRates, Product } from "@/types";
 import { FiAlertCircle } from "react-icons/fi";
 import PaginationControls from "./PaginationControls";
 import SortDropdown from "./SortDropdown";
+import { useTranslations } from "next-intl";
 
 interface ProductGridProps {
   products: Product[];
@@ -19,6 +20,8 @@ interface ProductGridProps {
   totalProducts: number;
   onPageChange: (newPage: number) => void;
   limit: number;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 export default function ProductGrid({
@@ -35,7 +38,11 @@ export default function ProductGrid({
   totalProducts,
   onPageChange,
   limit,
+  displayCurrency,
+  rates,
 }: ProductGridProps) {
+  const t = useTranslations("ProductPage");
+
   if (isLoading) {
     // Hiển thị skeleton cho product grid trong khi loading (tương tự skeleton ở page.tsx)
     return (
@@ -71,7 +78,9 @@ export default function ProductGrid({
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-8 text-center text-red-700">
         <FiAlertCircle className="h-12 w-12 text-red-400" />
-        <h3 className="mt-4 text-xl font-semibold">Lỗi tải sản phẩm</h3>
+        <h3 className="mt-4 text-xl font-semibold">
+          {t("errorLoadingProducts")}
+        </h3>
         <p className="mt-2 text-sm">
           {error?.message || "Đã có lỗi xảy ra. Vui lòng thử lại."}
         </p>
@@ -84,10 +93,10 @@ export default function ProductGrid({
     return (
       <div className="py-12 text-center">
         <h3 className="text-xl font-medium text-gray-700">
-          Không tìm thấy sản phẩm nào
+          {t("noProductsFound")}
         </h3>
         <p className="mt-2 text-sm text-gray-500">
-          Vui lòng thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác.
+          {t("noProductsFoundSubtitle")}
         </p>
       </div>
     );
@@ -97,12 +106,12 @@ export default function ProductGrid({
     <div>
       <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <p className="text-sm text-gray-600">
-          Hiển thị{" "}
-          <span className="font-medium">{(currentPage - 1) * limit + 1}</span>-{" "}
-          <span className="font-medium">
-            {Math.min(currentPage * limit, totalProducts)}
-          </span>{" "}
-          trên <span className="font-medium">{totalProducts}</span> sản phẩm
+          {t.rich("showingResults", {
+            from: (currentPage - 1) * limit + 1,
+            to: Math.min(currentPage * limit, totalProducts),
+            total: totalProducts,
+            bold: (chunks) => <span className="font-medium">{chunks}</span>,
+          })}
         </p>
         <SortDropdown
           sortBy={sortBy}
@@ -118,6 +127,8 @@ export default function ProductGrid({
             key={product._id}
             product={product}
             attributes={attributes}
+            displayCurrency={displayCurrency}
+            rates={rates}
           />
         ))}
       </div>

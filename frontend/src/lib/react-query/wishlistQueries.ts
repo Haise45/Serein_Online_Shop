@@ -1,12 +1,12 @@
-// src/lib/react-query/wishlistQueries.ts
 import {
   addToWishlist as addToWishlistApi,
   getWishlist as getWishlistApi,
   removeFromWishlist as removeFromWishlistApi,
 } from "@/services/wishlistService";
-import { WishlistItem } from "@/types"; // Sử dụng WishlistItem đã cập nhật
+import { WishlistItem } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 // --- Query Keys ---
 export const wishlistKeys = {
@@ -35,32 +35,34 @@ export const useGetWishlist = (options?: { enabled?: boolean }) => {
 
 // --- Custom Hook: Thêm vào wishlist ---
 export const useAddToWishlist = () => {
+  const t = useTranslations("reactQuery.wishlist");
   const queryClient = useQueryClient();
   return useMutation<{ message: string }, Error, AddToWishlistVariables>({
     // Sử dụng AddToWishlistVariables
     mutationFn: addToWishlistApi,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: wishlistKeys.wishlist });
-      toast.success(data.message || "Đã thêm vào danh sách yêu thích!");
+      toast.success(data.message || t("addSuccess"));
     },
     onError: (error) => {
-      toast.error(error.message || "Thêm vào yêu thích thất bại.");
+      toast.error(error.message || t("addError"));
     },
   });
 };
 
 // --- Custom Hook: Xóa khỏi wishlist ---
 export const useRemoveFromWishlist = () => {
+  const t = useTranslations("reactQuery.wishlist");
   const queryClient = useQueryClient();
   return useMutation<{ message: string }, Error, RemoveFromWishlistVariables>({
     // Sử dụng RemoveFromWishlistVariables
     mutationFn: removeFromWishlistApi,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: wishlistKeys.wishlist });
-      toast.success(data.message || "Đã xóa khỏi danh sách yêu thích.");
+      toast.success(data.message || t("removeSuccess"));
     },
     onError: (error) => {
-      toast.error(error.message || "Xóa khỏi yêu thích thất bại.");
+      toast.error(error.message || t("removeError"));
     },
   });
 };

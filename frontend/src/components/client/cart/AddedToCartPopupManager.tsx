@@ -6,13 +6,21 @@ import { removePopup } from "@/store/slices/notificationPopupSlice";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddedToCartPopup from "./AddedToCartPopup";
+import { useSettings } from "@/app/SettingsContext";
 
 export default function AddedToCartPopupManager() {
   const dispatch: AppDispatch = useDispatch();
   const { popups } = useSelector((state: RootState) => state.notificationPopup);
 
   const { data: attributes } = useGetAttributes();
-  
+
+  // *** LẤY THÔNG TIN TIỀN TỆ ***
+  const settingsContext = useSettings();
+  const currencyOptions = {
+    currency: settingsContext?.displayCurrency || "VND",
+    rates: settingsContext?.rates || null,
+  };
+
   const attributeMap = useMemo(() => {
     if (!attributes) return new Map();
     const map = new Map<
@@ -31,7 +39,6 @@ export default function AddedToCartPopupManager() {
     return null;
   }
 
-
   return (
     <div className="fixed top-5 right-5 z-[100] flex flex-col items-end space-y-3">
       {/* Render các popup, popup mới nhất (đầu mảng) sẽ ở trên */}
@@ -41,6 +48,7 @@ export default function AddedToCartPopupManager() {
           item={popupItem} // Truyền toàn bộ PopupNotificationItem
           onClose={() => dispatch(removePopup(popupItem.id))}
           attributeMap={attributeMap}
+          currencyOptions={currencyOptions}
         />
       ))}
     </div>

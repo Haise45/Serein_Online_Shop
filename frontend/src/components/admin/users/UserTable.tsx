@@ -1,6 +1,8 @@
 "use client";
 
-import { formatCurrency, maskString, timeAgo } from "@/lib/utils";
+import { useSettings } from "@/app/SettingsContext";
+import RelativeTime from "@/components/shared/RelativeTime";
+import { formatCurrency, maskString } from "@/lib/utils";
 import { User } from "@/types";
 import { cilCheckCircle, cilPen, cilTrash } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
@@ -16,6 +18,7 @@ import {
   CTableRow,
   CTooltip,
 } from "@coreui/react";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface UserTableProps {
@@ -29,26 +32,35 @@ const UserTable: React.FC<UserTableProps> = ({
   onStatusChangeClick,
   queryString,
 }) => {
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
+  const t = useTranslations("AdminUsers.table");
+  const locale = useLocale();
+
   return (
     <CTable hover responsive className="align-middle">
       <CTableHead>
         <CTableRow>
-          <CTableHeaderCell>Người dùng</CTableHeaderCell>
-          <CTableHeaderCell>Liên hệ</CTableHeaderCell>
+          <CTableHeaderCell>{t("colUser")}</CTableHeaderCell>
+          <CTableHeaderCell>{t("colContact")}</CTableHeaderCell>
           <CTableHeaderCell className="text-center">
-            Số đơn hàng
+            {t("colOrders")}
           </CTableHeaderCell>
           <CTableHeaderCell className="text-end">
-            Tổng chi tiêu
-          </CTableHeaderCell>
-          <CTableHeaderCell className="text-center">Vai trò</CTableHeaderCell>
-          <CTableHeaderCell className="text-center">
-            Trạng thái
+            {t("colTotalSpent")}
           </CTableHeaderCell>
           <CTableHeaderCell className="text-center">
-            Ngày tham gia
+            {t("colRole")}
           </CTableHeaderCell>
-          <CTableHeaderCell className="text-center">Hành động</CTableHeaderCell>
+          <CTableHeaderCell className="text-center">
+            {t("colStatus")}
+          </CTableHeaderCell>
+          <CTableHeaderCell className="text-center">
+            {t("colJoined")}
+          </CTableHeaderCell>
+          <CTableHeaderCell className="text-center">
+            {t("colActions")}
+          </CTableHeaderCell>
         </CTableRow>
       </CTableHead>
       <CTableBody>
@@ -83,25 +95,30 @@ const UserTable: React.FC<UserTableProps> = ({
             </CTableDataCell>
             <CTableDataCell className="text-end">
               <span className="fw-semibold text-gray-800">
-                {formatCurrency(user.totalSpent ?? 0)}
+                {formatCurrency(user.totalSpent ?? 0, {
+                  currency: displayCurrency,
+                  rates,
+                })}
               </span>
             </CTableDataCell>
             <CTableDataCell className="text-center">
               <CBadge color={user.role === "admin" ? "danger" : "info"}>
-                {user.role === "admin" ? "Quản trị viên" : "Khách hàng"}
+                {user.role === "admin" ? t("roleAdmin") : t("roleCustomer")}
               </CBadge>
             </CTableDataCell>
             <CTableDataCell className="text-center">
               <CBadge color={user.isActive ? "success" : "danger"}>
-                {user.isActive ? "Hoạt động" : "Đình chỉ"}
+                {user.isActive ? t("statusActive") : t("statusSuspended")}
               </CBadge>
             </CTableDataCell>
             <CTableDataCell className="text-center">
-              {timeAgo(user.createdAt!)}
+              <div title={new Date(user.createdAt!).toLocaleString(locale)}>
+                <RelativeTime date={user.createdAt!} />
+              </div>
             </CTableDataCell>
             <CTableDataCell className="text-center">
               <div className="d-flex justify-content-center gap-2">
-                <CTooltip content="Xem chi tiết và chỉnh sửa">
+                <CTooltip content={t("tooltipEdit")}>
                   <Link href={`/admin/users/${user._id}?${queryString}`}>
                     <CButton
                       color="info"
@@ -115,7 +132,7 @@ const UserTable: React.FC<UserTableProps> = ({
                 </CTooltip>
                 <CTooltip
                   content={
-                    user.isActive ? "Đình chỉ người dùng" : "Kích hoạt lại"
+                    user.isActive ? t("tooltipSuspend") : t("tooltipReactivate")
                   }
                 >
                   <CButton

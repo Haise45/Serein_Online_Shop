@@ -1,0 +1,2135 @@
+{
+  "Metadata": {
+    "root": {
+      "title": "Trang chủ chính thức | Serein Shop",
+      "description": "Mua sắm quần áo thời trang nam nữ chất lượng."
+    },
+    "forgotPassword": {
+      "title": "Quên Mật Khẩu | Serein Shop",
+      "description": "Yêu cầu đặt lại mật khẩu cho tài khoản Serein Shop của bạn."
+    },
+    "login": {
+      "title": "Đăng Nhập | Serein Shop",
+      "description": "Đăng nhập vào tài khoản Serein Shop của bạn để tiếp tục mua sắm và quản lý đơn hàng."
+    },
+    "register": {
+      "title": "Đăng Ký Tài Khoản | Serein Shop",
+      "description": "Tạo tài khoản mới tại Serein Shop để nhận nhiều ưu đãi hấp dẫn."
+    },
+    "resetPassword": {
+      "title": "Đặt Lại Mật Khẩu | Serein Shop",
+      "description": "Tạo mật khẩu mới cho tài khoản Serein Shop của bạn."
+    },
+    "verifyEmail": {
+      "title": "Xác Thực Email | Serein Shop",
+      "description": "Hoàn tất việc xác thực địa chỉ email của bạn."
+    },
+    "wishlist": {
+      "title": "Danh Sách Yêu Thích | Serein Shop",
+      "description": "Xem và quản lý các sản phẩm bạn đã yêu thích tại Serein Shop."
+    },
+    "cart": {
+      "title": "Giỏ Hàng Của Bạn | Serein Shop",
+      "description": "Xem lại sản phẩm trong giỏ hàng và tiến hành thanh toán tại Serein Shop."
+    },
+    "checkout": {
+      "title": "Thanh Toán | Serein Shop",
+      "description": "Hoàn tất thông tin đặt hàng của bạn tại Serein Shop."
+    },
+    "products": {
+      "title": "Tất Cả Sản Phẩm | Serein Shop",
+      "description": "Khám phá bộ sưu tập sản phẩm đa dạng tại Serein Shop."
+    },
+    "productNotFound": {
+      "title": "Không tìm thấy sản phẩm | Serein Shop"
+    },
+    "product": {
+      "title": "{name} | Serein Shop",
+      "description": "Mua {name} tại Serein Shop."
+    },
+    "profile": {
+      "title": "Thông Tin Tài Khoản | Serein Shop",
+      "description": "Quản lý thông tin cá nhân và cài đặt mật khẩu của bạn."
+    },
+    "addresses": {
+      "title": "Sổ Địa Chỉ | Serein Shop",
+      "description": "Quản lý các địa chỉ giao hàng của bạn."
+    },
+    "orders": {
+      "title": "Lịch Sử Đơn Hàng | Serein Shop",
+      "description": "Xem lại các đơn hàng bạn đã đặt tại Serein Shop."
+    },
+    "orderDetails": {
+      "title": "Chi tiết Đơn hàng #{id} | Serein Shop",
+      "description": "Xem chi tiết đơn hàng #{id} của bạn tại Serein Shop."
+    },
+    "vouchers": {
+      "title": "Ví Voucher | Serein Shop",
+      "description": "Xem và quản lý các mã giảm giá và voucher của bạn."
+    }
+  },
+
+  "NavbarClient": {
+    "searchPlaceholder": "Bạn muốn tìm gì hôm nay?",
+    "wishlist": "Danh sách yêu thích",
+    "cart": "Giỏ hàng",
+    "search": "Tìm kiếm",
+    "setting": "Cài đặt"
+  },
+
+  "NotFoundPage": {
+    "meta": {
+      "title": "Không tìm thấy trang | Serein Shop"
+    },
+    "imageAlt": "Hình minh họa trang bị lạc",
+    "title": "Ôi! Không tìm thấy trang",
+    "subtitle": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không có sẵn.",
+    "backToHome": "Về trang chủ",
+    "contactSupport": "Liên hệ hỗ trợ"
+  },
+
+  "SettingDropdown": {
+    "language": "Ngôn ngữ",
+    "currency": "Tiền tệ",
+    "vi": "Tiếng Việt",
+    "en": "Tiếng Anh"
+  },
+
+  "UserMenu": {
+    "greeting": "Chào, {name}!",
+    "dashboard": "Trang quản trị",
+    "profile": "Thông tin cá nhân",
+    "my_orders": "Đơn hàng của tôi",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập",
+    "register": "Đăng ký"
+  },
+
+  "FeatureBar": {
+    "title": "Tại Sao Chọn {shopName}?",
+    "subtitle": "Chúng tôi cam kết mang đến trải nghiệm mua sắm tốt nhất cho bạn.",
+    "features": {
+      "delivery": {
+        "title": "Giao Hàng Toàn Quốc",
+        "subtitle": "Miễn phí vận chuyển cho đơn từ 500K"
+      },
+      "returns": {
+        "title": "Đổi Trả Linh Hoạt",
+        "subtitle": "Trong vòng 7 ngày, thủ tục đơn giản"
+      },
+      "genuine": {
+        "title": "Hàng Chính Hãng 100%",
+        "subtitle": "Cam kết chất lượng và nguồn gốc"
+      },
+      "support": {
+        "title": "Hỗ Trợ Khách Hàng",
+        "subtitle": "Hotline 24/7: 1900.1234"
+      }
+    }
+  },
+
+  "AppLoadingManager": {
+    "loadingMessage": "Xin đợi một chút..."
+  },
+
+  "GuestGuard": {
+    "redirectingTitle": "Bạn đã đăng nhập",
+    "redirectingSubtitle": "Đang chuyển hướng..."
+  },
+
+  "HomePage": {
+    "newestProductsTitle": "#SảnPhẩmMớiNhất",
+    "popularProductsTitle": "#SảnPhẩmBánChạy",
+    "viewAllButton": "Xem Tất Cả Sản Phẩm",
+    "errorNewToast": "Lỗi tải sản phẩm mới.",
+    "errorPopularToast": "Lỗi tải sản phẩm phổ biến."
+  },
+
+  "Breadcrumbs": {
+    "home": "Trang chủ",
+    "login": "Đăng Nhập",
+    "register": "Đăng Ký",
+    "forgotPassword": "Quên Mật Khẩu",
+    "resetPassword": "Đặt Lại Mật Khẩu",
+    "verifyEmail": "Xác Thức Email",
+    "cart": "Giỏ Hàng",
+    "checkout": "Thanh Toán",
+    "wishlist": "Danh Sách Yêu Thích",
+    "products": "Sản Phẩm",
+    "productDetails": "Chi Tiết Sản Phẩm",
+    "profile": "Thông Tin Tài Khoản"
+  },
+
+  "ProfileBreadcrumbs": {
+    "home": "Trang chủ",
+    "account": "Tài khoản",
+    "myOrders": "Đơn hàng của tôi",
+    "orderDetails": "Chi tiết đơn #{orderId}",
+    "addressBook": "Sổ địa chỉ",
+    "voucherWallet": "Ví Voucher"
+  },
+
+  "SideDrawer": {
+    "closeMenu": "Đóng menu",
+    "discoverAll": "KHÁM PHÁ TẤT CẢ {categoryName}",
+    "noSubcategories": "Không có danh mục con.",
+    "noCategories": "Không có danh mục nào để hiển thị."
+  },
+
+  "Footer": {
+    "customerSupportTitle": "Hỗ Trợ Khách Hàng",
+    "policiesTitle": "Chính Sách",
+    "aboutUsTitle": "Về {shopName}",
+    "newsletterTitle": "Đăng Ký Nhận Tin",
+    "newsletterSubtitle": "Nhận thông tin sản phẩm mới và khuyến mãi đặc biệt.",
+    "emailLabel": "Địa chỉ email",
+    "emailPlaceholder": "Email của bạn",
+    "submitButton": "Gửi",
+    "submitButtonLoading": "Đang gửi...",
+    "newsletterSuccess": "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi thông tin đến {email}.",
+    "copyright": "© {year} {shopName}. Mọi quyền được bảo lưu.",
+    "links": {
+      "helpCenter": "Trung Tâm Trợ Giúp",
+      "howToBuy": "Hướng Dẫn Mua Hàng",
+      "paymentMethods": "Phương Thức Thanh Toán",
+      "shippingPolicy": "Chính Sách Vận Chuyển",
+      "faqs": "Câu Hỏi Thường Gặp",
+      "returnPolicy": "Chính Sách Đổi Trả",
+      "warrantyPolicy": "Chính Sách Bảo Hành",
+      "privacyPolicy": "Chính Sách Bảo Mật",
+      "termsOfService": "Điều Khoản Dịch Vụ",
+      "aboutUs": "Giới Thiệu",
+      "careers": "Tuyển Dụng",
+      "storeLocations": "Hệ Thống Cửa Hàng",
+      "contactUs": "Liên Hệ"
+    },
+    "socials": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "x": "X (Twitter)"
+    }
+  },
+
+  "SearchSuggestion": {
+    "loading": "Đang tìm...",
+    "noResults": "Không tìm thấy sản phẩm nào khớp với \"{searchTerm}\".",
+    "viewAll": "Xem tất cả kết quả cho \"{searchTerm}\""
+  },
+
+  "CategoryMenu": {
+    "all": "Tất cả {categoryName}",
+    "newProducts": "Sản phẩm mới",
+    "bestSellers": "Bán chạy nhất",
+    "noSubcategories": "Không có danh mục con."
+  },
+
+  "ForgotPasswordPage": {
+    "title": "Quên Mật Khẩu",
+    "instructions": "Nhập địa chỉ email đã đăng ký của bạn. Chúng tôi sẽ gửi cho bạn một liên kết (hoặc mã OTP) để đặt lại mật khẩu.",
+    "emailLabel": "Địa chỉ Email",
+    "emailPlaceholder": "Nhập email của bạn",
+    "submitButton": "Gửi Yêu Cầu Đặt Lại",
+    "submitButtonLoading": "Đang gửi...",
+    "successMessage": "Yêu cầu đã được gửi. Vui lòng kiểm tra email của bạn.",
+    "failureMessage": "Gửi yêu cầu thất bại. Vui lòng thử lại.",
+    "backToLoginLink": "Quay lại Đăng nhập"
+  },
+
+  "LoginPage": {
+    "title": "Đăng Nhập",
+    "subtitle": "Chào mừng trở lại!",
+    "emailLabel": "Email của bạn",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Mật khẩu",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Ghi nhớ tôi",
+    "forgotPasswordLink": "Quên mật khẩu?",
+    "submitButton": "Đăng Nhập",
+    "submitButtonLoading": "Đang xử lý...",
+    "registerPrompt": "Chưa có tài khoản?",
+    "registerLink": "Đăng ký ngay",
+    "invalidEmailToast": "Địa chỉ email không hợp lệ.",
+    "loginSuccessToast": "Đăng nhập thành công!",
+    "loginFailureToast": "Đăng nhập thất bại. Vui lòng kiểm tra lại."
+  },
+
+  "RegisterPage": {
+    "title": "Đăng Ký Tài Khoản",
+    "fullNameLabel": "Họ và Tên *",
+    "fullNamePlaceholder": "Họ và tên của bạn",
+    "emailLabel": "Email *",
+    "emailPlaceholder": "Email của bạn",
+    "phoneLabel": "Số Điện Thoại *",
+    "phonePlaceholder": "Số điện thoại của bạn",
+    "passwordLabel": "Mật khẩu *",
+    "passwordPlaceholder": "••••••••",
+    "confirmPasswordLabel": "Xác Nhận Mật khẩu *",
+    "confirmPasswordPlaceholder": "••••••••",
+    "passwordHint": {
+      "length": "Ít nhất 6 ký tự",
+      "uppercase": "Chứa ít nhất 1 chữ hoa (A-Z)",
+      "lowercase": "Chứa ít nhất 1 chữ thường (a-z)",
+      "number": "Chứa ít nhất 1 số (0-9)",
+      "special": "Chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)"
+    },
+    "submitButton": "Đăng Ký",
+    "submitButtonLoading": "Đang xử lý...",
+    "loginPrompt": "Đã có tài khoản?",
+    "loginLink": "Đăng nhập",
+    "validation": {
+      "required": "Vui lòng nhập {field}.",
+      "invalidEmail": "Email không hợp lệ.",
+      "invalidPhone": "Số điện thoại không hợp lệ.",
+      "passwordMismatch": "Mật khẩu và xác nhận mật khẩu không khớp.",
+      "passwordComplexity": "Mật khẩu phải có ít nhất 6 ký tự, chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt (!@#$%^&*)."
+    },
+    "registerSuccessMessage": "Đăng ký thành công. Vui lòng kiểm tra email để xác thực."
+  },
+
+  "ResetPasswordPage": {
+    "title": "Đặt Lại Mật Khẩu",
+    "newPasswordLabel": "Mật khẩu mới *",
+    "newPasswordPlaceholder": "Nhập mật khẩu mới",
+    "confirmPasswordLabel": "Xác nhận mật khẩu mới *",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+    "submitButton": "Đặt Lại Mật Khẩu",
+    "submitButtonLoading": "Đang xử lý...",
+    "successMessage": "Mật khẩu của bạn đã được đặt lại thành công!",
+    "goToLoginButton": "Đi đến Đăng nhập",
+    "passwordMismatch": "Mật khẩu không khớp.",
+    "passwordLengthError": "Mật khẩu phải có ít nhất 6 ký tự.",
+    "invalidTokenError": "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.",
+    "tokenErrorTitle": "Lỗi Token",
+    "requestNewLinkButton": "Yêu cầu liên kết mới"
+  },
+
+  "VerifyEmailPage": {
+    "title": "Xác Thực Email",
+    "initialMessage": "Một mã OTP gồm 6 chữ số đã được gửi đến <strong>{email}</strong>. Vui lòng nhập mã vào bên dưới.",
+    "defaultEmail": "email của bạn",
+    "otpInputLabel": "Ký tự OTP thứ {index}",
+    "submitButton": "Xác Thực Mã OTP",
+    "submitButtonLoading": "Đang xác thực...",
+    "resendButton": "Chưa nhận được mã? Gửi lại OTP",
+    "resendButtonLoading": "Đang gửi lại...",
+    "resendButtonCooldown": "Gửi lại sau ({seconds}s)",
+    "backToLoginLink": "Quay lại Đăng nhập",
+    "successMessage": "Xác thực email thành công! Đang chuyển hướng...",
+    "failureMessage": "Xác thực OTP thất bại.",
+    "resendSuccessMessage": "Mã OTP mới đã được gửi. Vui lòng kiểm tra email.",
+    "resendFailureMessage": "Gửi lại OTP thất bại.",
+    "missingEmailError": "Không tìm thấy thông tin email để xác thực.",
+    "invalidOtpError": "Vui lòng nhập đủ 6 số OTP."
+  },
+
+  "WishlistPage": {
+    "loading": "Đang tải danh sách yêu thích...",
+    "errorTitle": "Lỗi tải danh sách yêu thích",
+    "errorMessage": "Đã có lỗi không mong muốn xảy ra.",
+    "retryButton": "Thử lại",
+    "emptyTitle": "Danh sách yêu thích của bạn trống",
+    "emptySubtitle": "Có vẻ như bạn chưa thêm sản phẩm nào vào đây. Hãy bắt đầu khám phá và lưu lại những món đồ bạn yêu thích nhé!",
+    "exploreButton": "Khám phá sản phẩm",
+    "pageTitle": "Danh Sách Yêu Thích",
+    "itemCount": "{count} sản phẩm"
+  },
+
+  "WishlistItemCard": {
+    "outOfStock": "Hết hàng",
+    "saleBadge": "-{percentage}%",
+    "removeFromWishlist": "Xóa khỏi yêu thích",
+    "attributeLabel": "{label}: {value}",
+    "defaultAttribute": "Thuộc tính",
+    "outOfStockToast": "Sản phẩm này hiện đã hết hàng.",
+    "addToCartSuccess": "Đã thêm \"{name}\" vào giỏ hàng!",
+    "addToCartButton": "Thêm vào giỏ",
+    "outOfStockButton": "Đã hết hàng"
+  },
+
+  "CartPage": {
+    "loadingErrorTitle": "Lỗi tải giỏ hàng",
+    "retryButton": "Thử lại",
+    "emptyCartTitle": "Giỏ hàng của bạn đang trống",
+    "emptyCartSubtitle": "Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ.",
+    "startShoppingButton": "Bắt đầu mua sắm",
+    "pageTitle": "Giỏ hàng",
+    "selectAllLabel": "Chọn tất cả",
+    "srOnlyTitle": "Sản phẩm trong giỏ hàng của bạn",
+    "clearCartButton": "Xóa giỏ hàng",
+    "clearCartConfirmTitle": "Bạn có chắc muốn xóa toàn bộ giỏ hàng không?",
+    "clearCartConfirmButton": "Vâng, Xóa",
+    "cancelButton": "Hủy"
+  },
+
+  "AddedToCartPopup": {
+    "closeButtonLabel": "Đóng",
+    "successTitle": "Thêm vào giỏ hàng thành công!",
+    "quantityLabel": "Số lượng: {quantity}",
+    "viewCartButton": "Xem Giỏ Hàng",
+    "continueShoppingButton": "Tiếp tục mua sắm"
+  },
+
+  "CartItemRow": {
+    "stockErrorToast": "Chỉ còn {stock} sản phẩm tồn kho.",
+    "variantUnavailableToast": "Phiên bản này không có sẵn hoặc đã hết hàng.",
+    "loadingErrorTitle": "Lỗi tải thông tin cho sản phẩm \"{name}\"",
+    "loadingErrorSubtitle": "Sản phẩm có thể đã bị xóa hoặc ẩn.",
+    "retryButton": "Thử lại",
+    "selectItemLabel": "Chọn sản phẩm {name}",
+    "unitPriceLabel": "Đơn giá:",
+    "outOfStock": "Đã hết hàng",
+    "insufficientStock": "Sản phẩm không đủ",
+    "stockWarningMessage": "Bạn đang chọn {quantity} sản phẩm, nhưng hiện chỉ còn {availableStock} sản phẩm. Vui lòng cập nhật số lượng hoặc chọn sản phẩm khác. Xin cảm ơn.",
+    "selectAttributePlaceholder": "Chọn {label}",
+    "decreaseQuantityLabel": "Giảm số lượng",
+    "quantityAriaLabel": "Số lượng của {name}",
+    "increaseQuantityLabel": "Tăng số lượng",
+    "removeButton": "Xóa"
+  },
+
+  "CartPreviewModal": {
+    "loading": "Đang tải...",
+    "loadingErrorTitle": "Lỗi tải giỏ hàng",
+    "loadingErrorSubtitle": "Đã có lỗi xảy ra khi tải thông tin giỏ hàng của bạn.",
+    "errorDetails": "Chi tiết: {message}",
+    "retryButton": "Thử lại",
+    "emptyCartTitle": "Giỏ hàng của bạn trống",
+    "emptyCartSubtitle": "Thêm sản phẩm vào giỏ để mua sắm nhé!",
+    "continueShoppingButton": "Tiếp tục mua sắm",
+    "decreaseQuantityLabel": "Giảm số lượng sản phẩm {name}",
+    "currentQuantityLabel": "Số lượng hiện tại của {name}",
+    "increaseQuantityLabel": "Tăng số lượng sản phẩm {name}",
+    "removeItemTitle": "Xóa {name} khỏi giỏ hàng",
+    "stockRemaining": "Tồn kho chỉ còn: {stock}",
+    "lineTotalLabel": "Tổng:",
+    "subtotalLabel": "Tạm tính ({count} sản phẩm)",
+    "discountLabel": "Giảm giá ({code})",
+    "totalLabel": "Tổng cộng",
+    "shippingFeeNotice": "Phí vận chuyển sẽ được tính ở bước thanh toán.",
+    "viewCartDetailsButton": "Xem chi tiết giỏ hàng",
+    "proceedToCheckoutButton": "Tiến hành thanh toán",
+    "modalTitle": "Giỏ hàng của bạn",
+    "closeModalLabel": "Đóng giỏ hàng",
+    "itemCountMessage": "Hiện có {count} sản phẩm.",
+    "emptyCartToast": "Giỏ hàng của bạn đang trống."
+  },
+
+  "CartSummary": {
+    "title": "Tóm tắt đơn hàng",
+    "subtotalLabel": "Tạm tính ({lineCount} loại, {quantityCount} sản phẩm)",
+    "discountLabel": "Giảm giá ({code})",
+    "totalLabel": "Tổng cộng",
+    "stockErrorNotice": "Sản phẩm bạn chọn có số lượng không hợp lệ. Vui lòng kiểm tra lại các sản phẩm được tô đỏ trong giỏ hàng.",
+    "proceedToCheckoutButton": "Tiến hành đặt hàng ({count})",
+    "continueShoppingLink": "Hoặc tiếp tục mua sắm",
+    "stockErrorToast": "Một số sản phẩm bạn chọn có số lượng vượt quá tồn kho. Vui lòng kiểm tra lại.",
+    "noItemsSelectedToast": "Vui lòng chọn ít nhất một sản phẩm để tiếp tục."
+  },
+
+  "CouponSection": {
+    "title": "Mã giảm giá",
+    "inputPlaceholder": "Nhập mã giảm giá",
+    "applyButton": "Áp dụng",
+    "loadingCoupons": "Đang tải mã giảm giá...",
+    "viewAvailableCoupons": "Xem mã giảm giá khả dụng ({count})",
+    "discountPercentage": "Giảm {value}%",
+    "discountFixed": "Giảm {value}",
+    "forOrdersFrom": ", cho đơn từ {value}",
+    "expiryDate": "HSD: {date}",
+    "usesLeft": "(Còn {count} lượt)"
+  },
+
+  "CheckoutPage": {
+    "loading": "Đang tải...",
+    "processingOrder": "Đang hoàn tất đơn hàng...",
+    "checkingCart": "Đang kiểm tra giỏ hàng...",
+    "pageTitle": "Thông tin thanh toán",
+    "loadingErrorTitle": "Lỗi tải giỏ hàng",
+    "loadingErrorMessage": "Không thể lấy thông tin giỏ hàng để thanh toán.",
+    "noItemsToCheckoutToast": "Vui lòng chọn sản phẩm từ giỏ hàng để thanh toán.",
+    "staleDataToast": "Một số sản phẩm đã thay đổi. Vui lòng kiểm tra lại giỏ hàng.",
+    "stockErrorToast": "Sản phẩm \"{name}\" không đủ tồn kho (còn {stock})."
+  },
+
+  "AddressFormModal": {
+    "editTitle": "Chỉnh sửa địa chỉ",
+    "addTitle": "Thêm địa chỉ mới",
+    "editDescription": "Cập nhật thông tin địa chỉ giao hàng của bạn.",
+    "addDescription": "Thêm địa chỉ giao hàng mới vào danh sách của bạn.",
+    "closeButton": "Đóng",
+    "receiverInfoTitle": "Thông tin người nhận",
+    "fullNameLabel": "Họ và tên người nhận *",
+    "fullNamePlaceholder": "Nhập họ và tên",
+    "phoneLabel": "Số điện thoại *",
+    "phonePlaceholder": "Nhập số điện thoại",
+    "shippingAddressTitle": "Địa chỉ giao hàng",
+    "provinceLabel": "Tỉnh/Thành phố *",
+    "provincePlaceholder": "Chọn Tỉnh/Thành",
+    "districtLabel": "Quận/Huyện *",
+    "districtPlaceholder": "Chọn Quận/Huyện",
+    "communeLabel": "Phường/Xã *",
+    "communePlaceholder": "Chọn Phường/Xã",
+    "streetLabel": "Địa chỉ cụ thể *",
+    "streetPlaceholder": "Số nhà, tên đường, khu vực...",
+    "isDefaultLabel": "Đặt làm địa chỉ mặc định",
+    "isDefaultHint": "(Địa chỉ này sẽ được chọn mặc định khi đặt hàng)",
+    "cancelButton": "Hủy bỏ",
+    "saveChangesButton": "Lưu thay đổi",
+    "addAddressButton": "Thêm địa chỉ",
+    "loadingProvinces": "Đang tải tỉnh/thành...",
+    "loadingDistricts": "Đang tải quận/huyện...",
+    "loadingCommunes": "Đang tải phường/xã...",
+    "validationErrorToast": "Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã."
+  },
+
+  "CheckoutForm": {
+    "contactInfoTitle": "Thông tin liên hệ",
+    "emailLabel": "Địa chỉ Email *",
+    "emailPlaceholder": "you@example.com",
+    "shippingAddressTitle": "Địa chỉ giao hàng",
+    "defaultLabel": "(Mặc định)",
+    "editAddressLabel": "Sửa địa chỉ của {name}",
+    "useNewAddressButton": "Nhập địa chỉ mới",
+    "orEnterNewAddress": "Hoặc nhập địa chỉ mới dưới đây:",
+    "paymentMethodTitle": "Phương thức thanh toán",
+    "notesTitle": "Ghi chú đơn hàng",
+    "notesPlaceholder": "Thêm ghi chú cho đơn hàng của bạn (tùy chọn)...",
+    "submitButton": "Hoàn tất đặt hàng",
+    "processingButton": "Đang xử lý...",
+    "addressValidationError": "Vui lòng điền đầy đủ thông tin địa chỉ giao hàng.",
+    "emailValidationError": "Địa chỉ email không hợp lệ.",
+    "paymentMethods": {
+      "COD": {
+        "name": "Thanh toán khi nhận hàng (COD)",
+        "description": "Trả tiền mặt khi shipper giao hàng."
+      },
+      "BANK_TRANSFER": {
+        "name": "Chuyển khoản ngân hàng",
+        "description": "Thông tin chuyển khoản sẽ được cung cấp sau khi đặt hàng."
+      },
+      "PAYPAL": {
+        "name": "PayPal",
+        "description": "Thanh toán nhanh chóng và bảo mật qua PayPal."
+      }
+    }
+  },
+
+  "CheckoutOrderSummary": {
+    "title": "Tóm tắt đơn hàng",
+    "noItemSelected": "Không có sản phẩm nào được chọn để thanh toán.",
+    "backToCartLink": "Quay lại giỏ hàng",
+    "productQuantity": "SL: {quantity} x {price}",
+    "subtotalLabel": "Tạm tính ({count} sản phẩm)",
+    "discountLabel": "Giảm giá ({code})",
+    "shippingFeeLabel": "Phí vận chuyển",
+    "shippingFeeFree": "Miễn phí",
+    "totalLabel": "Tổng cộng",
+    "couponNotApplicable": "Mã \"{code}\" không đủ điều kiện áp dụng cho các sản phẩm đã chọn.",
+    "stockError": "Vui lòng quay lại giỏ hàng để điều chỉnh.",
+    "placeOrderButton": "Đặt Hàng ({count})",
+    "processingButton": "Đang xử lý...",
+    "continueShoppingLink": "Quay lại giỏ hàng",
+    "continueShoppingArrow": "→"
+  },
+
+  "PayPal": {
+    "configError": "Lỗi cấu hình: Không thể tải phương thức thanh toán PayPal. Vui lòng thử lại sau.",
+    "genericError": "Đã xảy ra lỗi trong quá trình thanh toán PayPal.",
+    "createOrderError": "Không thể tạo đơn hàng PayPal. Vui lòng thử lại.",
+    "captureError": "Đã xảy ra lỗi khi xác nhận thanh toán. Vui lòng liên hệ hỗ trợ.",
+    "invalidFormError": "Vui lòng điền đầy đủ thông tin giao hàng trước."
+  },
+
+  "ProductPage": {
+    "allProductsTitle": "Tất Cả Sản Phẩm",
+    "productsTitle": "Sản Phẩm",
+    "filterButton": "Bộ lọc",
+    "activeFiltersLabel": "Đang lọc theo:",
+    "clearAllButton": "Xóa tất cả",
+    "removeFilterAriaLabel": "Xóa bộ lọc {keyDisplay}: {valueDisplay}",
+    "loadingProducts": "Đang tải sản phẩm...",
+    "errorLoadingProducts": "Lỗi tải sản phẩm",
+    "noProductsFound": "Không tìm thấy sản phẩm nào",
+    "noProductsFoundSubtitle": "Vui lòng thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác.",
+    "showingResults": "Hiển thị <bold>{from}</bold>-<bold>{to}</bold> trên <bold>{total}</bold> sản phẩm",
+    "closeFilters": "Đóng bộ lọc",
+    "viewResults": "Xem kết quả"
+  },
+
+  "ProductFilters": {
+    "searchLabel": "Tìm kiếm sản phẩm",
+    "searchPlaceholder": "Tìm theo tên, SKU...",
+    "searchButtonLabel": "Tìm kiếm",
+    "categoryTitle": "Danh mục",
+    "allCategories": "Tất cả danh mục",
+    "priceTitle": "Giá",
+    "onSale": "Đang giảm giá",
+    "applyButton": "Áp dụng",
+    "fromPlaceholder": "Từ",
+    "toPlaceholder": "Đến",
+    "attributeTitle": "Màu sắc",
+    "sizeTitle": "Kích cỡ",
+    "ratingTitle": "Đánh giá",
+    "fromXStars": "Từ {count} sao trở lên",
+    "clearRatingFilter": "Xóa bộ lọc đánh giá"
+  },
+
+  "PriceRanges": {
+    "all": "Tất cả giá",
+    "under100k": "Dưới {value}",
+    "100kTo300k": "{min} - {max}",
+    "300kTo500k": "{min} - {max}",
+    "500kTo1m": "{min} - {max}",
+    "over1m": "Trên {value}"
+  },
+
+  "SortDropdown": {
+    "options": {
+      "createdAt-desc": "Mới nhất",
+      "totalSold-desc": "Bán chạy nhất",
+      "price-asc": "Giá: Thấp đến Cao",
+      "price-desc": "Giá: Cao đến Thấp",
+      "averageRating-desc": "Đánh giá cao nhất",
+      "name-asc": "Tên: A-Z",
+      "name-desc": "Tên: Z-A"
+    }
+  },
+
+  "ProductCard": {
+    "comingSoon": "Sắp ra mắt",
+    "outOfStock": "Hết hàng",
+    "new": "Mới",
+    "bestSeller": "Bán Chạy",
+    "sale": "-{percentage}%",
+    "manageWishlist": "Quản lý Yêu thích",
+    "addToWishlist": "Thêm vào Yêu thích",
+    "selectVariantForWishlist": "Chọn phiên bản để yêu thích",
+    "versionInWishlist": "Một phiên bản được yêu thích",
+    "removeFromWishlist": "Xóa khỏi Yêu thích",
+    "addToCart": "Thêm vào giỏ hàng",
+    "errorSelectVariant": "Vui lòng chọn một phiên bản sản phẩm (ví dụ: màu sắc, size).",
+    "errorGeneric": "Không xác định được sản phẩm.",
+    "errorOutOfStock": "Sản phẩm này hiện không có sẵn để mua."
+  },
+
+  "ReviewFilters": {
+    "filterReviews": "Lọc đánh giá:",
+    "ratingLabel": "Sao:",
+    "allRatings": "Tất cả",
+    "star": "{count} sao",
+    "hasImagesLabel": "Có hình ảnh"
+  },
+
+  "Pagination": {
+    "page": "Trang <bold>{currentPage}</bold> / <bold>{totalPages}</bold>",
+    "previous": "Trước",
+    "next": "Sau"
+  },
+
+  "ProductDetailsPage": {
+    "productNotFound": "Không tìm thấy sản phẩm",
+    "buyProduct": "Mua {name} tại Serein Shop.",
+    "productDetails": "Chi tiết sản phẩm",
+    "loadingProduct": "Đang tải sản phẩm...",
+    "errorLoadingProduct": "Lỗi không tải được sản phẩm",
+    "errorProductNotFound": "Sản phẩm bạn tìm kiếm có thể không tồn tại hoặc đã bị ẩn. Vui lòng thử lại sau.",
+    "backToProductsButton": "Quay lại trang sản phẩm",
+    "priceSaleBadge": "(-{percentage}%)",
+    "reviewsLink": "{count} đánh giá",
+    "noReviews": "Chưa có đánh giá",
+    "skuLabel": "SKU:",
+    "soldLabel": "Đã bán:",
+    "categoryLabel": "Danh mục:",
+    "selectVariantError": "Vui lòng chọn đầy đủ các phiên bản (màu sắc, kích thước...).",
+    "outOfStockError": "Sản phẩm này đã hết hàng.",
+    "quantityLabel": "Số lượng",
+    "stockRemaining": "Còn lại: {count}",
+    "outOfStock": "Hết hàng",
+    "addToCartButton": {
+      "default": "Thêm vào giỏ",
+      "adding": "Đang thêm...",
+      "selectOptions": "Vui lòng chọn đầy đủ thông tin",
+      "variantUnavailable": "Phiên bản không tồn tại",
+      "outOfStock": "Hết hàng"
+    },
+    "wishlistButton": {
+      "add": "Thêm vào yêu thích",
+      "remove": "Xóa khỏi yêu thích",
+      "selectVariant": "Vui lòng chọn phiên bản để thêm vào yêu thích."
+    },
+    "description": {
+      "title": "Mô tả sản phẩm",
+      "noDescription": "Chưa có thông tin mô tả cho sản phẩm này.",
+      "readMore": "Xem thêm",
+      "collapse": "Thu gọn"
+    },
+    "reviews": {
+      "title": "Đánh giá ({count})",
+      "basedOn": "Dựa trên {count} đánh giá",
+      "loading": "Đang tải đánh giá...",
+      "loadingError": "Lỗi khi tải đánh giá. Vui lòng thử lại.",
+      "noReviews": "Chưa có đánh giá nào cho sản phẩm này",
+      "noReviewsWithFilter": "với bộ lọc hiện tại",
+      "loadMore": "Xem thêm đánh giá"
+    }
+  },
+
+  "ImageGallery": {
+    "noImages": "Không có ảnh",
+    "prevImage": "Ảnh trước",
+    "nextImage": "Ảnh tiếp theo",
+    "fullscreen": "Xem toàn màn hình",
+    "imageCounter": "{current} / {total}",
+    "mainImageAlt": "{name} - Ảnh chính",
+    "fullscreenImageAlt": "{name} - Ảnh {index}",
+    "thumbnailAlt": "{name} - Thumbnail {index}",
+    "viewThumbnail": "Xem ảnh {index}",
+    "close": "Đóng"
+  },
+
+  "ReviewItem": {
+    "anonymousUser": "Người dùng ẩn danh",
+    "adminUser": "Quản trị viên",
+    "viewImageFullscreen": "Xem ảnh {index} của {user} ở chế độ toàn màn hình",
+    "adminReplyFrom": "Phản hồi từ {name}"
+  },
+
+  "ReviewLightbox": {
+    "close": "Đóng",
+    "prevImage": "Ảnh trước",
+    "nextImage": "Ảnh tiếp theo",
+    "mainImageAlt": "{user} - Ảnh đánh giá {index}",
+    "imageCounter": "{current} / {total}",
+    "thumbnailAlt": "Thumbnail {index}",
+    "viewThumbnail": "Xem ảnh thumbnail {index}",
+    "title": "Xem ảnh chi tiết"
+  },
+
+  "ProfileLayout": {
+    "loading": "Đang tải...",
+    "accountMenu": "Menu Tài Khoản",
+    "closeMenu": "Đóng menu",
+    "myAccount": "Tài khoản của tôi",
+    "manageAccount": "Quản lý tài khoản",
+    "logoutSuccess": "Đăng xuất thành công!",
+    "logoutError": "Đăng xuất thất bại: {error}",
+    "navigation": {
+      "profile": {
+        "name": "Thông tin tài khoản",
+        "description": "Quản lý thông tin cá nhân"
+      },
+      "addresses": {
+        "name": "Sổ địa chỉ",
+        "description": "Quản lý địa chỉ giao hàng"
+      },
+      "orders": {
+        "name": "Lịch sử đơn hàng",
+        "description": "Theo dõi đơn hàng của bạn"
+      },
+      "vouchers": {
+        "name": "Ví Voucher",
+        "description": "Nhận các voucher mới nhất"
+      },
+      "logout": "Đăng xuất"
+    }
+  },
+
+  "ProfileSettingsPage": {
+    "title": "Thông tin tài khoản",
+    "description": "Quản lý thông tin cá nhân và bảo mật tài khoản của bạn.",
+    "personalInfoSectionTitle": "Thông tin cá nhân",
+    "changePasswordSectionTitle": "Đổi mật khẩu",
+    "loadingError": "Lỗi tải thông tin: {error}",
+    "loadingProfileError": "Không thể tải thông tin tài khoản. Vui lòng thử lại.",
+    "loginPrompt": "Vui lòng đăng nhập để xem thông tin tài khoản.",
+    "tokenError": "Không tìm thấy Access Token để cập nhật trạng thái đăng nhập."
+  },
+
+  "UpdateInfoForm": {
+    "nameLabel": "Họ và tên",
+    "emailLabel": "Email",
+    "phoneLabel": "Số điện thoại",
+    "unupdated": "Chưa cập nhật",
+    "editInfoButton": "Chỉnh sửa thông tin",
+    "saveChangesButton": "Lưu thay đổi",
+    "cancelButton": "Hủy",
+    "nameRequiredError": "Vui lòng nhập họ và tên.",
+    "invalidPhoneError": "Số điện thoại không hợp lệ.",
+    "invalidEmailError": "Địa chỉ email mới không hợp lệ.",
+    "noChangesToast": "Không có thông tin nào thay đổi.",
+    "updateSuccessToast": "Thông tin cá nhân đã được cập nhật!",
+    "emailChangeNotice": "Thay đổi email sẽ yêu cầu bạn xác thực lại địa chỉ email mới.",
+    "emailVerificationNotice": "Thông tin đã cập nhật. Email của bạn đã thay đổi, vui lòng xác thực email mới."
+  },
+
+  "ChangePasswordForm": {
+    "currentPasswordLabel": "Mật khẩu hiện tại",
+    "newPasswordLabel": "Mật khẩu mới",
+    "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+    "changePasswordButton": "Đổi mật khẩu",
+    "currentPasswordRequired": "Vui lòng nhập mật khẩu hiện tại.",
+    "newPasswordMinLength": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+    "passwordMismatch": "Mật khẩu mới và xác nhận mật khẩu không khớp.",
+    "newPasswordSameAsOld": "Mật khẩu mới không được trùng với mật khẩu hiện tại.",
+    "successToast": "Đổi mật khẩu thành công!"
+  },
+
+  "PasswordInput": {
+    "hidePassword": "Ẩn mật khẩu",
+    "showPassword": "Hiện mật khẩu"
+  },
+
+  "AddressPage": {
+    "title": "Sổ địa chỉ",
+    "description": "Quản lý các địa chỉ nhận hàng của bạn để đặt hàng nhanh chóng hơn.",
+    "addAddressButton": "Thêm địa chỉ mới",
+    "loadingError": "Lỗi tải danh sách địa chỉ: {error}",
+    "noAddressesTitle": "Chưa có địa chỉ nào",
+    "noAddressesSubtitle": "Hãy thêm địa chỉ mới để giao hàng thuận tiện hơn.",
+    "deleteConfirmTitle": "Bạn có chắc chắn muốn xóa địa chỉ này?",
+    "deleteConfirmButton": "Xác nhận Xóa",
+    "cancelButton": "Hủy"
+  },
+
+  "AddressCard": {
+    "defaultLabel": "Mặc định",
+    "editButtonTitle": "Sửa địa chỉ",
+    "deleteButtonTitle": "Xóa địa chỉ",
+    "setAsDefaultButton": "Đặt làm mặc định"
+  },
+
+  "OrderListPage": {
+    "title": "Lịch sử đơn hàng",
+    "description": "Theo dõi và quản lý tất cả các đơn hàng bạn đã đặt.",
+    "loadingError": "Lỗi tải lịch sử đơn hàng: {error}",
+    "retryButton": "Thử lại",
+    "allStatuses": "Tất cả trạng thái"
+  },
+
+  "OrderEmptyState": {
+    "noOrdersWithStatus": "Không có đơn hàng nào với trạng thái \"{status}\"",
+    "noOrdersYet": "Bạn chưa có đơn hàng nào",
+    "tryAnotherStatus": "Hãy thử chọn trạng thái khác hoặc xem tất cả đơn hàng.",
+    "startShoppingPrompt": "Hãy bắt đầu mua sắm để xem lịch sử đơn hàng của bạn tại đây.",
+    "startShoppingButton": "Bắt đầu mua sắm"
+  },
+
+  "OrderFilters": {
+    "filterByStatus": "Lọc theo trạng thái"
+  },
+
+  "OrderActionModal": {
+    "cancelTitle": "Yêu cầu hủy đơn hàng",
+    "refundTitle": "Yêu cầu trả hàng/hoàn tiền",
+    "cancelReasonLabel": "Lý do hủy đơn",
+    "refundReasonLabel": "Lý do trả hàng/hoàn tiền",
+    "reasonPlaceholder": "Mô tả chi tiết lý do của bạn...",
+    "imagesLabel": "Hình ảnh thực tế (Tối đa {count} ảnh)",
+    "uploadButton": "Tải ảnh lên",
+    "orDragAndDrop": "hoặc kéo thả",
+    "fileTypes": "PNG, JPG, GIF, WEBP (Tối đa {size}MB/ảnh)",
+    "removeImage": "Xóa ảnh",
+    "addImage": "Thêm ảnh",
+    "cancelFormButton": "Hủy",
+    "submitCancelButton": "Gửi yêu cầu hủy",
+    "submitRefundButton": "Gửi yêu cầu trả hàng",
+    "processing": "Đang xử lý",
+    "closeButtonTitle": "Đóng cửa sổ",
+    "reasonRequiredError": "Vui lòng nhập lý do.",
+    "maxImagesError": "Bạn chỉ có thể tải lên tối đa {count} hình ảnh.",
+    "fileTooLargeError": "Kích thước ảnh \"{name}\" quá lớn (Tối đa {size}MB).",
+    "notAnImageError": "Tệp \"{name}\" không phải là hình ảnh."
+  },
+
+  "OrderStatus": {
+    "Pending": "Chờ xác nhận",
+    "Processing": "Đang xử lý",
+    "Shipped": "Đang vận chuyển",
+    "Delivered": "Đã giao",
+    "Cancelled": "Đã hủy",
+    "Refunded": "Đã hoàn tiền",
+    "CancellationRequested": "Yêu cầu hủy",
+    "RefundRequested": "Yêu cầu hoàn tiền",
+    "DeliveredSuccessfully": "Đã giao thành công",
+    "CancellationPending": "Yêu cầu hủy đang chờ",
+    "RefundPending": "Yêu cầu hoàn tiền đang chờ"
+  },
+
+  "OrderRow": {
+    "orderCode": "Mã đơn hàng: #{code}",
+    "orderDate": "Ngày đặt: {date}",
+    "andXMoreProducts": "và {count} sản phẩm khác",
+    "totalAmount": "Tổng tiền:",
+    "viewDetails": "Xem chi tiết",
+    "markAsReceived": "Đã nhận hàng",
+    "requestCancellation": "Yêu cầu hủy",
+    "requestRefund": "Yêu cầu trả hàng"
+  },
+
+  "OrderStatusStepper": {
+    "trackOrder": "Theo dõi đơn hàng",
+    "currentStatus": "Trạng thái hiện tại: <bold>{status}</bold>",
+    "cancelledMessage": "Đơn hàng Đã Hủy",
+    "refundedMessage": "Đơn hàng Đã Hoàn Tiền",
+    "cancellationPendingMessage": "Đang Yêu Cầu Hủy Đơn",
+    "refundPendingMessage": "Đang Yêu Cầu Hoàn Tiền",
+    "pendingMessage": "Yêu cầu của bạn đang được xử lý."
+  },
+
+  "OrderDetailPage": {
+    "loading": "Đang tải chi tiết đơn hàng...",
+    "loadingError": "Lỗi tải chi tiết đơn hàng.",
+    "notFound": "Không tìm thấy đơn hàng",
+    "notFoundMessage": "Đơn hàng bạn đang tìm kiếm không tồn tại hoặc bạn không có quyền truy cập.",
+    "backToList": "Quay lại danh sách đơn hàng",
+    "staleDataWarning": "Đã có lỗi khi cập nhật thông tin đơn hàng mới nhất. Dữ liệu hiển thị có thể là bản cũ.",
+    "title": "Chi tiết đơn hàng"
+  },
+
+  "OrderSuccessPage": {
+    "title": "Đặt hàng thành công!",
+    "orderCode": "Mã đơn hàng của bạn là: <bold>#{code}</bold>",
+    "thankYou": "Cảm ơn bạn đã mua sắm tại Serein Shop. Chúng tôi sẽ xử lý đơn hàng của bạn sớm nhất có thể.",
+    "emailConfirmation": "Một email xác nhận với chi tiết đơn hàng đã được gửi đến địa chỉ email của bạn."
+  },
+
+  "GuestTrackOrderPage": {
+    "loading": "Đang tải...",
+    "title": "Theo dõi đơn hàng",
+    "errorTitle": "Theo dõi đơn hàng thất bại",
+    "errorMessage": "Link theo dõi không hợp lệ, đã hết hạn hoặc đơn hàng không tồn tại.",
+    "backToHome": "Về trang chủ"
+  },
+
+  "OrderDetailsDisplay": {
+    "title": "Chi tiết đơn hàng",
+    "orderCodeMessage": "Mã đơn hàng của bạn: <bold>#{code}</bold>",
+    "shippingAddressTitle": "Địa chỉ giao hàng",
+    "paymentTitle": "Thanh toán",
+    "paymentMethod": "Phương thức: <bold>{method}</bold>",
+    "paymentStatus": "Trạng thái: ",
+    "paidStatus": "Đã thanh toán ({date})",
+    "unpaidStatus": "Chưa thanh toán",
+    "orderInfoTitle": "Thông tin đơn hàng",
+    "orderCodeLabel": "Mã ĐH:",
+    "orderDateLabel": "Ngày đặt:",
+    "customerLabel": "Người đặt:",
+    "phoneLabel": "SĐT:",
+    "guestEmailLabel": "Email khách:",
+    "unupdated": "Chưa cập nhật",
+    "notesLabel": "Ghi chú: {notes}",
+    "orderedProductsTitle": "Sản phẩm đã đặt",
+    "costSummaryTitle": "Tóm tắt chi phí",
+    "subtotal": "Tạm tính",
+    "discount": "Giảm giá ({code})",
+    "shippingFee": "Phí vận chuyển",
+    "shippingFeeFree": "Miễn phí",
+    "total": "Tổng cộng",
+    "continueShopping": "Tiếp tục mua sắm",
+    "viewMyOrders": "Xem đơn hàng của tôi"
+  },
+
+  "OrderItemRow": {
+    "quantity": "SL: {count}",
+    "unitPrice": "Đơn giá: {price}",
+    "checkingReview": "Đang kiểm tra đánh giá...",
+    "alreadyReviewed": "Đã đánh giá ({rating} sao)",
+    "pendingApproval": "(Chờ duyệt)",
+    "editReview": "Sửa",
+    "deleteReview": "Xóa",
+    "writeReview": "Viết đánh giá",
+    "deleteConfirmTitle": "Bạn có chắc chắn muốn xóa đánh giá này?",
+    "deleteConfirmButton": "Xác nhận Xóa",
+    "cancelButton": "Hủy",
+    "editReviewAriaLabel": "Sửa đánh giá cho {name}",
+    "deleteReviewAriaLabel": "Xóa đánh giá cho {name}",
+    "writeReviewAriaLabel": "Viết đánh giá cho {name}"
+  },
+
+  "ReviewModal": {
+    "editTitle": "Chỉnh sửa đánh giá cho {name}",
+    "createTitle": "Đánh giá sản phẩm: {name}",
+    "submitEditButton": "Lưu thay đổi",
+    "submitCreateButton": "Gửi đánh giá",
+    "closeButton": "Đóng",
+    "yourRatingLabel": "Đánh giá của bạn ",
+    "ratingLabel": "{count}/5 sao",
+    "commentLabel": "Nội dung đánh giá",
+    "commentOptional": "(Tùy chọn)",
+    "commentPlaceholder": "Chia sẻ cảm nhận chi tiết của bạn về sản phẩm này...",
+    "imagesLabel": "Hình ảnh thực tế (Tối đa {count} ảnh)",
+    "uploadButton": "Tải ảnh lên",
+    "orDragAndDrop": "hoặc kéo thả",
+    "supportedFiles": "Hỗ trợ: PNG, JPG, GIF, WEBP",
+    "selectedImages": "Ảnh đã chọn ({count}/{max}):",
+    "existingImageAlt": "Ảnh đánh giá đã tải lên",
+    "newImagePreviewAlt": "Xem trước ảnh mới {index}",
+    "removeExistingImage": "Xóa ảnh hiện tại",
+    "removeNewImage": "Xóa ảnh mới chọn",
+    "addImage": "Thêm ảnh",
+    "cancelButton": "Hủy",
+    "processing": "Đang xử lý...",
+    "validation": {
+      "ratingRequired": "Vui lòng chọn số sao đánh giá.",
+      "maxImages": "Bạn chỉ có thể tải lên tối đa {count} hình ảnh.",
+      "fileTooLarge": "Kích thước ảnh \"{name}\" quá lớn (Tối đa {size}MB).",
+      "notAnImage": "Tệp \"{name}\" không phải là hình ảnh."
+    },
+    "noChangesToast": "Không có thay đổi nào để lưu."
+  },
+
+  "VoucherPage": {
+    "title": "Ví Voucher của bạn",
+    "description": "Khám phá các ưu đãi và mã giảm giá đang chờ bạn sử dụng.",
+    "availableCount": "Bạn có <bold>{count}</bold> mã giảm giá khả dụng.",
+    "loadingError": "Lỗi tải danh sách voucher",
+    "retryButton": "Thử lại",
+    "noVouchersTitle": "Bạn chưa có voucher nào",
+    "noVouchersSubtitle": "Hãy theo dõi Serein Shop để nhận các ưu đãi hấp dẫn nhé!",
+    "exploreButton": "Khám phá sản phẩm",
+    "loadingVouchers": "Đang tải voucher..."
+  },
+
+  "VoucherCard": {
+    "expired": "Hết hạn",
+    "inactive": "Vô hiệu",
+    "available": "Khả dụng",
+    "discountPercentage": "Giảm {value}%",
+    "discountFixed": "Giảm {value}",
+    "minOrder": "Đơn tối thiểu: <bold>{value}</bold>",
+    "expiryDate": "Hạn sử dụng: <bold>{date}</bold>",
+    "usesLeft": "Lượt sử dụng còn lại: <bold>{count}</bold>",
+    "applicable": {
+      "all": "Áp dụng cho tất cả sản phẩm.",
+      "products": "Áp dụng cho sản phẩm nhất định.",
+      "categories": "Áp dụng cho danh mục nhất định."
+    },
+    "useNow": "Sử dụng ngay",
+    "copyCodeTitle": "Sao chép mã",
+    "copied": "Đã chép",
+    "copy": "Sao chép",
+    "copySuccess": "Đã sao chép mã: {code}",
+    "copyError": "Không thể sao chép mã. Lỗi: {error}"
+  },
+
+  "reactQuery": {
+    "attribute": {
+      "createSuccess": "Đã tạo thuộc tính '{label}'!",
+      "createError": "Lỗi khi tạo thuộc tính.",
+      "addValueSuccess": "Đã thêm giá trị mới!",
+      "addValueError": "Lỗi khi thêm giá trị.",
+      "updateValueSuccess": "Đã cập nhật giá trị!",
+      "updateValueError": "Lỗi khi cập nhật giá trị.",
+      "deleteValueError": "Lỗi khi xóa giá trị."
+    },
+    "cart": {
+      "addError": "Thêm vào giỏ hàng thất bại.",
+      "updateSuccess": "Đã cập nhật giỏ hàng.",
+      "updateError": "Cập nhật giỏ hàng thất bại.",
+      "removeSuccess": "Đã xóa sản phẩm khỏi giỏ hàng.",
+      "removeError": "Xóa sản phẩm thất bại.",
+      "clearSuccess": "Đã xóa toàn bộ giỏ hàng.",
+      "clearError": "Xóa giỏ hàng thất bại.",
+      "applyCouponSuccess": "Áp dụng mã giảm giá thành công!",
+      "applyCouponError": "Áp dụng mã giảm giá thất bại.",
+      "removeCouponSuccess": "Đã xóa mã giảm giá.",
+      "removeCouponError": "Xóa mã giảm giá thất bại."
+    },
+    "category": {
+      "createSuccess": "Đã tạo thành công danh mục '{name}'!",
+      "createError": "Tạo danh mục thất bại.",
+      "updateSuccess": "Đã cập nhật danh mục '{name}'!",
+      "updateError": "Cập nhật danh mục thất bại.",
+      "deleteSuccess": "Đã xóa danh mục thành công.",
+      "deleteError": "Xóa danh mục thất bại."
+    },
+    "coupon": {
+      "createSuccess": "Đã tạo mã giảm giá '{code}' thành công!",
+      "createError": "Tạo mã giảm giá thất bại.",
+      "updateSuccess": "Đã cập nhật mã giảm giá '{code}'!",
+      "updateError": "Cập nhật thất bại.",
+      "deleteError": "Vô hiệu hóa thất bại."
+    },
+    "order": {
+      "createSuccess": "Đặt hàng thành công! Mã đơn hàng: #{id}",
+      "createError": "Đặt hàng thất bại.",
+      "requestCancelError": "Gửi yêu cầu hủy thất bại.",
+      "requestRefundError": "Gửi yêu cầu hoàn tiền thất bại.",
+      "markAsDeliveredSuccess": "Đã xác nhận nhận hàng!",
+      "markAsDeliveredError": "Xác nhận nhận hàng thất bại.",
+      "updateStatusSuccess": "Cập nhật trạng thái đơn hàng #{id} thành công.",
+      "updateStatusError": "Cập nhật trạng thái thất bại.",
+      "restockError": "Khôi phục tồn kho thất bại.",
+      "capturePayPalError": "Xác nhận thanh toán thất bại.",
+      "capturePayPalSuccess": "Xác nhận thanh toán PayPal thành công!"
+    },
+    "product": {
+      "createSuccess": "Sản phẩm '{name}' đã được tạo thành công!",
+      "createError": "Tạo sản phẩm thất bại.",
+      "updateSuccess": "Sản phẩm '{name}' đã được cập nhật!",
+      "updateError": "Cập nhật sản phẩm thất bại.",
+      "deleteSuccess": "Sản phẩm đã được xóa (ẩn).",
+      "deleteError": "Xóa sản phẩm thất bại.",
+      "updateStockSuccess": "Đã cập nhật tồn kho!",
+      "updateStockError": "Lỗi cập nhật tồn kho.",
+      "updateVariantStockSuccess": "Đã cập nhật tồn kho biến thể!"
+    },
+    "review": {
+      "createSuccess": "Đánh giá của bạn đã được gửi!",
+      "createError": "Gửi đánh giá thất bại.",
+      "updateSuccess": "Đánh giá đã được cập nhật.",
+      "updateError": "Cập nhật đánh giá thất bại.",
+      "deleteSuccess": "Đánh giá đã được xóa.",
+      "deleteError": "Xóa đánh giá thất bại.",
+      "approveSuccess": "Đã duyệt đánh giá.",
+      "approveError": "Duyệt đánh giá thất bại.",
+      "rejectSuccess": "Đã ẩn đánh giá.",
+      "rejectError": "Ẩn đánh giá thất bại.",
+      "deleteAdminError": "Xóa đánh giá thất bại.",
+      "replySuccess": "Đã gửi phản hồi.",
+      "replyError": "Gửi phản hồi thất bại."
+    },
+    "setting": {
+      "saveSuccess": "Cài đặt đã được lưu thành công!",
+      "saveError": "Lưu cài đặt thất bại."
+    },
+    "user": {
+      "updateProfileSuccess": "Cập nhật thông tin thành công!",
+      "updateProfileError": "Cập nhật thất bại.",
+      "addAddressSuccess": "Thêm địa chỉ mới thành công!",
+      "addAddressError": "Thêm địa chỉ thất bại.",
+      "updateAddressSuccess": "Cập nhật địa chỉ thành công!",
+      "updateAddressError": "Cập nhật địa chỉ thất bại.",
+      "deleteAddressSuccess": "Xóa địa chỉ thành công!",
+      "deleteAddressError": "Xóa địa chỉ thất bại.",
+      "setDefaultAddressSuccess": "Đặt địa chỉ mặc định thành công!",
+      "setDefaultAddressError": "Đặt địa chỉ mặc định thất bại.",
+      "updateStatusError": "Cập nhật trạng thái thất bại."
+    },
+    "wishlist": {
+      "addSuccess": "Đã thêm vào danh sách yêu thích!",
+      "addError": "Thêm vào yêu thích thất bại.",
+      "removeSuccess": "Đã xóa khỏi danh sách yêu thích.",
+      "removeError": "Xóa khỏi yêu thích thất bại."
+    }
+  },
+
+  "Admin": {
+    "meta": {
+      "title": "Trang Quản Trị | Serein Shop"
+    },
+    "auth": {
+      "loginRequired": "Yêu cầu đăng nhập để truy cập trang quản trị.",
+      "noPermission": "Bạn không có quyền truy cập trang quản trị.",
+      "sessionExpired": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      "verifyingAuth": "Đang tải và xác thực..."
+    },
+
+    "breadcrumbs": {
+      "dashboard": "Bảng điều khiển",
+      "products": "Sản phẩm",
+      "categories": "Danh mục",
+      "orders": "Đơn hàng",
+      "attributes": "Thuộc tính",
+      "users": "Người dùng",
+      "coupons": "Mã giảm giá",
+      "reviews": "Đánh giá",
+      "settings": "Cài đặt",
+      "create": "Thêm mới",
+      "edit": "Chỉnh sửa",
+      "notifications": "Thông báo",
+      "reports": "Thống kê",
+      "print": "In đơn hàng",
+      "productWithId": "Sản phẩm #{id}",
+      "orderWithId": "Đơn hàng #{id}",
+      "userWithId": "Người dùng #{id}",
+      "editObject": "Chỉnh sửa: {objectLabel}",
+      "createObject": "Thêm mới {objectTypeLabel}"
+    },
+    "languageSwitcher": {
+      "vietnamese": "Tiếng Việt",
+      "english": "Tiếng Anh"
+    },
+    "header": {
+      "logoutSuccess": "Đăng xuất thành công!",
+      "logoutTitle": "Đăng xuất"
+    },
+    "sidebar": {
+      "manageShop": "Quản lý Shop",
+      "dashboard": "Bảng điều khiển",
+      "productsGroup": "Sản phẩm",
+      "allProducts": "Tất cả sản phẩm",
+      "addNewProduct": "Thêm sản phẩm mới",
+      "categories": "Danh mục",
+      "attributes": "Thuộc tính",
+      "orders": "Đơn hàng",
+      "users": "Người dùng",
+      "coupons": "Mã giảm giá",
+      "reviews": "Đánh giá",
+      "reports": "Thống kê",
+      "system": "Hệ thống",
+      "shopSettings": "Cài đặt Shop"
+    },
+    "pagination": {
+      "showing": "Hiển thị <bold>{from}</bold>-<bold>{to}</bold> trên tổng số <bold>{total}</bold> {itemType}",
+      "show": "Hiển thị",
+      "itemsPerPage": "mục/trang",
+      "prev": "Trước",
+      "next": "Sau"
+    },
+    "notifications": {
+      "title": "Thông báo",
+      "noNew": "Hiện chưa có thông báo nào",
+      "unreadCount": "{count} thông báo chưa đọc",
+      "markAllAsRead": "Đã đọc tất cả",
+      "markAllAsReadTitle": "Đánh dấu tất cả đã đọc",
+      "markAllAsReadSuccess": "Đã đánh dấu tất cả thông báo là đã đọc.",
+      "loading": "Đang tải...",
+      "emptyState": "Không có thông báo mới",
+      "emptyStateSubtitle": "Khi có thông báo mới, chúng sẽ xuất hiện ở đây.",
+      "viewAll": "Xem tất cả thông báo",
+      "viewAllTitle": "Xem tất cả thông báo",
+      "toastJustNow": "vừa xong",
+      "toastSuccessTitle": "Thành công",
+      "labels": {
+        "NEW_USER_REGISTERED": "Người dùng mới",
+        "NEW_ORDER_PLACED": "Đơn hàng mới",
+        "ORDER_STATUS_SHIPPED": "Vận chuyển",
+        "ORDER_STATUS_DELIVERED": "Đã giao hàng",
+        "ORDER_CANCELLATION_REQUESTED": "Yêu cầu hủy đơn",
+        "ORDER_REFUND_REQUESTED": "Yêu cầu hoàn tiền",
+        "ORDER_CANCELLATION_APPROVED": "Hủy đơn được duyệt",
+        "ORDER_CANCELLATION_REJECTED": "Hủy đơn bị từ chối",
+        "ORDER_REFUND_APPROVED": "Hoàn tiền được duyệt",
+        "ORDER_REFUND_REJECTED": "Hoàn tiền bị từ chối",
+        "PRODUCT_LOW_STOCK": "Sắp hết hàng",
+        "PRODUCT_OUT_OF_STOCK": "Hết hàng",
+        "NEW_REVIEW_SUBMITTED": "Đánh giá mới",
+        "REVIEW_APPROVED": "Đánh giá được duyệt",
+        "UNKNOWN": "Thông báo"
+      }
+    }
+  },
+
+  "AdminDashboard": {
+    "meta": {
+      "title": "Thống kê số liệu | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Thống kê số liệu",
+      "description": "Tổng quan về hoạt động kinh doanh của cửa hàng."
+    },
+    "dateRange": {
+      "from": "Từ ngày",
+      "to": "Đến ngày",
+      "quickSelect": "Chọn nhanh",
+      "quickSelectAriaLabel": "Chọn nhanh khoảng thời gian",
+      "presets": {
+        "last7days": "7 ngày qua",
+        "last30days": "30 ngày qua",
+        "thisMonth": "Tháng này",
+        "thisQuarter": "Quý này",
+        "lastQuarter": "Quý trước",
+        "thisYear": "Năm này"
+      }
+    },
+    "stats": {
+      "revenue": "Doanh thu",
+      "newOrders": "Đơn hàng mới",
+      "newCustomers": "Khách hàng mới",
+      "totalProducts": "Tổng sản phẩm"
+    },
+    "quantityChart": {
+      "title": "Thống kê Số lượng",
+      "byOrders": "Theo Đơn hàng",
+      "byProducts": "Theo Sản phẩm",
+      "ordersLabel": "Số đơn hàng",
+      "productsLabel": "Số sản phẩm đã bán",
+      "revenueLabel": "Doanh thu"
+    },
+    "orderStatusChart": {
+      "title": "Phân phối Trạng thái Đơn hàng",
+      "noData": "Không có dữ liệu đơn hàng.",
+      "tooltipLabel": "{label}: {value} đơn"
+    },
+    "revenueChart": {
+      "title": "Biểu đồ doanh thu ({currency})",
+      "revenueLabel": "Doanh thu"
+    },
+    "topProductsTable": {
+      "title": "Top 10 sản phẩm bán chạy",
+      "colProduct": "Sản phẩm",
+      "colSold": "Đã bán",
+      "colRating": "Đánh giá"
+    }
+  },
+
+  "AdminProducts": {
+    "meta": {
+      "title": "Quản lý Sản phẩm | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Danh sách Sản phẩm",
+      "description": "Quản lý tất cả sản phẩm trong cửa hàng."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo tên, SKU...",
+      "allCategories": "Tất cả danh mục",
+      "loading": "Đang tải...",
+      "onSale": "Đang giảm giá",
+      "priceFrom": "Giá từ",
+      "priceTo": "Giá đến",
+      "addProduct": "Thêm sản phẩm",
+      "publishedStatus": "Công khai (Tất cả)",
+      "published": "Đã công khai",
+      "unpublished": "Chưa công khai",
+      "activeStatus": "Kích hoạt (Tất cả)",
+      "active": "Đang kích hoạt",
+      "inactive": "Ngừng kích hoạt",
+      "allAttributes": "Tất cả {label}",
+      "clearFilters": "Xóa lọc",
+      "clearFiltersTitle": "Xóa bộ lọc",
+      "filterByAttributeAriaLabel": "Lọc theo {label}"
+    },
+    "list": {
+      "title": "Quản lý sản phẩm",
+      "results": "{count} kết quả",
+      "loading": "Đang tải...",
+      "noResultsWithFilter": "Không tìm thấy sản phẩm nào phù hợp với bộ lọc.",
+      "noProductsYet": "Chưa có sản phẩm nào.",
+      "errorTitle": "Lỗi",
+      "errorMessage": "Không thể tải danh sách sản phẩm.",
+      "retryButton": "Thử lại"
+    },
+    "table": {
+      "colProductId": "Mã SP",
+      "colImage": "Ảnh",
+      "colName": "Tên sản phẩm",
+      "colSku": "SKU",
+      "colPrice": "Giá",
+      "colStock": "Tồn kho",
+      "colAttributes": "Thuộc tính",
+      "colCategory": "Danh mục",
+      "colPublished": "Công khai",
+      "colActive": "Kích hoạt",
+      "colActions": "Hành động",
+      "stockStatus": {
+        "outOfStock": "Hết hàng",
+        "lowStock": "Sắp hết hàng",
+        "inStock": "Còn hàng"
+      },
+      "noSku": "Không có SKU",
+      "viewOnShop": "Xem trên shop",
+      "originalPrice": "Giá gốc: {price}",
+      "variantTooltip": "{name} | Kho: {stock} | SKU: {sku}",
+      "moreVariants": "+{count} biến thể khác...",
+      "noVariants": "Không có",
+      "noCategory": "N/A",
+      "tooltipPublished": "Đã công khai",
+      "tooltipUnpublished": "Chưa công khai",
+      "tooltipActive": "Đang kích hoạt",
+      "tooltipInactive": "Ngừng kích hoạt",
+      "tooltipEdit": "Xem chi tiết và chỉnh sửa thông tin",
+      "tooltipDelete": "Ẩn sản phẩm",
+      "variantsModalTitle": "Tất cả biến thể: {name}",
+      "variantsColVersion": "Phiên bản",
+      "variantsColSku": "SKU",
+      "variantsColPrice": "Giá",
+      "variantsColStock": "Tồn kho",
+      "variantsColActions": "Hành động",
+      "variantsUpdateStock": "Cập nhật tồn kho cho {name}",
+      "variantsUpdateStockTitle": "Cập nhật tồn kho"
+    },
+    "deleteModal": {
+      "title": "Xác nhận ẩn sản phẩm",
+      "body": "Bạn có chắc chắn muốn ẩn sản phẩm \"<strong>{name}</strong>\"?",
+      "note": "Hành động này sẽ đặt sản phẩm về trạng thái không hoạt động và không công khai.",
+      "confirmButton": "Đồng ý ẩn"
+    },
+    "stockModal": {
+      "title": "Cập nhật tồn kho cho: {name}",
+      "currentStock": "Tồn kho hiện tại: <bold>{stock}</bold>",
+      "setNewLabel": "Đặt số lượng mới",
+      "setNewPlaceholder": "Ví dụ: 100",
+      "or": "HOẶC",
+      "changeLabel": "Thay đổi một lượng (+/-)",
+      "changePlaceholder": "Ví dụ: 5 (thêm 5) hoặc -10 (bớt 10)",
+      "cancelButton": "Hủy",
+      "saveButton": "Lưu thay đổi"
+    }
+  },
+
+  "AdminProductForm": {
+    "meta": {
+      "createTitle": "Thêm sản phẩm mới | Admin Serein Shop",
+      "editTitle": "Chỉnh sửa Sản phẩm | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "createTitle": "Thêm sản phẩm mới",
+      "createDescription": "Điền thông tin chi tiết để tạo một sản phẩm mới trong cửa hàng.",
+      "editTitle": "Chỉnh sửa Sản phẩm",
+      "editDescription": "Cập nhật thông tin chi tiết, biến thể và hình ảnh của sản phẩm."
+    },
+    "backToList": "← Quay lại danh sách",
+    "saveProduct": "Lưu sản phẩm",
+    "updateProduct": "Cập nhật sản phẩm",
+    "processing": "Đang xử lý...",
+    "productInfo": {
+      "title": "Thông tin sản phẩm",
+      "subtitle": "Nhập thông tin cho các phiên bản ngôn ngữ khác nhau.",
+      "nameLabel": "Tên sản phẩm ({locale})*",
+      "namePlaceholder": "Ví dụ: {placeholder}",
+      "descriptionLabel": "Mô tả chi tiết ({locale})",
+      "descriptionHelpText": "Mô tả chi tiết giúp khách hàng hiểu rõ hơn về sản phẩm.",
+      "editorLoading": "Đang tải trình soạn thảo..."
+    },
+    "productImages": {
+      "title": "Hình ảnh sản phẩm*",
+      "uploading": "Đang tải lên...",
+      "deleteImage": "Xóa ảnh",
+      "coverImage": "Ảnh bìa"
+    },
+    "attributes": {
+      "title": "Thuộc tính & Biến thể",
+      "selectAttributes": "Chọn thuộc tính cho sản phẩm",
+      "imagesByColor": "Ảnh theo màu sắc",
+      "imagesForColor": "Ảnh cho màu: {color}",
+      "variantList": "Danh sách biến thể ({count})",
+      "generateSku": "Tạo SKU hàng loạt",
+      "version": "Phiên bản: {name}",
+      "deleteVariant": "Xóa biến thể",
+      "skuLabel": "SKU*",
+      "priceLabel": "Giá*",
+      "salePriceLabel": "Giá Sale",
+      "stockLabel": "Tồn kho*"
+    },
+    "pricing": {
+      "title": "Giá & Kho hàng",
+      "selectCurrency": "Chọn tiền tệ nhập giá",
+      "enterPriceVND": "Nhập giá (VND)",
+      "enterPriceUSD": "Nhập giá (USD)",
+      "retailPriceLabel": "Giá bán lẻ*",
+      "salePriceLabel": "Giá khuyến mãi",
+      "enteringVND": "← Đang nhập VND",
+      "enteringUSD": "← Đang nhập USD",
+      "saleStartDate": "Ngày bắt đầu Sale",
+      "saleEndDate": "Ngày kết thúc Sale",
+      "skuLabel": "SKU (Mã SP chính)",
+      "skuPlaceholder": "Để trống nếu chỉ bán theo biến thể",
+      "skuHelpText": "Mã định danh sản phẩm duy nhất trong kho.",
+      "generateSku": "Tạo"
+    },
+    "organization": {
+      "title": "Tổ chức sản phẩm",
+      "categoryLabel": "Danh mục*",
+      "selectCategory": "Chọn danh mục",
+      "loadingCategories": "Đang tải danh mục...",
+      "statusLabel": "Trạng thái",
+      "publishLabel": "Công khai sản phẩm",
+      "publishHelpText": "Khi bật, sản phẩm sẽ hiển thị cho khách hàng.",
+      "activateLabel": "Kích hoạt kinh doanh",
+      "activateHelpText": "Khi tắt, sản phẩm sẽ bị ẩn và không thể mua."
+    },
+    "toasts": {
+      "baseSkuRequired": "Vui lòng nhập Tên sản phẩm (Tiếng Việt) hoặc SKU chính để tạo SKU hàng loạt.",
+      "attributesNotReady": "Dữ liệu thuộc tính chưa sẵn sàng, vui lòng thử lại.",
+      "bulkSkuSuccess": "Đã tạo SKU hàng loạt cho các biến thể!",
+      "uploading": "Đang tải ảnh lên...",
+      "uploadSuccess": "Tải ảnh lên thành công!",
+      "uploadError": "Tải ảnh thất bại.",
+      "validationError": "Vui lòng kiểm tra lại các trường thông tin bắt buộc."
+    },
+    "validation": {
+      "nameRequired": "Tên sản phẩm ({locale}) là bắt buộc.",
+      "categoryRequired": "Vui lòng chọn danh mục.",
+      "priceInvalid": "Giá sản phẩm không hợp lệ.",
+      "imagesRequired": "Cần ít nhất một ảnh chính cho sản phẩm.",
+      "variantSkuRequired": "SKU của biến thể là bắt buộc."
+    }
+  },
+
+  "AdminCategories": {
+    "meta": {
+      "title": "Quản lý Danh mục | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Danh sách Danh mục",
+      "description": "Quản lý và tổ chức các danh mục sản phẩm trong cửa hàng."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo tên hoặc slug...",
+      "searchAriaLabel": "Tìm kiếm danh mục",
+      "allParentCategories": "Tất cả danh mục cha",
+      "onlyTopLevel": "- Chỉ danh mục cấp cao nhất -",
+      "loading": "Đang tải...",
+      "allStatuses": "Tất cả trạng thái",
+      "active": "Hoạt động",
+      "hidden": "Đã ẩn",
+      "addNew": "Thêm danh mục"
+    },
+    "list": {
+      "loading": "Đang tải danh sách danh mục...",
+      "loadingErrorTitle": "Lỗi không thể tải danh mục",
+      "loadingErrorSubtitle": "Đã có lỗi xảy ra.",
+      "retryButton": "Thử lại",
+      "noResults": "Không tìm thấy danh mục nào.",
+      "colCategoryName": "Tên Danh mục",
+      "colParentCategory": "Danh mục cha",
+      "colProducts": "Sản phẩm",
+      "colStatus": "Trạng thái",
+      "colActions": "Hành động",
+      "statusActive": "Hoạt động",
+      "statusHidden": "Đã ẩn",
+      "noParent": "—",
+      "editTitle": "Sửa",
+      "deleteTitle": "Xóa"
+    },
+    "formModal": {
+      "editTitle": "Chỉnh sửa Danh mục",
+      "createTitle": "Tạo Danh mục mới",
+      "categoryNameLabel": "Tên danh mục ({locale})*",
+      "descriptionLabel": "Mô tả ({locale})",
+      "parentCategoryLabel": "Danh mục cha",
+      "noParentOption": "-- Không có --",
+      "imageLabel": "Ảnh đại diện",
+      "isActiveLabel": "Kích hoạt danh mục",
+      "cancelButton": "Hủy",
+      "saveButton": "Lưu",
+      "nameRequiredError": "Tên {locale} là bắt buộc."
+    },
+    "deleteModal": {
+      "title": "Xác nhận xóa",
+      "confirmMessage": "Bạn có chắc chắn muốn xóa (ẩn) danh mục <strong>{name}</strong>?",
+      "warningMessage": "Hành động này chỉ thực hiện được khi danh mục không chứa sản phẩm hoặc danh mục con nào đang hoạt động.",
+      "cancelButton": "Hủy",
+      "confirmButton": "Đồng ý xóa"
+    },
+    "toasts": {
+      "uploadError": "Upload ảnh thất bại!"
+    }
+  },
+
+  "AdminAttributes": {
+    "meta": {
+      "title": "Quản lý Thuộc tính | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Quản lý Thuộc tính",
+      "description": "Thêm, sửa, xóa các thuộc tính sản phẩm và giá trị của chúng (Màu sắc, Size...)."
+    },
+    "loading": "Đang tải...",
+    "loadingError": "Lỗi: {error}",
+    "selectAttributePrompt": "Chọn một thuộc tính để xem chi tiết",
+    "attributeList": {
+      "title": "Thuộc tính",
+      "add": "Thêm"
+    },
+    "valueTable": {
+      "title": "Giá trị cho: <bold>{label}</bold>",
+      "add": "Thêm giá trị",
+      "noValues": "Chưa có giá trị nào. Nhấn <strong>Thêm giá trị</strong> để bắt đầu.",
+      "colValue": "Giá trị",
+      "colHex": "Mã màu",
+      "colActions": "Hành động",
+      "editTitle": "Sửa",
+      "deleteTitle": "Xóa",
+      "noHex": "Không có"
+    },
+    "attributeForm": {
+      "title": "Tạo thuộc tính mới",
+      "nameLabel": "Tên thuộc tính (key, không dấu)*",
+      "namePlaceholder": "Ví dụ: color, size",
+      "displayLabel": "Nhãn hiển thị ({locale})*",
+      "displayPlaceholder": "Ví dụ: Màu sắc",
+      "displayPlaceholder_en": "Example: Color",
+      "cancel": "Hủy",
+      "create": "Tạo"
+    },
+    "valueForm": {
+      "editTitle": "Chỉnh sửa giá trị",
+      "addTitle": "Thêm giá trị mới",
+      "nameLabel": "Tên giá trị ({locale})*",
+      "namePlaceholder": "Ví dụ: Đỏ tươi",
+      "hexLabel": "Mã màu Hex (tùy chọn, nếu là màu sắc)",
+      "hexPlaceholder": "#FF0000",
+      "cancel": "Hủy",
+      "save": "Lưu"
+    }
+  },
+
+  "AdminOrders": {
+    "meta": {
+      "title": "Quản lý Đơn hàng | Admin Serein Shop",
+      "description": "Xem và quản lý tất cả các đơn hàng của cửa hàng."
+    },
+    "pageHeader": {
+      "title": "Danh sách Đơn hàng",
+      "description": "Quản lý và theo dõi tất cả đơn hàng trong hệ thống."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo Mã đơn, Tên, Email...",
+      "filterByStatus": "Lọc theo trạng thái",
+      "allStatuses": "Tất cả trạng thái",
+      "startDateAria": "Ngày bắt đầu",
+      "endDateAria": "Ngày kết thúc",
+      "clearFiltersTitle": "Xóa bộ lọc",
+      "clearFilters": "Xóa lọc"
+    },
+    "list": {
+      "title": "Quản lý Đơn hàng",
+      "results": "{count} kết quả",
+      "loading": "Đang tải...",
+      "noResultsWithFilter": "Không tìm thấy đơn hàng nào phù hợp.",
+      "noOrdersYet": "Chưa có đơn hàng nào.",
+      "errorTitle": "Lỗi",
+      "errorMessage": "Không thể tải danh sách đơn hàng.",
+      "retryButton": "Thử lại"
+    },
+    "table": {
+      "colOrderId": "Mã Đơn",
+      "colCustomer": "Khách hàng",
+      "colDate": "Ngày đặt",
+      "colProducts": "Sản phẩm",
+      "colTotal": "Tổng tiền",
+      "colStatus": "Trạng thái",
+      "colPayment": "Thanh toán",
+      "colActions": "Hành động",
+      "guest": "Khách",
+      "moreProducts": "+{count} sản phẩm khác...",
+      "paidTooltip": "Đã thanh toán lúc {date}",
+      "unpaidTooltip": "Chưa thanh toán",
+      "viewDetailsTooltip": "Xem chi tiết và xử lý đơn hàng",
+      "restockTooltip": "Khôi phục tồn kho",
+      "restockDoneTooltip": "Tồn kho đã được khôi phục",
+      "itemsModalTitle": "Chi tiết sản phẩm trong đơn <primary>#{id}</primary>",
+      "itemsModalColImage": "Ảnh",
+      "itemsModalColName": "Tên sản phẩm",
+      "itemsModalColSku": "SKU",
+      "itemsModalColQty": "Số lượng",
+      "itemsModalColPrice": "Đơn giá",
+      "itemsModalColTotal": "Tổng tiền",
+      "itemsModalClose": "Đóng",
+      "itemsModalViewDetails": "Xem chi tiết đơn hàng",
+      "restockModalTitle": "Xác nhận Khôi phục Tồn kho",
+      "restockModalBody": "Bạn có chắc chắn muốn cộng lại số lượng sản phẩm của đơn hàng <bold>#{id}</bold> vào tồn kho? Hành động này có thể ảnh hưởng đến báo cáo kho hàng."
+    }
+  },
+
+  "AdminNotifications": {
+    "meta": {
+      "title": "Tất cả thông báo | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Tất cả thông báo",
+      "description": "Xem lại lịch sử các thông báo đã nhận."
+    },
+    "list": {
+      "title": "Tất cả thông báo",
+      "markAllAsRead": "Đánh dấu tất cả đã đọc",
+      "markAllAsReadSuccess": "Tất cả đã được đánh dấu đã đọc.",
+      "loading": "Đang tải...",
+      "error": "Lỗi: {message}",
+      "noNotifications": "Không có thông báo nào.",
+      "loadingMore": "Đang tải thêm...",
+      "endOfList": "Đã tải hết thông báo."
+    },
+    "item": {
+      "unreadTooltip": "Chưa đọc"
+    }
+  },
+
+  "AdminOrderDetail": {
+    "meta": {
+      "title": "Chi tiết Đơn hàng #{id} | Admin Serein Shop",
+      "description": "Xem chi tiết, cập nhật trạng thái và xử lý đơn hàng #{id}."
+    },
+    "pageHeader": {
+      "title": "Chi tiết Đơn hàng #{id}",
+      "description": "Xem thông tin chi tiết, cập nhật trạng thái và xử lý các yêu cầu của khách hàng."
+    },
+    "loading": "Đang tải...",
+    "loadingError": "Lỗi tải đơn hàng: {error}",
+    "retry": "Thử lại",
+    "notFound": "Không tìm thấy đơn hàng.",
+    "backToList": "← Quay lại danh sách",
+    "itemsInOrder": "Các sản phẩm trong đơn",
+    "customerInfo": "Thông tin khách hàng",
+    "financialSummary": {
+      "title": "Tóm tắt tài chính",
+      "subtotal": "Tạm tính:",
+      "discount": "Giảm giá:",
+      "shippingFee": "Phí vận chuyển:",
+      "total": "Tổng cộng:"
+    },
+    "paymentInfo": {
+      "method": "Phương thức: <bold>{method}</bold>",
+      "shipping": "Giao hàng: <bold>{method}</bold>",
+      "notes": "Ghi chú KH: <italic>{notes}</italic>",
+      "paymentDetails": "Chi tiết thanh toán:",
+      "transactionId": "Mã giao dịch:",
+      "status": "Trạng thái:",
+      "captureId": "Mã Capture:"
+    },
+    "printOrder": "In đơn hàng",
+    "header": {
+      "order": "Đơn hàng #{id}",
+      "placedAt": "Đặt lúc: {date}",
+      "restock": "Khôi phục tồn kho",
+      "restockTooltipDone": "Hành động này không thể thực hiện lại",
+      "restockTooltip": "Cộng lại số lượng sản phẩm vào kho",
+      "restored": "Đã khôi phục",
+      "updateStatus": "Cập nhật trạng thái",
+      "moveTo": "Chuyển sang \"{status}\""
+    },
+    "itemsTable": {
+      "colProduct": "Sản phẩm",
+      "colPrice": "Đơn giá",
+      "colQty": "Số lượng",
+      "colTotal": "Thành tiền",
+      "deletedProductTooltip": "Sản phẩm này đã bị xóa khỏi hệ thống"
+    },
+    "customerInfoCard": {
+      "title": "Thông tin khách hàng",
+      "name": "Tên:",
+      "email": "Email:",
+      "phone": "Điện thoại:",
+      "type": "Loại:",
+      "member": "Thành viên",
+      "guest": "Khách vãng lai",
+      "shippingAddress": "Địa chỉ giao hàng"
+    },
+    "requestPanel": {
+      "cancelTitle": "Yêu cầu Hủy Đơn hàng",
+      "refundTitle": "Yêu cầu Trả hàng/Hoàn tiền",
+      "customerReason": "Lý do của khách hàng:",
+      "attachedImages": "Hình ảnh đính kèm:",
+      "imageProof": "Ảnh bằng chứng {index}",
+      "reject": "Từ chối",
+      "approve": "Chấp nhận",
+      "confirmApproveTitle": "Xác nhận Chấp nhận Yêu cầu",
+      "confirmApproveBody": "Bạn có chắc chắn muốn chấp nhận yêu cầu {type} cho đơn hàng này? Hành động này không thể hoàn tác.",
+      "requestType_cancellation": "Hủy",
+      "requestType_refund": "Hoàn tiền",
+      "rejectModalTitle": "Từ chối yêu cầu",
+      "rejectModalBody": "Vui lòng nhập lý do từ chối yêu cầu. Khách hàng sẽ nhận được thông báo về lý do này.",
+      "rejectModalPlaceholder": "Ví dụ: Sản phẩm đã qua sử dụng, yêu cầu không hợp lệ...",
+      "rejectModalConfirm": "Xác nhận từ chối"
+    },
+    "restockModal": {
+      "title": "Xác nhận Khôi phục Tồn kho",
+      "body": "Bạn có chắc chắn muốn cộng lại số lượng sản phẩm của đơn hàng <bold>#{id}</bold> vào tồn kho?"
+    }
+  },
+
+  "AdminUsers": {
+    "meta": {
+      "listTitle": "Quản lý Người dùng | Admin Serein Shop",
+      "detailTitle": "Chi tiết Người dùng | Admin Serein Shop"
+    },
+    "listPageHeader": {
+      "title": "Danh sách Người dùng",
+      "description": "Quản lý tài khoản khách hàng và quản trị viên."
+    },
+    "detailPageHeader": {
+      "title": "Chi tiết Người dùng",
+      "description": "Xem thông tin cá nhân và lịch sử mua hàng của người dùng."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo tên, email, SĐT...",
+      "filterRole": "Lọc theo vai trò",
+      "filterStatus": "Lọc theo trạng thái",
+      "allRoles": "Tất cả vai trò",
+      "customer": "Khách hàng",
+      "admin": "Quản trị viên",
+      "allStatuses": "Tất cả trạng thái",
+      "active": "Đang hoạt động",
+      "suspended": "Bị đình chỉ"
+    },
+    "list": {
+      "title": "Quản lý Người dùng",
+      "results": "{count} kết quả",
+      "errorTitle": "Lỗi",
+      "errorMessage": "Không thể tải danh sách người dùng.",
+      "retryButton": "Thử lại",
+      "loading": "Đang tải danh sách người dùng...",
+      "noResultsWithFilter": "Không tìm thấy người dùng nào phù hợp.",
+      "noUsersYet": "Chưa có người dùng nào."
+    },
+    "table": {
+      "colUser": "Người dùng",
+      "colContact": "Liên hệ",
+      "colOrders": "Số đơn hàng",
+      "colTotalSpent": "Tổng chi tiêu",
+      "colRole": "Vai trò",
+      "colStatus": "Trạng thái",
+      "colJoined": "Ngày tham gia",
+      "colActions": "Hành động",
+      "roleAdmin": "Quản trị viên",
+      "roleCustomer": "Khách hàng",
+      "statusActive": "Hoạt động",
+      "statusSuspended": "Đình chỉ",
+      "tooltipEdit": "Xem chi tiết và chỉnh sửa",
+      "tooltipSuspend": "Đình chỉ người dùng",
+      "tooltipReactivate": "Kích hoạt lại"
+    },
+    "suspendModal": {
+      "title": "Đình chỉ tài khoản: {name}",
+      "reasonLabel": "Lý do đình chỉ *",
+      "reasonPlaceholder": "Ví dụ: Vi phạm điều khoản, spam,...",
+      "endDateLabel": "Ngày hết hạn đình chỉ (tùy chọn)",
+      "confirmButton": "Xác nhận đình chỉ",
+      "processing": "Đang xử lý..."
+    },
+    "reactivateModal": {
+      "title": "Xác nhận Kích hoạt lại",
+      "body": "Bạn có chắc muốn kích hoạt lại tài khoản cho người dùng \"{name}\"?",
+      "confirmButton": "Xác nhận Kích hoạt"
+    },
+    "detail": {
+      "loading": "Đang tải dữ liệu người dùng...",
+      "error": "Lỗi: {message}",
+      "notFound": "Không tìm thấy người dùng.",
+      "backToList": "← Quay lại danh sách",
+      "role": "Vai trò",
+      "roleAdmin": "Quản trị viên",
+      "roleCustomer": "Khách hàng",
+      "phone": "Điện thoại:",
+      "joined": "Ngày tham gia:",
+      "totalSpent": "Tổng chi tiêu:",
+      "orderHistory": "Lịch sử đơn hàng ({count})",
+      "noOrders": "Người dùng này chưa có đơn hàng nào."
+    },
+    "userOrdersTable": {
+      "colOrderId": "Mã đơn",
+      "colDate": "Ngày đặt",
+      "colProducts": "Sản phẩm",
+      "colTotal": "Tổng tiền",
+      "colStatus": "Trạng thái",
+      "colPayment": "Thanh toán",
+      "colActions": "Hành động",
+      "moreProducts": "+{count} sản phẩm khác...",
+      "paidTooltip": "Đã thanh toán lúc {date}",
+      "unpaidTooltip": "Chưa thanh toán",
+      "viewDetailsTooltip": "Xem chi tiết đơn hàng"
+    }
+  },
+
+  "AdminCoupons": {
+    "meta": {
+      "title": "Quản lý Mã giảm giá | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Mã giảm giá",
+      "description": "Tạo và quản lý các chương trình khuyến mãi cho cửa hàng."
+    },
+    "list": {
+      "title": "Mã giảm giá",
+      "results": "{count} kết quả",
+      "errorTitle": "Lỗi",
+      "errorMessage": "Không thể tải danh sách mã giảm giá.",
+      "retryButton": "Thử lại",
+      "loading": "Đang tải danh sách...",
+      "noResultsWithFilter": "Không tìm thấy mã giảm giá nào phù hợp.",
+      "noCouponsYet": "Chưa có mã giảm giá nào."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo mã code...",
+      "discountType": "Loại giảm giá",
+      "percentage": "Phần trăm",
+      "fixedAmount": "Số tiền cố định",
+      "status": "Trạng thái",
+      "active": "Đang hoạt động",
+      "inactive": "Vô hiệu hóa",
+      "clearFilters": "Xóa lọc",
+      "addNew": "Thêm mã giảm giá"
+    },
+    "table": {
+      "colCode": "Mã Code",
+      "colDescription": "Mô tả",
+      "colValue": "Giá trị giảm",
+      "colCondition": "Điều kiện",
+      "colUsage": "Sử dụng",
+      "colValidity": "Hiệu lực",
+      "colStatus": "Trạng thái",
+      "colActions": "Hành động",
+      "noDescription": "Không có",
+      "minOrder": "ĐH tối thiểu: {value}",
+      "appliesTo": "Áp dụng cho: ",
+      "usageCount": "{count} / {max}",
+      "unlimited": "∞",
+      "starts": "Bắt đầu: {date}",
+      "expires": "Kết thúc: {date}",
+      "statusActive": "Đang hoạt động",
+      "statusInactive": "Vô hiệu / Hết hạn",
+      "editTitle": "Sửa mã giảm giá",
+      "deactivateTitle": "Vô hiệu hóa",
+      "applicableTo": {
+        "all": "Tất cả",
+        "products": "Sản phẩm",
+        "categories": "Danh mục"
+      }
+    },
+    "form": {
+      "createTitle": "Tạo Mã giảm giá mới",
+      "editTitle": "Chỉnh sửa Mã giảm giá",
+      "enterPriceBy": "Nhập giá bằng:",
+      "enterPriceVND": "Tiền Việt (VND)",
+      "enterPriceUSD": "Đô la Mỹ (USD)",
+      "codeLabel": "Mã Code *",
+      "typeLabel": "Loại giảm giá *",
+      "typePercentage": "Phần trăm (%)",
+      "typeFixedAmount": "Số tiền cố định",
+      "descriptionLabel": "Mô tả ({locale})",
+      "valueLabel": "Giá trị giảm *",
+      "valuePercentageLabel": "Giá trị giảm (%) *",
+      "minOrderLabel": "Đơn hàng tối thiểu để áp dụng",
+      "priceVNDPlaceholder": "Giá trị VND",
+      "priceUSDPlaceholder": "Giá trị USD",
+      "startDateLabel": "Ngày bắt đầu",
+      "expiryDateLabel": "Ngày hết hạn *",
+      "totalUsageLabel": "Tổng lượt sử dụng (trống là không giới hạn)",
+      "totalUsagePlaceholder": "∞",
+      "usagePerUserLabel": "Lượt sử dụng / Người dùng *",
+      "applicableToLabel": "Đối tượng áp dụng *",
+      "applicableToAll": "Tất cả sản phẩm",
+      "applicableToProducts": "Sản phẩm được chọn",
+      "applicableToCategories": "Danh mục được chọn",
+      "activateLabel": "Kích hoạt mã giảm giá này",
+      "cancel": "Hủy",
+      "save": "Lưu thay đổi",
+      "saving": "Đang lưu...",
+      "validation": {
+        "codeRequired": "Mã code là bắt buộc.",
+        "valuePositive": "Giá trị giảm phải là số lớn hơn 0.",
+        "valuePercentageLimit": "Giảm giá % không được lớn hơn 100.",
+        "expiryDateRequired": "Ngày hết hạn là bắt buộc.",
+        "expiryDateAfterStart": "Ngày hết hạn phải sau ngày bắt đầu.",
+        "applicableIdsRequired": "Vui lòng chọn ít nhất một mục.",
+        "maxUsageInvalid": "Phải là số không âm.",
+        "maxUsagePerUserInvalid": "Phải ít nhất là 1.",
+        "formError": "Vui lòng kiểm tra lại các trường có lỗi."
+      }
+    },
+    "applicableSelector": {
+      "productsLabel": "Chọn sản phẩm áp dụng",
+      "categoriesLabel": "Chọn danh mục áp dụng",
+      "noItemSelected": "Chưa có mục nào được chọn.",
+      "searchProducts": "Tìm kiếm sản phẩm...",
+      "searchCategories": "Tìm kiếm danh mục...",
+      "loading": "Đang tìm...",
+      "noResults": "Không tìm thấy kết quả.",
+      "removeAria": "Xóa {name}"
+    },
+    "deleteModal": {
+      "title": "Xác nhận Vô hiệu hóa",
+      "body": "Bạn có chắc muốn vô hiệu hóa mã giảm giá \"{code}\"?"
+    }
+  },
+
+  "AdminReviews": {
+    "meta": {
+      "title": "Quản lý Đánh giá | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Quản lý Đánh giá",
+      "description": "Duyệt, phản hồi và quản lý tất cả các đánh giá của khách hàng."
+    },
+    "list": {
+      "title": "Quản lý Đánh giá",
+      "results": "{count} kết quả",
+      "errorTitle": "Lỗi",
+      "errorMessage": "Không thể tải danh sách đánh giá.",
+      "retryButton": "Thử lại",
+      "loading": "Đang tải...",
+      "noResultsWithFilter": "Không tìm thấy đánh giá nào phù hợp.",
+      "noReviewsYet": "Chưa có đánh giá nào."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo nội dung bình luận...",
+      "allStatuses": "Tất cả trạng thái",
+      "approved": "Đã duyệt",
+      "pending": "Chờ duyệt",
+      "allRatings": "Tất cả sao",
+      "star": "{count} sao",
+      "clearFiltersTitle": "Xóa bộ lọc",
+      "clearFilters": "Xóa lọc"
+    },
+    "table": {
+      "colReviewer": "Người đánh giá",
+      "colRating": "Xếp hạng",
+      "colComment": "Bình luận",
+      "colProduct": "Sản phẩm",
+      "colStatus": "Trạng thái",
+      "colActions": "Hành động",
+      "noComment": "Không có bình luận",
+      "noUserImages": "Không có ảnh thực tế",
+      "shopReply": "Phản hồi của shop:",
+      "inactive": "Ngừng hoạt động",
+      "deletedProduct": "Sản phẩm đã bị xóa",
+      "statusApproved": "Đã duyệt",
+      "statusPending": "Chờ duyệt",
+      "tooltipApproved": "Đã duyệt",
+      "tooltipPending": "Chờ duyệt",
+      "actionHide": "Ẩn đánh giá",
+      "actionApprove": "Duyệt đánh giá",
+      "actionEditReply": "Sửa phản hồi",
+      "actionAddReply": "Thêm phản hồi",
+      "actionDelete": "Xóa vĩnh viễn"
+    },
+    "replyModal": {
+      "title": "Phản hồi đánh giá",
+      "reviewBy": "Đánh giá của: <bold>{name}</bold>",
+      "commentPlaceholder": "Nhập phản hồi của bạn...",
+      "cancel": "Hủy",
+      "submit": "Gửi phản hồi",
+      "processing": "Đang xử lý...",
+      "emptyReplyError": "Phản hồi không được để trống."
+    },
+    "deleteModal": {
+      "title": "Xác nhận Xóa Đánh giá",
+      "body": "Bạn có chắc muốn xóa vĩnh viễn đánh giá của \"{author}\"? Hành động này không thể hoàn tác."
+    }
+  },
+
+  "AdminReports": {
+    "meta": {
+      "title": "Báo cáo & Thống kê | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Báo cáo & Thống kê",
+      "description": "Phân tích chi tiết về hoạt động kinh doanh của cửa hàng."
+    },
+    "tabs": {
+      "sales": "Bán hàng",
+      "products": "Sản phẩm",
+      "customers": "Khách hàng",
+      "inventory": "Tồn kho"
+    },
+    "sales": {
+      "totalRevenue": "Tổng Doanh thu",
+      "totalOrders": "Tổng Đơn hàng",
+      "itemsSold": "Sản phẩm đã bán",
+      "avgOrderValue": "Giá trị ĐH Trung bình",
+      "revenueByPayment": "Doanh thu theo Phương thức Thanh toán",
+      "tableColMethod": "Phương thức",
+      "tableColOrders": "Số đơn",
+      "tableColValue": "Tổng giá trị",
+      "chartTooltipOrders": "{count} đơn hàng"
+    },
+    "products": {
+      "topByQuantity": "Top Sản phẩm Bán chạy (Số lượng)",
+      "topByRevenue": "Top Sản phẩm Doanh thu Cao",
+      "tableColProduct": "Sản phẩm",
+      "tableColSold": "Đã bán",
+      "tableColRevenue": "Doanh thu",
+      "chartLabelQuantity": "Số lượng đã bán",
+      "chartLabelRevenue": "Doanh thu"
+    },
+    "customers": {
+      "newCustomers": "Khách hàng mới",
+      "description": "Trong khoảng thời gian đã chọn",
+      "topSpenders": "Top Khách hàng Chi tiêu nhiều nhất",
+      "tableColCustomer": "Khách hàng",
+      "tableColOrders": "Số đơn hàng",
+      "tableColSpent": "Tổng chi tiêu"
+    },
+    "inventory": {
+      "totalValue": "Tổng giá trị kho",
+      "lowStock": "Sản phẩm sắp hết hàng",
+      "lowStockThreshold": "(Ngưỡng: {count})",
+      "outOfStock": "Sản phẩm hết hàng",
+      "listLowStock": "Danh sách Sản phẩm sắp hết hàng",
+      "listOutOfStock": "Danh sách Sản phẩm đã hết hàng",
+      "tableColProduct": "Sản phẩm",
+      "tableColSku": "SKU",
+      "tableColStock": "Tồn kho",
+      "noLowStock": "Tất cả sản phẩm đều còn hàng trên ngưỡng báo động.",
+      "noOutOfStock": "Không có sản phẩm nào hết hàng."
+    },
+    "shared": {
+      "viewAsTable": "Xem dạng bảng",
+      "viewAsChart": "Xem dạng biểu đồ",
+      "noData": "Không có dữ liệu."
+    }
+  },
+  
+  "AdminSettings": {
+    "meta": {
+      "title": "Cài đặt Cửa hàng | Admin Serein Shop",
+      "description": "Quản lý các cấu hình chung cho trang web và trang quản trị."
+    },
+    "pageHeader": {
+      "title": "Cài đặt Cửa hàng",
+      "description": "Thay đổi các cấu hình chung ảnh hưởng đến toàn bộ trang web."
+    },
+    "loading": "Đang tải cài đặt...",
+    "systemConfig": "Cấu hình hệ thống",
+    "clientSettings": {
+      "title": "Cài đặt cho Khách hàng (Client)",
+      "defaultLanguage": "Ngôn ngữ mặc định",
+      "defaultCurrency": "Tiền tệ mặc định"
+    },
+    "adminSettings": {
+      "title": "Cài đặt cho Quản trị viên (Admin)",
+      "defaultLanguage": "Ngôn ngữ mặc định",
+      "defaultCurrency": "Tiền tệ mặc định"
+    },
+    "homepageUI": {
+      "title": "Giao diện Trang Chủ",
+      "bannerManager": "Quản lý Banner",
+      "featuredProducts": "Số sản phẩm nổi bật (Trang chủ)",
+      "newestProducts": "Số sản phẩm mới nhất (Trang chủ)",
+      "productsPerPage": "Số sản phẩm/trang (Trang danh sách)"
+    },
+    "adminUI": {
+      "title": "Giao diện Quản trị (Admin)",
+      "rowsPerPage": "Số dòng/trang trong bảng dữ liệu"
+    },
+    "bannerManager": {
+      "deleteBanner": "Xóa banner",
+      "bannerImage": "Hình ảnh Banner",
+      "changeImage": "Thay đổi ảnh",
+      "titleLabel": "Tiêu đề ({locale})",
+      "subtitleLabel": "Phụ đề ({locale})",
+      "buttonTextLabel": "Chữ trên nút ({locale})",
+      "buttonLinkLabel": "Đường dẫn của nút",
+      "showBanner": "Hiển thị banner này",
+      "addBanner": "Thêm Banner",
+      "newBanner": {
+        "title_vi": "Tiêu đề mới", "title_en": "New Title",
+        "subtitle_vi": "Phụ đề mới", "subtitle_en": "New Subtitle",
+        "buttonText_vi": "Xem ngay", "buttonText_en": "Shop Now"
+      }
+    },
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh"
+    },
+    "currencies": {
+      "VND": "VND",
+      "USD": "USD"
+    },
+    "saveChanges": "Lưu thay đổi",
+    "processing": "Đang xử lý...",
+    "uploadingImages": "Đang tải ảnh lên..."
+  },
+  
+  "Shared": {
+    "confirmModal": {
+      "confirm": "Xác nhận",
+      "cancel": "Hủy",
+      "processing": "Đang xử lý...",
+      "confirmActive": "Xác nhận kích hoạt",
+      "confirmRestock": "Xác nhận khôi phục"
+    },
+    "deleteConfirm": {
+      "title": "Xác nhận xóa giá trị",
+      "message": "Bạn có chắc muốn xóa giá trị \"<strong>{name}</strong>\"?",
+      "warning": "Hành động này không thể hoàn tác.",
+      "confirmButton": "Đồng ý Xóa",
+      "cancelButton": "Hủy",
+      "deleting": "Đang xóa..."
+    }
+  }
+}

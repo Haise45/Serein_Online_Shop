@@ -1,7 +1,7 @@
 "use client";
 
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { Coupon } from "@/types";
+import { formatCurrency, formatDate, getLocalizedName } from "@/lib/utils";
+import { CouponAdmin, ExchangeRates } from "@/types";
 import { cilCheckCircle, cilPen, cilTrash, cilXCircle } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import {
@@ -16,34 +16,48 @@ import {
   CTooltip,
 } from "@coreui/react";
 import classNames from "classnames";
+import { useLocale } from "next-intl";
+import React from "react";
+import { useTranslations } from "next-intl";
 
 interface CouponTableProps {
-  coupons: Coupon[];
+  coupons: CouponAdmin[];
   onDeleteClick: (couponId: string, couponCode: string) => void;
   onEditClick: (couponId: string) => void;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 const CouponTable: React.FC<CouponTableProps> = ({
   coupons,
   onDeleteClick,
   onEditClick,
+  displayCurrency,
+  rates,
 }) => {
+  const t = useTranslations("AdminCoupons.table");
+  const locale = useLocale() as "vi" | "en";
   const now = new Date();
+  const currencyOptions = { currency: displayCurrency, rates };
 
   return (
     <CTable hover responsive className="align-middle text-sm">
       <CTableHead>
         <CTableRow>
-          <CTableHeaderCell>Mã Code</CTableHeaderCell>
-          <CTableHeaderCell>Mô tả</CTableHeaderCell>
-          <CTableHeaderCell>Giá trị giảm</CTableHeaderCell>
-          <CTableHeaderCell>Điều kiện</CTableHeaderCell>
-          <CTableHeaderCell className="text-center">Sử dụng</CTableHeaderCell>
-          <CTableHeaderCell>Hiệu lực</CTableHeaderCell>
+          <CTableHeaderCell>{t("colCode")}</CTableHeaderCell>
+          <CTableHeaderCell>{t("colDescription")}</CTableHeaderCell>
+          <CTableHeaderCell>{t("colValue")}</CTableHeaderCell>
+          <CTableHeaderCell>{t("colCondition")}</CTableHeaderCell>
           <CTableHeaderCell className="text-center">
-            Trạng thái
+            {t("colUsage")}
           </CTableHeaderCell>
-          <CTableHeaderCell className="text-center">Hành động</CTableHeaderCell>
+          <CTableHeaderCell>{t("colValidity")}</CTableHeaderCell>
+          <CTableHeaderCell className="text-center">
+            {t("colStatus")}
+          </CTableHeaderCell>
+          <CTableHeaderCell className="text-center">
+            {t("colActions")}
+          </CTableHeaderCell>
         </CTableRow>
       </CTableHead>
       <CTableBody>
@@ -60,58 +74,65 @@ const CouponTable: React.FC<CouponTableProps> = ({
                 <div
                   className="truncate"
                   style={{ maxWidth: "200px" }}
-                  title={coupon.description || ""}
+                  title={getLocalizedName(coupon.description, locale)}
                 >
-                  {coupon.description || (
-                    <span className="text-muted">N/A</span>
-                  )}
+                  {getLocalizedName(coupon.description, locale) ||
+                    t("noDescription")}
                 </div>
               </CTableDataCell>
               <CTableDataCell>
                 <div className="fw-semibold text-success">
                   {coupon.discountType === "percentage"
                     ? `${coupon.discountValue}%`
-                    : formatCurrency(coupon.discountValue)}
+                    : formatCurrency(coupon.discountValue, currencyOptions)}
                 </div>
               </CTableDataCell>
               <CTableDataCell>
                 <div className="text-xs">
                   {coupon.minOrderValue > 0 && (
                     <div>
-                      ĐH tối thiểu: {formatCurrency(coupon.minOrderValue)}
+                      {t("minOrder", {
+                        value: formatCurrency(
+                          coupon.minOrderValue,
+                          currencyOptions,
+                        ),
+                      })}
                     </div>
                   )}
                   <div>
-                    Áp dụng cho:{" "}
+                    {t("appliesTo")}{" "}
                     <CBadge
                       color="info"
                       shape="rounded-pill"
                       className="!text-white"
                     >
-                      {coupon.applicableTo === "all"
-                        ? "Tất cả"
-                        : coupon.applicableTo === "products"
-                          ? "Sản phẩm"
-                          : "Danh mục"}
+                      {t(`applicableTo.${coupon.applicableTo}` as string)}
                     </CBadge>
                   </div>
                 </div>
               </CTableDataCell>
               <CTableDataCell className="text-center">
-                {coupon.usageCount} / {coupon.maxUsage || "∞"}
+                {t("usageCount", {
+                  count: coupon.usageCount,
+                  max: coupon.maxUsage || t("unlimited"),
+                })}
               </CTableDataCell>
               <CTableDataCell>
                 <div className="text-xs">
-                  <div>Bắt đầu: {formatDate(coupon.startDate)}</div>
-                  <div>Kết thúc: {formatDate(coupon.expiryDate)}</div>
+                  <div>
+                    {t("starts", { date: formatDate(coupon.startDate) })}
+                  </div>
+                  <div>
+                    {t("expires", { date: formatDate(coupon.expiryDate) })}
+                  </div>
                 </div>
               </CTableDataCell>
               <CTableDataCell className="text-center">
                 <CTooltip
                   content={
                     status === "active"
-                      ? "Đang hoạt động"
-                      : "Vô hiệu hóa / Hết hạn"
+                      ? t("statusActive")
+                      : t("statusInactive")
                   }
                 >
                   <CIcon
@@ -125,7 +146,7 @@ const CouponTable: React.FC<CouponTableProps> = ({
               </CTableDataCell>
               <CTableDataCell className="text-center">
                 <div className="d-flex justify-content-center gap-2">
-                  <CTooltip content="Sửa mã giảm giá">
+                  <CTooltip content={t("editTitle")}>
                     <CButton
                       color="info"
                       variant="outline"
@@ -137,7 +158,7 @@ const CouponTable: React.FC<CouponTableProps> = ({
                     </CButton>
                   </CTooltip>
                   {coupon.isActive && (
-                    <CTooltip content="Vô hiệu hóa">
+                    <CTooltip content={t("deactivateTitle")}>
                       <CButton
                         color="danger"
                         variant="outline"

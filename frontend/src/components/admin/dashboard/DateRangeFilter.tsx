@@ -1,9 +1,15 @@
 "use client";
 
 import { CCol, CFormInput, CFormSelect, CRow } from "@coreui/react";
-import { sub, format } from "date-fns";
+import {
+  endOfQuarter,
+  format,
+  startOfQuarter,
+  sub,
+  subQuarters,
+} from "date-fns";
+import { useTranslations } from "next-intl";
 import React from "react";
-import { startOfQuarter, endOfQuarter, subQuarters } from "date-fns";
 
 interface DateRangeFilterProps {
   value: { startDate?: string; endDate?: string };
@@ -16,6 +22,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   value,
   onChange,
 }) => {
+  const t = useTranslations("AdminDashboard.dateRange");
+
   const setPresetRange = (preset: string) => {
     const now = new Date();
     let startDate: Date;
@@ -61,7 +69,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         <CCol md={3}>
           <CFormInput
             type="date"
-            label="Từ ngày"
+            label={t("from")}
             value={value.startDate || ""}
             onChange={(e) =>
               onChange((prev) => ({ ...prev, startDate: e.target.value }))
@@ -71,7 +79,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         <CCol md={3}>
           <CFormInput
             type="date"
-            label="Đến ngày"
+            label={t("to")}
             value={value.endDate || ""}
             onChange={(e) =>
               onChange((prev) => ({ ...prev, endDate: e.target.value }))
@@ -80,16 +88,16 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </CCol>
         <CCol md={4}>
           <CFormSelect
-            label="Chọn nhanh"
+            label={t("quickSelect")}
             onChange={(e) => setPresetRange(e.target.value)}
-            aria-label="Chọn nhanh khoảng thời gian"
+            aria-label={t("quickSelectAriaLabel")}
           >
-            <option value="last_7_days">7 ngày qua</option>
-            <option value="last_30_days">30 ngày qua</option>
-            <option value="this_month">Tháng này</option>
-            <option value="this_quarter">Quý này</option>
-            <option value="last_quarter">Quý trước</option>
-            <option value="this_year">Năm này</option>
+            <option value="last_7_days">{t("presets.last7days")}</option>
+            <option value="last_30_days">{t("presets.last30days")}</option>
+            <option value="this_month">{t("presets.thisMonth")}</option>
+            <option value="this_quarter">{t("presets.thisQuarter")}</option>
+            <option value="last_quarter">{t("presets.lastQuarter")}</option>
+            <option value="this_year">{t("presets.thisYear")}</option>
           </CFormSelect>
         </CCol>
       </CRow>

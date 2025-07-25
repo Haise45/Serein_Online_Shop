@@ -1,6 +1,8 @@
 import {
   createCouponApi,
   deleteCouponAdminApi,
+  getAdminCouponByIdApi,
+  getAdminCouponsApi,
   getCouponByIdApi,
   getCouponsApi,
   GetCouponsParams,
@@ -8,7 +10,9 @@ import {
 } from "@/services/couponService";
 import {
   Coupon,
+  CouponAdmin,
   CouponFormData,
+  PaginatedAdminCouponsResponse,
   PaginatedCouponsResponse,
 } from "@/types/coupon";
 import {
@@ -18,6 +22,7 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 
 export const couponKeys = {
@@ -50,51 +55,72 @@ export const useGetCoupons = (
 export const useGetCouponById = (
   id: string,
   // Thêm tham số options (optional)
-  options?: Omit<UseQueryOptions<Coupon, Error>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<Coupon, Error>, "queryKey" | "queryFn">,
 ) => {
-    return useQuery<Coupon, Error>({
-        queryKey: couponKeys.detail(id),
-        queryFn: () => getCouponByIdApi(id),
-        ...options, // Truyền các options từ ngoài vào
-    });
+  return useQuery<Coupon, Error>({
+    queryKey: couponKeys.detail(id),
+    queryFn: () => getCouponByIdApi(id),
+    ...options, // Truyền các options từ ngoài vào
+  });
+};
+
+export const useGetAdminCoupons = (params?: GetCouponsParams) => {
+  return useQuery<PaginatedAdminCouponsResponse, Error>({
+    queryKey: [...couponKeys.lists(), "admin", params || {}],
+    queryFn: () => getAdminCouponsApi(params),
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useGetAdminCouponById = (id: string) => {
+  return useQuery<CouponAdmin, Error>({
+    queryKey: couponKeys.detail(id),
+    queryFn: () => getAdminCouponByIdApi(id),
+    enabled: !!id,
+  });
 };
 
 export const useCreateCoupon = () => {
+  const t = useTranslations("reactQuery.coupon");
   const queryClient = useQueryClient();
-  return useMutation<Coupon, Error, Partial<CouponFormData>>({
+  return useMutation<CouponAdmin, Error, Partial<CouponFormData>>({
     mutationFn: createCouponApi,
     onSuccess: (newCoupon) => {
-      toast.success(`Đã tạo mã giảm giá "${newCoupon.code}" thành công!`);
+      const message = t("createSuccess").replace("{code}", newCoupon.code);
+      toast.success(message);
       queryClient.invalidateQueries({ queryKey: couponKeys.lists() });
     },
     onError: (error) => {
-      toast.error(error.message || "Tạo mã giảm giá thất bại.");
+      toast.error(error.message || t("createError"));
     },
   });
 };
 
 export const useUpdateCoupon = () => {
+  const t = useTranslations("reactQuery.coupon");
   const queryClient = useQueryClient();
   return useMutation<
-    Coupon,
+    CouponAdmin,
     Error,
     { id: string; payload: Partial<CouponFormData> }
   >({
     mutationFn: ({ id, payload }) => updateCouponApi(id, payload),
     onSuccess: (updatedCoupon) => {
-      toast.success(`Đã cập nhật mã giảm giá "${updatedCoupon.code}"!`);
+      const message = t("updateSuccess").replace("{code}", updatedCoupon.code);
+      toast.success(message);
       queryClient.invalidateQueries({ queryKey: couponKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: couponKeys.detail(updatedCoupon._id),
       });
     },
     onError: (error) => {
-      toast.error(error.message || "Cập nhật thất bại.");
+      toast.error(error.message || t("updateError"));
     },
   });
 };
 
 export const useDeleteCouponAdmin = () => {
+  const t = useTranslations("reactQuery.coupon");
   const queryClient = useQueryClient();
   return useMutation<{ message: string }, Error, string>({
     mutationFn: deleteCouponAdminApi,
@@ -103,7 +129,7 @@ export const useDeleteCouponAdmin = () => {
       queryClient.invalidateQueries({ queryKey: couponKeys.lists() });
     },
     onError: (error) => {
-      toast.error(error.message || "Vô hiệu hóa thất bại.");
+      toast.error(error.message || t("deleteError"));
     },
   });
 };

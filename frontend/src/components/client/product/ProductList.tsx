@@ -1,6 +1,8 @@
 "use client";
 import { Attribute, Product } from "@/types";
 import ProductCard from "./ProductCard";
+import { useSettings } from "@/app/SettingsContext";
+import { useTranslations } from "next-intl";
 
 interface ProductListProps {
   title?: string;
@@ -17,6 +19,9 @@ export default function ProductList({
   error,
   attributes,
 }: ProductListProps) {
+  const t = useTranslations("ProductPage");
+  const settingsContext = useSettings();
+
   if (loading) {
     return (
       <div className="py-8">
@@ -55,7 +60,7 @@ export default function ProductList({
             {title}
           </h2>
         )}
-        <p className="text-red-500">Lỗi tải sản phẩm: {error}</p>
+        <p className="text-red-500">{t("errorLoadingProducts")}: {error}</p>
       </div>
     );
   }
@@ -68,7 +73,7 @@ export default function ProductList({
             {title}
           </h2>
         )}
-        <p className="text-gray-500">Không tìm thấy sản phẩm nào.</p>
+        <p className="text-gray-500">{t("noProductsFound")}</p>
       </div>
     );
   }
@@ -82,7 +87,13 @@ export default function ProductList({
       )}
       <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
-          <ProductCard key={product._id} product={product} attributes={attributes} />
+          <ProductCard
+            key={product._id}
+            product={product}
+            attributes={attributes}
+            displayCurrency={settingsContext.displayCurrency}
+            rates={settingsContext.rates}
+          />
         ))}
       </div>
     </div>

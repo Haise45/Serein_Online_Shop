@@ -38,6 +38,8 @@ import { useSelector } from "react-redux";
 import OrderStatusStepper from "./OrderStatusStepper";
 import toast from "react-hot-toast"; // Đảm bảo đã import toast
 import { FiAlertCircle } from "react-icons/fi";
+import { useSettings } from "@/app/SettingsContext";
+import { useTranslations } from "next-intl";
 
 interface OrderDetailsDisplayProps {
   order: Order;
@@ -52,6 +54,11 @@ const OrderItemRow: React.FC<{
 }> = ({ item, orderId, canDisplayReviewActions }) => {
   const { user: loggedInUser } = useSelector((state: RootState) => state.auth);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const t = useTranslations("OrderItemRow");
+
+  // *** LẤY THÔNG TIN TIỀN TỆ TRONG COMPONENT CON ***
+  const { displayCurrency, rates } = useSettings();
+  const currencyOptions = { currency: displayCurrency, rates };
 
   const createReviewMutation = useCreateReview();
   const updateReviewMutation = useUpdateReview();
@@ -117,31 +124,29 @@ const OrderItemRow: React.FC<{
   const handleDeleteReview = () => {
     if (existingReview?._id) {
       toast(
-        (t) => (
+        (toastInstance) => (
           <div className="flex flex-col items-center p-1">
             <p className="mb-3 text-sm font-medium text-gray-800">
-              Bạn có chắc chắn muốn xóa đánh giá này?
+              {t("deleteConfirmTitle")}
             </p>
             <div className="flex w-full space-x-3">
               <button
                 onClick={() => {
-                  deleteReviewMutation.mutate(
-                    {
-                      reviewId: existingReview._id!,
-                      productId: actualProductId,
-                    },
-                  );
-                  toast.dismiss(t.id); // Đóng toast xác nhận này
+                  deleteReviewMutation.mutate({
+                    reviewId: existingReview._id!,
+                    productId: actualProductId,
+                  });
+                  toast.dismiss(toastInstance.id); // Đóng toast xác nhận này
                 }}
                 className="flex-1 rounded-md bg-red-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline-offset-2 focus-visible:outline-red-600"
               >
-                Xác nhận Xóa
+                {t("deleteConfirmButton")}
               </button>
               <button
-                onClick={() => toast.dismiss(t.id)}
+                onClick={() => toast.dismiss(toastInstance.id)}
                 className="flex-1 rounded-md bg-white px-3.5 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
               >
-                Hủy
+                {t("cancelButton")}
               </button>
             </div>
           </div>
@@ -158,6 +163,10 @@ const OrderItemRow: React.FC<{
       );
     }
   };
+
+  const variantDisplayName = item.variant?.options
+    ?.map((opt) => `${opt.attributeName}: ${opt.value}`)
+    .join(" / ");
 
   const isReviewProcessing =
     createReviewMutation.isPending ||
@@ -188,22 +197,21 @@ const OrderItemRow: React.FC<{
               </Link>
             </h3>
             <p className="ml-4 font-medium whitespace-nowrap text-gray-900">
-              {formatCurrency(item.price * item.quantity)}
+              {formatCurrency(item.price * item.quantity, currencyOptions)}
             </p>
           </div>
-          {item.variant?.options && item.variant.options.length > 0 && (
+          {variantDisplayName && (
             <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-              {item.variant.options
-                .map((opt) => `${opt.attributeName}: ${opt.value}`)
-                .join(" / ")}
-              {item.variant.sku && ` (SKU: ${item.variant.sku})`}
+              {variantDisplayName}
             </p>
           )}
           <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-            Số lượng: {item.quantity}
+            {t("quantity", { count: item.quantity })}
           </p>
           <p className="mt-0.5 text-xs text-gray-500 sm:text-sm">
-            Đơn giá: {formatCurrency(item.price)}
+            {t("unitPrice", {
+              price: formatCurrency(item.price, currencyOptions),
+            })}
           </p>
         </div>
 
@@ -212,16 +220,18 @@ const OrderItemRow: React.FC<{
           <div className="mt-3 border-t border-gray-100 pt-3">
             {isLoadingExistingReview ? (
               <div className="flex items-center text-xs text-gray-400">
-                <FiLoader className="mr-1 inline h-4 w-4 animate-spin" /> Đang
-                kiểm tra đánh giá...
+                <FiLoader className="mr-1 inline h-4 w-4 animate-spin" />{" "}
+                {t("checkingReview")}
               </div>
             ) : existingReview ? (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="flex items-center text-xs text-green-600 italic">
                   <FiStar className="-mt-0.5 mr-1 inline h-3.5 w-3.5 fill-current text-yellow-400" />
-                  Đã đánh giá ({existingReview.rating} sao)
+                  {t("alreadyReviewed", { rating: existingReview.rating })}
                   {existingReview.isApproved ? null : (
-                    <span className="ml-1 text-orange-500">(Chờ duyệt)</span>
+                    <span className="ml-1 text-orange-500">
+                      {t("pendingApproval")}
+                    </span>
                   )}
                 </span>
                 {/* Backend quy định: chỉ sửa được khi chưa có admin reply và review đó chưa từng bị sửa */}
@@ -230,7 +240,7 @@ const OrderItemRow: React.FC<{
                     onClick={() => setIsReviewModalOpen(true)}
                     className="flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50"
                     disabled={isReviewProcessing}
-                    aria-label={`Sửa đánh giá cho ${item.name}`}
+                    aria-label={t("editReviewAriaLabel", { name: item.name })}
                   >
                     {updateReviewMutation.isPending &&
                     updateReviewMutation.variables?.reviewId ===
@@ -239,14 +249,14 @@ const OrderItemRow: React.FC<{
                     ) : (
                       <FiEdit2 className="mr-1 h-3.5 w-3.5" />
                     )}
-                    Sửa
+                    {t("editReview")}
                   </button>
                 )}
                 <button
                   onClick={handleDeleteReview}
                   className="flex items-center text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
                   disabled={isReviewProcessing}
-                  aria-label={`Xóa đánh giá cho ${item.name}`}
+                  aria-label={t("deleteReviewAriaLabel", { name: item.name })}
                 >
                   {deleteReviewMutation.isPending &&
                   deleteReviewMutation.variables?.reviewId ===
@@ -255,7 +265,7 @@ const OrderItemRow: React.FC<{
                   ) : (
                     <FiTrash2 className="mr-1 h-3.5 w-3.5" />
                   )}
-                  Xóa
+                  {t("deleteReview")}
                 </button>
               </div>
             ) : (
@@ -263,14 +273,14 @@ const OrderItemRow: React.FC<{
                 onClick={() => setIsReviewModalOpen(true)}
                 className="inline-flex items-center rounded-md border border-indigo-600 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-100 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:outline-none disabled:opacity-50"
                 disabled={isReviewProcessing}
-                aria-label={`Viết đánh giá cho ${item.name}`}
+                aria-label={t("writeReviewAriaLabel", { name: item.name })}
               >
                 {createReviewMutation.isPending ? (
                   <FiLoader className="mr-2 -ml-0.5 h-4 w-4 animate-spin" />
                 ) : (
                   <FiStar className="mr-2 -ml-0.5 h-4 w-4" />
                 )}
-                Viết đánh giá
+                {t("writeReview")}
               </button>
             )}
           </div>
@@ -304,6 +314,12 @@ export default function OrderDetailsDisplay({
   title,
 }: OrderDetailsDisplayProps) {
   const { user: loggedInUser } = useSelector((state: RootState) => state.auth); // Lấy user ID từ Redux
+  const t = useTranslations("OrderDetailsDisplay");
+  const tCheckout = useTranslations("CheckoutForm");
+
+  // *** LẤY THÔNG TIN TIỀN TỆ TRONG COMPONENT CON ***
+  const { displayCurrency, rates } = useSettings();
+  const currencyOptions = { currency: displayCurrency, rates };
 
   const itemsSubtotal = order.itemsPrice;
   const discount = order.discountAmount;
@@ -311,6 +327,10 @@ export default function OrderDetailsDisplay({
   const total = order.totalPrice;
 
   const canUserReviewThisOrder = order.status === "Delivered" && !!loggedInUser;
+
+  const paymentMethodLabel =
+    tCheckout(`paymentMethods.${order.paymentMethod}.name`) ||
+    order.paymentMethod;
 
   return (
     <div>
@@ -320,11 +340,10 @@ export default function OrderDetailsDisplay({
             {title}
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            Mã đơn hàng của bạn:
-            <span className="font-semibold text-gray-700">
-              {" "}
-              #{order._id.toString().slice(-6).toUpperCase()}
-            </span>
+            {t.rich("orderCodeMessage", {
+              code: order._id.toString().slice(-6).toUpperCase(),
+              bold: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
         </div>
       )}
@@ -335,7 +354,8 @@ export default function OrderDetailsDisplay({
         {/* Thông tin giao hàng */}
         <div className="md:col-span-1">
           <h2 className="mb-3 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800 md:text-base lg:text-lg">
-            <FiHome className="mr-2 text-indigo-600" /> Địa chỉ giao hàng
+            <FiHome className="mr-2 text-indigo-600" />{" "}
+            {t("shippingAddressTitle")}
           </h2>
           <div className="space-y-1 text-sm text-gray-600">
             <p className="font-medium text-gray-700">
@@ -354,28 +374,25 @@ export default function OrderDetailsDisplay({
         {/* Phương thức thanh toán */}
         <div className="md:col-span-1">
           <h2 className="mb-3 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800 md:text-base lg:text-lg">
-            <FiCreditCard className="mr-2 text-indigo-600" /> Thanh toán
+            <FiCreditCard className="mr-2 text-indigo-600" />{" "}
+            {t("paymentTitle")}
           </h2>
           <div className="space-y-1 text-sm text-gray-600">
             <p>
-              Phương thức:{" "}
-              <span className="font-medium text-gray-700">
-                {order.paymentMethod === "COD"
-                  ? "Thanh toán khi nhận hàng"
-                  : order.paymentMethod === "BANK_TRANSFER"
-                    ? "Chuyển khoản ngân hàng"
-                    : order.paymentMethod}
-              </span>
+              {t.rich("paymentMethod", {
+                method: paymentMethodLabel,
+                bold: (chunks) => <strong>{chunks}</strong>,
+              })}
             </p>
             <p>
-              Trạng thái:{" "}
+              {t("paymentStatus")}{" "}
               {order.isPaid ? (
                 <span className="font-medium text-green-600">
-                  Đã thanh toán ({formatDate(order.paidAt)})
+                  {t("paidStatus", { date: formatDate(order.paidAt) })}
                 </span>
               ) : (
                 <span className="font-medium text-orange-500">
-                  Chưa thanh toán
+                  {t("unpaidStatus")}
                 </span>
               )}
             </p>
@@ -385,19 +402,20 @@ export default function OrderDetailsDisplay({
         {/* Thông tin khác */}
         <div className="md:col-span-1">
           <h2 className="mb-3 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800 md:text-base lg:text-lg">
-            <FiFileText className="mr-2 text-indigo-600" /> Thông tin đơn hàng
+            <FiFileText className="mr-2 text-indigo-600" />{" "}
+            {t("orderInfoTitle")}
           </h2>
           <div className="space-y-1 text-sm text-gray-600">
             <p className="flex items-center">
               <FiHash className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-              Mã ĐH:{" "}
+              {t("orderCodeLabel")}{" "}
               <span className="ml-1 font-medium text-gray-700">
                 #{order._id.toString().slice(-6).toUpperCase()}
               </span>
             </p>
             <p className="flex items-center">
               <FiCalendar className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-              Ngày đặt:{" "}
+              {t("orderDateLabel")}{" "}
               <span className="ml-1 font-medium text-gray-700">
                 {formatDate(order.createdAt)}
               </span>
@@ -406,14 +424,14 @@ export default function OrderDetailsDisplay({
               <>
                 <p className="flex items-center">
                   <FiUser className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-                  Người đặt:{" "}
+                  {t("customerLabel")}{" "}
                   <span className="ml-1 font-medium text-gray-700">
                     {order.user.name}
                   </span>
                 </p>
                 <p className="flex items-center">
                   <FiPhone className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-                  SĐT:{" "}
+                  {t("phoneLabel")}{" "}
                   <span className="ml-1 font-medium text-gray-700">
                     {order.user.phone || "Chưa cập nhật"}
                   </span>
@@ -423,7 +441,7 @@ export default function OrderDetailsDisplay({
             {!order.user && order.guestOrderEmail && (
               <p className="flex items-center">
                 <FiUser className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-                Email khách:{" "}
+                {t("guestEmailLabel")}{" "}
                 <span className="ml-1 font-medium text-gray-700">
                   {order.guestOrderEmail}
                 </span>
@@ -431,7 +449,7 @@ export default function OrderDetailsDisplay({
             )}
             {order.notes && (
               <p className="mt-2 border-t border-gray-300 pt-2 text-sm">
-                Ghi chú: {order.notes}
+                {t("notesLabel", { notes: order.notes })}
               </p>
             )}
           </div>
@@ -441,7 +459,7 @@ export default function OrderDetailsDisplay({
       {/* Danh sách sản phẩm */}
       <div className="mt-8 sm:mt-10">
         <h2 className="mb-4 flex items-center border-b border-gray-300 pb-2 text-lg font-semibold text-gray-800">
-          <FiBox className="mr-2 text-indigo-600" /> Sản phẩm đã đặt
+          <FiBox className="mr-2 text-indigo-600" /> {t("orderedProductsTitle")}
         </h2>
         <ul role="list" className="divide-y divide-gray-300">
           {order.orderItems.map((item) => (
@@ -458,12 +476,12 @@ export default function OrderDetailsDisplay({
       {/* Tóm tắt chi phí */}
       <div className="mt-8 sm:mt-10">
         <div className="rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:p-8">
-          <h2 className="sr-only">Tóm tắt chi phí</h2>
+          <h2 className="sr-only">{t("costSummaryTitle")}</h2>
           <dl className="space-y-3">
             <div className="flex items-center justify-between">
-              <dt className="text-sm text-gray-600">Tạm tính</dt>
+              <dt className="text-sm text-gray-600">{t("subtotal")}</dt>
               <dd className="text-sm font-medium text-gray-900">
-                {formatCurrency(itemsSubtotal)}
+                {formatCurrency(itemsSubtotal, currencyOptions)}
               </dd>
             </div>
             {discount > 0 && (
@@ -471,25 +489,24 @@ export default function OrderDetailsDisplay({
                 <dt className="flex items-center text-sm text-green-600">
                   <FiTag className="mr-1.5 h-4 w-4" />
                   <span>
-                    Giảm giá{" "}
-                    {order.appliedCouponCode && `(${order.appliedCouponCode})`}
+                    {t("discount", { code: order.appliedCouponCode ?? "" })}
                   </span>
                 </dt>
                 <dd className="text-sm font-medium text-green-600">
-                  -{formatCurrency(discount)}
+                  -{formatCurrency(discount, currencyOptions)}
                 </dd>
               </div>
             )}
             <div className="flex items-center justify-between">
-              <dt className="text-sm text-gray-600">Phí vận chuyển</dt>
+              <dt className="text-sm text-gray-600">{t("shippingFee")}</dt>
               <dd className="text-sm font-medium text-gray-900">
-                {shipping > 0 ? formatCurrency(shipping) : "Miễn phí"}
+                {shipping > 0 ? formatCurrency(shipping, currencyOptions) : t("shippingFeeFree")}
               </dd>
             </div>
             <div className="flex items-center justify-between border-t border-gray-300 pt-4">
-              <dt className="text-base font-bold text-gray-900">Tổng cộng</dt>
+              <dt className="text-base font-bold text-gray-900">{t("total")}</dt>
               <dd className="text-base font-bold text-gray-900">
-                {formatCurrency(total)}
+                {formatCurrency(total, currencyOptions)}
               </dd>
             </div>
           </dl>
@@ -501,14 +518,14 @@ export default function OrderDetailsDisplay({
           href="/"
           className="rounded-md bg-indigo-600 px-6 py-3 text-center text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
         >
-          Tiếp tục mua sắm
+          {t("continueShopping")}
         </Link>
         {order.user && typeof order.user !== "string" && (
           <Link
             href="/profile/orders"
             className="rounded-md border border-gray-300 bg-white px-6 py-3 text-center text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
           >
-            Xem đơn hàng của tôi
+            {t("viewMyOrders")}
           </Link>
         )}
       </div>

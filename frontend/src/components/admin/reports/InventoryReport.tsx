@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetInventoryReport } from "@/lib/react-query/reportQueries";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getLocalizedName } from "@/lib/utils";
 import { InventoryReportParams } from "@/services/reportService";
 import { LowStockProductItem } from "@/types/report";
 import { CTableDataCell, CTableRow } from "@coreui/react";
@@ -11,11 +11,24 @@ import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useMemo } from "react";
+import { ExchangeRates } from "@/types";
+import { useLocale, useTranslations } from "next-intl";
 
-const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
+interface InventoryReportProps {
+  filters: InventoryReportParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const InventoryReport: React.FC<InventoryReportProps> = ({
   filters,
+  displayCurrency,
+  rates,
 }) => {
+  const t = useTranslations("AdminReports.inventory");
+  const locale = useLocale() as "vi" | "en";
   const { data, isLoading } = useGetInventoryReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
   const { data: attributes } = useGetAttributes();
 
   // *** Lấy attribute map để dịch tên biến thể ***
@@ -51,15 +64,15 @@ const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
       : null;
 
     const displayName = variantDisplayName
-      ? `${item.name} (${variantDisplayName})`
-      : item.name;
+      ? `${getLocalizedName(item.name, locale)} (${variantDisplayName})`
+      : getLocalizedName(item.name, locale);
 
     return (
       <CTableRow key={item._id}>
         <CTableDataCell>
           <Link
             href={`/admin/products/${item.productId}/edit`}
-            className="flex items-center gap-3 text-decoration-none"
+            className="text-decoration-none flex items-center gap-3"
           >
             <Image
               src={
@@ -90,18 +103,20 @@ const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <ReportStatCard
-          title="Tổng giá trị kho"
-          value={formatCurrency(data?.totalInventoryValue)}
+          title={t("totalValue")}
+          value={formatCurrency(data?.totalInventoryValue, currencyOptions)}
           isLoading={isLoading}
         />
         <ReportStatCard
-          title="Sản phẩm sắp hết hàng"
+          title={t("lowStock")}
           value={data?.lowStockProducts.length || 0}
           isLoading={isLoading}
-          description={`(Ngưỡng: ${filters.lowStockThreshold})`}
+          description={t("lowStockThreshold", {
+            count: filters.lowStockThreshold ?? 0,
+          })}
         />
         <ReportStatCard
-          title="Sản phẩm hết hàng"
+          title={t("outOfStock")}
           value={data?.outOfStockCount || 0}
           isLoading={isLoading}
         />
@@ -109,29 +124,29 @@ const InventoryReport: React.FC<{ filters: InventoryReportParams }> = ({
 
       {/* Bảng sản phẩm sắp hết hàng */}
       <ReportTable
-        title="Danh sách Sản phẩm sắp hết hàng"
+        title={t("listLowStock")}
         isLoading={isLoading}
         items={data?.lowStockProducts || []}
         headers={[
-          { key: "product", label: "Sản phẩm" },
-          { key: "sku", label: "SKU" },
-          { key: "stock", label: "Tồn kho", className: "text-center" },
+          { key: "product", label: t("tableColProduct") },
+          { key: "sku", label: t("tableColSku") },
+          { key: "stock", label: t("tableColStock"), className: "text-center" },
         ]}
-        noDataMessage="Tất cả sản phẩm đều còn hàng trên ngưỡng báo động."
+        noDataMessage={t("noLowStock")}
         renderRow={renderInventoryRow}
       />
 
       {/* Bảng sản phẩm hết hàng */}
       <ReportTable
-        title="Danh sách Sản phẩm đã hết hàng"
+        title={t("listOutOfStock")}
         isLoading={isLoading}
         items={data?.outOfStockProducts || []}
         headers={[
-          { key: "product", label: "Sản phẩm" },
-          { key: "sku", label: "SKU" },
-          { key: "stock", label: "Tồn kho", className: "text-center" },
+          { key: "product", label: t("tableColProduct") },
+          { key: "sku", label: t("tableColSku") },
+          { key: "stock", label: t("tableColStock"), className: "text-center" },
         ]}
-        noDataMessage="Không có sản phẩm nào hết hàng."
+        noDataMessage={t("noOutOfStock")}
         renderRow={renderInventoryRow}
       />
     </div>

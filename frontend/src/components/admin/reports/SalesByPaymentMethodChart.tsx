@@ -1,17 +1,32 @@
 "use client";
+
 import "@/components/shared/charts/ChartJsDefaults";
 import { formatCurrency } from "@/lib/utils";
+import { ExchangeRates } from "@/types";
 import { SalesByPaymentMethod } from "@/types/report";
 import { CSpinner } from "@coreui/react";
 import { TooltipItem } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { useTranslations } from "next-intl";
 
-const SalesByPaymentMethodChart: React.FC<{
+interface SalesByPaymentMethodChartProps {
   data?: SalesByPaymentMethod[];
   isLoading: boolean;
-}> = ({ data, isLoading }) => {
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const SalesByPaymentMethodChart: React.FC<SalesByPaymentMethodChartProps> = ({
+  data,
+  isLoading,
+  displayCurrency,
+  rates,
+}) => {
+  const t = useTranslations("AdminReports.sales");
+  const tPayment = useTranslations("CheckoutForm.paymentMethods");
+
   const chartData = {
-    labels: data?.map((d) => d._id) || [],
+    labels: data?.map((d) => tPayment(`${d._id}.name`)) || [],
     datasets: [
       {
         data: data?.map((d) => d.totalValue) || [],
@@ -29,14 +44,16 @@ const SalesByPaymentMethodChart: React.FC<{
             const label = context.label || "";
             const value = context.parsed; // Giá trị số
             if (value !== null) {
-              return `${label}: ${formatCurrency(value)}`;
+              const originalValueVND =
+                data?.[context.dataIndex]?.totalValue || 0;
+              return `${label}: ${formatCurrency(originalValueVND, { currency: displayCurrency, rates })}`;
             }
             return label;
           },
           afterLabel: function (context: TooltipItem<"doughnut">) {
             // Lấy ra số lượng đơn hàng tương ứng với lát cắt này
             const orderCount = data?.[context.dataIndex]?.count || 0;
-            return `Số đơn hàng: ${orderCount}`;
+            return t("chartTooltipOrders", { count: orderCount });
           },
         },
       },

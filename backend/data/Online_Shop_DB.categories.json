@@ -1,0 +1,355 @@
+[{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a1"
+  },
+  "name": {
+    "vi": "Thời trang Nam",
+    "en": "Men's Fashion"
+  },
+  "slug": "thoi-trang-nam",
+  "parent": null,
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.292Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-13T05:06:17.236Z"
+  },
+  "image": ""
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a2"
+  },
+  "name": {
+    "vi": "Thời trang Nữ",
+    "en": "Women's Fashion"
+  },
+  "slug": "thoi-trang-nu",
+  "parent": null,
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.294Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-09T15:32:20.154Z"
+  },
+  "image": ""
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b1"
+  },
+  "name": {
+    "vi": "Áo Nam",
+    "en": "Áo Nam"
+  },
+  "slug": "ao-nam",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a1"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b2"
+  },
+  "name": {
+    "vi": "Quần Nam",
+    "en": "Quần Nam"
+  },
+  "slug": "quan-nam",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a1"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b3"
+  },
+  "name": {
+    "vi": "Áo Nữ",
+    "en": "Áo Nữ"
+  },
+  "slug": "ao-nu",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a2"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b4"
+  },
+  "name": {
+    "vi": "Quần Nữ",
+    "en": "Quần Nữ"
+  },
+  "slug": "quan-nu",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a2"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b5"
+  },
+  "name": {
+    "vi": "Váy Nữ",
+    "en": "Váy Nữ"
+  },
+  "slug": "vay-nu",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1a2"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c1"
+  },
+  "name": {
+    "vi": "Áo Thun Nam",
+    "en": "Áo Thun Nam"
+  },
+  "slug": "ao-thun-nam",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b1"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c2"
+  },
+  "name": {
+    "vi": "Áo Sơ Mi Nam",
+    "en": "Áo Sơ Mi Nam"
+  },
+  "slug": "ao-so-mi-nam",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b1"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.296Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c3"
+  },
+  "name": {
+    "vi": "Quần Jeans Nam",
+    "en": "Quần Jeans Nam"
+  },
+  "slug": "quan-jeans-nam",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b2"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.296Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c4"
+  },
+  "name": {
+    "vi": "Quần Short Nam",
+    "en": "Quần Short Nam"
+  },
+  "slug": "quan-short-nam",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b2"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.296Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c5"
+  },
+  "name": {
+    "vi": "Áo Thun Nữ",
+    "en": "Áo Thun Nữ"
+  },
+  "slug": "ao-thun-nu",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b3"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.296Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c6"
+  },
+  "name": {
+    "vi": "Áo Sơ Mi Nữ",
+    "en": "Áo Sơ Mi Nữ"
+  },
+  "slug": "ao-so-mi-nu",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b3"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.297Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c7"
+  },
+  "name": {
+    "vi": "Quần Jeans Nữ",
+    "en": "Quần Jeans Nữ"
+  },
+  "slug": "quan-jeans-nu",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b4"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.297Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c8"
+  },
+  "name": {
+    "vi": "Quần Legging",
+    "en": "Quần Legging"
+  },
+  "slug": "quan-legging",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b4"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.297Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1c9"
+  },
+  "name": {
+    "vi": "Chân Váy",
+    "en": "Chân Váy"
+  },
+  "slug": "chan-vay",
+  "parent": {
+    "$oid": "64f1a0e8a9b8c2a5a4e8d1b5"
+  },
+  "isActive": true,
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-05-05T15:38:16.297Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "684bf4f07bbd49f4a110e4c5"
+  },
+  "name": {
+    "vi": "Testing1234",
+    "en": "Testing1234"
+  },
+  "description": "",
+  "parent": null,
+  "image": "",
+  "isActive": false,
+  "createdAt": {
+    "$date": "2025-06-13T09:52:48.680Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T13:44:13.617Z"
+  },
+  "slug": "testing1234",
+  "__v": 0
+}]

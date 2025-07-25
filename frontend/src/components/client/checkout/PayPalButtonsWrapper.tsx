@@ -8,10 +8,11 @@ import {
 import { OrderCreationPayload } from "@/types";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
-import { useSelector, useDispatch } from "react-redux"; // Import useDispatch
-import { RootState, AppDispatch } from "@/store"; // Import AppDispatch
-import { clearSelectedItemsForCheckout } from "@/store/slices/checkoutSlice"; // Import action
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/store";
+import { clearSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 interface PayPalButtonsWrapperProps {
   // Dữ liệu form (địa chỉ, ghi chú,...) để tạo đơn hàng trong DB
@@ -25,6 +26,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
   getFormData,
   setIsProcessing,
 }) => {
+  const t = useTranslations("PayPal");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const selectedCartItemIds = useSelector(
@@ -38,7 +40,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
   const handleCreateOrder = async (): Promise<string> => {
     const formData = getFormData();
     if (!formData || !formData.shippingAddress) {
-      toast.error("Vui lòng điền đầy đủ thông tin giao hàng trước.");
+      toast.error(t("invalidFormError"));
       return Promise.reject(new Error("Thông tin giao hàng không hợp lệ."));
     }
 
@@ -49,7 +51,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
       });
       return orderID;
     } catch (error) {
-      toast.error("Không thể tạo đơn hàng PayPal. Vui lòng thử lại.");
+      toast.error(t("createOrderError"));
       return Promise.reject(error);
     }
   };
@@ -98,10 +100,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
       router.push(successRoute);
     } catch (error) {
       const err = error as Error;
-      toast.error(
-        err.message ||
-          "Đã xảy ra lỗi khi xác nhận thanh toán. Vui lòng liên hệ hỗ trợ.",
-      );
+      toast.error(err.message || t("captureError"));
       setIsProcessing(false);
     }
   };
@@ -109,8 +108,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
   if (!PAYPAL_CLIENT_ID) {
     return (
       <div className="rounded-md bg-red-50 p-4 text-center text-red-700">
-        Lỗi cấu hình: Không thể tải phương thức thanh toán PayPal. Vui lòng thử
-        lại sau.
+        {t("configError")}
       </div>
     );
   }
@@ -136,7 +134,7 @@ const PayPalButtonsWrapper: React.FC<PayPalButtonsWrapperProps> = ({
             createOrder={handleCreateOrder}
             onApprove={handleOnApprove}
             onError={() => {
-              toast.error("Đã xảy ra lỗi trong quá trình thanh toán PayPal.");
+              toast.error(t("genericError"));
               setIsProcessing(false);
             }}
             // Thêm forceReRender để tránh caching issues

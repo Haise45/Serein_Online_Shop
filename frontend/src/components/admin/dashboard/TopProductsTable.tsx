@@ -1,5 +1,7 @@
 "use client";
 
+import RatingStars from "@/components/shared/RatingStars";
+import { getLocalizedName } from "@/lib/utils";
 import { TopSellingProduct } from "@/types";
 import {
   CCard,
@@ -13,9 +15,9 @@ import {
   CTableHeaderCell,
   CTableRow,
 } from "@coreui/react";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import RatingStars from "@/components/shared/RatingStars";
 
 interface TopProductsTableProps {
   data: TopSellingProduct[] | undefined;
@@ -26,9 +28,12 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
   data,
   isLoading,
 }) => {
+  const t = useTranslations("AdminDashboard.topProductsTable");
+  const locale = useLocale() as "vi" | "en";
+
   return (
     <CCard className="shadow-sm">
-      <CCardHeader>Top 10 sản phẩm bán chạy</CCardHeader>
+      <CCardHeader>{t("title")}</CCardHeader>
       <CCardBody className="p-0">
         {isLoading ? (
           <div className="p-10 text-center">
@@ -38,12 +43,12 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
           <CTable hover responsive className="mb-0 align-middle">
             <CTableHead>
               <CTableRow>
-                <CTableHeaderCell>Sản phẩm</CTableHeaderCell>
+                <CTableHeaderCell>{t("colProduct")}</CTableHeaderCell>
                 <CTableHeaderCell className="text-center">
-                  Đã bán
+                  {t("colSold")}
                 </CTableHeaderCell>
                 <CTableHeaderCell className="text-center">
-                  Đánh giá
+                  {t("colRating")}
                 </CTableHeaderCell>
               </CTableRow>
             </CTableHead>
@@ -53,7 +58,7 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
                   <CTableDataCell>
                     <Link
                       href={`/admin/products/${product.productId}/edit`}
-                      className="flex items-center gap-3 text-decoration-none"
+                      className="text-decoration-none flex items-center gap-3"
                     >
                       <Image
                         src={product.image || "/placeholder-image.jpg"}
@@ -64,7 +69,7 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
                         className="aspect-square rounded object-cover object-top"
                       />
                       <span className="text-decoration-none font-medium text-gray-800 hover:text-indigo-600">
-                        {product.name}
+                        {getLocalizedName(product.name, locale)}
                       </span>
                     </Link>
                   </CTableDataCell>

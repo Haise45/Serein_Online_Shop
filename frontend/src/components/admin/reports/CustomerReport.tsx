@@ -1,38 +1,56 @@
 "use client";
 
 import { useGetCustomerReport } from "@/lib/react-query/reportQueries";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getLocalizedName } from "@/lib/utils";
 import { CustomerReportParams } from "@/services/reportService";
 import { CustomerReportItem } from "@/types/report";
 import { CAvatar, CTableDataCell, CTableRow } from "@coreui/react";
 import Link from "next/link";
 import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
+import { ExchangeRates } from "@/types";
+import { useLocale, useTranslations } from "next-intl";
 
-const CustomerReport: React.FC<{ filters: CustomerReportParams }> = ({
+interface CustomerReportProps {
+  filters: CustomerReportParams;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}
+
+const CustomerReport: React.FC<CustomerReportProps> = ({
   filters,
+  displayCurrency,
+  rates,
 }) => {
+  const t = useTranslations("AdminReports.customers");
+
   const { data, isLoading } = useGetCustomerReport(filters);
+  const currencyOptions = { currency: displayCurrency, rates };
+  const locale = useLocale() as "vi" | "en";
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <ReportStatCard
-          title="Khách hàng mới"
+          title={t("newCustomers")}
           value={data?.newCustomersCount || 0}
           isLoading={isLoading}
-          description="Trong khoảng thời gian đã chọn"
+          description={t("description")}
         />
       </div>
 
       <ReportTable
-        title="Top Khách hàng Chi tiêu nhiều nhất"
+        title={t("topSpenders")}
         isLoading={isLoading}
         items={data?.topSpenders || []}
         headers={[
-          { key: "customer", label: "Khách hàng" },
-          { key: "orders", label: "Số đơn hàng", className: "text-center" },
-          { key: "spent", label: "Tổng chi tiêu", className: "text-end" },
+          { key: "customer", label: t("tableColCustomer") },
+          {
+            key: "orders",
+            label: t("tableColOrders"),
+            className: "text-center",
+          },
+          { key: "spent", label: t("tableColSpent"), className: "text-end" },
         ]}
         // TypeScript sẽ tự động suy ra `item` có kiểu là `CustomerReportItem`
         renderRow={(item: CustomerReportItem) => (
@@ -45,14 +63,14 @@ const CustomerReport: React.FC<{ filters: CustomerReportParams }> = ({
                   size="md"
                   className="me-3"
                 >
-                  {item.name.charAt(0).toUpperCase()}
+                  {getLocalizedName(item.name, locale).charAt(0).toUpperCase()}
                 </CAvatar>
                 <div>
                   <Link
                     href={`/admin/users/${item._id}`}
                     className="text-decoration-none font-medium hover:underline"
                   >
-                    {item.name}
+                    {getLocalizedName(item.name, locale)}
                   </Link>
                   <div className="text-xs text-gray-500">{item.email}</div>
                 </div>
@@ -62,7 +80,7 @@ const CustomerReport: React.FC<{ filters: CustomerReportParams }> = ({
               {item.orderCount}
             </CTableDataCell>
             <CTableDataCell className="text-end font-semibold text-green-600">
-              {formatCurrency(item.totalSpent)}
+              {formatCurrency(item.totalSpent, currencyOptions)}
             </CTableDataCell>
           </CTableRow>
         )}

@@ -1,13 +1,24 @@
 const Cart = require("../models/Cart");
 const Coupon = require("../models/Coupon");
 const Product = require("../models/Product");
-const Attribute = require("../models/Attribute");
 const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 const {
   getCategoryAncestors,
   fetchAndMapCategories,
 } = require("../utils/categoryUtils");
+
+// --- Helper: "Làm phẳng" i18n ---
+const flattenI18nObject = (obj, locale, fields) => {
+  if (!obj) return obj;
+  const newObj = { ...obj };
+  for (const field of fields) {
+    if (newObj[field] && typeof newObj[field] === "object") {
+      newObj[field] = newObj[field][locale] || newObj[field].vi;
+    }
+  }
+  return newObj;
+};
 
 // Hàm helper tìm hoặc tạo giỏ hàng
 const findOrCreateCart = async (identifier) => {
@@ -20,7 +31,7 @@ const findOrCreateCart = async (identifier) => {
 };
 
 // Hàm helper populate và tính toán giỏ hàng
-const populateAndCalculateCart = async (cartObject) => {
+const populateAndCalculateCart = async (cartObject, locale) => {
   // --- Bước 0: Xử lý trường hợp giỏ hàng rỗng hoặc không tồn tại ---
   if (!cartObject || !cartObject.items || cartObject.items.length === 0) {
     const appliedCouponInfo = cartObject?.appliedCoupon
@@ -86,6 +97,7 @@ const populateAndCalculateCart = async (cartObject) => {
       $project: {
         _id: 1,
         name: 1,
+        description: 1,
         slug: 1,
         price: 1,
         salePrice: 1,
@@ -94,7 +106,17 @@ const populateAndCalculateCart = async (cartObject) => {
         images: 1,
         sku: 1,
         stockQuantity: 1,
-        category: { $arrayElemAt: ["$categoryInfo", 0] }, // Lấy object category đầu tiên
+        category: {
+          $let: {
+            vars: { cat: { $arrayElemAt: ["$categoryInfo", 0] } },
+            in: {
+              _id: "$$cat._id",
+              name: "$$cat.name",
+              slug: "$$cat.slug",
+              parent: "$$cat.parent",
+            },
+          },
+        },
         // Tạo một object variant đã được "làm giàu" thông tin
         variant: {
           _id: "$variants._id",
@@ -182,40 +204,38 @@ const populateAndCalculateCart = async (cartObject) => {
     },
   ]);
 
-  // --- Bước 3: Tạo một Map để tra cứu nhanh thông tin đã populate ---
-  const productInfoMap = new Map();
+  // --- Bước 3: Tạo Map để tra cứu nhanh ---
+  // Map này sẽ chứa dữ liệu gốc, chưa làm phẳng
+  const rawProductInfoMap = new Map();
   populatedProductsInfo.forEach((p) => {
-    // Tạo key duy nhất cho mỗi sản phẩm hoặc biến thể
     const key = p.variant
       ? `${p._id.toString()}-${p.variant._id.toString()}`
       : p._id.toString();
-    productInfoMap.set(key, p);
+    rawProductInfoMap.set(key, p);
   });
-
   // --- Bước 4: Lặp qua các item trong giỏ hàng để tính toán và xây dựng kết quả cuối cùng ---
   let subtotal = 0;
   const finalCartItems = [];
+  const itemsToRemove = [];
 
   for (const item of cartObject.items) {
     // Tạo key để tra cứu trong Map
     const key = item.variantId
       ? `${item.productId.toString()}-${item.variantId.toString()}`
       : item.productId.toString();
-    const productInfo = productInfoMap.get(key);
+    const rawProductInfo = rawProductInfoMap.get(key);
 
     // Nếu không tìm thấy thông tin (sản phẩm đã bị xóa/ẩn), bỏ qua item này
-    if (!productInfo) {
-      console.warn(
-        `[Cart] Bỏ qua item không hợp lệ: Product ${item.productId}, Variant ${item.variantId}`
-      );
+    if (!rawProductInfo) {
+      itemsToRemove.push(item._id); // Ghi nhận item cần xóa
       continue;
     }
 
     const isVariant = !!item.variantId;
     // `source` là sản phẩm gốc hoặc biến thể cụ thể
-    const source = isVariant ? productInfo.variant : productInfo;
+    const source = isVariant ? rawProductInfo.variant : rawProductInfo;
 
-    // Tính toán giá hiển thị (displayPrice) bằng tay vì virtuals không chạy trong aggregation
+    // Tính toán giá hiển thị (displayPrice)
     const now = new Date();
     let displayPrice = source.price;
     const isOnSale =
@@ -231,36 +251,112 @@ const populateAndCalculateCart = async (cartObject) => {
 
     subtotal += displayPrice * item.quantity;
 
-    finalCartItems.push({
-      _id: item._id,
-      productId: productInfo._id,
+    // *** LOGIC LÀM PHẲNG CÓ ĐIỀU KIỆN ***
+    let finalItem;
+    if (locale) {
+      // Nếu có locale, làm phẳng dữ liệu để gửi cho client
+      const flatProduct = flattenI18nObject(rawProductInfo, locale, [
+        "name",
+        "description",
+      ]);
+      if (flatProduct.category) {
+        flatProduct.category = flattenI18nObject(flatProduct.category, locale, [
+          "name",
+        ]);
+      }
+      if (flatProduct.variant?.optionValues) {
+        flatProduct.variant.optionValues.forEach((opt) => {
+          opt.attributeLabel =
+            opt.attributeLabel?.[locale] || opt.attributeLabel?.vi;
+          opt.valueName = opt.valueName?.[locale] || opt.valueName?.vi;
+        });
+      }
+      finalItem = {
+        _id: item._id,
+        productId: flatProduct._id,
+        variantId: item.variantId,
+        name: flatProduct.name,
+        slug: flatProduct.slug,
+        sku: source.sku,
+        price: displayPrice,
+        originalPrice: source.price,
+        isOnSale,
+        quantity: item.quantity,
+        lineTotal: displayPrice * item.quantity,
+        image:
+          source.images && source.images.length > 0
+            ? source.images[0]
+            : flatProduct.images[0] || null,
+        availableStock: source.stockQuantity,
+        category: flatProduct.category, // Category đã được populate sẵn
+        variantInfo: isVariant
+          ? {
+              _id: source._id,
+              options: source.optionValues.map((opt) => {
+                const flatOpt = flattenI18nObject(opt, locale, [
+                  "attributeLabel",
+                  "valueName",
+                ]);
+                return {
+                  attribute: opt.attributeId,
+                  value: opt.valueId,
+                  attributeName: flatOpt.attributeLabel,
+                  valueName: flatOpt.valueName,
+                };
+              }),
+            }
+          : undefined,
+      };
+    } else {
+      // Nếu KHÔNG có locale (trường hợp của createOrder), giữ nguyên dữ liệu gốc
+      finalItem = {
+        _id: item._id,
+        productId: rawProductInfo._id,
+        variantId: item.variantId,
+        name: rawProductInfo.name,
+        slug: rawProductInfo.slug,
+        sku: source.sku,
+        price: displayPrice,
+        originalPrice: source.price,
+        isOnSale,
+        quantity: item.quantity,
+        lineTotal: displayPrice * item.quantity,
+        image:
+          source.images && source.images.length > 0
+            ? source.images[0]
+            : rawProductInfo.images[0] || null,
+        availableStock: source.stockQuantity,
+        category: rawProductInfo.category, // Category đã được populate sẵn
+        variantInfo: isVariant
+          ? {
+              _id: source._id,
+              options: source.optionValues.map((opt) => ({
+                attribute: opt.attributeId,
+                value: opt.valueId,
+                attributeName: opt.attributeLabel, // Đã là string
+                valueName: opt.valueName, // Đã là string
+              })),
+            }
+          : undefined,
+        rawProductInfo: rawProductInfo,
+      };
+    }
+    // Gộp các thuộc tính chung vào finalItem
+    Object.assign(finalItem, {
       variantId: item.variantId,
-      name: productInfo.name,
-      slug: productInfo.slug,
+      slug: rawProductInfo.slug,
       sku: source.sku,
       price: displayPrice,
       originalPrice: source.price,
       isOnSale,
       quantity: item.quantity,
       lineTotal: displayPrice * item.quantity,
-      image:
-        source.images && source.images.length > 0
-          ? source.images[0]
-          : productInfo.images[0] || null,
+      image: source.images?.[0] || rawProductInfo.images?.[0] || null,
       availableStock: source.stockQuantity,
-      category: productInfo.category, // Category đã được populate sẵn
-      variantInfo: isVariant
-        ? {
-            _id: source._id,
-            options: source.optionValues.map((opt) => ({
-              attribute: opt.attributeId,
-              value: opt.valueId,
-              attributeName: opt.attributeLabel,
-              valueName: opt.valueName,
-            })),
-          }
-        : undefined,
+      category: rawProductInfo.category, // Category gốc, sẽ được làm phẳng sau nếu cần
     });
+
+    finalCartItems.push(finalItem);
   }
 
   // === Bước 5 & 6: Gọi hàm Helper và xử lý kết quả ===
@@ -287,12 +383,10 @@ const populateAndCalculateCart = async (cartObject) => {
   }
 
   // --- Bước 7: Xử lý các item không hợp lệ bị loại bỏ (nếu có) ---
-  if (finalCartItems.length !== cartObject.items.length) {
-    const validItemIds = finalCartItems.map((item) => item._id);
-    // Cần một cart document để save
+  if (itemsToRemove.length > 0) {
     const cartToUpdate = await Cart.findById(cartObject._id);
     if (cartToUpdate) {
-      cartToUpdate.items.pull({ _id: { $nin: validItemIds } });
+      cartToUpdate.items.pull({ _id: { $in: itemsToRemove } });
       await cartToUpdate.save();
     }
   }
@@ -442,6 +536,7 @@ const calculateDiscount = async (appliedCoupon, cartItems, subtotal) => {
 const applyCoupon = asyncHandler(async (req, res) => {
   const { couponCode } = req.body;
   const identifier = req.cartIdentifier;
+  const locale = req.locale || "vi";
 
   if (!couponCode) {
     res.status(400);
@@ -606,7 +701,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
   await cart.save();
 
   // --- 5. Trả về giỏ hàng đã cập nhật ---
-  const updatedPopulatedCart = await populateAndCalculateCart(cart);
+  const updatedPopulatedCart = await populateAndCalculateCart(cart, locale);
   res.status(200).json(updatedPopulatedCart);
 });
 
@@ -615,6 +710,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
 // @access  Public
 const removeCoupon = asyncHandler(async (req, res) => {
   const identifier = req.cartIdentifier;
+  const locale = req.locale || "vi";
 
   const cart = await Cart.findOne(identifier);
   if (cart && cart.appliedCoupon) {
@@ -624,7 +720,7 @@ const removeCoupon = asyncHandler(async (req, res) => {
   }
 
   // Trả về giỏ hàng mới nhất (dù có thay đổi hay không)
-  const populatedCart = await populateAndCalculateCart(cart);
+  const populatedCart = await populateAndCalculateCart(cart, locale);
   res.status(200).json(populatedCart);
 });
 
@@ -634,6 +730,7 @@ const removeCoupon = asyncHandler(async (req, res) => {
 const addItemToCart = asyncHandler(async (req, res) => {
   const { productId, variantId, quantity } = req.body; // Dữ liệu đã validate
   const identifier = req.cartIdentifier; // Lấy từ middleware { userId: ... } hoặc { guestId: ... }
+  const locale = req.locale || "vi";
 
   // --- 1. Tìm hoặc tạo giỏ hàng ---
   const cart = await findOrCreateCart(identifier);
@@ -721,7 +818,7 @@ const addItemToCart = asyncHandler(async (req, res) => {
 
   // --- 6. Lưu giỏ hàng và trả về ---
   await cart.save();
-  const populatedCart = await populateAndCalculateCart(cart.toObject());
+  const populatedCart = await populateAndCalculateCart(cart.toObject(), locale);
   res.status(200).json(populatedCart); // Trả về giỏ hàng đã cập nhật và populate
 });
 
@@ -729,10 +826,11 @@ const addItemToCart = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/cart
 // @access  Public (User hoặc Guest)
 const getCart = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const identifier = req.cartIdentifier;
   const cart = await Cart.findOne(identifier);
 
-  const populatedCart = await populateAndCalculateCart(cart); // Luôn gọi để trả về cấu trúc chuẩn
+  const populatedCart = await populateAndCalculateCart(cart, locale); // Luôn gọi để trả về cấu trúc chuẩn
   res.status(200).json(populatedCart);
 });
 
@@ -743,6 +841,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
   const { itemId } = req.params; // ID của cart item (subdocument)
   const { quantity, newVariantId } = req.body; // Số lượng, Variant mới (đã validate)
   const identifier = req.cartIdentifier;
+  const locale = req.locale || "vi";
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     res.status(400);
@@ -821,7 +920,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
       cart.items.pull({ _id: itemToUpdate._id });
 
       await cart.save();
-      const populatedCart = await populateAndCalculateCart(cart.toObject());
+      const populatedCart = await populateAndCalculateCart(
+        cart.toObject(),
+        locale
+      );
       return res.status(200).json(populatedCart);
     }
     // Nếu không tìm thấy item để gộp, tiếp tục logic cập nhật bình thường ở dưới
@@ -834,7 +936,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
   if (!product || !product.isActive || !product.isPublished) {
     cart.items.pull({ _id: itemId });
     await cart.save();
-    const populatedCart = await populateAndCalculateCart(cart);
+    const populatedCart = await populateAndCalculateCart(cart, locale);
     return res.status(404).json({
       message: "Sản phẩm không còn tồn tại hoặc không hoạt động.",
       cart: populatedCart,
@@ -881,7 +983,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
       if (!currentVariant) {
         cart.items.pull({ _id: itemId });
         await cart.save();
-        const populatedCart = await populateAndCalculateCart(cart);
+        const populatedCart = await populateAndCalculateCart(cart, locale);
         return res.status(404).json({
           message: "Biến thể sản phẩm hiện tại không còn tồn tại.",
           cart: populatedCart,
@@ -914,7 +1016,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
 
   // Lưu giỏ hàng
   await cart.save();
-  const populatedCart = await populateAndCalculateCart(cart.toObject());
+  const populatedCart = await populateAndCalculateCart(cart.toObject(), locale);
   res.status(200).json(populatedCart);
 });
 
@@ -924,6 +1026,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
 const removeCartItem = asyncHandler(async (req, res) => {
   const { itemId } = req.params;
   const identifier = req.cartIdentifier;
+  const locale = req.locale || "vi";
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     res.status(400);
@@ -944,7 +1047,7 @@ const removeCartItem = asyncHandler(async (req, res) => {
 
   // --- 3. Lưu giỏ hàng và trả về ---
   await cart.save();
-  const populatedCart = await populateAndCalculateCart(cart);
+  const populatedCart = await populateAndCalculateCart(cart, locale);
   res.status(200).json(populatedCart);
 });
 
@@ -966,6 +1069,7 @@ const clearCart = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  flattenI18nObject,
   applyCoupon,
   removeCoupon,
   addItemToCart,

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
 
 const couponSchema = new mongoose.Schema(
   {
@@ -13,7 +14,7 @@ const couponSchema = new mongoose.Schema(
     },
     description: {
       // Mô tả nội bộ cho admin
-      type: String,
+      type: i18nStringSchema,
       trim: true,
     },
     discountType: {

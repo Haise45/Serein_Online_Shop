@@ -4,6 +4,7 @@ import { Order, User } from "@/types";
 import { cilContact, cilLocationPin } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface OrderCustomerInfoProps {
   order: Order;
@@ -20,6 +21,8 @@ const isUserObject = (user: User | string | null | undefined): user is User => {
 };
 
 const OrderCustomerInfo: React.FC<OrderCustomerInfoProps> = ({ order }) => {
+  const t = useTranslations("AdminOrderDetail.customerInfoCard");
+
   const customerName = isUserObject(order.user)
     ? order.user.name
     : order.shippingAddress.fullName;
@@ -42,35 +45,31 @@ const OrderCustomerInfo: React.FC<OrderCustomerInfoProps> = ({ order }) => {
       <div>
         <h3 className="mb-3 flex items-center text-lg font-semibold text-gray-800">
           <CIcon icon={cilContact} className="mr-2 h-5 w-5" />
-          Thông tin khách hàng
+          {t("title")}
         </h3>
         <div className="space-y-2 text-sm">
           <p>
-            <strong>Tên:</strong> {customerName}
+            <strong>{t("name")}</strong> {customerName}
           </p>
           <p>
-            <strong>Email:</strong> {customerEmail}
+            <strong>{t("email")}</strong> {customerEmail}
           </p>
           <p>
-            <strong>Điện thoại:</strong> {customerPhone}
+            <strong>{t("phone")}</strong> {customerPhone}
           </p>
-          {isUserObject(order.user) && (
-            <p>
-              <strong>Loại:</strong>{" "}
+          <p>
+            <strong>{t("type")}</strong>{" "}
+            {isUserObject(order.user) ? (
               <Link
                 href={`/admin/users/${order.user._id}`}
-                className="text-indigo-600 hover:underline text-decoration-none"
+                className="text-decoration-none text-indigo-600 hover:underline"
               >
-                Thành viên
+                {t("member")}
               </Link>
-            </p>
-          )}
-          {!order.user && (
-            <p>
-              <strong>Loại:</strong>{" "}
-              <span className="text-gray-600">Khách vãng lai</span>
-            </p>
-          )}
+            ) : (
+              <span className="text-gray-600">{t("guest")}</span>
+            )}
+          </p>
         </div>
       </div>
 
@@ -78,7 +77,7 @@ const OrderCustomerInfo: React.FC<OrderCustomerInfoProps> = ({ order }) => {
       <div>
         <h3 className="mb-3 flex items-center text-lg font-semibold text-gray-800">
           <CIcon icon={cilLocationPin} className="mr-2 h-5 w-5" />
-          Địa chỉ giao hàng
+          {t("shippingAddress")}
         </h3>
         <div className="space-y-1 text-sm text-gray-700">
           <p className="font-medium">

@@ -97,6 +97,7 @@ export interface OrderSummary {
   status: string;
   totalPrice: number;
   createdAt: string | Date;
+  deliveredAt: string | Date;
   orderItems: OrderItem[]; // Chỉ lấy một phần của orderItems
 
   // Thêm các trường đã được populate từ API

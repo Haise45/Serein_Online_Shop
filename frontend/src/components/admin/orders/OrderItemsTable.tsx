@@ -1,5 +1,6 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import { formatCurrency } from "@/lib/utils";
 import { OrderItem, Product } from "@/types";
 import { cilWarning } from "@coreui/icons";
@@ -15,23 +16,26 @@ import {
 } from "@coreui/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface OrderItemsTableProps {
   items: OrderItem[];
 }
 
 const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
+  const t = useTranslations("AdminOrderDetail.itemsTable");
+
   return (
     <div className="overflow-x-auto">
       <CTable hover className="align-middle" style={{ minWidth: "700px" }}>
         <CTableHead>
           <CTableRow>
-            <CTableHeaderCell colSpan={2}>Sản phẩm</CTableHeaderCell>
-            <CTableHeaderCell className="text-end">Đơn giá</CTableHeaderCell>
-            <CTableHeaderCell className="text-center">
-              Số lượng
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-end">Thành tiền</CTableHeaderCell>
+            <CTableHeaderCell colSpan={2}>{t("colProduct")}</CTableHeaderCell>
+            <CTableHeaderCell className="text-end">{t("colPrice")}</CTableHeaderCell>
+            <CTableHeaderCell className="text-center">{t("colQty")}</CTableHeaderCell>
+            <CTableHeaderCell className="text-end">{t("colTotal")}</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
@@ -52,7 +56,8 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
                     alt={item.name}
                     width={64}
                     height={64}
-                    className="rounded border object-cover"
+                    quality={100}
+                    className="aspect-square rounded border object-cover object-top"
                   />
                 </CTableDataCell>
                 <CTableDataCell>
@@ -61,7 +66,7 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
                     <Link
                       href={`/products/${productData.slug}`}
                       target="_blank"
-                      className="font-medium text-gray-800 hover:text-indigo-600 text-decoration-none"
+                      className="text-decoration-none font-medium text-gray-800 hover:text-indigo-600"
                     >
                       {item.name}
                     </Link>
@@ -91,13 +96,19 @@ const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
                   )}
                 </CTableDataCell>
                 <CTableDataCell className="text-end">
-                  {formatCurrency(item.price)}
+                  {formatCurrency(item.price, {
+                    currency: displayCurrency,
+                    rates,
+                  })}
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
                   x {item.quantity}
                 </CTableDataCell>
                 <CTableDataCell className="text-end font-semibold">
-                  {formatCurrency(item.price * item.quantity)}
+                  {formatCurrency(item.price * item.quantity, {
+                    currency: displayCurrency,
+                    rates,
+                  })}
                 </CTableDataCell>
               </CTableRow>
             );
