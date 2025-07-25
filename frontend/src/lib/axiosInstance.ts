@@ -11,10 +11,10 @@ if (IS_SERVER) {
   // Đảm bảo các biến môi trường này được set đúng cho môi trường server của Next.js
   if (process.env.NODE_ENV === "development") {
     apiBaseUrl =
-      process.env.INTERNAL_API_BASE_URL || "http://localhost:8080/api/v1"; // URL backend API mà server Next.js có thể gọi
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1"; // URL backend API mà server Next.js có thể gọi
   } else {
     apiBaseUrl =
-      process.env.INTERNAL_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
       "https://online-store-pb1l.onrender.com/api/v1"; // URL backend API cho production
   }
 } else {
@@ -70,7 +70,6 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
-    console.error("[Axios Request Error]", error);
     return Promise.reject(error);
   },
 );
@@ -104,6 +103,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+
     // --- LOGIC TỰ ĐỘNG LOGOUT KHI GẶP LỖI 403 (Forbidden) ---
     // Đây là trường hợp tài khoản bị đình chỉ hoặc không có quyền admin.
     if (error.response?.status === 403) {
@@ -115,12 +115,6 @@ axiosInstance.interceptors.response.use(
 
       // Dispatch action logout để xóa state và token
       store.dispatch(logout());
-
-      // Chuyển hướng về trang đăng nhập
-      // if (typeof window !== "undefined") {
-      //   // Chỉ chuyển hướng ở client-side
-      //   window.location.href = "/login";
-      // }
 
       // Reject promise để dừng chuỗi xử lý hiện tại
       return Promise.reject(new Error(errorMessage));
@@ -171,10 +165,6 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         const axiosRefreshError = refreshError as AxiosError;
-        console.error(
-          "[Axios Interceptor] Refresh token failed:",
-          axiosRefreshError.response?.data || axiosRefreshError.message,
-        );
         if (axiosRefreshError.config?.url?.endsWith("auth/refresh")) {
           store.dispatch(logout());
         }
@@ -195,7 +185,6 @@ axiosInstance.interceptors.response.use(
       // với thông điệp đó. Đây là thông điệp mà người dùng sẽ thấy.
       if (apiErrorData && typeof apiErrorData.message === "string") {
         const customError = new Error(apiErrorData.message);
-        console.error("[API Error Message]:", customError.message);
         return Promise.reject(customError);
       }
     }

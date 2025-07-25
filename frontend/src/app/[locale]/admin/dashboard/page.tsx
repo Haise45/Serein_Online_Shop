@@ -1,18 +1,31 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Metadata } from "next";
 import AdminDashboardClient from "./AdminDashboardClient";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Thống kê số liệu | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function AdminDashboardPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "AdminDashboard.meta" });
+
+  return {
+    title: t("title"),
+  };
+}
+
+export default async function AdminDashboardPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminDashboard.pageHeader",
+  });
+
   return (
     <div>
-      <PageHeader
-        title="Thống kê số liệu"
-        description="Tổng quan về hoạt động kinh doanh của cửa hàng."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <AdminDashboardClient />
     </div>
   );

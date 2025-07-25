@@ -35,8 +35,14 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 export default function AdminReviewsClient() {
+  const t = useTranslations("AdminReviews.list");
+  const tAdmin = useTranslations("Admin");
+  const tReply = useTranslations("AdminReviews.replyModal");
+  const tDelete = useTranslations("AdminReviews.deleteModal");
+  const tShared = useTranslations("Shared.confirmModal");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -146,7 +152,7 @@ export default function AdminReviewsClient() {
 
   const handleReplySubmit = () => {
     if (!replyModal.review || !replyModal.comment.trim()) {
-      toast.error("Phản hồi không được để trống.");
+      toast.error(tReply("emptyReplyError"));
       return;
     }
     replyMutation.mutate(
@@ -179,13 +185,13 @@ export default function AdminReviewsClient() {
   if (isError) {
     return (
       <CCard className="mb-4">
-        <CCardHeader>Lỗi</CCardHeader>
+        <CCardHeader>{t("errorTitle")}</CCardHeader>
         <CCardBody className="p-5 text-center">
           <CIcon icon={cilWarning} size="xl" className="text-danger mb-3" />
-          <p className="text-danger">Không thể tải danh sách đánh giá.</p>
+          <p className="text-danger">{t("errorMessage")}</p>
           <p className="text-muted text-sm">{error?.message}</p>
           <CButton color="primary" onClick={() => refetch()} className="mt-3">
-            Thử lại
+            {t("retryButton")}
           </CButton>
         </CCardBody>
       </CCard>
@@ -198,10 +204,10 @@ export default function AdminReviewsClient() {
         <CCard className="shadow-sm">
           <CCardHeader className="border-b bg-white !p-4">
             <div className="d-flex align-items-center mb-3">
-              <h4 className="fw-semibold text-dark mb-0">Quản lý Đánh giá</h4>
+              <h4 className="fw-semibold text-dark mb-0">{t("title")}</h4>
               {hasActiveFilters && (
                 <CBadge color="info" className="ms-2 px-2 py-1">
-                  {data?.totalReviews || 0} kết quả
+                  {t("results", { count: data?.totalReviews || 0 })}
                 </CBadge>
               )}
             </div>
@@ -216,7 +222,7 @@ export default function AdminReviewsClient() {
             {isLoading && !data && (
               <div className="p-5 text-center">
                 <CSpinner />
-                <p className="text-muted mt-2">Đang tải...</p>
+                <p className="text-muted mt-2">{t("loading")}</p>
               </div>
             )}
 
@@ -230,8 +236,8 @@ export default function AdminReviewsClient() {
                 />
                 <p className="text-muted mb-0">
                   {hasActiveFilters
-                    ? "Không tìm thấy đánh giá nào phù hợp."
-                    : "Chưa có đánh giá nào."}
+                    ? t("noResultsWithFilter")
+                    : t("noReviewsYet")}
                 </p>
               </div>
             )}
@@ -271,7 +277,9 @@ export default function AdminReviewsClient() {
               limit={data.limit}
               onPageChange={setCurrentPage}
               onLimitChange={handleLimitChange}
-              itemType="đánh giá"
+              itemType={tAdmin("breadcrumbs.reviews", {
+                count: 2,
+              }).toLowerCase()}
               defaultLimitFromSettings={defaultLimitFromSettings}
             />
           )}
@@ -285,18 +293,22 @@ export default function AdminReviewsClient() {
         alignment="center"
       >
         <CModalHeader>
-          <CModalTitle>Phản hồi đánh giá</CModalTitle>
+          <CModalTitle>{tReply("title")}</CModalTitle>
         </CModalHeader>
         <CModalBody>
           <p className="mb-2 text-sm text-gray-600">
-            Đánh giá của: <strong>{replyModal.review?.user.name}</strong>
+            {tReply.rich("reviewBy", {
+              name: replyModal.review?.user.name ?? "",
+              bold: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
+
           <blockquote className="mb-4 border-l-4 bg-gray-100 p-2 text-sm">
             &quot;{replyModal.review?.comment}&quot;
           </blockquote>
           <CFormTextarea
             rows={4}
-            placeholder="Nhập phản hồi của bạn..."
+            placeholder={tReply("commentPlaceholder")}
             value={replyModal.comment}
             onChange={(e) =>
               setReplyModal((prev) => ({ ...prev, comment: e.target.value }))
@@ -310,14 +322,18 @@ export default function AdminReviewsClient() {
               setReplyModal((prev) => ({ ...prev, isOpen: false }))
             }
           >
-            Hủy
+            {tReply("cancel")}
           </CButton>
           <CButton
             color="primary"
             onClick={handleReplySubmit}
             disabled={replyMutation.isPending}
           >
-            {replyMutation.isPending ? <CSpinner size="sm" /> : "Gửi phản hồi"}
+            {replyMutation.isPending ? (
+              <CSpinner size="sm" />
+            ) : (
+              tReply("submit")
+            )}
           </CButton>
         </CModalFooter>
       </CModal>
@@ -329,9 +345,11 @@ export default function AdminReviewsClient() {
         }
         onConfirm={handleDeleteSubmit}
         isConfirming={deleteMutation.isPending}
-        title="Xác nhận Xóa Đánh giá"
-        body={`Bạn có chắc muốn xóa vĩnh viễn đánh giá của "${deleteModal.author}"? Hành động này không thể hoàn tác.`}
+        title={tDelete("title")}
+        body={tDelete("body", { author: deleteModal.author })}
         confirmButtonColor="danger"
+        confirmButtonText={tShared("confirm")}
+        cancelButtonText={tShared("cancel")}
       />
     </CRow>
   );

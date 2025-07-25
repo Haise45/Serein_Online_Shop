@@ -1,8 +1,8 @@
 "use client";
 
 import { useSettings } from "@/app/SettingsContext";
-import { ORDER_STATUSES } from "@/constants/orderConstants";
-import { formatCurrency, timeAgo } from "@/lib/utils";
+import RelativeTime from "@/components/shared/RelativeTime";
+import { formatCurrency, getLocalizedName } from "@/lib/utils";
 import { Order, OrderItem } from "@/types";
 import {
   cilCheckCircle,
@@ -12,7 +12,6 @@ import {
 } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import {
-  CBadge,
   CButton,
   CModal,
   CModalBody,
@@ -28,25 +27,22 @@ import {
   CTooltip,
 } from "@coreui/react";
 import classNames from "classnames";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { getStatusBadge } from "../orders/OrderTable";
 
 interface UserOrdersTableProps {
   orders: Order[];
 }
 
-// Helper để lấy màu và text cho badge trạng thái
-const getStatusBadge = (status: string) => {
-  const config = ORDER_STATUSES.find((s) => s.value === status) || {
-    color: "light",
-    label: status,
-  };
-  return <CBadge color={config.color}>{config.label}</CBadge>;
-};
-
 const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
+  const t = useTranslations("AdminUsers.userOrdersTable");
+  const tOrder = useTranslations("AdminOrders.table");
+  const tStatus = useTranslations("OrderStatus");
+  const locale = useLocale() as "vi" | "en";
   // --- State and handlers for the items modal ---
   const router = useRouter();
   // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
@@ -68,32 +64,39 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
     setIsModalOpen(false);
   };
 
+  const getStatusBadgeWithT = (status: string) =>
+    getStatusBadge(status, tStatus);
+
   return (
     <>
       <div className="overflow-x-auto">
         <CTable hover responsive className="align-middle text-sm">
           <CTableHead>
             <CTableRow>
-              <CTableHeaderCell>Mã đơn</CTableHeaderCell>
-              <CTableHeaderCell>Ngày đặt</CTableHeaderCell>
-              <CTableHeaderCell>Sản phẩm</CTableHeaderCell>
+              <CTableHeaderCell>{t("colOrderId")}</CTableHeaderCell>
+              <CTableHeaderCell>{t("colDate")}</CTableHeaderCell>
+              <CTableHeaderCell>{t("colProducts")}</CTableHeaderCell>
               <CTableHeaderCell className="text-end">
-                Tổng tiền
+                {t("colTotal")}
               </CTableHeaderCell>
               <CTableHeaderCell className="text-center">
-                Trạng thái
+                {t("colStatus")}
               </CTableHeaderCell>
               <CTableHeaderCell className="text-center">
-                Thanh toán
+                {t("colPayment")}
               </CTableHeaderCell>
               <CTableHeaderCell className="text-center">
-                Hành động
+                {t("colActions")}
               </CTableHeaderCell>
             </CTableRow>
           </CTableHead>
           <CTableBody>
             {orders.map((order) => {
               const firstItem = order.orderItems[0];
+              const localizedItemName = firstItem
+                ? getLocalizedName(firstItem.name, locale)
+                : "";
+
               return (
                 <CTableRow key={order._id}>
                   <CTableDataCell>
@@ -104,11 +107,13 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                       #{order._id.slice(-6).toUpperCase()}
                     </Link>
                   </CTableDataCell>
-                  <CTableDataCell>
+                  <CTableDataCell
+                    style={{ minWidth: "95px" }}
+                  >
                     <div
-                      title={new Date(order.createdAt).toLocaleString("vi-VN")}
+                      title={new Date(order.createdAt).toLocaleString(locale)}
                     >
-                      {timeAgo(order.createdAt)}
+                      <RelativeTime date={order.createdAt} />
                     </div>
                   </CTableDataCell>
                   <CTableDataCell style={{ minWidth: "250px" }}>
@@ -117,7 +122,7 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                         <div className="flex-shrink-0">
                           <Image
                             src={firstItem.image || "/placeholder-image.jpg"}
-                            alt={firstItem.name}
+                            alt={localizedItemName}
                             width={40}
                             height={40}
                             quality={100}
@@ -128,9 +133,9 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                         <div className="ml-3 min-w-0">
                           <div
                             className="truncate font-medium text-gray-800"
-                            title={firstItem.name}
+                            title={localizedItemName}
                           >
-                            {firstItem.name}
+                            {localizedItemName}
                           </div>
                           {/* Span to Button */}
                           {order.orderItems.length > 1 && (
@@ -138,7 +143,9 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                               onClick={() => handleViewItemsClick(order)}
                               className="mt-1 text-xs text-indigo-600 hover:underline"
                             >
-                              + {order.orderItems.length - 1} sản phẩm khác...
+                              {t("moreProducts", {
+                                count: order.orderItems.length - 1,
+                              })}
                             </button>
                           )}
                         </div>
@@ -154,14 +161,18 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                     </span>
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
-                    {getStatusBadge(order.status)}
+                    {getStatusBadgeWithT(order.status)}
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
                     <CTooltip
                       content={
                         order.isPaid
-                          ? `Đã thanh toán lúc ${new Date(order.paidAt!).toLocaleString("vi-VN")}`
-                          : "Chưa thanh toán"
+                          ? t("paidTooltip", {
+                              date: new Date(order.paidAt!).toLocaleString(
+                                locale,
+                              ),
+                            })
+                          : t("unpaidTooltip")
                       }
                     >
                       <CIcon
@@ -174,7 +185,7 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                     </CTooltip>
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
-                    <CTooltip content="Xem chi tiết đơn hàng">
+                    <CTooltip content={t("viewDetailsTooltip")}>
                       <Link href={`/admin/orders/${order._id}`} passHref>
                         <CButton
                           color="info"
@@ -203,10 +214,15 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
       >
         <CModalHeader>
           <CModalTitle>
-            Chi tiết sản phẩm trong đơn
-            <span className="text-primary fw-medium">
-              {" "}
-              #{selectedOrder?._id.slice(-6).toUpperCase()}
+            <span>
+              {tOrder.rich("itemsModalTitle", {
+                id: selectedOrder?._id?.slice(-6).toUpperCase() || "",
+                primary: (chunks) => (
+                  <span className="font-semibold text-indigo-600">
+                    {chunks}
+                  </span>
+                ),
+              })}
             </span>
           </CModalTitle>
         </CModalHeader>
@@ -215,34 +231,37 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell style={{ width: "80px" }}>
-                  Ảnh
+                  {tOrder("itemsModalColImage")}
                 </CTableHeaderCell>
-                <CTableHeaderCell>Tên sản phẩm</CTableHeaderCell>
+                <CTableHeaderCell>
+                  {tOrder("itemsModalColName")}
+                </CTableHeaderCell>
                 <CTableHeaderCell style={{ width: "150px" }}>
-                  SKU
+                  {tOrder("itemsModalColSku")}
                 </CTableHeaderCell>
                 <CTableHeaderCell
                   className="text-center"
                   style={{ width: "100px" }}
                 >
-                  Số lượng
+                  {tOrder("itemsModalColQty")}
                 </CTableHeaderCell>
                 <CTableHeaderCell
                   className="text-end"
                   style={{ width: "130px" }}
                 >
-                  Đơn giá
+                  {tOrder("itemsModalColPrice")}
                 </CTableHeaderCell>
                 <CTableHeaderCell
                   className="text-end"
                   style={{ width: "130px" }}
                 >
-                  Tổng tiền
+                  {tOrder("itemsModalColTotal")}
                 </CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
               {selectedOrderItems.map((item) => {
+                // Giả sử item.variant.options có cấu trúc { attributeName: string, value: string }
                 const variantDisplayName =
                   item.variant?.options
                     .map((opt) => `${opt.attributeName}: ${opt.value}`)
@@ -250,7 +269,7 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
 
                 return (
                   <CTableRow
-                    key={item.product + (item.variant?.variantId || "")}
+                    key={item._id || item.name}
                     className="align-middle"
                   >
                     <CTableDataCell>
@@ -259,8 +278,9 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                         alt={item.name}
                         width={60}
                         height={60}
-                        className="rounded border object-cover"
-                        style={{ aspectRatio: "1 / 1" }}
+                        quality={100}
+                        className="rounded border object-cover object-top"
+                        style={{ aspectRatio: "1/1" }}
                       />
                     </CTableDataCell>
                     <CTableDataCell>
@@ -303,11 +323,11 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
             variant="outline"
             onClick={() => setIsModalOpen(false)}
           >
-            Đóng
+            {tOrder("itemsModalClose")}
           </CButton>
           <CButton color="primary" onClick={handleViewOrderDetails}>
             <CIcon icon={cilExternalLink} className="me-2" />
-            Xem chi tiết đơn hàng
+            {tOrder("itemsModalViewDetails")}
           </CButton>
         </CModalFooter>
       </CModal>

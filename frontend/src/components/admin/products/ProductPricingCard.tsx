@@ -17,6 +17,7 @@ import {
   CFormSelect,
 } from "@coreui/react";
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ProductPricingCardProps {
   // Nhận vào giá trị gốc (luôn là VND) và hàm cập nhật nó
@@ -51,7 +52,8 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
 }) => {
   // Lấy tỷ giá từ context
   const settingsContext = useSettings();
-  const usdToVndRate = settingsContext.rates?.inverseRates?.USD || 25400; // Tỷ giá 1 USD = ? VND
+  const usdToVndRate = settingsContext.rates?.inverseRates?.USD || 26000; // Tỷ giá 1 USD = ? VND
+  const t = useTranslations("AdminProductForm.pricing");
 
   // --- STATE MỚI ---
   const [inputCurrency, setInputCurrency] = useState<"VND" | "USD">("VND");
@@ -150,18 +152,18 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
       <CCardHeader className="d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center gap-2">
           <CIcon icon={cilDollar} />
-          <span>Giá & Kho hàng</span>
+          <span>{t("title")}</span>
         </div>
         <div>
           <CFormSelect
             size="sm"
             value={inputCurrency}
             onChange={(e) => setInputCurrency(e.target.value as "VND" | "USD")}
-            aria-label="Chọn tiền tệ nhập giá"
+            aria-label={t("selectCurrency")}
             style={{ minWidth: "150px" }}
           >
-            <option value="VND">Nhập giá (VND)</option>
-            <option value="USD">Nhập giá (USD)</option>
+            <option value="VND">{t("enterPriceVND")}</option>
+            <option value="USD">{t("enterPriceUSD")}</option>
           </CFormSelect>
         </div>
       </CCardHeader>
@@ -169,12 +171,12 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
         {/* --- GIÁ BÁN --- */}
         <div className="mb-3">
           <CFormLabel>
-            Giá bán lẻ*
+            {t("retailPriceLabel")}
             {inputCurrency === "VND" && (
-              <span className="text-primary ms-1">← Đang nhập VND</span>
+              <span className="text-primary ms-1">{t("enteringVND")}</span>
             )}
             {inputCurrency === "USD" && (
-              <span className="text-primary ms-1">← Đang nhập USD</span>
+              <span className="text-primary ms-1">{t("enteringUSD")}</span>
             )}
           </CFormLabel>
           <div className="d-flex gap-2">
@@ -223,12 +225,12 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
         {/* --- GIÁ KHUYẾN MÃI --- */}
         <div className="mb-3">
           <CFormLabel>
-            Giá khuyến mãi
+            {t("salePriceLabel")}
             {inputCurrency === "VND" && (
-              <span className="text-primary ms-1">← Đang nhập VND</span>
+              <span className="text-primary ms-1">{t("enteringVND")}</span>
             )}
             {inputCurrency === "USD" && (
-              <span className="text-primary ms-1">← Đang nhập USD</span>
+              <span className="text-primary ms-1">{t("enteringUSD")}</span>
             )}
           </CFormLabel>
           <div className="d-flex gap-2">
@@ -275,7 +277,9 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
         {hasSalePrice && (
           <CRow className="g-3 mb-4">
             <CCol md={6}>
-              <CFormLabel htmlFor="saleStartDate">Ngày bắt đầu Sale</CFormLabel>
+              <CFormLabel htmlFor="saleStartDate">
+                {t("saleStartDate")}
+              </CFormLabel>
               <CFormInput
                 id="saleStartDate"
                 type="date"
@@ -284,7 +288,7 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
               />
             </CCol>
             <CCol md={6}>
-              <CFormLabel htmlFor="saleEndDate">Ngày kết thúc Sale</CFormLabel>
+              <CFormLabel htmlFor="saleEndDate">{t("saleEndDate")}</CFormLabel>
               <CFormInput
                 id="saleEndDate"
                 type="date"
@@ -296,13 +300,13 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
         )}
 
         <div className="border-top pt-3">
-          <CFormLabel htmlFor="sku">SKU (Mã SP chính)</CFormLabel>
+          <CFormLabel htmlFor="sku">{t("skuLabel")}</CFormLabel>
           <div className="d-flex align-items-center gap-2">
             <CFormInput
               id="sku"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              placeholder="Để trống nếu chỉ bán theo biến thể"
+              placeholder={t("skuPlaceholder")}
               className="flex-grow-1"
             />
             <CButton
@@ -312,12 +316,10 @@ const ProductPricingCard: React.FC<ProductPricingCardProps> = ({
               className="d-flex align-items-center flex-shrink-0"
             >
               <CIcon icon={cilRecycle} className="me-1" size="sm" />
-              Tạo
+              {t("generateSku")}
             </CButton>
           </div>
-          <div className="text-muted small mt-1">
-            Mã định danh sản phẩm duy nhất trong kho.
-          </div>
+          <div className="text-muted small mt-1">{t("skuHelpText")}</div>
         </div>
       </CCardBody>
     </CCard>

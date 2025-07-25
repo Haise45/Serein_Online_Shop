@@ -1,18 +1,31 @@
 import PageHeader from "@/components/shared/PageHeader";
-import { Metadata } from "next";
 import AdminCouponsClient from "./AdminCouponsClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Quản lý Mã giảm giá | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function AdminCouponsPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "AdminCoupons.meta" });
+
+  return {
+    title: t("title"),
+  };
+}
+
+export default async function AdminCouponsPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminCoupons.pageHeader",
+  });
+
   return (
     <div>
-      <PageHeader
-        title="Mã giảm giá"
-        description="Tạo và quản lý các chương trình khuyến mãi cho cửa hàng."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <AdminCouponsClient />
     </div>
   );

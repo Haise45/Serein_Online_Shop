@@ -13,10 +13,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation"; // Đã import
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
+import { useSettings } from "@/app/SettingsContext";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
@@ -30,6 +32,9 @@ export default function LoginPage() {
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams(); // Hook để đọc query params
+
+  const { settings } = useSettings();
+  const adminDefaultLocale = settings?.adminSettings.defaultLanguage || 'vi';
 
   // Lấy URL redirect từ query params khi component mount
   useEffect(() => {
@@ -94,7 +99,7 @@ export default function LoginPage() {
           `/verify-email?email=${encodeURIComponent(data.email)}&message=${encodeURIComponent("Vui lòng xác thực email của bạn.")}&redirect=${encodeURIComponent(redirectUrl)}`,
         );
       } else if (data.role === "admin") {
-        router.push("/admin/dashboard");
+        router.push("/admin/dashboard", { locale: adminDefaultLocale });
       } else {
         // Chuyển hướng về redirectUrl đã lưu (hoặc trang mặc định nếu redirectUrl không hợp lệ)
         const finalRedirect =

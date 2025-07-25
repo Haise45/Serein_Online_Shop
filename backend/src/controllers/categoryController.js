@@ -148,85 +148,45 @@ const getCategories = asyncHandler(async (req, res) => {
 
   // 3. Xử lý phân trang
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10; // Mặc định 10 mục/trang
+  const limit = parseInt(req.query.limit, 10) || 9999; // Mặc định 10 mục/trang
   const skip = (page - 1) * limit;
 
   // --- Pipeline chính để tính toán dữ liệu ---
-  // const calculationPipeline = [
-  //   // Giai đoạn 1: Áp dụng filter ngay từ đầu
-  //   { $match: filter },
-
-  //   // Giai đoạn 2: Tìm tất cả các danh mục con cháu của mỗi danh mục
-  //   {
-  //     $graphLookup: {
-  //       from: "categories", // Tên collection
-  //       startWith: "$_id", // Bắt đầu từ _id của mỗi document
-  //       connectFromField: "_id", // Trường nối từ
-  //       connectToField: "parent", // Trường nối đến (parent của document khác)
-  //       as: "descendants", // Tên mảng chứa tất cả con cháu
-  //       depthField: "depth", // (Tùy chọn) Thêm trường cho biết độ sâu
-  //     },
-  //   },
-
-  //   // Giai đoạn 3: Tạo một mảng chứa ID của chính nó và tất cả con cháu
-  //   {
-  //     $addFields: {
-  //       allCategoryIds: {
-  //         $concatArrays: [["$_id"], "$descendants._id"],
-  //       },
-  //     },
-  //   },
-
-  //   // Giai đoạn 4: Join với collection 'products' dựa trên mảng ID đã tạo
-  //   {
-  //     $lookup: {
-  //       from: "products",
-  //       localField: "allCategoryIds", // Mảng ID của danh mục (cha + con)
-  //       foreignField: "category", // Trường category trong Product
-  //       as: "allProducts", // Tên mảng chứa tất cả sản phẩm
-  //     },
-  //   },
-
-  //   // Giai đoạn 5: Join với collection 'categories' để lấy thông tin parent (cho hiển thị)
-  //   {
-  //     $lookup: {
-  //       from: "categories",
-  //       localField: "parent",
-  //       foreignField: "_id",
-  //       as: "parentInfo",
-  //     },
-  //   },
-
-  //   // Giai đoạn 6: Tạo các trường cuối cùng và định dạng lại
-  //   {
-  //     $addFields: {
-  //       productCount: { $size: "$allProducts" }, // Đếm tổng số sản phẩm
-  //       parent: { $ifNull: [{ $arrayElemAt: ["$parentInfo", 0] }, null] }, // Lấy parent hoặc set là null
-  //     },
-  //   },
-
-  //   // Giai đoạn 7: Chọn lọc các trường cần trả về
-  //   {
-  //     $project: {
-  //       name: 1,
-  //       slug: 1,
-  //       description: 1,
-  //       image: 1,
-  //       isActive: 1,
-  //       createdAt: 1,
-  //       updatedAt: 1,
-  //       productCount: 1,
-  //       "parent._id": 1,
-  //       "parent.name": 1,
-  //       "parent.slug": 1,
-  //     },
-  //   },
-  // ];
-
-  // Sử dụng một pipeline đơn giản hơn để lấy dữ liệu và tính toán
-  const pipeline = [
+  const aggregationPipeline = [
+    // Giai đoạn 1: Lọc các danh mục thỏa mãn điều kiện ban đầu
     { $match: filter },
-    // Lấy thông tin parent
+
+    // Giai đoạn 2: Tìm tất cả các ID con cháu của mỗi danh mục
+    {
+      $graphLookup: {
+        from: "categories",
+        startWith: "$_id",
+        connectFromField: "_id",
+        connectToField: "parent",
+        as: "descendants",
+      },
+    },
+
+    // Giai đoạn 3: Tạo một mảng ID bao gồm cả chính nó và các con cháu
+    {
+      $addFields: {
+        allCategoryIdsForCount: {
+          $concatArrays: [["$_id"], "$descendants._id"],
+        },
+      },
+    },
+
+    // Giai đoạn 4: Join với collection 'products' để đếm sản phẩm
+    {
+      $lookup: {
+        from: "products",
+        localField: "allCategoryIdsForCount",
+        foreignField: "category",
+        as: "products",
+      },
+    },
+
+    // Giai đoạn 5: Join để lấy thông tin danh mục cha
     {
       $lookup: {
         from: "categories",
@@ -235,27 +195,41 @@ const getCategories = asyncHandler(async (req, res) => {
         as: "parentInfo",
       },
     },
-    // Tính toán productCount sau
+
+    // Giai đoạn 6: Định hình lại document cuối cùng
     {
       $project: {
-        name: 1,
+        name: 1, // Giữ nguyên object {vi, en}
         slug: 1,
-        description: 1,
+        description: 1, // Giữ nguyên object {vi, en}
         image: 1,
         isActive: 1,
         createdAt: 1,
         updatedAt: 1,
-        parent: { $arrayElemAt: ["$parentInfo", 0] },
+        productCount: { $size: "$products" }, // Đếm số sản phẩm tìm thấy
+        parent: { $arrayElemAt: ["$parentInfo", 0] }, // Lấy object cha
       },
     },
   ];
 
-  const [categories, totalCategories] = await Promise.all([
-    Category.aggregate(pipeline).sort(sort).skip(skip).limit(limit),
-    Category.countDocuments(filter),
+  // Thực thi pipeline để lấy tổng số lượng và dữ liệu đã phân trang
+  const countPipeline = [...aggregationPipeline, { $count: "totalCount" }];
+  const dataPipeline = [
+    ...aggregationPipeline,
+    { $sort: sort },
+    { $skip: skip },
+    { $limit: limit },
+  ];
+
+  const [totalResult, categories] = await Promise.all([
+    Category.aggregate(countPipeline),
+    Category.aggregate(dataPipeline),
   ]);
 
-  // *** "LÀM PHẲNG" DỮ LIỆU TRƯỚC KHI TRẢ VỀ ***
+  const totalCategories = totalResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCategories / limit);
+
+  // --- "Làm phẳng" dữ liệu TRƯỚC KHI gửi về client ---
   const flattenedCategories = categories.map((cat) => {
     const flatCat = flattenI18nObject(cat, locale, ["name", "description"]);
     if (flatCat.parent) {
@@ -264,30 +238,84 @@ const getCategories = asyncHandler(async (req, res) => {
     return flatCat;
   });
 
-  // 4. Thực thi pipeline để lấy tổng số lượng và dữ liệu
-  // const countPipeline = [...calculationPipeline, { $count: "total" }];
-
-  // const [totalResult, categories] = await Promise.all([
-  //   Category.aggregate(countPipeline),
-  //   Category.aggregate(calculationPipeline).sort(sort).skip(skip).limit(limit),
-  // ]);
-
-  // const totalItems = totalResult.length > 0 ? totalResult[0].total : 0;
-  // const totalPages = Math.ceil(totalItems / limit);
-
-  // Debug log
-  console.log("--- [Categories Result] ---");
-  console.log("Total items found:", totalCategories);
-  console.log("Categories returned:", categories.length);
-  console.log("---------------------------");
-
-  // 5. Trả về response
   res.status(200).json({
     currentPage: page,
-    totalPages: Math.ceil(totalCategories / limit),
-    totalCategories: totalCategories,
-    limit: limit,
+    totalPages,
+    totalCategories,
+    limit,
     categories: flattenedCategories,
+  });
+});
+
+// @desc    Lấy tất cả danh mục GỐC (chưa làm phẳng - cho Admin)
+// @route   GET /api/v1/categories/admin
+// @access  Private/Admin
+const getAdminCategories = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi"; // Vẫn cần locale để build filter
+  const isAdmin = true;
+
+  // Lấy các tham số
+  const filter = buildCategoryFilter(req.query, isAdmin, locale);
+  const sort = buildCategorySort(req.query, locale);
+  const limit = parseInt(req.query.limit, 10) || 9999; // Lấy nhiều để xây dựng cây
+
+  // Sử dụng aggregation để lấy cả productCount
+  const aggregationPipeline = [
+    { $match: filter },
+    {
+      $graphLookup: {
+        from: "categories",
+        startWith: "$_id",
+        connectFromField: "_id",
+        connectToField: "parent",
+        as: "descendants",
+      },
+    },
+    {
+      $addFields: {
+        allCategoryIdsForCount: {
+          $concatArrays: [["$_id"], "$descendants._id"],
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "allCategoryIdsForCount",
+        foreignField: "category",
+        as: "products",
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "parent",
+        foreignField: "_id",
+        as: "parentInfo",
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        slug: 1,
+        description: 1,
+        image: 1,
+        isActive: 1,
+        createdAt: 1,
+        productCount: { $size: "$products" },
+        parent: { $arrayElemAt: ["$parentInfo", 0] },
+      },
+    },
+  ];
+
+  const categories = await Category.aggregate(aggregationPipeline)
+    .sort(sort)
+    .limit(limit);
+
+  // Trả về dữ liệu gốc, không làm phẳng
+  res.status(200).json({
+    categories,
+    // Có thể thêm các thông tin phân trang khác nếu cần
   });
 });
 
@@ -322,6 +350,27 @@ const getCategoryByIdOrSlug = asyncHandler(async (req, res) => {
     "description",
   ]);
   res.json(flattenedCategory);
+});
+
+// @desc    Lấy chi tiết danh mục gốc cho Admin (không làm phẳng)
+// @route   GET /api/v1/categories/admin/:id
+// @access  Private/Admin
+const getAdminCategoryDetails = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400);
+    throw new Error("ID danh mục không hợp lệ.");
+  }
+  // Lấy dữ liệu gốc, populate cả parent để lấy thông tin
+  const category = await Category.findById(id).populate("parent");
+
+  if (!category) {
+    res.status(404);
+    throw new Error("Không tìm thấy danh mục.");
+  }
+
+  // Trả về dữ liệu Mongoose document hoặc object gốc, không làm phẳng
+  res.json(category);
 });
 
 // @desc    Cập nhật danh mục
@@ -437,7 +486,9 @@ const deleteCategory = asyncHandler(async (req, res) => {
 module.exports = {
   createCategory,
   getCategories,
+  getAdminCategories,
   getCategoryByIdOrSlug,
+  getAdminCategoryDetails,
   updateCategory,
   deleteCategory,
 };

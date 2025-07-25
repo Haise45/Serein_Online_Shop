@@ -2,7 +2,9 @@ import axiosInstance from "@/lib/axiosInstance";
 import { AxiosError } from "axios";
 import {
   Coupon,
+  CouponAdmin,
   CouponFormData,
+  PaginatedAdminCouponsResponse,
   PaginatedCouponsResponse,
 } from "@/types/coupon";
 
@@ -29,6 +31,7 @@ export interface GetCouponsParams {
 
 // Hàm lấy danh sách coupon (có thể dùng cho cả admin và client với params phù hợp)
 // API backend GET /api/v1/coupons của bạn trả về PaginatedCouponsResponse
+// Client APIs
 export const getCouponsApi = async (
   params?: GetCouponsParams,
 ): Promise<PaginatedCouponsResponse> => {
@@ -50,22 +53,37 @@ export const getCouponsApi = async (
 };
 
 export const getCouponByIdApi = async (id: string): Promise<Coupon> => {
-  const { data } = await axiosInstance.get<Coupon>(`/coupons/${id}`);
+  const { data } = await axiosInstance.get<Coupon>(`code/coupons/${id}`);
+  return data;
+};
+
+// Admin APIs
+export const getAdminCouponsApi = async (
+  params?: GetCouponsParams,
+): Promise<PaginatedAdminCouponsResponse> => {
+  const { data } = await axiosInstance.get("/coupons/admin", { params });
+  return data;
+};
+
+export const getAdminCouponByIdApi = async (
+  id: string,
+): Promise<CouponAdmin> => {
+  const { data } = await axiosInstance.get(`/coupons/admin/${id}`);
   return data;
 };
 
 export const createCouponApi = async (
   payload: Partial<CouponFormData>,
-): Promise<Coupon> => {
-  const { data } = await axiosInstance.post<Coupon>("/coupons", payload);
+): Promise<CouponAdmin> => {
+  const { data } = await axiosInstance.post<CouponAdmin>("/coupons", payload);
   return data;
 };
 
 export const updateCouponApi = async (
   id: string,
   payload: Partial<CouponFormData>,
-): Promise<Coupon> => {
-  const { data } = await axiosInstance.put<Coupon>(`/coupons/${id}`, payload);
+): Promise<CouponAdmin> => {
+  const { data } = await axiosInstance.put<CouponAdmin>(`/coupons/${id}`, payload);
   return data;
 };
 

@@ -1,0 +1,567 @@
+[{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8e6"
+  },
+  "code": "01",
+  "name": "Thành phố Hà Nội",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8e7"
+  },
+  "code": "79",
+  "name": "Thành phố Hồ Chí Minh",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8e8"
+  },
+  "code": "31",
+  "name": "Thành phố Hải Phòng",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8e9"
+  },
+  "code": "48",
+  "name": "Thành phố Đà Nẵng",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8ea"
+  },
+  "code": "92",
+  "name": "Thành phố Cần Thơ",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8eb"
+  },
+  "code": "02",
+  "name": "Tỉnh Hà Giang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8ec"
+  },
+  "code": "04",
+  "name": "Tỉnh Cao Bằng",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8ed"
+  },
+  "code": "06",
+  "name": "Tỉnh Bắc Kạn",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8ee"
+  },
+  "code": "08",
+  "name": "Tỉnh Tuyên Quang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8ef"
+  },
+  "code": "10",
+  "name": "Tỉnh Lào Cai",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f0"
+  },
+  "code": "11",
+  "name": "Tỉnh Điện Biên",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f1"
+  },
+  "code": "12",
+  "name": "Tỉnh Lai Châu",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f2"
+  },
+  "code": "14",
+  "name": "Tỉnh Sơn La",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f3"
+  },
+  "code": "15",
+  "name": "Tỉnh Yên Bái",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f4"
+  },
+  "code": "17",
+  "name": "Tỉnh Hoà Bình",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f5"
+  },
+  "code": "19",
+  "name": "Tỉnh Thái Nguyên",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f6"
+  },
+  "code": "20",
+  "name": "Tỉnh Lạng Sơn",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f7"
+  },
+  "code": "22",
+  "name": "Tỉnh Quảng Ninh",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f8"
+  },
+  "code": "24",
+  "name": "Tỉnh Bắc Giang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8f9"
+  },
+  "code": "25",
+  "name": "Tỉnh Phú Thọ",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8fa"
+  },
+  "code": "26",
+  "name": "Tỉnh Vĩnh Phúc",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8fb"
+  },
+  "code": "27",
+  "name": "Tỉnh Bắc Ninh",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8fc"
+  },
+  "code": "30",
+  "name": "Tỉnh Hải Dương",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8fd"
+  },
+  "code": "33",
+  "name": "Tỉnh Hưng Yên",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8fe"
+  },
+  "code": "34",
+  "name": "Tỉnh Thái Bình",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d8ff"
+  },
+  "code": "35",
+  "name": "Tỉnh Hà Nam",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d900"
+  },
+  "code": "36",
+  "name": "Tỉnh Nam Định",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d901"
+  },
+  "code": "37",
+  "name": "Tỉnh Ninh Bình",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d902"
+  },
+  "code": "38",
+  "name": "Tỉnh Thanh Hóa",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d903"
+  },
+  "code": "40",
+  "name": "Tỉnh Nghệ An",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d904"
+  },
+  "code": "42",
+  "name": "Tỉnh Hà Tĩnh",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d905"
+  },
+  "code": "44",
+  "name": "Tỉnh Quảng Bình",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d906"
+  },
+  "code": "45",
+  "name": "Tỉnh Quảng Trị",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d907"
+  },
+  "code": "46",
+  "name": "Tỉnh Thừa Thiên Huế",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d908"
+  },
+  "code": "49",
+  "name": "Tỉnh Quảng Nam",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d909"
+  },
+  "code": "51",
+  "name": "Tỉnh Quảng Ngãi",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d90a"
+  },
+  "code": "52",
+  "name": "Tỉnh Bình Định",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d90b"
+  },
+  "code": "54",
+  "name": "Tỉnh Phú Yên",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d90c"
+  },
+  "code": "56",
+  "name": "Tỉnh Khánh Hòa",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d90d"
+  },
+  "code": "58",
+  "name": "Tỉnh Ninh Thuận",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d90e"
+  },
+  "code": "60",
+  "name": "Tỉnh Bình Thuận",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d90f"
+  },
+  "code": "62",
+  "name": "Tỉnh Kon Tum",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d910"
+  },
+  "code": "64",
+  "name": "Tỉnh Gia Lai",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d911"
+  },
+  "code": "66",
+  "name": "Tỉnh Đắk Lắk",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d912"
+  },
+  "code": "67",
+  "name": "Tỉnh Đắk Nông",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d913"
+  },
+  "code": "68",
+  "name": "Tỉnh Lâm Đồng",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d914"
+  },
+  "code": "70",
+  "name": "Tỉnh Bình Phước",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d915"
+  },
+  "code": "72",
+  "name": "Tỉnh Tây Ninh",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d916"
+  },
+  "code": "74",
+  "name": "Tỉnh Bình Dương",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d917"
+  },
+  "code": "75",
+  "name": "Tỉnh Đồng Nai",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d918"
+  },
+  "code": "77",
+  "name": "Tỉnh Bà Rịa - Vũng Tàu",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d919"
+  },
+  "code": "80",
+  "name": "Tỉnh Long An",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d91a"
+  },
+  "code": "82",
+  "name": "Tỉnh Tiền Giang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d91b"
+  },
+  "code": "83",
+  "name": "Tỉnh Bến Tre",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d91c"
+  },
+  "code": "84",
+  "name": "Tỉnh Trà Vinh",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d91d"
+  },
+  "code": "86",
+  "name": "Tỉnh Vĩnh Long",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d91e"
+  },
+  "code": "87",
+  "name": "Tỉnh Đồng Tháp",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d91f"
+  },
+  "code": "89",
+  "name": "Tỉnh An Giang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d920"
+  },
+  "code": "91",
+  "name": "Tỉnh Kiên Giang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d921"
+  },
+  "code": "93",
+  "name": "Tỉnh Hậu Giang",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d922"
+  },
+  "code": "94",
+  "name": "Tỉnh Sóc Trăng",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d923"
+  },
+  "code": "95",
+  "name": "Tỉnh Bạc Liêu",
+  "countryCode": "VN",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d924"
+  },
+  "code": "96",
+  "name": "Tỉnh Cà Mau",
+  "countryCode": "VN",
+  "__v": 0
+}]

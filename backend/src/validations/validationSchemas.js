@@ -4,6 +4,16 @@ const Joi = require("joi");
 const phoneVNRegex =
   /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
 
+// --- Schema con cho các trường đa ngôn ngữ ---
+const i18nStringSchema = Joi.object({
+  vi: Joi.string().trim().allow("").optional(),
+  en: Joi.string().trim().allow("").optional(),
+})
+  .or("vi", "en")
+  .messages({
+    "object.missing": "Ít nhất phải có một trong hai ngôn ngữ.",
+  });
+
 const registerSchema = Joi.object({
   name: Joi.string().min(3).max(50).required().messages({
     "string.base": `"Tên" phải là chuỗi`,
@@ -163,22 +173,8 @@ const addressSchemaValidation = Joi.object({
 });
 
 const createCategorySchema = Joi.object({
-  name: Joi.string().trim().min(2).max(100).required().messages({
-    "string.base": `"Tên danh mục" phải là chuỗi`,
-    "string.empty": `"Tên danh mục" không được để trống`,
-    "string.min": `"Tên danh mục" phải có ít nhất {#limit} ký tự`,
-    "string.max": `"Tên danh mục" không được vượt quá {#limit} ký tự`,
-    "any.required": `"Tên danh mục" là trường bắt buộc`,
-  }),
-  description: Joi.string()
-    .trim()
-    .max(500)
-    .optional()
-    .allow(null, "")
-    .messages({
-      "string.base": `"Mô tả" phải là chuỗi`,
-      "string.max": `"Mô tả" không được vượt quá {#limit} ký tự`,
-    }),
+  name: i18nStringSchema.required().max(100), // Sử dụng schema con
+  description: i18nStringSchema.optional().max(500).allow(null),
   parent: Joi.string().optional().allow(null, "").messages({
     "string.base": `"Danh mục cha" phải là ID hợp lệ`,
   }),
@@ -189,21 +185,8 @@ const createCategorySchema = Joi.object({
 });
 
 const updateCategorySchema = Joi.object({
-  name: Joi.string().trim().min(2).max(100).optional().messages({
-    "string.base": `"Tên danh mục" phải là chuỗi`,
-    "string.empty": `"Tên danh mục" không được để trống`,
-    "string.min": `"Tên danh mục" phải có ít nhất {#limit} ký tự`,
-    "string.max": `"Tên danh mục" không được vượt quá {#limit} ký tự`,
-  }),
-  description: Joi.string()
-    .trim()
-    .max(500)
-    .optional()
-    .allow(null, "")
-    .messages({
-      "string.base": `"Mô tả" phải là chuỗi`,
-      "string.max": `"Mô tả" không được vượt quá {#limit} ký tự`,
-    }),
+  name: i18nStringSchema.max(100).optional(),
+  description: i18nStringSchema.max(500).optional().allow(null),
   parent: Joi.string().optional().allow(null, "").messages({
     "string.base": `"Danh mục cha" phải là ID hợp lệ`,
   }),
@@ -269,14 +252,8 @@ const productAttributeSchema = Joi.object({
 
 // Schema cho tạo sản phẩm mới
 const createProductSchema = Joi.object({
-  name: Joi.string().trim().min(3).max(200).required().messages({
-    "any.required": "Tên sản phẩm là bắt buộc",
-    "string.min": "Tên sản phẩm phải có ít nhất {#limit} ký tự",
-    "string.max": "Tên sản phẩm không được vượt quá {#limit} ký tự",
-    "string.base": "Tên sản phẩm phải là chuỗi",
-    "string.empty": "Tên sản phẩm không được để trống",
-  }),
-  description: Joi.string().trim().optional().allow(""),
+  name: i18nStringSchema.required(), // Sử dụng schema con
+  description: i18nStringSchema.optional().allow(null),
   price: Joi.number().min(0).required().messages({
     "any.required": "Giá sản phẩm là bắt buộc",
     "number.min": "Giá không được âm",
@@ -322,13 +299,8 @@ const createProductSchema = Joi.object({
 
 // Schema cho cập nhật sản phẩm
 const updateProductSchema = Joi.object({
-  name: Joi.string().trim().min(3).max(200).optional().messages({
-    "string.min": "Tên sản phẩm phải có ít nhất {#limit} ký tự",
-    "string.max": "Tên sản phẩm không được vượt quá {#limit} ký tự",
-    "string.base": "Tên sản phẩm phải là chuỗi",
-    "string.empty": "Tên sản phẩm không được để trống",
-  }),
-  description: Joi.string().trim().optional().allow(""),
+  name: i18nStringSchema.optional(),
+  description: i18nStringSchema.optional().allow(null),
   price: Joi.number()
     .min(0)
     .optional()
@@ -396,7 +368,7 @@ const createCouponSchema = Joi.object({
     "string.max": "Mã giảm giá không được vượt quá {#limit} ký tự.",
     "string.uppercase": "Mã giảm giá phải là chữ hoa.",
   }),
-  description: Joi.string().trim().optional().allow(""),
+  description: i18nStringSchema.optional().allow(null),
   discountType: Joi.string()
     .valid("percentage", "fixed_amount")
     .required()
@@ -453,7 +425,7 @@ const createCouponSchema = Joi.object({
 
 // Schema cho việc cập nhật mã giảm giá
 const updateCouponSchema = Joi.object({
-  description: Joi.string().trim().optional().allow(""),
+  description: i18nStringSchema.optional().allow(null),
   // Không cho phép sửa code, discountType, discountValue
   minOrderValue: Joi.number().min(0).optional(),
   maxUsage: Joi.number().integer().min(1).optional().allow(null),

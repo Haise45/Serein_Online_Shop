@@ -1,4 +1,4 @@
-import { Category, VariantOptionValue } from "@/types";
+import { Category, I18nField, VariantOptionValue } from "@/types";
 import DOMPurify from "isomorphic-dompurify";
 import { ExchangeRates } from "@/types/setting";
 
@@ -209,27 +209,6 @@ export const sanitizeHtmlContent = (
 
   return clean;
 };
-export function timeAgo(dateInput: string | Date): string {
-  if (!dateInput) return "";
-  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-  const now = new Date();
-  const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
-  const minutes = Math.round(seconds / 60);
-  const hours = Math.round(minutes / 60);
-  const days = Math.round(hours / 24);
-  const weeks = Math.round(days / 7);
-  const months = Math.round(days / 30.44); // Trung bình số ngày trong tháng
-  const years = Math.round(days / 365.25); // Trung bình số ngày trong năm (tính năm nhuận)
-
-  if (seconds < 5) return "vài giây trước";
-  if (seconds < 60) return `${seconds} giây trước`;
-  if (minutes < 60) return `${minutes} phút trước`;
-  if (hours < 24) return `${hours} giờ trước`;
-  if (days < 7) return `${days} ngày trước`;
-  if (weeks < 5) return `${weeks} tuần trước`; // Sau khoảng 4 tuần thì hiển thị tháng
-  if (months < 12) return `${months} tháng trước`;
-  return `${years} năm trước`;
-}
 
 /**
  * Chuyển đổi một mảng optionValues (chứa ID) thành một chuỗi tên hiển thị.
@@ -298,4 +277,20 @@ export const maskString = (
   const maskedLength = str.length - visibleStart - visibleEnd;
   const masked = "*".repeat(Math.max(0, maskedLength));
   return `${start}${masked}${end}`;
+};
+
+/**
+ * Hàm tiện ích để lấy ra giá trị đã được dịch từ một object i18n.
+ * @param i18nObject - Object có dạng { vi: '...', en: '...' } hoặc một chuỗi.
+ * @param locale - Ngôn ngữ hiện tại ('vi' hoặc 'en').
+ * @returns Chuỗi ký tự của ngôn ngữ hiện tại.
+ */
+export const getLocalizedName = (
+  i18nObject: I18nField | string | undefined | null,
+  locale: "vi" | "en",
+): string => {
+  if (!i18nObject) return "";
+  if (typeof i18nObject === "string") return i18nObject;
+
+  return i18nObject[locale] || i18nObject.vi || "";
 };

@@ -8,60 +8,68 @@ import DeleteConfirmationModal from "@/components/shared/DeleteConfirmationModal
 import {
   useAddAttributeValue,
   useDeleteAttributeValue,
-  useGetAttributes,
+  useGetAdminAttributes,
   useUpdateAttributeValue,
 } from "@/lib/react-query/attributeQueries";
-import { Attribute, AttributeValue, AttributeValueCreationData } from "@/types";
+import { getLocalizedName } from "@/lib/utils";
+import { AttributeAdmin, AttributeValueAdmin, I18nField } from "@/types";
 import { CCol, CRow, CSpinner } from "@coreui/react";
-import React, { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const AdminAttributesClient = () => {
+  const t = useTranslations("AdminAttributes");
+  const tShared = useTranslations("Shared.deleteConfirm");
+  const locale = useLocale() as "vi" | "en";
   // --- React Query Hooks ---
   const {
     data: attributes = [],
     isLoading,
     isError,
     error,
-  } = useGetAttributes();
+  } = useGetAdminAttributes();
   const addValueMutation = useAddAttributeValue();
   const updateValueMutation = useUpdateAttributeValue();
   const deleteValueMutation = useDeleteAttributeValue();
 
   // --- State quản lý UI ---
-  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
-    null,
-  );
+  const [selectedAttribute, setSelectedAttribute] =
+    useState<AttributeAdmin | null>(null);
   const [isAddAttrModalOpen, setAddAttrModalOpen] = useState(false);
-  const [valueToEdit, setValueToEdit] = useState<AttributeValue | null>(null);
-  const [valueToDelete, setValueToDelete] = useState<AttributeValue | null>(
-    null,
-  );
+  const [valueFormState, setValueFormState] = useState<{
+    visible: boolean;
+    isEdit: boolean;
+    data: Partial<AttributeValueAdmin> | null;
+  }>({ visible: false, isEdit: false, data: null });
+  const [valueToDelete, setValueToDelete] =
+    useState<AttributeValueAdmin | null>(null);
 
   // --- Handlers ---
-  const handleSaveValue = (valueData: AttributeValueCreationData) => {
+  const handleSaveValue = (data: {
+    value: I18nField;
+    meta?: { hex?: string };
+  }) => {
     if (!selectedAttribute) return;
 
-    if (valueToEdit?._id) {
-      // Update existing value
+    if (valueFormState.isEdit && valueFormState.data?._id) {
       updateValueMutation.mutate(
         {
           attributeId: selectedAttribute._id,
-          valueId: valueToEdit._id,
-          valueData,
+          valueId: valueFormState.data._id,
+          valueData: data,
         },
         {
-          onSuccess: () => setValueToEdit(null),
+          onSuccess: () =>
+            setValueFormState({ visible: false, isEdit: false, data: null }),
         },
       );
     } else {
-      // Add new value
       addValueMutation.mutate(
+        { attributeId: selectedAttribute._id, valueData: data },
         {
-          attributeId: selectedAttribute._id,
-          valueData,
-        },
-        {
-          onSuccess: () => setValueToEdit(null),
+          onSuccess: () =>
+            setValueFormState({ visible: false, isEdit: false, data: null }),
         },
       );
     }
@@ -101,18 +109,23 @@ const AdminAttributesClient = () => {
         // Nếu không tìm thấy (ví dụ thuộc tính đã bị xóa), reset lựa chọn
         setSelectedAttribute(null);
       }
+    } else if (!selectedAttribute && attributes.length > 0) {
+      // Tự động chọn thuộc tính đầu tiên nếu chưa có gì được chọn
+      setSelectedAttribute(attributes[0]);
     }
   }, [attributes, selectedAttribute]);
 
   if (isLoading)
     return (
       <div className="p-5 text-center">
-        <CSpinner />
+        <CSpinner /> {t("loading")}
       </div>
     );
   if (isError)
     return (
-      <div className="text-danger p-5 text-center">Lỗi: {error.message}</div>
+      <div className="text-danger p-5 text-center">
+        {t("loadingError", { error: error.message })}
+      </div>
     );
 
   return (
@@ -130,13 +143,21 @@ const AdminAttributesClient = () => {
           {selectedAttribute ? (
             <AttributeValueTable
               selectedAttribute={selectedAttribute}
-              onAddValue={() => setValueToEdit({} as AttributeValue)} // Mở modal thêm mới
-              onEditValue={setValueToEdit}
+              onAddValue={() =>
+                setValueFormState({
+                  visible: true,
+                  isEdit: false,
+                  data: { value: { vi: "", en: "" } },
+                })
+              }
+              onEditValue={(value) =>
+                setValueFormState({ visible: true, isEdit: true, data: value })
+              }
               onDeleteValue={setValueToDelete}
             />
           ) : (
             <div className="flex h-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-gray-500">
-              <p>Chọn một thuộc tính để xem chi tiết</p>
+              <p>{t("selectAttributePrompt")}</p>
             </div>
           )}
         </CCol>
@@ -148,10 +169,12 @@ const AdminAttributesClient = () => {
       />
 
       <AttributeValueFormModal
-        visible={!!valueToEdit}
-        isEdit={!!valueToEdit?._id}
-        initialData={valueToEdit}
-        onClose={() => setValueToEdit(null)}
+        visible={!!valueFormState.visible}
+        isEdit={valueFormState.isEdit}
+        initialData={valueFormState.data as AttributeValueAdmin | null}
+        onClose={() =>
+          setValueFormState({ visible: false, isEdit: false, data: null })
+        }
         onSave={handleSaveValue}
         isSaving={addValueMutation.isPending || updateValueMutation.isPending}
       />
@@ -161,18 +184,22 @@ const AdminAttributesClient = () => {
         onClose={() => setValueToDelete(null)}
         onConfirm={handleDeleteValue}
         isDeleting={deleteValueMutation.isPending}
-        title="Xác nhận xóa giá trị"
+        title={tShared("title")}
         message={
           // Truyền vào một ReactNode
           <>
-            Bạn có chắc muốn xóa giá trị &quot;
-            <strong>{valueToDelete?.value}</strong>&quot;?
+            {tShared.rich("message", {
+              name: valueToDelete
+                ? getLocalizedName(valueToDelete.value, locale)
+                : "",
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
             <br />
-            <small className="text-muted">
-              Hành động này không thể hoàn tác.
-            </small>
+            <small className="text-muted">{tShared("warning")}</small>
           </>
         }
+        confirmButtonText={tShared("confirmButton")}
+        cancelButtonText={tShared("cancelButton")}
       />
     </>
   );

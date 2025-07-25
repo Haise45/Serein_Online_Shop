@@ -28,6 +28,7 @@ import {
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { productKeys } from "./productQueries";
+import { useTranslations } from "next-intl";
 
 // --- Query Keys ---
 export const reviewKeys = {
@@ -107,6 +108,7 @@ export const useCreateReview = (
     { productId: string; payload: CreateReviewPayload }
   >,
 ) => {
+  const t = useTranslations("reactQuery.review");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string; review: Review },
@@ -115,7 +117,7 @@ export const useCreateReview = (
   >({
     mutationFn: ({ productId, payload }) => createReviewApi(productId, payload),
     onSuccess: (data, variables, context) => {
-      toast.success(data.message || "Đánh giá của bạn đã được gửi!");
+      toast.success(data.message || t("createSuccess"));
       // Invalidate các query liên quan
       queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
       queryClient.invalidateQueries({
@@ -127,7 +129,7 @@ export const useCreateReview = (
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(error.response?.data?.message || "Gửi đánh giá thất bại.");
+      toast.error(error.response?.data?.message || t("createError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -141,6 +143,7 @@ export const useUpdateReview = (
     { reviewId: string; payload: UpdateReviewPayload }
   >,
 ) => {
+  const t = useTranslations("reactQuery.review");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string; review: Review },
@@ -150,7 +153,7 @@ export const useUpdateReview = (
     mutationFn: ({ reviewId, payload }) =>
       updateUserReviewApi(reviewId, payload),
     onSuccess: (data, variables, context) => {
-      toast.success(data.message || "Đánh giá đã được cập nhật.");
+      toast.success(data.message || t("updateSuccess"));
       const productId =
         typeof data.review.product === "string"
           ? data.review.product
@@ -169,9 +172,7 @@ export const useUpdateReview = (
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(
-        error.response?.data?.message || "Cập nhật đánh giá thất bại.",
-      );
+      toast.error(error.response?.data?.message || t("updateError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -185,6 +186,7 @@ export const useDeleteReview = (
     { reviewId: string; productId: string }
   >,
 ) => {
+  const t = useTranslations("reactQuery.review");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string },
@@ -193,7 +195,7 @@ export const useDeleteReview = (
   >({
     mutationFn: ({ reviewId }) => deleteMyReviewApi(reviewId),
     onSuccess: (data, variables, context) => {
-      toast.success(data.message || "Đánh giá đã được xóa.");
+      toast.success(data.message || t("deleteSuccess"));
       // Invalidate các query liên quan
       queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
       queryClient.invalidateQueries({
@@ -205,7 +207,7 @@ export const useDeleteReview = (
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(error.response?.data?.message || "Xóa đánh giá thất bại.");
+      toast.error(error.response?.data?.message || t("deleteError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -242,33 +244,35 @@ const useAdminReviewMutationInvalidation = () => {
 };
 
 export const useApproveReviewAdmin = () => {
+  const t = useTranslations("reactQuery.review");
   const invalidate = useAdminReviewMutationInvalidation();
   return useMutation<Review, Error, string>({
     // string là reviewId
     mutationFn: approveReviewAdminApi,
     onSuccess: (updatedReview) => {
-      toast.success("Đã duyệt đánh giá.");
+      toast.success(t("approveSuccess"));
       invalidate(updatedReview);
     },
-    onError: (error) =>
-      toast.error(error.message || "Duyệt đánh giá thất bại."),
+    onError: (error) => toast.error(error.message || t("approveError")),
   });
 };
 
 export const useRejectReviewAdmin = () => {
+  const t = useTranslations("reactQuery.review");
   const invalidate = useAdminReviewMutationInvalidation();
   return useMutation<Review, Error, string>({
     // string là reviewId
     mutationFn: rejectReviewAdminApi,
     onSuccess: (updatedReview) => {
-      toast.success("Đã ẩn đánh giá.");
+      toast.success(t("rejectSuccess"));
       invalidate(updatedReview);
     },
-    onError: (error) => toast.error(error.message || "Ẩn đánh giá thất bại."),
+    onError: (error) => toast.error(error.message || t("rejectError")),
   });
 };
 
 export const useDeleteReviewAdmin = () => {
+  const t = useTranslations("reactQuery.review");
   const queryClient = useQueryClient();
   return useMutation<{ message: string }, Error, string>({
     // string là reviewId
@@ -278,11 +282,12 @@ export const useDeleteReviewAdmin = () => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.adminLists() });
       queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
     },
-    onError: (error) => toast.error(error.message || "Xóa đánh giá thất bại."),
+    onError: (error) => toast.error(error.message || t("deleteAdminError")),
   });
 };
 
 export const useAddAdminReply = () => {
+  const t = useTranslations("reactQuery.review");
   const invalidate = useAdminReviewMutationInvalidation();
   return useMutation<
     Review,
@@ -291,9 +296,9 @@ export const useAddAdminReply = () => {
   >({
     mutationFn: ({ reviewId, payload }) => addAdminReplyApi(reviewId, payload),
     onSuccess: (updatedReview) => {
-      toast.success("Đã gửi phản hồi.");
+      toast.success(t("replySuccess"));
       invalidate(updatedReview);
     },
-    onError: (error) => toast.error(error.message || "Gửi phản hồi thất bại."),
+    onError: (error) => toast.error(error.message || t("replyError")),
   });
 };

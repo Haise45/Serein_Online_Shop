@@ -7,7 +7,9 @@ import {
   CSpinner,
 } from "@coreui/react";
 import dynamic from "next/dynamic";
-import React from "react";
+import React, { useState } from "react";
+import LanguageSwitcherTabs from "@/components/shared/LanguageSwitcherTabs";
+import { useTranslations, useLocale } from "next-intl";
 
 // Tải động CustomEditor và định nghĩa component Loading ngay tại đây
 const CustomEditor = dynamic(() => import("@/components/shared/CustomEditor"), {
@@ -15,64 +17,98 @@ const CustomEditor = dynamic(() => import("@/components/shared/CustomEditor"), {
   loading: () => (
     <div className="flex h-[342px] items-center justify-center rounded-lg border bg-gray-50">
       <CSpinner size="sm" />
-      <span className="ml-2 text-gray-400">Đang tải trình soạn thảo...</span>
+      <span className="ml-2 text-gray-400">Loading...</span>
     </div>
   ),
 });
 
+// Định nghĩa kiểu cho các trường đa ngôn ngữ
+interface I18nField {
+  vi: string;
+  en: string;
+}
+
 interface ProductInfoCardProps {
-  name: string;
-  setName: (name: string) => void;
-  description: string;
-  setDescription: (description: string) => void;
-  error?: string;
+  name: I18nField;
+  description: I18nField;
+  onFieldChange: (
+    field: "name" | "description",
+    locale: "vi" | "en",
+    value: string,
+  ) => void;
+  errors: {
+    name_vi?: string;
+    name_en?: string;
+  };
 }
 
 const ProductInfoCard: React.FC<ProductInfoCardProps> = ({
   name,
-  setName,
   description,
-  setDescription,
-  error,
+  onFieldChange,
+  errors,
 }) => {
+  const t = useTranslations("AdminProductForm.productInfo");
+  const locale = useLocale() as "vi" | "en";
+  const [editLocale, setEditLocale] = useState<"vi" | "en">(locale);
+
   return (
     <CCard className="mb-4 shadow-sm">
       <CCardHeader className="!p-4">
-        <h5 className="mb-1 font-semibold">Thông tin sản phẩm</h5>
-        <p className="mb-0 text-sm text-gray-500">
-          Tên và mô tả sẽ được hiển thị cho khách hàng trên trang chi tiết.
-        </p>
+        <h5 className="mb-1 font-semibold">{t("title")}</h5>
+        <p className="mb-0 text-sm text-gray-500">{t("subtitle")}</p>
       </CCardHeader>
       <CCardBody className="!p-4">
-        <div className="mb-4">
-          <CFormLabel htmlFor="name" className="font-medium">
-            Tên sản phẩm*
-          </CFormLabel>
-          <CFormInput
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            invalid={!!error}
-            placeholder="Ví dụ: Áo Polo Thể Thao Vải Pique"
-            className="mt-1"
-          />
-          {error && <div className="mt-1 text-sm text-red-600">{error}</div>}
-        </div>
+        {/* Component chuyển đổi ngôn ngữ */}
+        <LanguageSwitcherTabs
+          activeLocale={editLocale}
+          onLocaleChange={setEditLocale}
+        />
 
+        {/* Nội dung sẽ thay đổi dựa trên editLocale */}
         <div>
-          <CFormLabel htmlFor="description" className="font-medium">
-            Mô tả chi tiết
-          </CFormLabel>
-          <div className="mt-1">
-            <CustomEditor
-              initialData={description}
-              onChange={(data) => setDescription(data)}
+          {/* Tên sản phẩm */}
+          <div className="mb-4">
+            <CFormLabel htmlFor={`name-${editLocale}`} className="font-medium">
+              {t("nameLabel", { locale: editLocale.toUpperCase() })}
+            </CFormLabel>
+            <CFormInput
+              id={`name-${editLocale}`}
+              value={name[editLocale]}
+              onChange={(e) =>
+                onFieldChange("name", editLocale, e.target.value)
+              }
+              invalid={!!errors[`name_${editLocale}` as keyof typeof errors]}
+              placeholder={t("namePlaceholder", { placeholder: editLocale === "vi" ? "Áo Polo Thể Thao" : "Sport Polo Shirt" })}
+              className="mt-1"
             />
+            {errors[`name_${editLocale}` as keyof typeof errors] && (
+              <div className="mt-1 text-sm text-red-600">
+                {errors[`name_${editLocale}` as keyof typeof errors]}
+              </div>
+            )}
           </div>
-          <p className="mt-2 text-xs text-gray-500">
-            Mô tả chi tiết giúp khách hàng hiểu rõ hơn về sản phẩm. Bạn có thể
-            chèn ảnh, video và định dạng văn bản tại đây.
-          </p>
+
+          {/* Mô tả chi tiết */}
+          <div>
+            <CFormLabel
+              htmlFor={`description-${editLocale}`}
+              className="font-medium"
+            >
+              {t("descriptionLabel", { locale: editLocale.toUpperCase() })}
+            </CFormLabel>
+            <div className="mt-1">
+              {/* Sử dụng key để ép CKEditor re-render khi đổi ngôn ngữ */}
+              <CustomEditor
+                key={editLocale}
+                initialData={description[editLocale]}
+                onChange={(data) =>
+                  onFieldChange("description", editLocale, data)
+                }
+              />
+            </div>
+            <p className="mt-2 text-xs text-gray-500">{t("descriptionHelpText")}</p>
+          </div>
         </div>
       </CCardBody>
     </CCard>

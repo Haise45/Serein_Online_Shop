@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { Product, Variant } from "@/types";
+import { Product, ProductAdmin, Variant } from "@/types";
 import { AxiosError } from "axios";
 
 // --- Interfaces ---
@@ -26,6 +26,14 @@ export interface PaginatedProductsResponse {
   totalProducts: number;
   limit: number;
   products: Product[];
+}
+
+export interface PaginatedAdminProductsResponse {
+  currentPage: number;
+  totalPages: number;
+  totalProducts: number;
+  limit: number;
+  products: ProductAdmin[];
 }
 
 // Type cho một VariantOptionValue khi tạo/cập nhật (chứa string ID)
@@ -57,7 +65,7 @@ export interface StockUpdateResponse {
 // Type chính cho dữ liệu tạo sản phẩm
 export interface ProductCreationData
   extends Omit<
-    Product,
+    ProductAdmin,
     | "_id"
     | "createdAt"
     | "updatedAt"
@@ -123,11 +131,21 @@ export const getProductByIdOrSlug = async (
 };
 
 // === API Services cho ADMIN ===
+export const getAdminProductsApi = async (
+  params: GetProductsParams,
+): Promise<PaginatedAdminProductsResponse> => {
+  const { data } = await axiosInstance.get("/products/admin", { params });
+  return data;
+};
+
 export const createProduct = async (
   productData: ProductCreationData,
-): Promise<Product> => {
+): Promise<ProductAdmin> => {
   try {
-    const response = await axiosInstance.post<Product>("products", productData);
+    const response = await axiosInstance.post<ProductAdmin>(
+      "products",
+      productData,
+    );
     return response.data;
   } catch (err: unknown) {
     console.error("Lỗi khi tạo sản phẩm:", err);
@@ -135,12 +153,21 @@ export const createProduct = async (
   }
 };
 
+export const getAdminProductDetailsApi = async (
+  productId: string,
+): Promise<ProductAdmin> => {
+  const { data } = await axiosInstance.get<ProductAdmin>(
+    `/products/admin/${productId}`,
+  );
+  return data;
+};
+
 export const updateProduct = async (
   productId: string,
   productData: ProductUpdateData,
-): Promise<Product> => {
+): Promise<ProductAdmin> => {
   try {
-    const response = await axiosInstance.put<Product>(
+    const response = await axiosInstance.put<ProductAdmin>(
       `products/${productId}`,
       productData,
     );

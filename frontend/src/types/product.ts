@@ -1,5 +1,6 @@
 import { Category } from "./category";
 import { Attribute, AttributeValue } from "./attribute";
+import { I18nField } from ".";
 
 // === CẤU TRÚC LỰA CHỌN CỦA BIẾN THỂ ===
 export interface VariantOptionValue {
@@ -31,11 +32,9 @@ export interface ProductAttribute {
 }
 
 // === CẤU TRÚC SẢN PHẨM ===
-export interface Product {
+interface BaseProduct {
   _id: string;
-  name: string;
   slug: string;
-  description?: string;
   price: number;
   salePrice?: number | null;
   salePriceEffectiveDate?: string | Date | null;
@@ -60,3 +59,12 @@ export interface Product {
   isConsideredNew: boolean;
 }
 
+export interface Product extends BaseProduct {
+  name: string;
+  description?: string;
+}
+
+export interface ProductAdmin extends BaseProduct {
+  name: I18nField;
+  description?: I18nField;
+}

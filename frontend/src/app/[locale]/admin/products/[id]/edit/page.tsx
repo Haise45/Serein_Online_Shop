@@ -1,29 +1,34 @@
 import PageHeader from "@/components/shared/PageHeader";
-import { Metadata } from "next";
 import AdminProductEditClient from "./AdminProductEditClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Chỉnh sửa Sản phẩm | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
 };
 
-interface AdminProductEditPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminProductForm.meta",
+  });
+
+  return {
+    title: t("editTitle"),
+  };
 }
 
-export default async function AdminProductEditPage({
-  params,
-}: AdminProductEditPageProps) {
-  const { id } = await params;
+export default async function AdminProductEditPage({ params }: Props) {
+  const { id, locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminProductForm.pageHeader",
+  });
 
   return (
     <div>
-      <PageHeader
-        title="Chỉnh sửa Sản phẩm"
-        description="Cập nhật thông tin chi tiết, biến thể và hình ảnh của sản phẩm."
-      />
-      {/* Truyền productId vào component Client */}
+      <PageHeader title={t("editTitle")} description={t("editDescription")} />
       <AdminProductEditClient productId={id} />
     </div>
   );

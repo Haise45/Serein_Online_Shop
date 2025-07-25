@@ -9,6 +9,7 @@ import {
   CTableRow,
 } from "@coreui/react";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 // T sẽ đại diện cho kiểu của mỗi item trong mảng items
 interface ReportTableProps<T> {
@@ -27,8 +28,11 @@ const ReportTable = <T extends { _id?: string }>({
   renderRow,
   isLoading,
   title,
-  noDataMessage = "Không có dữ liệu.",
+  noDataMessage,
 }: ReportTableProps<T>) => {
+  const t = useTranslations("AdminReports.shared");
+  const finalNoDataMessage = noDataMessage || t("noData");
+
   return (
     <div className="h-100 rounded-lg border bg-white p-4 shadow-sm">
       {title && <h3 className="mb-4 text-lg font-semibold">{title}</h3>}
@@ -37,7 +41,7 @@ const ReportTable = <T extends { _id?: string }>({
           <CSpinner />
         </div>
       ) : items.length === 0 ? (
-        <p className="py-5 text-center text-gray-500">{noDataMessage}</p>
+        <p className="py-5 text-center text-gray-500">{finalNoDataMessage}</p>
       ) : (
         <div className="overflow-x-auto">
           <CTable hover responsive className="mb-0 align-middle text-sm">

@@ -1,6 +1,7 @@
 import axiosInstance from "@/lib/axiosInstance";
 import {
   Attribute,
+  AttributeAdmin,
   AttributeCreationData,
   AttributeValue,
   AttributeValueCreationData,
@@ -16,22 +17,22 @@ const getErrorMessage = (err: unknown, fallback: string): string => {
 
 // --- API Service Functions ---
 
-export const getAttributes = async (): Promise<Attribute[]> => {
-  try {
-    const { data } = await axiosInstance.get<Attribute[]>("/attributes");
-    return data;
-  } catch (error) {
-    throw new Error(
-      getErrorMessage(error, "Không thể tải danh sách thuộc tính."),
-    );
-  }
+export const getAttributesApi = async (): Promise<Attribute[]> => {
+  const { data } = await axiosInstance.get<Attribute[]>("/attributes");
+  return data;
+};
+
+export const getAdminAttributesApi = async (): Promise<AttributeAdmin[]> => {
+  const { data } =
+    await axiosInstance.get<AttributeAdmin[]>("/attributes/admin");
+  return data;
 };
 
 export const createAttribute = async (
   attributeData: AttributeCreationData,
-): Promise<Attribute> => {
+): Promise<AttributeAdmin> => {
   try {
-    const { data } = await axiosInstance.post<Attribute>(
+    const { data } = await axiosInstance.post<AttributeAdmin>(
       "/attributes",
       attributeData,
     );

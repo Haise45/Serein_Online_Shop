@@ -7,6 +7,7 @@ import classNames from "classnames";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import FilterDisclosure from "./FilterDisclosure";
+import { FiTag } from "react-icons/fi";
 
 interface PriceFilterProps {
   currentFilters: ProductFilters;
@@ -88,6 +89,14 @@ export default function PriceFilter({
     });
   };
 
+  // Khi người dùng nhấn "Đang giảm giá"
+  const handleOnSaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFilterChange({
+      ...currentFilters,
+      onSale: e.target.checked ? true : undefined,
+    });
+  };
+
   // Hàm helper để tạo label hiển thị động
   const getRangeLabel = (range: PriceRangeOption) => {
     // Luôn luôn gọi hàm t() với đầy đủ các biến mà chuỗi yêu cầu
@@ -117,6 +126,29 @@ export default function PriceFilter({
   return (
     <FilterDisclosure title={t("priceTitle")} defaultOpen={true}>
       <div className="space-y-4">
+        <div className="border-b border-gray-200 pb-4">
+          <div className="relative flex items-start">
+            <div className="flex h-6 items-center">
+              <input
+                id="on-sale-filter"
+                name="on-sale-filter"
+                type="checkbox"
+                checked={!!currentFilters.onSale} // Dùng `!!` để chuyển đổi sang boolean
+                onChange={handleOnSaleChange}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="ml-3 text-sm leading-6">
+              <label
+                htmlFor="on-sale-filter"
+                className="flex items-center font-medium text-gray-900"
+              >
+                <FiTag className="mr-1.5 h-4 w-4 text-red-500" />
+                <span className="text-red-700">{t("onSale")}</span>
+              </label>
+            </div>
+          </div>
+        </div>
         <div className="space-y-2">
           {PREDEFINED_PRICE_RANGES.map((range) => {
             const label = getRangeLabel(range);

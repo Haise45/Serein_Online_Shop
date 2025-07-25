@@ -6,11 +6,11 @@ import CouponTable from "@/components/admin/coupons/CouponTable";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import useDebounce from "@/hooks/useDebounce";
 import {
-  useGetCoupons,
+  useGetAdminCoupons,
   useDeleteCouponAdmin,
   useCreateCoupon,
   useUpdateCoupon,
-  useGetCouponById,
+  useGetAdminCouponById,
 } from "@/lib/react-query/couponQueries";
 import { GetCouponsParams } from "@/services/couponService";
 import { CouponFormData, DiscountType } from "@/types";
@@ -34,9 +34,16 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import CouponForm from "@/components/admin/coupons/CouponForm";
 import { useSettings } from "@/app/SettingsContext";
+import { useTranslations } from "next-intl";
 
 export default function AdminCouponsClient() {
+  const t = useTranslations("AdminCoupons.list");
+  const tForm = useTranslations("AdminCoupons.form");
+  const tDelete = useTranslations("AdminCoupons.deleteModal");
+  const tAdmin = useTranslations("Admin");
+  const tShared = useTranslations("Shared.confirmModal");
   const router = useRouter();
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { settings, displayCurrency, rates } = useSettings();
@@ -103,19 +110,15 @@ export default function AdminCouponsClient() {
     isError,
     error,
     refetch,
-  } = useGetCoupons(queryParams, {
-    placeholderData: (prev) => prev,
-  });
+  } = useGetAdminCoupons(queryParams);
 
-  const { data: couponToEdit, isLoading: isLoadingDetail } = useGetCouponById(
-    formModalState.couponId!,
-    {
-      enabled:
-        formModalState.isOpen &&
-        formModalState.mode === "edit" &&
-        !!formModalState.couponId,
-    },
-  );
+  const shouldFetchCoupon =
+    formModalState.isOpen &&
+    formModalState.mode === "edit" &&
+    !!formModalState.couponId;
+
+  const { data: couponToEdit, isLoading: isLoadingDetail } =
+    useGetAdminCouponById(shouldFetchCoupon ? formModalState.couponId! : "");
 
   const createCouponMutation = useCreateCoupon();
   const updateCouponMutation = useUpdateCoupon();
@@ -225,13 +228,13 @@ export default function AdminCouponsClient() {
   if (isError) {
     return (
       <CCard className="mb-4">
-        <CCardHeader>Lỗi</CCardHeader>
+        <CCardHeader>{t("errorTitle")}</CCardHeader>
         <CCardBody className="p-5 text-center">
           <CIcon icon={cilWarning} size="xl" className="text-danger mb-3" />
-          <p className="text-danger">Không thể tải danh sách mã giảm giá.</p>
+          <p className="text-danger">{t("errorMessage")}</p>
           <p className="text-muted text-sm">{error?.message}</p>
           <CButton color="primary" onClick={() => refetch()} className="mt-3">
-            Thử lại
+            {t("retryButton")}
           </CButton>
         </CCardBody>
       </CCard>
@@ -244,10 +247,10 @@ export default function AdminCouponsClient() {
         <CCard className="mb-4 shadow-sm">
           <CCardHeader className="border-b bg-white !p-4">
             <div className="d-flex align-items-center mb-3">
-              <h4 className="fw-semibold text-dark mb-0">Mã giảm giá</h4>
+              <h4 className="fw-semibold text-dark mb-0">{t("title")}</h4>
               {hasActiveFilters && (
                 <CBadge color="info" className="ms-2 px-2 py-1">
-                  {paginatedData?.totalCoupons || 0} kết quả
+                  {t("results", { count: paginatedData?.totalCoupons || 0 })}
                 </CBadge>
               )}
             </div>
@@ -263,7 +266,7 @@ export default function AdminCouponsClient() {
             {isLoadingList && !paginatedData && (
               <div className="p-5 text-center">
                 <CSpinner color="primary" />
-                <p className="text-muted mt-2">Đang tải danh sách...</p>
+                <p className="text-muted mt-2">{t("loading")}</p>
               </div>
             )}
 
@@ -277,8 +280,8 @@ export default function AdminCouponsClient() {
                 />
                 <p className="text-muted mb-0">
                   {hasActiveFilters
-                    ? "Không tìm thấy mã giảm giá nào phù hợp."
-                    : "Chưa có mã giảm giá nào."}
+                    ? t("noResultsWithFilter")
+                    : t("noCouponsYet")}
                 </p>
               </div>
             )}
@@ -310,7 +313,9 @@ export default function AdminCouponsClient() {
               limit={paginatedData.limit}
               onPageChange={setCurrentPage}
               onLimitChange={handleLimitChange}
-              itemType="mã giảm giá"
+              itemType={tAdmin("breadcrumbs.coupons", {
+                count: 2,
+              }).toLowerCase()}
               defaultLimitFromSettings={defaultLimitFromSettings}
             />
           )}
@@ -327,8 +332,8 @@ export default function AdminCouponsClient() {
         <CModalHeader>
           <CModalTitle>
             {formModalState.mode === "create"
-              ? "Tạo Mã giảm giá mới"
-              : "Chỉnh sửa Mã giảm giá"}
+              ? tForm("createTitle")
+              : tForm("editTitle")}
           </CModalTitle>
         </CModalHeader>
         <CModalBody>
@@ -357,10 +362,10 @@ export default function AdminCouponsClient() {
         }
         onConfirm={handleConfirmDelete}
         isConfirming={deleteCouponMutation.isPending}
-        title="Xác nhận Vô hiệu hóa"
-        body={`Bạn có chắc muốn vô hiệu hóa mã giảm giá "${deleteModalState.couponToDelete.code}"?`}
-        confirmButtonText="Đồng ý"
-        confirmButtonColor="danger"
+        title={tDelete("title")}
+        body={tDelete("body", { code: deleteModalState.couponToDelete.code })}
+        confirmButtonText={tShared("confirm")}
+        cancelButtonText={tShared("cancel")}
       />
     </CRow>
   );

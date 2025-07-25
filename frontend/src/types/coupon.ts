@@ -1,30 +1,37 @@
+import { I18nField } from ".";
+
 export type DiscountType = "percentage" | "fixed_amount";
 export type CouponApplicableTo = "all" | "categories" | "products";
 
 export interface ApplicableDetail {
   _id: string;
-  name: string;
+  name: I18nField | string;
   slug: string;
 }
 
-export interface Coupon {
+// --- Base Interface ---
+interface BaseCoupon {
   _id: string;
   code: string;
-  description?: string | null;
   discountType: DiscountType;
   discountValue: number;
   minOrderValue: number;
-  maxUsage?: number | null; // null nghĩa là không giới hạn
+  maxUsage: number | null;
   usageCount: number;
   maxUsagePerUser: number;
-  startDate?: Date | string | null; // API có thể trả về string, client có thể convert sang Date
-  expiryDate: Date | string; // Tương tự, API có thể trả về string
+  startDate?: Date | string | null;
+  expiryDate: Date | string;
   isActive: boolean;
   applicableTo: CouponApplicableTo;
-  applicableIds: string[]; // Mảng các ObjectId dưới dạng string
+  applicableIds: string[];
   applicableDetails?: ApplicableDetail[];
   createdAt: Date | string;
   updatedAt: Date | string;
+}
+
+// --- Dành cho Client (đã làm phẳng) ---
+export interface Coupon extends BaseCoupon {
+  description?: string | null;
 }
 
 export interface PaginatedCouponsResponse {
@@ -35,12 +42,24 @@ export interface PaginatedCouponsResponse {
   coupons: Coupon[];
 }
 
-// Dùng cho cả tạo mới và cập nhật
+// --- Dành cho Admin (dữ liệu gốc) ---
+export interface CouponAdmin extends BaseCoupon {
+  description?: I18nField;
+}
+export interface PaginatedAdminCouponsResponse {
+  currentPage: number;
+  totalPages: number;
+  totalCoupons: number;
+  limit: number;
+  coupons: CouponAdmin[];
+}
+
+// --- Dành cho Form ---
 export interface CouponFormData {
   code: string;
-  description: string;
+  description: I18nField;
   discountType: DiscountType;
-  discountValue: number | string; // Cho phép string để form dễ xử lý
+  discountValue: number | string;
   minOrderValue: number | string;
   maxUsage: number | string | null;
   maxUsagePerUser: number | string;

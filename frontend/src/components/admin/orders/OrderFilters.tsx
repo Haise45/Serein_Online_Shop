@@ -5,6 +5,7 @@ import { cilFilterX } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import { CButton, CCol, CFormInput, CFormSelect, CRow } from "@coreui/react";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface OrderFiltersProps {
   searchTerm: string;
@@ -29,6 +30,9 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
   setFilterEndDate,
   clearFilters,
 }) => {
+  const t = useTranslations("AdminOrders.filters");
+  const tStatus = useTranslations("OrderStatus");
+
   return (
     <div className="mb-4">
       <CRow className="gy-3 gx-3 align-items-center">
@@ -37,7 +41,7 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
           <CFormInput
             type="search"
             size="sm"
-            placeholder="Tìm theo Mã đơn, Tên, Email..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border-gray-300"
@@ -51,12 +55,12 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="border-gray-300"
-            aria-label="Lọc theo trạng thái"
+            aria-label={t("filterByStatus")}
           >
-            <option value="">Tất cả trạng thái</option>
+            <option value="">{t("allStatuses")}</option>
             {ORDER_STATUSES.map((status) => (
               <option key={status.value} value={status.value}>
-                {status.label}
+                {tStatus(status.value)}
               </option>
             ))}
           </CFormSelect>
@@ -70,7 +74,7 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
             value={filterStartDate}
             onChange={(e) => setFilterStartDate(e.target.value)}
             className="border-gray-300"
-            aria-label="Ngày bắt đầu"
+            aria-label={t("startDateAria")}
           />
         </CCol>
         <CCol xs={12} sm={6} md={2}>
@@ -80,7 +84,7 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
             value={filterEndDate}
             onChange={(e) => setFilterEndDate(e.target.value)}
             className="border-gray-300"
-            aria-label="Ngày kết thúc"
+            aria-label={t("endDateAria")}
           />
         </CCol>
 
@@ -91,11 +95,11 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
             variant="outline"
             size="sm"
             onClick={clearFilters}
-            title="Xóa bộ lọc"
+            title={t("clearFiltersTitle")}
             className="w-md-auto w-100 px-3"
           >
             <CIcon icon={cilFilterX} className="me-1" />
-            Xóa lọc
+            {t("clearFilters")}
           </CButton>
         </CCol>
       </CRow>

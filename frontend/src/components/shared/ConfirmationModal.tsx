@@ -8,6 +8,7 @@ import {
   CSpinner,
 } from "@coreui/react";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface ConfirmationModalProps {
   visible: boolean;
@@ -35,11 +36,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   body,
-  confirmButtonText = "Xác nhận",
-  cancelButtonText = "Hủy",
+  confirmButtonText,
+  cancelButtonText,
   confirmButtonColor = "primary",
   isConfirming = false,
 }) => {
+  const t = useTranslations("Shared.confirmModal");
+  const finalConfirmText = confirmButtonText || t("confirm");
+  const finalCancelText = cancelButtonText || t("cancel");
+  
   return (
     <CModal alignment="center" visible={visible} onClose={onClose}>
       <CModalHeader>
@@ -53,7 +58,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           onClick={onClose}
           disabled={isConfirming}
         >
-          {cancelButtonText}
+          {finalCancelText}
         </CButton>
         <CButton
           color={confirmButtonColor}
@@ -61,7 +66,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           disabled={isConfirming}
         >
           {isConfirming ? <CSpinner size="sm" className="me-2" /> : null}
-          {isConfirming ? "Đang xử lý..." : confirmButtonText}
+          {isConfirming ? t("processing") : finalConfirmText}
         </CButton>
       </CModalFooter>
     </CModal>

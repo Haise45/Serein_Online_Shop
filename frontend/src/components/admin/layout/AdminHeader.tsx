@@ -1,5 +1,6 @@
 "use client";
 import "@/app/globals.css";
+import { useSettings } from "@/app/SettingsContext";
 import SettingsSwitcher from "@/components/shared/SettingsSwitcher";
 import { logoutUserApi } from "@/services/authService";
 import { AppDispatch, RootState } from "@/store";
@@ -19,6 +20,7 @@ import React, { useCallback } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationBell from "./NotificationBell";
+import { useTranslations } from "next-intl";
 
 interface AdminHeaderProps {
   onSidebarToggle: () => void;
@@ -29,9 +31,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   onSidebarToggle,
   onUnfoldableToggle,
 }) => {
+  const t = useTranslations("Admin.header");
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const user = useSelector((state: RootState) => state.auth.user);
+
+  const { settings } = useSettings();
+  const clientDefaultLocale = settings?.clientSettings.defaultLanguage || 'vi';
 
   const handleLogout = useCallback(async () => {
     try {
@@ -41,9 +47,9 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
     }
     dispatch(logoutAction());
     queryClient.clear();
-    toast.success("Đăng xuất thành công!");
-    window.location.replace("/login");
-  }, [dispatch, queryClient]);
+    toast.success(t("logoutSuccess"));
+    window.location.replace(`/${clientDefaultLocale}/login`);
+  }, [dispatch, queryClient, t, clientDefaultLocale]);
 
   return (
     <CHeader
@@ -87,7 +93,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
               onClick={handleLogout}
               className="px-2 text-gray-600 hover:text-indigo-600"
             >
-              <CIcon icon={cilAccountLogout} size="lg" title="Đăng xuất" />
+              <CIcon icon={cilAccountLogout} size="lg" title={t("logoutTitle")} />
             </CNavLink>
           </CNavItem>
         </CHeaderNav>

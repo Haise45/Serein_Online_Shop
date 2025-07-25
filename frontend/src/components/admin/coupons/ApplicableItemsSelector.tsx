@@ -1,19 +1,21 @@
 "use client";
 
 import useDebounce from "@/hooks/useDebounce";
-import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
+import { useGetAdminCategories } from "@/lib/react-query/categoryQueries";
 import { useGetAdminProducts } from "@/lib/react-query/productQueries";
-import { ApplicableDetail } from "@/types";
+import { getLocalizedName } from "@/lib/utils";
+import { ApplicableDetail, CategoryAdmin, ProductAdmin } from "@/types";
 import { cilSearch, cilX } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import { CFormInput, CSpinner } from "@coreui/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface ApplicableItemsSelectorProps {
   type: "products" | "categories";
   value: string[]; // Mảng các ID đã được chọn
   onChange: (ids: string[]) => void;
-  initialDetails?: ApplicableDetail[]; // Vẫn cần để khởi tạo
+  initialDetails?: ApplicableDetail[];
 }
 
 const ApplicableItemsSelector: React.FC<ApplicableItemsSelectorProps> = ({
@@ -22,93 +24,111 @@ const ApplicableItemsSelector: React.FC<ApplicableItemsSelectorProps> = ({
   onChange,
   initialDetails = [],
 }) => {
+  const t = useTranslations("AdminCoupons.applicableSelector");
+  const locale = useLocale() as "vi" | "en";
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // State này sẽ lưu trữ cả ID và tên, giải quyết cả hai vấn đề.
+  // State để lưu trữ các object đã chọn (bao gồm _id và name)
   const [selectedItems, setSelectedItems] = useState<ApplicableDetail[]>([]);
 
   // useEffect để đồng bộ state nội bộ với props từ form cha
   useEffect(() => {
-    // Chỉ cập nhật từ initialDetails nếu state nội bộ đang rỗng
-    // và có dữ liệu ban đầu để điền vào (trường hợp sửa coupon)
+    // 1. Nếu mảng ID từ form cha bị rỗng (do reset), xóa sạch các item ở đây
+    if (selectedIds.length === 0) {
+      setSelectedItems([]);
+      return;
+    }
+
+    // 2. Nếu có dữ liệu ban đầu (chế độ sửa), điền vào state nội bộ
+    // Chỉ chạy một lần khi có initialDetails và state đang rỗng
     if (selectedItems.length === 0 && initialDetails.length > 0) {
-      // Lọc ra các chi tiết tương ứng với các ID đã chọn
       const correspondingDetails = initialDetails.filter((detail) =>
         selectedIds.includes(detail._id),
       );
       setSelectedItems(correspondingDetails);
     }
-  }, [initialDetails, selectedIds, selectedItems.length]);
+  }, [selectedIds, initialDetails, selectedItems.length]);
 
-  // Fetch dữ liệu tìm kiếm
+  // Fetch dữ liệu tìm kiếm từ các API admin
   const { data: productData, isLoading: isLoadingProducts } =
     useGetAdminProducts(
       { search: debouncedSearchTerm, limit: 10, isActive: true },
       { enabled: type === "products" && debouncedSearchTerm.length > 0 },
     );
+
   const { data: categoryData, isLoading: isLoadingCategories } =
-    useGetAllCategories(
+    useGetAdminCategories(
       { name: debouncedSearchTerm, limit: 10, isActive: true },
       { enabled: type === "categories" && debouncedSearchTerm.length > 0 },
     );
 
   const searchResults: ApplicableDetail[] =
-    (type === "products" ? productData?.products : categoryData?.categories) ||
-    [];
+    (type === "products"
+      ? (productData?.products as ProductAdmin[])
+      : (categoryData?.categories as CategoryAdmin[])) || [];
+
   const isLoading = isLoadingProducts || isLoadingCategories;
 
+  // Xử lý khi người dùng chọn một item từ dropdown
   const handleSelect = (item: ApplicableDetail) => {
-    // Kiểm tra trùng lặp dựa trên ID
     if (!selectedItems.some((selected) => selected._id === item._id)) {
       const newSelectedItems = [...selectedItems, item];
       setSelectedItems(newSelectedItems);
-      // Gọi onChange của form cha với mảng các ID mới
       onChange(newSelectedItems.map((i) => i._id));
     }
     setSearchTerm("");
     setIsDropdownOpen(false);
   };
 
+  // Xử lý khi người dùng xóa một item đã chọn
   const handleRemove = (idToRemove: string) => {
     const newSelectedItems = selectedItems.filter(
       (item) => item._id !== idToRemove,
     );
     setSelectedItems(newSelectedItems);
-    // Gọi onChange của form cha với mảng các ID mới
     onChange(newSelectedItems.map((i) => i._id));
   };
 
   return (
     <div className="mt-3 space-y-3">
       <label className="font-medium text-gray-700">
-        {type === "products"
-          ? "Chọn sản phẩm áp dụng"
-          : "Chọn danh mục áp dụng"}
+        {type === "products" ? t("productsLabel") : t("categoriesLabel")}
       </label>
 
       {/* Hiển thị các item đã chọn */}
-      {selectedItems.length > 0 && (
-        <div className="flex flex-wrap gap-3 rounded-lg border border-gray-200 bg-gray-50 py-3 px-2">
-          {selectedItems.map((item) => (
+      <div className="flex min-h-[52px] flex-wrap gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2">
+        {selectedItems.length > 0 ? (
+          selectedItems.map((item) => (
             <div
               key={item._id}
               className="flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-gray-700 shadow-sm"
             >
-              <span className="max-w-[200px] truncate">{item.name}</span>
+              <span
+                className="max-w-[200px] truncate"
+                title={getLocalizedName(item.name, locale)}
+              >
+                {getLocalizedName(item.name, locale)}
+              </span>
               <button
                 type="button"
                 onClick={() => handleRemove(item._id)}
-                className="rounded-full text-red-500 hover:text-red-700 focus:ring-2 focus:ring-red-400 focus:outline-none"
-                aria-label={`Xóa ${item.name}`}
+                className="flex-shrink-0 rounded-full text-red-400 hover:text-red-700 focus:outline-none"
+                aria-label={t("removeAria", {
+                  name: getLocalizedName(item.name, locale),
+                })}
               >
                 <CIcon icon={cilX} size="sm" />
               </button>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="flex w-full items-center justify-center text-sm text-gray-400">
+            {t("noItemSelected")}
+          </div>
+        )}
+      </div>
 
       {/* Ô tìm kiếm */}
       <div className="relative">
@@ -118,7 +138,9 @@ const ApplicableItemsSelector: React.FC<ApplicableItemsSelectorProps> = ({
         />
         <CFormInput
           type="search"
-          placeholder={`Tìm kiếm ${type === "products" ? "sản phẩm" : "danh mục"}...`}
+          placeholder={
+            type === "products" ? t("searchProducts") : t("searchCategories")
+          }
           className="!pl-9"
           value={searchTerm}
           onChange={(e) => {
@@ -137,24 +159,23 @@ const ApplicableItemsSelector: React.FC<ApplicableItemsSelectorProps> = ({
           <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
             {isLoading && (
               <div className="p-3 text-center text-gray-500">
-                <CSpinner size="sm" /> Đang tìm...
+                <CSpinner size="sm" /> {t("loading")}
               </div>
             )}
             {!isLoading &&
               debouncedSearchTerm &&
               searchResults.length === 0 && (
                 <div className="p-3 text-center text-gray-500">
-                  Không tìm thấy kết quả.
+                  {t("noResults")}
                 </div>
               )}
             {searchResults.map((item) => (
               <div
                 key={item._id}
                 className="cursor-pointer p-3 hover:bg-indigo-50"
-                // Dùng onMouseDown để nó chạy trước sự kiện onBlur của input
                 onMouseDown={() => handleSelect(item)}
               >
-                {item.name}
+                {getLocalizedName(item.name, locale)}
               </div>
             ))}
           </div>
