@@ -9,6 +9,7 @@ import ReportTable from "./ReportTable";
 import SalesByPaymentMethodChart from "./SalesByPaymentMethodChart";
 import ReportBlock from "./ReportBlock";
 import { ExchangeRates } from "@/types";
+import { useTranslations } from "next-intl";
 
 interface SalesReportProps {
   filters: DateRangeParams;
@@ -21,6 +22,8 @@ const SalesReport: React.FC<SalesReportProps> = ({
   displayCurrency,
   rates,
 }) => {
+  const t = useTranslations("AdminReports.sales");
+  const tPayment = useTranslations("CheckoutForm.paymentMethods");
   const { data, isLoading } = useGetSalesReport(filters);
   const currencyOptions = { currency: displayCurrency, rates };
 
@@ -28,22 +31,22 @@ const SalesReport: React.FC<SalesReportProps> = ({
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <ReportStatCard
-          title="Tổng Doanh thu"
+          title={t("totalRevenue")}
           value={formatCurrency(data?.summary.totalRevenue, currencyOptions)}
           isLoading={isLoading}
         />
         <ReportStatCard
-          title="Tổng Đơn hàng"
+          title={t("totalOrders")}
           value={data?.summary.totalOrders || 0}
           isLoading={isLoading}
         />
         <ReportStatCard
-          title="Sản phẩm đã bán"
+          title={t("itemsSold")}
           value={data?.summary.totalItemsSold || 0}
           isLoading={isLoading}
         />
         <ReportStatCard
-          title="Giá trị ĐH Trung bình"
+          title={t("avgOrderValue")}
           value={formatCurrency(
             data?.summary.averageOrderValue,
             currencyOptions,
@@ -53,24 +56,28 @@ const SalesReport: React.FC<SalesReportProps> = ({
       </div>
 
       <ReportBlock
-        title="Doanh thu theo Phương thức Thanh toán"
+        title={t("revenueByPayment")}
         renderTable={() => (
           <ReportTable
             isLoading={isLoading}
             items={data?.byPaymentMethod || []}
             headers={[
-              { key: "method", label: "Phương thức" },
-              { key: "orders", label: "Số đơn", className: "text-center" },
-              { key: "value", label: "Tổng giá trị", className: "text-end" },
+              { key: "method", label: t("tableColMethod") },
+              {
+                key: "orders",
+                label: t("tableColOrders"),
+                className: "text-center",
+              },
+              {
+                key: "value",
+                label: t("tableColValue"),
+                className: "text-end",
+              },
             ]}
             renderRow={(item) => (
               <CTableRow key={item._id}>
                 <CTableDataCell className="font-medium">
-                  {{
-                    COD: "Thanh toán khi nhận hàng (COD)",
-                    BANK_TRANSFER: "Chuyển khoản ngân hàng",
-                    PAYPAL: "Thanh toán bằng PayPal",
-                  }[item._id] || item._id}
+                  {tPayment(`${item._id}.name`)}
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
                   {item.count}

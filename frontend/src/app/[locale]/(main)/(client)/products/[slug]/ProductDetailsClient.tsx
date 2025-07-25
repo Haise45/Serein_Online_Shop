@@ -25,6 +25,7 @@ import {
   VariantOptionValue,
 } from "@/types";
 import classNames from "classnames";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -43,7 +44,6 @@ import {
   FiXCircle,
 } from "react-icons/fi";
 import { useDispatch } from "react-redux";
-import { useTranslations } from "next-intl";
 
 interface ProductDetailsClientProps {
   slug: string;
@@ -190,7 +190,7 @@ export default function ProductDetailsClient({
       router.replace(newUrl, { scroll: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product, selectedOptions, pathname, router]);
+  }, [selectedOptions, pathname, router]);
 
   // --- Logic hiển thị ---
 
@@ -633,9 +633,6 @@ export default function ProductDetailsClient({
                                   const hex =
                                     (valueOption.meta?.hex as string) ||
                                     "#E5E7EB";
-                                  const borderColor =
-                                    (valueOption.meta?.borderColor as string) ||
-                                    "transparent";
                                   return (
                                     <button
                                       key={valueOption._id}
@@ -649,20 +646,19 @@ export default function ProductDetailsClient({
                                         )
                                       }
                                       className={classNames(
-                                        "relative flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all duration-200 focus:outline-none",
+                                        "relative flex h-9 w-9 items-center justify-center rounded-full border-1 transition-all duration-200 focus:outline-none",
                                         isDisabled
                                           ? "cursor-not-allowed"
                                           : "cursor-pointer hover:scale-110",
                                         isSelected
                                           ? "border-indigo-500 ring-2 ring-indigo-500 ring-offset-1"
-                                          : "border-transparent",
+                                          : "border-gray-600",
                                         !isSelected && !isDisabled
                                           ? `hover:border-indigo-400`
                                           : "",
                                       )}
                                       style={{
                                         backgroundColor: hex,
-                                        borderColor: borderColor,
                                       }}
                                     >
                                       {isDisabled && (
@@ -801,24 +797,6 @@ export default function ProductDetailsClient({
                 </button>
               </div>
             </form>
-
-            {/* Product Description Section */}
-            {/* {product.description && (
-            // ... (Phần mô tả giữ nguyên) ...
-            <div className="mt-10 border-t border-gray-200 pt-8">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">
-                Mô tả sản phẩm
-              </h2>
-              <div
-                className="prose prose-sm sm:prose-base max-w-none text-gray-700"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    product.description ||
-                    "<p>Chưa có mô tả cho sản phẩm này.</p>",
-                }}
-              />
-            </div>
-          )} */}
           </div>
         </div>
       </div>

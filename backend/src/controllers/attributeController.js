@@ -45,6 +45,15 @@ const getAttributes = asyncHandler(async (req, res) => {
   res.status(200).json(flattenedAttributes);
 });
 
+// @desc    Lấy tất cả thuộc tính GỐC (chưa làm phẳng, cho admin)
+// @route   GET /api/v1/attributes/admin
+// @access  Private/Admin
+const getAdminAttributes = asyncHandler(async (req, res) => {
+  // Lấy dữ liệu gốc mà không qua xử lý làm phẳng
+  const attributes = await Attribute.find({}).sort({ name: 1 });
+  res.status(200).json(attributes);
+});
+
 // @desc    Thêm một giá trị mới vào một thuộc tính đã có
 // @route   POST /api/v1/attributes/:id/values
 // @access  Private/Admin
@@ -124,6 +133,7 @@ const deleteAttributeValue = asyncHandler(async (req, res) => {
 
 module.exports = {
   getAttributes,
+  getAdminAttributes,
   createAttribute,
   addAttributeValue,
   updateAttributeValue,

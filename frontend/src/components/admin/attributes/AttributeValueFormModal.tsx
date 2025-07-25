@@ -1,4 +1,9 @@
-import { AttributeValue, AttributeValueCreationData } from "@/types";
+import LanguageSwitcherTabs from "@/components/shared/LanguageSwitcherTabs";
+import {
+  AttributeValueAdmin,
+  AttributeValueCreationData,
+  I18nField,
+} from "@/types";
 import {
   CButton,
   CCol,
@@ -14,11 +19,12 @@ import {
 } from "@coreui/react";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 // Form nội bộ
 interface ValueFormProps {
-  initialData: AttributeValue | null;
-  onSave: (data: AttributeValueCreationData) => void;
+  initialData: AttributeValueAdmin | null;
+  onSave: (data: { value: I18nField; meta?: { hex?: string } }) => void;
   onCancel: () => void;
   isSaving: boolean;
 }
@@ -28,11 +34,18 @@ const ValueForm: React.FC<ValueFormProps> = ({
   onCancel,
   isSaving,
 }) => {
-  const [value, setValue] = useState("");
+  const t = useTranslations("AdminAttributes.valueForm");
+
+  const [value, setValue] = useState<I18nField>({ vi: "", en: "" });
   const [hex, setHex] = useState("");
+  const [editLocale, setEditLocale] = useState<"vi" | "en">("vi");
 
   useEffect(() => {
-    setValue(initialData?.value || "");
+    setValue(
+      typeof initialData?.value === "object"
+        ? initialData.value
+        : { vi: "", en: "" },
+    );
     setHex(
       initialData?.meta && typeof initialData.meta.hex === "string"
         ? initialData.meta.hex
@@ -41,8 +54,8 @@ const ValueForm: React.FC<ValueFormProps> = ({
   }, [initialData]);
 
   const handleSubmit = () => {
-    if (!value.trim()) {
-      toast.error("Tên giá trị không được để trống.");
+    if (!value.vi.trim() || !value.en.trim()) {
+      toast.error(t("validationError"));
       return;
     }
     onSave({ value, meta: { hex: hex || undefined } });
@@ -50,19 +63,26 @@ const ValueForm: React.FC<ValueFormProps> = ({
 
   return (
     <>
+      <LanguageSwitcherTabs
+        activeLocale={editLocale}
+        onLocaleChange={setEditLocale}
+      />
+
       <div className="mb-3">
-        <CFormLabel htmlFor="valueName">Tên giá trị*</CFormLabel>
+        <CFormLabel htmlFor="valueName">
+          {t("nameLabel", { locale: editLocale.toUpperCase() })}
+        </CFormLabel>
         <CFormInput
           id="valueName"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Ví dụ: Đỏ tươi, XL, Cotton..."
+          value={value[editLocale]}
+          onChange={(e) =>
+            setValue((prev) => ({ ...prev, [editLocale]: e.target.value }))
+          }
+          placeholder={t("nameLabel", { locale: editLocale.toUpperCase() })}
         />
       </div>
       <div className="mb-3">
-        <CFormLabel htmlFor="valueHex">
-          Mã màu Hex (tùy chọn, nếu là màu sắc)
-        </CFormLabel>
+        <CFormLabel htmlFor="valueHex">{t("hexLabel")}</CFormLabel>
         <CRow className="g-2 align-items-center">
           <CCol xs="auto">
             <CFormInput
@@ -76,7 +96,7 @@ const ValueForm: React.FC<ValueFormProps> = ({
           <CCol>
             <CFormInput
               id="valueHex"
-              placeholder="#FF0000"
+              placeholder={t("hexPlaceholder")}
               value={hex}
               onChange={(e) => setHex(e.target.value)}
             />
@@ -85,11 +105,11 @@ const ValueForm: React.FC<ValueFormProps> = ({
       </div>
       <CModalFooter className="!mt-4 !p-0">
         <CButton color="secondary" onClick={onCancel} variant="outline">
-          Hủy
+          {t("cancel")}
         </CButton>
         <CButton color="primary" onClick={handleSubmit} disabled={isSaving}>
           {isSaving && <CSpinner size="sm" className="mr-2" />}
-          Lưu
+          {t("save")}
         </CButton>
       </CModalFooter>
     </>
@@ -100,7 +120,7 @@ const ValueForm: React.FC<ValueFormProps> = ({
 interface AttributeValueFormModalProps {
   visible: boolean;
   isEdit: boolean;
-  initialData: AttributeValue | null;
+  initialData: AttributeValueAdmin | null;
   onClose: () => void;
   onSave: (data: AttributeValueCreationData) => void;
   isSaving: boolean;
@@ -113,12 +133,12 @@ const AttributeValueFormModal: React.FC<AttributeValueFormModalProps> = ({
   onSave,
   isSaving,
 }) => {
+  const t = useTranslations("AdminAttributes.valueForm");
+
   return (
     <CModal visible={visible} onClose={onClose} alignment="center">
       <CModalHeader>
-        <CModalTitle>
-          {isEdit ? "Chỉnh sửa giá trị" : "Thêm giá trị mới"}
-        </CModalTitle>
+        <CModalTitle>{isEdit ? t("editTitle") : t("addTitle")}</CModalTitle>
       </CModalHeader>
       <CModalBody>
         <ValueForm

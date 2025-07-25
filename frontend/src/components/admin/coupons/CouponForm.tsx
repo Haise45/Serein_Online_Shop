@@ -1,7 +1,8 @@
 "use client";
 
 import { useSettings } from "@/app/SettingsContext";
-import { Coupon, CouponFormData } from "@/types";
+import LanguageSwitcherTabs from "@/components/shared/LanguageSwitcherTabs";
+import { CouponAdmin, CouponFormData, CouponApplicableTo } from "@/types";
 import {
   CButton,
   CCol,
@@ -10,6 +11,7 @@ import {
   CFormInput,
   CFormLabel,
   CFormSelect,
+  CFormTextarea,
   CInputGroup,
   CInputGroupText,
   CRow,
@@ -17,9 +19,10 @@ import {
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ApplicableItemsSelector from "./ApplicableItemsSelector";
+import { useTranslations } from "next-intl";
 
 interface CouponFormProps {
-  initialData?: Coupon;
+  initialData?: CouponAdmin;
   onSubmit: (data: Partial<CouponFormData>) => void;
   isSubmitting: boolean;
   onClose: () => void;
@@ -33,38 +36,33 @@ const CouponForm: React.FC<CouponFormProps> = ({
   isSubmitting,
   onClose,
 }) => {
+  const t = useTranslations("AdminCoupons.form");
   const { rates } = useSettings();
   const usdToVndRate = rates?.inverseRates?.USD || 25400;
+  const vndToUsdRate = rates?.rates?.USD || 1 / 25400;
+  const [editLocale, setEditLocale] = useState<"vi" | "en">("vi");
   const [inputCurrency, setInputCurrency] = useState<"VND" | "USD">("VND");
 
   const [formData, setFormData] = useState<Partial<CouponFormData>>({
-    code: initialData?.code || "",
-    description: initialData?.description || "",
-    discountType: initialData?.discountType || "percentage",
-    discountValue: initialData?.discountValue || 0,
-    minOrderValue: initialData?.minOrderValue || 0,
-    maxUsage: initialData?.maxUsage ?? null,
-    maxUsagePerUser: initialData?.maxUsagePerUser || 1,
-    startDate: initialData?.startDate
-      ? new Date(initialData.startDate).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
-    expiryDate: initialData?.expiryDate
-      ? new Date(initialData.expiryDate).toISOString().split("T")[0]
-      : "",
-    isActive: initialData?.isActive ?? true,
-    applicableTo: initialData?.applicableTo || "all",
-    applicableIds: initialData?.applicableIds || [],
+    code: "",
+    description: { vi: "", en: "" },
+    discountType: "percentage",
+    discountValue: 0,
+    minOrderValue: 0,
+    maxUsage: null,
+    maxUsagePerUser: 1,
+    startDate: new Date().toISOString().split("T")[0],
+    expiryDate: "",
+    isActive: true,
+    applicableTo: "all",
+    applicableIds: [],
   });
 
   const [displayValues, setDisplayValues] = useState({
-    discountValueVND: String(initialData?.discountValue || ""),
-    discountValueUSD: (
-      (initialData?.discountValue || 0) / usdToVndRate
-    ).toFixed(2),
-    minOrderValueVND: String(initialData?.minOrderValue || "0"),
-    minOrderValueUSD: (
-      (initialData?.minOrderValue || 0) / usdToVndRate
-    ).toFixed(2),
+    discountValueVND: "",
+    discountValueUSD: "",
+    minOrderValueVND: "0",
+    minOrderValueUSD: "0",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -73,83 +71,67 @@ const CouponForm: React.FC<CouponFormProps> = ({
     if (initialData) {
       const discountVND = initialData.discountValue || 0;
       const minOrderVND = initialData.minOrderValue || 0;
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
+        code: initialData.code,
+        description: initialData.description || { vi: "", en: "" },
+        discountType: initialData.discountType,
         discountValue: discountVND,
         minOrderValue: minOrderVND,
-      }));
+        maxUsage: initialData.maxUsage,
+        maxUsagePerUser: initialData.maxUsagePerUser,
+        startDate: initialData.startDate
+          ? new Date(initialData.startDate).toISOString().split("T")[0]
+          : "",
+        expiryDate: initialData.expiryDate
+          ? new Date(initialData.expiryDate).toISOString().split("T")[0]
+          : "",
+        isActive: initialData.isActive,
+        applicableTo: initialData.applicableTo,
+        applicableIds: initialData.applicableIds,
+      });
       setDisplayValues({
         discountValueVND: String(discountVND),
-        discountValueUSD: (discountVND / usdToVndRate).toFixed(2),
+        discountValueUSD: (discountVND * vndToUsdRate).toFixed(2),
         minOrderValueVND: String(minOrderVND),
-        minOrderValueUSD: (minOrderVND / usdToVndRate).toFixed(2),
+        minOrderValueUSD: (minOrderVND * vndToUsdRate).toFixed(2),
       });
     }
-  }, [initialData, usdToVndRate]);
+  }, [initialData, vndToUsdRate]);
 
-  const handleDisplayValueChange = (
+  const handlePriceChange = (
     value: string,
     field: "discountValue" | "minOrderValue",
-    currency: "VND" | "USD",
   ) => {
-    if (field === "discountValue") {
-      setDisplayValues((prev) => ({
-        ...prev,
-        [currency === "VND" ? "discountValueVND" : "discountValueUSD"]: value,
-      }));
+    const numericValue = parseFloat(value) || 0;
+    let valueInVND = 0;
+    if (inputCurrency === "VND") {
+      valueInVND = numericValue;
     } else {
-      setDisplayValues((prev) => ({
-        ...prev,
-        [currency === "VND" ? "minOrderValueVND" : "minOrderValueUSD"]: value,
-      }));
+      valueInVND = numericValue * usdToVndRate;
     }
+    setFormData((prev) => ({ ...prev, [field]: valueInVND }));
   };
 
-  const handlePriceBlur = (
-    field: "discountValue" | "minOrderValue",
-    currency: "VND" | "USD",
-  ) => {
-    let numericValue = 0;
-    if (currency === "VND") {
-      numericValue =
-        parseFloat(
-          field === "discountValue"
-            ? displayValues.discountValueVND
-            : displayValues.minOrderValueVND,
-        ) || 0;
-    } else {
-      numericValue =
-        parseFloat(
-          field === "discountValue"
-            ? displayValues.discountValueUSD
-            : displayValues.minOrderValueUSD,
-        ) || 0;
-    }
-
-    let finalValueInVND = 0;
-    if (currency === "VND") {
-      finalValueInVND = Math.round(numericValue / 1000) * 1000;
-    } else {
-      finalValueInVND = Math.round((numericValue * usdToVndRate) / 1000) * 1000;
-    }
-
-    setFormData((prev) => ({ ...prev, [field]: finalValueInVND }));
-
-    const finalDiscountVND: number =
-      field === "discountValue"
-        ? finalValueInVND
-        : Number(formData.discountValue) || 0;
-    
-    const finalMinOrderVND: number =
-      field === "minOrderValue"
-        ? finalValueInVND
-        : Number(formData.minOrderValue) || 0;
-
+  useEffect(() => {
+    const discountVND = Number(formData.discountValue) || 0;
+    const minOrderVND = Number(formData.minOrderValue) || 0;
     setDisplayValues({
-      discountValueVND: String(finalDiscountVND),
-      discountValueUSD: (finalDiscountVND / usdToVndRate).toFixed(2),
-      minOrderValueVND: String(finalMinOrderVND),
-      minOrderValueUSD: (finalMinOrderVND / usdToVndRate).toFixed(2),
+      discountValueVND: String(discountVND),
+      discountValueUSD: (discountVND * vndToUsdRate).toFixed(2),
+      minOrderValueVND: String(minOrderVND),
+      minOrderValueUSD: (minOrderVND * vndToUsdRate).toFixed(2),
+    });
+  }, [formData.discountValue, formData.minOrderValue, vndToUsdRate]);
+
+  const handleI18nChange = (
+    field: "description",
+    locale: "vi" | "en",
+    value: string,
+  ) => {
+    setFormData((prev) => {
+      const currentI18nField = prev[field] || { vi: "", en: "" };
+      const newI18nField = { ...currentI18nField, [locale]: value };
+      return { ...prev, [field]: newI18nField };
     });
   };
 
@@ -164,43 +146,56 @@ const CouponForm: React.FC<CouponFormProps> = ({
     }));
   };
 
+  const handleApplicableToChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const newApplicableTo = e.target.value as CouponApplicableTo;
+
+    // Cập nhật applicableTo VÀ RESET các lựa chọn cũ
+    setFormData((prev) => ({
+      ...prev,
+      applicableTo: newApplicableTo,
+      applicableIds: [], // Reset mảng ID
+    }));
+  };
+
   const handleApplicableIdsChange = (ids: string[]) => {
     setFormData((prev) => ({ ...prev, applicableIds: ids }));
   };
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!formData.code?.trim()) newErrors.code = "Mã code là bắt buộc.";
+    if (!formData.code?.trim()) newErrors.code = t("validation.codeRequired");
 
     const discountVal = Number(formData.discountValue);
     if (isNaN(discountVal) || discountVal <= 0)
-      newErrors.discountValue = "Giá trị giảm phải là số lớn hơn 0.";
+      newErrors.discountValue = t("validation.valuePositive");
     if (formData.discountType === "percentage" && discountVal > 100)
-      newErrors.discountValue = "Giảm giá % không được lớn hơn 100.";
+      newErrors.discountValue = t("validation.valuePercentageLimit");
 
     if (!formData.expiryDate)
-      newErrors.expiryDate = "Ngày hết hạn là bắt buộc.";
+      newErrors.expiryDate = t("validation.expiryDateRequired");
     else if (
       formData.startDate &&
       new Date(formData.expiryDate) <= new Date(formData.startDate)
     ) {
-      newErrors.expiryDate = "Ngày hết hạn phải sau ngày bắt đầu.";
+      newErrors.expiryDate = t("validation.expiryDateAfterStart");
     }
 
     if (
       formData.applicableTo !== "all" &&
       (!formData.applicableIds || formData.applicableIds.length === 0)
     ) {
-      newErrors.applicableIds = "Vui lòng chọn ít nhất một mục.";
+      newErrors.applicableIds = t("validation.applicableIdsRequired");
     }
 
     const maxUsage = formData.maxUsage ? Number(formData.maxUsage) : null;
     if (maxUsage !== null && (isNaN(maxUsage) || maxUsage < 0))
-      newErrors.maxUsage = "Phải là số không âm.";
+      newErrors.maxUsage = t("validation.maxUsageInvalid");
 
     const maxUsagePerUser = Number(formData.maxUsagePerUser);
     if (isNaN(maxUsagePerUser) || maxUsagePerUser < 1)
-      newErrors.maxUsagePerUser = "Phải ít nhất là 1.";
+      newErrors.maxUsagePerUser = t("validation.maxUsagePerUserInvalid");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -209,13 +204,16 @@ const CouponForm: React.FC<CouponFormProps> = ({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const payload = {
+      const payload: Partial<CouponFormData> = {
         ...formData,
+        discountValue: Number(formData.discountValue),
+        minOrderValue: Number(formData.minOrderValue),
         maxUsage: formData.maxUsage ? Number(formData.maxUsage) : null,
+        maxUsagePerUser: Number(formData.maxUsagePerUser),
       };
       onSubmit(payload);
     } else {
-      toast.error("Vui lòng kiểm tra lại các trường có lỗi.");
+      toast.error(t("validation.formError"));
     }
   };
 
@@ -223,7 +221,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
     <CForm onSubmit={handleSubmit}>
       <div className="d-flex justify-content-end mb-4">
         <CFormLabel htmlFor="inputCurrency" className="col-form-label-sm me-2">
-          Nhập giá bằng:
+          {t("enterPriceBy")}
         </CFormLabel>
         <CFormSelect
           size="sm"
@@ -233,13 +231,13 @@ const CouponForm: React.FC<CouponFormProps> = ({
           onChange={(e) => setInputCurrency(e.target.value as "VND" | "USD")}
           aria-label="Chọn tiền tệ nhập giá"
         >
-          <option value="VND">Tiền Việt (VND)</option>
-          <option value="USD">Đô la Mỹ (USD)</option>
+          <option value="VND">{t("enterPriceVND")}</option>
+          <option value="USD">{t("enterPriceUSD")}</option>
         </CFormSelect>
       </div>
       <CRow className="g-4">
         <CCol md={8}>
-          <CFormLabel htmlFor="code">Mã Code *</CFormLabel>
+          <CFormLabel htmlFor="code">{t("codeLabel")}</CFormLabel>
           <CFormInput
             id="code"
             name="code"
@@ -253,46 +251,49 @@ const CouponForm: React.FC<CouponFormProps> = ({
           )}
         </CCol>
         <CCol md={4}>
-          <CFormLabel htmlFor="discountType">Loại giảm giá *</CFormLabel>
+          <CFormLabel htmlFor="discountType">{t("typeLabel")}</CFormLabel>
           <CFormSelect
             id="discountType"
             name="discountType"
             value={formData.discountType}
             onChange={handleChange}
           >
-            <option value="percentage">Phần trăm (%)</option>
-            <option value="fixed_amount">Số tiền cố định</option>
+            <option value="percentage">{t("typePercentage")}</option>
+            <option value="fixed_amount">{t("typeFixedAmount")}</option>
           </CFormSelect>
         </CCol>
         <CCol xs={12}>
-          <CFormLabel htmlFor="description">Mô tả</CFormLabel>
-          <CFormInput
-            id="description"
-            name="description"
-            value={formData.description || ""}
-            onChange={handleChange}
+          <LanguageSwitcherTabs
+            activeLocale={editLocale}
+            onLocaleChange={setEditLocale}
           />
+          <div className="mt-3">
+            <CFormLabel htmlFor="description">
+              {t("descriptionLabel", { locale: editLocale.toUpperCase() })}
+            </CFormLabel>
+            <CFormTextarea
+              id="description"
+              value={formData.description?.[editLocale] || ""}
+              onChange={(e) =>
+                handleI18nChange("description", editLocale, e.target.value)
+              }
+            />
+          </div>
         </CCol>
 
         {formData.discountType === "fixed_amount" ? (
           <>
             <CCol xs={12}>
-              <CFormLabel>Giá trị giảm *</CFormLabel>
+              <CFormLabel>{t("valueLabel")}</CFormLabel>
             </CCol>
             <CCol md={6}>
               <CInputGroup>
                 <CFormInput
                   type="number"
-                  placeholder="Giá trị VND"
                   value={displayValues.discountValueVND}
                   onChange={(e) =>
-                    handleDisplayValueChange(
-                      e.target.value,
-                      "discountValue",
-                      "VND",
-                    )
+                    handlePriceChange(e.target.value, "discountValue")
                   }
-                  onBlur={() => handlePriceBlur("discountValue", "VND")}
                   readOnly={inputCurrency !== "VND"}
                   invalid={!!errors.discountValue}
                 />
@@ -305,16 +306,10 @@ const CouponForm: React.FC<CouponFormProps> = ({
                 <CFormInput
                   type="number"
                   step="0.01"
-                  placeholder="Giá trị USD"
                   value={displayValues.discountValueUSD}
                   onChange={(e) =>
-                    handleDisplayValueChange(
-                      e.target.value,
-                      "discountValue",
-                      "USD",
-                    )
+                    handlePriceChange(e.target.value, "discountValue")
                   }
-                  onBlur={() => handlePriceBlur("discountValue", "USD")}
                   readOnly={inputCurrency !== "USD"}
                 />
               </CInputGroup>
@@ -322,7 +317,9 @@ const CouponForm: React.FC<CouponFormProps> = ({
           </>
         ) : (
           <CCol md={6}>
-            <CFormLabel htmlFor="discountValue">Giá trị giảm (%) *</CFormLabel>
+            <CFormLabel htmlFor="discountValue">
+              {t("valuePercentageLabel")}
+            </CFormLabel>
             <CInputGroup>
               <CFormInput
                 id="discountValue"
@@ -345,18 +342,17 @@ const CouponForm: React.FC<CouponFormProps> = ({
         )}
 
         <CCol xs={12}>
-          <CFormLabel>Đơn hàng tối thiểu để áp dụng</CFormLabel>
+          <CFormLabel>{t("minOrderLabel")}</CFormLabel>
         </CCol>
         <CCol md={6}>
           <CInputGroup>
             <CFormInput
               type="number"
-              placeholder="Giá trị VND"
+              placeholder={t("priceVNDPlaceholder")}
               value={displayValues.minOrderValueVND}
               onChange={(e) =>
-                handleDisplayValueChange(e.target.value, "minOrderValue", "VND")
+                handlePriceChange(e.target.value, "minOrderValue")
               }
-              onBlur={() => handlePriceBlur("minOrderValue", "VND")}
               readOnly={inputCurrency !== "VND"}
             />
             <CInputGroupText>VND</CInputGroupText>
@@ -368,19 +364,18 @@ const CouponForm: React.FC<CouponFormProps> = ({
             <CFormInput
               type="number"
               step="0.01"
-              placeholder="Giá trị USD"
+              placeholder={t("priceUSDPlaceholder")}
               value={displayValues.minOrderValueUSD}
               onChange={(e) =>
-                handleDisplayValueChange(e.target.value, "minOrderValue", "USD")
+                handlePriceChange(e.target.value, "minOrderValue")
               }
-              onBlur={() => handlePriceBlur("minOrderValue", "USD")}
               readOnly={inputCurrency !== "USD"}
             />
           </CInputGroup>
         </CCol>
 
         <CCol md={6}>
-          <CFormLabel htmlFor="startDate">Ngày bắt đầu</CFormLabel>
+          <CFormLabel htmlFor="startDate">{t("startDateLabel")}</CFormLabel>
           <CFormInput
             id="startDate"
             name="startDate"
@@ -390,7 +385,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
           />
         </CCol>
         <CCol md={6}>
-          <CFormLabel htmlFor="expiryDate">Ngày hết hạn *</CFormLabel>
+          <CFormLabel htmlFor="expiryDate">{t("expiryDateLabel")}</CFormLabel>
           <CFormInput
             id="expiryDate"
             name="expiryDate"
@@ -406,9 +401,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
         </CCol>
 
         <CCol md={6}>
-          <CFormLabel htmlFor="maxUsage">
-            Tổng lượt sử dụng (trống là không giới hạn)
-          </CFormLabel>
+          <CFormLabel htmlFor="maxUsage">{t("totalUsageLabel")}</CFormLabel>
           <CFormInput
             id="maxUsage"
             name="maxUsage"
@@ -416,7 +409,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
             value={formData.maxUsage ?? ""}
             onChange={handleChange}
             invalid={!!errors.maxUsage}
-            placeholder="∞"
+            placeholder={t("totalUsagePlaceholder")}
           />
           {errors.maxUsage && (
             <div className="text-danger mt-1 text-xs">{errors.maxUsage}</div>
@@ -424,7 +417,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
         </CCol>
         <CCol md={6}>
           <CFormLabel htmlFor="maxUsagePerUser">
-            Lượt sử dụng / Người dùng *
+            {t("usagePerUserLabel")}
           </CFormLabel>
           <CFormInput
             id="maxUsagePerUser"
@@ -442,15 +435,15 @@ const CouponForm: React.FC<CouponFormProps> = ({
         </CCol>
 
         <CCol md={12}>
-          <CFormLabel>Đối tượng áp dụng *</CFormLabel>
+          <CFormLabel>{t("applicableToLabel")}</CFormLabel>
           <CFormSelect
             name="applicableTo"
             value={formData.applicableTo}
-            onChange={handleChange}
+            onChange={handleApplicableToChange}
           >
-            <option value="all">Tất cả sản phẩm</option>
-            <option value="products">Sản phẩm được chọn</option>
-            <option value="categories">Danh mục được chọn</option>
+            <option value="all">{t("applicableToAll")}</option>
+            <option value="products">{t("applicableToProducts")}</option>
+            <option value="categories">{t("applicableToCategories")}</option>
           </CFormSelect>
         </CCol>
         {formData.applicableTo !== "all" && (
@@ -473,7 +466,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
           <CFormCheck
             id="isActive"
             name="isActive"
-            label="Kích hoạt mã giảm giá này"
+            label={t("activateLabel")}
             checked={formData.isActive}
             onChange={handleChange}
           />
@@ -486,10 +479,10 @@ const CouponForm: React.FC<CouponFormProps> = ({
           onClick={onClose}
           className="me-2"
         >
-          Hủy
+          {t("cancel")}
         </CButton>
         <CButton type="submit" color="primary" disabled={isSubmitting}>
-          {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
+          {isSubmitting ? t("saving") : t("save")}
         </CButton>
       </div>
     </CForm>

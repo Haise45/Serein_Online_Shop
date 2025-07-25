@@ -70,57 +70,58 @@ async function getVndToUsdRate() {
 }
 
 /**
- * Tạo một đơn hàng trên hệ thống PayPal với đầy đủ chi tiết.
+ * Tạo một đơn hàng trên hệ thống PayPal với các giá trị tiền tệ đã được tính toán.
+ * Thay vì gửi chi tiết từng item, chúng ta gửi tổng tiền hàng và khoản giảm giá.
  * @param {object} orderPayload - Dữ liệu đơn hàng.
- * @param {Array} orderPayload.items - Mảng các sản phẩm, mỗi sản phẩm có { name, quantity, priceVND, sku, productId }.
+ * @param {number} orderPayload.subtotalUSD - Tổng giá trị các sản phẩm trước khi giảm giá, đã quy đổi sang USD.
+ * @param {number} orderPayload.discountUSD - Tổng số tiền được giảm giá, đã quy đổi sang USD.
+ * @param {number} orderPayload.totalAmountUSD - Số tiền cuối cùng khách hàng phải trả, đã quy đổi sang USD.
  * @param {object} orderPayload.shippingDetails - Thông tin địa chỉ giao hàng.
+ * @param {string} orderPayload.orderDescription - Mô tả ngắn gọn về đơn hàng.
  * @returns {Promise<object>} Dữ liệu đơn hàng từ PayPal.
  */
 async function createPayPalOrder(orderPayload) {
-  const { items, shippingDetails } = orderPayload;
+  // Trích xuất các giá trị từ payload
+  const {
+    subtotalUSD,
+    discountUSD,
+    totalAmountUSD,
+    shippingDetails,
+    orderDescription,
+  } = orderPayload;
+
+  // Lấy access token để xác thực với PayPal
   const accessToken = await getPayPalAccessToken();
   const url = `${PAYPAL_API_BASE}/v2/checkout/orders`;
 
-  const vndToUsdRate = await getVndToUsdRate();
-
-  // Chuyển đổi giá của từng item sang USD
-  const itemsWithUsdPrice = items.map((item) => ({
-    ...item,
-    priceUSD: item.priceVND * vndToUsdRate,
-  }));
-
-  // Tính tổng tiền hàng (item_total) bằng USD
-  const itemTotalAmountUSD = itemsWithUsdPrice.reduce((sum, item) => {
-    const itemTotal = parseFloat(item.priceUSD.toFixed(2)) * item.quantity;
-    return sum + itemTotal;
-  }, 0);
-
-  // Tổng tiền cuối cùng (tạm thời bằng tổng tiền hàng)
-  const totalAmountUSD = itemTotalAmountUSD;
-
+  // Xây dựng payload chi tiết cho API của PayPal
   const payload = {
-    intent: "CAPTURE",
+    intent: "CAPTURE", // Ý định là "bắt" (hoàn tất) thanh toán ngay sau khi người dùng đồng ý
     purchase_units: [
       {
+        description:
+          orderDescription || "Thanh toán cho đơn hàng tại Serein Shop", // Mô tả chung cho đơn hàng
         amount: {
-          currency_code: "USD",
-          value: totalAmountUSD.toFixed(2),
+          currency_code: "USD", // Luôn là USD cho PayPal
+          value: totalAmountUSD.toFixed(2), // Số tiền cuối cùng, làm tròn 2 chữ số thập phân
+
+          // Phân tách chi tiết số tiền để hiển thị cho khách hàng
           breakdown: {
+            // Tổng giá trị của tất cả các sản phẩm
             item_total: {
               currency_code: "USD",
-              value: itemTotalAmountUSD.toFixed(2),
+              value: subtotalUSD.toFixed(2),
             },
+            // Khoản giảm giá (phải là số dương)
+            discount: {
+              currency_code: "USD",
+              value: discountUSD.toFixed(2),
+            },
+            // Có thể thêm các trường khác như shipping, tax... ở đây nếu cần
+            // shipping: { currency_code: 'USD', value: '...' }
           },
         },
-        items: itemsWithUsdPrice.map((item) => ({
-          name: item.name.substring(0, 127), // PayPal giới hạn 127 ký tự
-          quantity: String(item.quantity),
-          unit_amount: {
-            currency_code: "USD",
-            value: item.priceUSD.toFixed(2),
-          },
-          sku: item.sku || item.productId.toString().slice(-12),
-        })),
+        // thông tin chi tiết sẽ được hiển thị qua `description` và `breakdown`
         shipping: {
           name: {
             full_name: shippingDetails.fullName,
@@ -129,7 +130,7 @@ async function createPayPalOrder(orderPayload) {
             address_line_1: shippingDetails.street,
             admin_area_2: shippingDetails.districtName,
             admin_area_1: shippingDetails.provinceName,
-            postal_code: "700000", // Mã bưu chính chung cho Việt Nam, PayPal yêu cầu
+            postal_code: "700000", // Mã bưu chính chung, PayPal yêu cầu
             country_code: "VN",
           },
         },
@@ -142,6 +143,7 @@ async function createPayPalOrder(orderPayload) {
   };
 
   try {
+    // Gửi request đến PayPal
     const response = await axios.post(url, payload, {
       headers: {
         "Content-Type": "application/json",
@@ -150,8 +152,9 @@ async function createPayPalOrder(orderPayload) {
     });
     return response.data;
   } catch (error) {
+    // Log lỗi chi tiết từ PayPal để dễ dàng debug
     console.error(
-      "Failed to create detailed PayPal order:",
+      "Failed to create PayPal order:",
       JSON.stringify(error.response?.data, null, 2)
     );
     throw new Error("Không thể tạo đơn hàng trên hệ thống PayPal.");

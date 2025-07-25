@@ -1,18 +1,34 @@
 import PageHeader from "@/components/shared/PageHeader";
-import { Metadata } from "next";
 import AdminNotificationsClient from "./AdminNotificationsClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Tất cả thông báo | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function AdminNotificationsPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminNotifications.meta",
+  });
+
+  return {
+    title: t("title"),
+  };
+}
+
+export default async function AdminNotificationsPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminNotifications.pageHeader",
+  });
+
   return (
     <div>
-      <PageHeader
-        title="Tất cả thông báo"
-        description="Xem lại lịch sử các thông báo đã nhận."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <AdminNotificationsClient />
     </div>
   );

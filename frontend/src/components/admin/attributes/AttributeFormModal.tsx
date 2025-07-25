@@ -1,4 +1,6 @@
+import LanguageSwitcherTabs from "@/components/shared/LanguageSwitcherTabs";
 import { useCreateAttribute } from "@/lib/react-query/attributeQueries";
+import { I18nField } from "@/types";
 import {
   CButton,
   CFormInput,
@@ -12,6 +14,7 @@ import {
 } from "@coreui/react";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 interface AttributeFormModalProps {
   visible: boolean;
@@ -23,12 +26,14 @@ const AttributeFormModal: React.FC<AttributeFormModalProps> = ({
   onClose,
 }) => {
   const [name, setName] = useState("");
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState<I18nField>({ vi: "", en: "" });
+  const [editLocale, setEditLocale] = useState<"vi" | "en">("vi");
   const createAttributeMutation = useCreateAttribute();
+  const t = useTranslations("AdminAttributes.attributeForm");
 
   const handleSave = () => {
-    if (!name.trim() || !label.trim()) {
-      toast.error("Vui lòng nhập đầy đủ Tên (key) và Nhãn (label).");
+    if (!name.trim() || !label.vi.trim() || !label.en.trim()) {
+      toast.error(t("validationError"));
       return;
     }
     createAttributeMutation.mutate(
@@ -37,7 +42,7 @@ const AttributeFormModal: React.FC<AttributeFormModalProps> = ({
         onSuccess: () => {
           onClose(); // Đóng modal khi thành công
           setName(""); // Reset form
-          setLabel("");
+          setLabel({ vi: "", en: "" });
         },
       },
     );
@@ -46,35 +51,45 @@ const AttributeFormModal: React.FC<AttributeFormModalProps> = ({
   return (
     <CModal visible={visible} onClose={onClose} alignment="center">
       <CModalHeader>
-        <CModalTitle>Tạo thuộc tính mới</CModalTitle>
+        <CModalTitle>{t("title")}</CModalTitle>
       </CModalHeader>
       <CModalBody>
         <div className="mb-3">
-          <CFormLabel htmlFor="attrName">
-            Tên thuộc tính (key, không dấu)*
-          </CFormLabel>
+          <CFormLabel htmlFor="attrName">{t("nameLabel")}</CFormLabel>
           <CFormInput
             id="attrName"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ví dụ: color, size"
+            placeholder={t("namePlaceholder")}
           />
         </div>
+
+        <hr className="my-4" />
+
+        <LanguageSwitcherTabs
+          activeLocale={editLocale}
+          onLocaleChange={setEditLocale}
+        />
+
         <div className="mb-3">
           <CFormLabel htmlFor="attrLabel">
-            Nhãn hiển thị (label, tiếng Việt)*
+            {t("displayLabel", { locale: editLocale })}
           </CFormLabel>
           <CFormInput
             id="attrLabel"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Ví dụ: Màu sắc, Kích thước"
+            value={label[editLocale]}
+            onChange={(e) =>
+              setLabel((prev) => ({ ...prev, [editLocale]: e.target.value }))
+            }
+            placeholder={t(
+              `displayPlaceholder${editLocale === "en" ? "_en" : ""}`,
+            )}
           />
         </div>
       </CModalBody>
       <CModalFooter>
         <CButton color="secondary" variant="outline" onClick={onClose}>
-          Hủy
+          {t("cancel")}
         </CButton>
         <CButton
           color="primary"
@@ -84,7 +99,7 @@ const AttributeFormModal: React.FC<AttributeFormModalProps> = ({
           {createAttributeMutation.isPending && (
             <CSpinner size="sm" className="mr-2" />
           )}{" "}
-          Tạo
+          {t("create")}
         </CButton>
       </CModalFooter>
     </CModal>

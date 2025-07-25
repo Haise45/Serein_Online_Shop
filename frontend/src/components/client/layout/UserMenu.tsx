@@ -10,7 +10,8 @@ import {
   Transition,
 } from "@headlessui/react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { useSettings } from "@/app/SettingsContext";
+import { Link } from "@/i18n/navigation";
 import {
   useSearchParams as useNextSearchParamsHook,
   usePathname,
@@ -32,8 +33,10 @@ export default function UserMenu() {
     (state: RootState) => state.auth,
   );
   const dispatch = useDispatch<AppDispatch>();
-
   const t = useTranslations("UserMenu");
+
+  const { settings } = useSettings();
+  const adminDefaultLocale = settings?.adminSettings.defaultLanguage || "vi";
 
   // Lấy thông tin URL hiện tại
   const pathname = usePathname();
@@ -85,6 +88,7 @@ export default function UserMenu() {
                 <MenuItem as={Fragment}>
                   <Link
                     href="/admin/dashboard"
+                    locale={adminDefaultLocale}
                     className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                   >
                     <MdDashboard className="mr-3 inline-block h-4 w-4" />

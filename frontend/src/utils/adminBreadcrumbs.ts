@@ -1,54 +1,39 @@
 import { BreadcrumbItem } from "@/types";
 
-// Map để dịch các segment sang label tiếng Việt
-const segmentToLabelMap: Record<string, string> = {
-  products: "Sản phẩm",
-  categories: "Danh mục",
-  orders: "Đơn hàng",
-  attributes: "Thuộc tính",
-  users: "Người dùng",
-  coupons: "Mã giảm giá",
-  reviews: "Đánh giá",
-  settings: "Cài đặt",
-  create: "Thêm mới",
-  edit: "Chỉnh sửa",
-  notifications: "Thông báo",
-  reports: "Thống kê",
-  print: " In đơn hàng",
-};
-
-// Dữ liệu động có thể được truyền vào
+// Dữ liệu động không thay đổi
 export interface AdminDynamicData {
   productName?: string;
   orderId?: string;
   userName?: string;
-  // Thêm các dữ liệu khác nếu cần
 }
+
+// Nó sẽ tự động lấy các key từ file JSON của bạn.
+export type AdminBreadcrumbsTranslator = (
+  key: keyof (typeof import("../../messages/vi.json"))["Admin"]["breadcrumbs"],
+  values?: Record<string, unknown>,
+) => string;
 
 export const generateAdminBreadcrumbs = (
   pathname: string,
   dynamicData: AdminDynamicData = {},
+  t: AdminBreadcrumbsTranslator,
 ): BreadcrumbItem[] => {
   const basePath = "/admin";
 
-  // Xử lý trường hợp chỉ có /admin
-  if (pathname === basePath) {
-    return [
-      { label: "Dashboard", href: `${basePath}/dashboard`, isCurrent: true },
-    ];
-  }
-
-  const segments = pathname.replace(basePath, "").split("/").filter(Boolean);
+  // SỬA LỖI CỐT LÕI: Bỏ qua tiền tố locale và base path khi xử lý
+  const segments = pathname
+    .replace(basePath, "")
+    .split("/")
+    .filter(Boolean);
 
   if (segments.length === 0 || segments[0] === "dashboard") {
     return [
-      { label: "Dashboard", href: `${basePath}/dashboard`, isCurrent: true },
+      { label: t("dashboard"), href: `${basePath}/dashboard`, isCurrent: true },
     ];
   }
 
-  // Luôn bắt đầu với Dashboard
   const breadcrumbs: BreadcrumbItem[] = [
-    { label: "Dashboard", href: `${basePath}/dashboard`, isCurrent: false },
+    { label: t("dashboard"), href: `${basePath}/dashboard`, isCurrent: false },
   ];
 
   let currentPath = basePath;
@@ -56,20 +41,27 @@ export const generateAdminBreadcrumbs = (
   segments.forEach((segment, index) => {
     currentPath += `/${segment}`;
     const isLast = index === segments.length - 1;
+    let label = "";
 
-    // Ưu tiên tra cứu trong map, nếu không có thì dùng segment đã format
-    let label =
-      segmentToLabelMap[segment] ||
-      segment.charAt(0).toUpperCase() + segment.slice(1);
-
-    // Xử lý các ID động
+    // Xử lý các ID động (logic không đổi)
     const prevSegment = segments[index - 1];
+    // Bước 1: Ưu tiên kiểm tra xem segment có phải là một ID động hay không.
     if (prevSegment === "products" && segment !== "create") {
-      label = dynamicData.productName || `Sản phẩm #${segment.slice(-6)}`;
+      label =
+        dynamicData.productName ||
+        t("productWithId", { id: segment.slice(-6) });
     } else if (prevSegment === "orders" && segment !== "create") {
-      label = dynamicData.orderId || `Đơn hàng #${segment.slice(-6)}`;
+      label =
+        dynamicData.orderId || t("orderWithId", { id: segment.slice(-6) });
     } else if (prevSegment === "users" && segment !== "create") {
-      label = dynamicData.userName || `Người dùng #${segment.slice(-6)}`;
+      label =
+        dynamicData.userName || t("userWithId", { id: segment.slice(-6) });
+    } else {
+      // Bước 2: Nếu không phải ID, thì mới tiến hành dịch nó như một key tĩnh.
+      // Dòng này giờ đây sẽ không bao giờ nhận một ID để dịch.
+      label =
+        t(segment as Parameters<AdminBreadcrumbsTranslator>[0]) ||
+        segment.charAt(0).toUpperCase() + segment.slice(1);
     }
 
     breadcrumbs.push({
@@ -79,27 +71,28 @@ export const generateAdminBreadcrumbs = (
     });
   });
 
-  // Post-processing để logic label "Thêm mới" và "Chỉnh sửa" đơn giản hơn
-  // Ví dụ: [..., "Sản phẩm", "ID_SP", "Chỉnh sửa"] -> [..., "Sản phẩm", "Chỉnh sửa Sản phẩm"]
+  // Post-processing
   if (
     breadcrumbs.length >= 3 &&
-    breadcrumbs[breadcrumbs.length - 1].label === "Chỉnh sửa"
+    breadcrumbs[breadcrumbs.length - 1].label === t("edit")
   ) {
     const objectLabel = breadcrumbs[breadcrumbs.length - 2].label;
-    breadcrumbs.pop(); // Xóa item "Chỉnh sửa"
-    breadcrumbs.pop(); // Xóa item "ID_SP"
+    breadcrumbs.pop();
+    breadcrumbs.pop();
     breadcrumbs.push({
-      label: `Chỉnh sửa: ${objectLabel}`,
+      label: t("editObject", { objectLabel: objectLabel }),
       href: currentPath,
       isCurrent: true,
     });
   } else if (
     breadcrumbs.length >= 2 &&
-    breadcrumbs[breadcrumbs.length - 1].label === "Thêm mới"
+    breadcrumbs[breadcrumbs.length - 1].label === t("create")
   ) {
     const objectTypeLabel = breadcrumbs[breadcrumbs.length - 2].label;
-    breadcrumbs.pop(); // Xóa item "Thêm mới"
-    breadcrumbs[breadcrumbs.length - 1].label = `Thêm mới ${objectTypeLabel}`;
+    breadcrumbs.pop();
+    breadcrumbs[breadcrumbs.length - 1].label = t("createObject", {
+      objectTypeLabel: objectTypeLabel,
+    });
     breadcrumbs[breadcrumbs.length - 1].isCurrent = true;
   }
 

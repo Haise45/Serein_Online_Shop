@@ -1,17 +1,36 @@
 import PageHeader from "@/components/shared/PageHeader";
-import type { Metadata } from "next";
 import AdminProductCreateClient from "./AdminProductCreateClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Thêm sản phẩm mới | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function AdminCreateProductPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminProductForm.meta",
+  });
+
+  return {
+    title: t("createTitle"),
+  };
+}
+
+export default async function AdminCreateProductPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminProductForm.pageHeader",
+  });
+
   return (
     <div>
       <PageHeader
-        title="Thêm sản phẩm mới"
-        description="Điền thông tin chi tiết để tạo một sản phẩm mới trong cửa hàng."
+        title={t("createTitle")}
+        description={t("createDescription")}
       />
       <AdminProductCreateClient />
     </div>

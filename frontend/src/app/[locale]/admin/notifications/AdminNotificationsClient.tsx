@@ -21,10 +21,13 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useInView } from "react-intersection-observer";
+import { useTranslations } from "next-intl";
 
 const NOTIFICATIONS_PER_PAGE = 20;
 
 export default function AdminNotificationsClient() {
+  const t = useTranslations("AdminNotifications.list");
+
   const { ref, inView } = useInView({
     threshold: 0.5,
   });
@@ -64,7 +67,7 @@ export default function AdminNotificationsClient() {
   const handleMarkAllRead = () => {
     markAllAsReadMutation.mutate(undefined, {
       onSuccess: (data) => {
-        toast.success(data.message || "Tất cả đã được đánh dấu đã đọc.");
+        toast.success(data.message || t("markAllAsReadSuccess"));
       },
     });
   };
@@ -77,7 +80,7 @@ export default function AdminNotificationsClient() {
       <CCol xs={12}>
         <CCard className="shadow-sm">
           <CCardHeader className="flex items-center justify-between">
-            <h5 className="mb-0 font-semibold">Tất cả thông báo</h5>
+            <h5 className="mb-0 font-semibold">{t("title")}</h5>
             <CButton
               size="sm"
               color="light"
@@ -85,23 +88,24 @@ export default function AdminNotificationsClient() {
               disabled={markAllAsReadMutation.isPending}
             >
               <CIcon icon={cilCheckAlt} className="me-2" />
-              Đánh dấu tất cả đã đọc
+              {t("markAllAsRead")}
             </CButton>
           </CCardHeader>
           <CCardBody>
             {status === "pending" ? (
               <div className="p-10 text-center">
                 <CSpinner />
+                <span className="ml-2">{t("loading")}</span>
               </div>
             ) : status === "error" ? (
               <div className="p-10 text-center text-red-600">
-                Lỗi: {error.message}
+                {t("error", { message: error.message })}
               </div>
             ) : (
               <div className="space-y-2">
                 {allNotifications.length === 0 && (
                   <p className="py-10 text-center text-gray-500">
-                    Không có thông báo nào.
+                    {t("noNotifications")}
                   </p>
                 )}
                 {allNotifications.map((notification) => (
@@ -120,11 +124,12 @@ export default function AdminNotificationsClient() {
                   {isFetchingNextPage && (
                     <div className="pt-4 text-center">
                       <CSpinner size="sm" />
+                      <span className="ml-2 text-sm text-gray-500">{t("loadingMore")}</span>
                     </div>
                   )}
                   {!hasNextPage && allNotifications.length > 0 && (
                     <p className="pt-4 text-center text-sm text-gray-400">
-                      Đã tải hết thông báo.
+                      {t("endOfList")}
                     </p>
                   )}
                 </div>

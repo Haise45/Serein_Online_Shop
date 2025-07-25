@@ -375,82 +375,187 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/products
 // @access  Public
 const getProducts = asyncHandler(async (req, res) => {
-  // 1. LẤY CÁC THAM SỐ
-  const locale = req.locale || "vi"; // Lấy locale từ middleware, mặc định là 'vi'
+  // 1. LẤY CÁC THAM SỐ CƠ BẢN
+  const locale = req.locale || "vi";
   const isAdmin = req.user?.role === "admin";
-
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 12; // Mặc định 12 sản phẩm/trang
+  const limit = parseInt(req.query.limit, 10) || 12;
   const skip = (page - 1) * limit;
 
-  // 2. XÂY DỰNG BỘ LỌC VÀ SẮP XẾP
-  const filter = await buildFilter(req.query, isAdmin, locale); // Truyền locale vào helper
-  const sortOptions = buildSort(req.query, locale); // Truyền locale vào helper
+  // 2. XÂY DỰNG BỘ LỌC CƠ BẢN VÀ SẮP XẾP
+  // `buildFilter` giờ đây không chứa logic `onSale`
+  const baseFilter = await buildFilter(req.query, isAdmin, locale);
+  const sortOptions = buildSort(req.query, locale);
 
-  // 3. XÁC ĐỊNH CÁC TRƯỜNG CẦN LẤY (PROJECTION)
-  // Tên và mô tả sẽ được lấy dưới dạng object để làm phẳng sau
-  const projection = {
-    name: 1, // Lấy cả object {vi, en}
-    slug: 1,
-    price: 1,
-    salePrice: 1,
-    salePriceEffectiveDate: 1,
-    salePriceExpiryDate: 1,
-    sku: 1,
-    images: { $slice: 2 }, // Chỉ lấy 2 ảnh đầu tiên
-    category: 1,
-    averageRating: 1,
-    numReviews: 1,
-    totalSold: 1,
-    createdAt: 1,
-    isPublished: 1,
-    isActive: 1,
-    "variants.optionValues": 1,
-    "variants.images": { $slice: 2 },
-    "variants.price": 1,
-    "variants.sku": 1,
-    "variants.salePrice": 1,
-    "variants.salePriceEffectiveDate": 1,
-    "variants.salePriceExpiryDate": 1,
-    "variants.stockQuantity": 1,
-    "variants._id": 1,
-  };
+  // --- 3. XÂY DỰNG AGGREGATION PIPELINE ---
+  const aggregationPipeline = [];
 
-  // 4. THỰC THI QUERY
-  const productsQuery = Product.find(filter)
-    .populate({
-      path: "category",
-      select: "name slug parent", // Lấy cả name object {vi, en}
-    })
-    .select(projection)
-    .sort(sortOptions)
-    .skip(skip)
-    .limit(limit);
+  // Giai đoạn 1: Áp dụng các bộ lọc cơ bản (category, price, attributes, search...)
+  if (Object.keys(baseFilter).length > 0) {
+    aggregationPipeline.push({ $match: baseFilter });
+  }
 
-  // Áp dụng collation nếu sắp xếp theo tên
-  if (req.query.sortBy === "name") {
-    productsQuery.collation({
-      locale: locale === "vi" ? "vi" : "en",
-      strength: 2,
+  // Giai đoạn 2: Xử lý bộ lọc "Đang giảm giá" nếu có
+  if (req.query.onSale === "true") {
+    const now = new Date();
+
+    // Thêm các trường tạm thời để kiểm tra điều kiện sale
+    aggregationPipeline.push({
+      $addFields: {
+        // Kiểm tra xem sản phẩm chính (không có variant) có đang sale không
+        mainProductOnSale: {
+          $let: {
+            vars: {
+              // Điều kiện chung cho một item (sản phẩm hoặc variant) được coi là sale
+              isSaleValid: {
+                $and: [
+                  { $gt: ["$salePrice", 0] },
+                  { $ne: ["$salePrice", null] },
+                  { $lt: ["$salePrice", "$price"] },
+                  {
+                    $or: [
+                      { $eq: ["$salePriceEffectiveDate", null] },
+                      { $lte: ["$salePriceEffectiveDate", now] },
+                    ],
+                  },
+                  {
+                    $or: [
+                      { $eq: ["$salePriceExpiryDate", null] },
+                      { $gte: ["$salePriceExpiryDate", now] },
+                    ],
+                  },
+                ],
+              },
+            },
+            // Chỉ trả về true nếu là sản phẩm đơn giản VÀ thỏa mãn điều kiện sale
+            in: {
+              $and: [
+                "$$isSaleValid",
+                { $eq: [{ $ifNull: ["$variants", []] }, []] },
+              ],
+            },
+          },
+        },
+        // Kiểm tra xem có bất kỳ variant nào đang sale không
+        anyVariantOnSale: {
+          $gt: [
+            {
+              $size: {
+                $filter: {
+                  input: { $ifNull: ["$variants", []] },
+                  as: "variant",
+                  cond: {
+                    $and: [
+                      { $gt: ["$$variant.salePrice", 0] },
+                      { $ne: ["$$variant.salePrice", null] },
+                      { $lt: ["$$variant.salePrice", "$$variant.price"] },
+                      {
+                        $or: [
+                          { $eq: ["$$variant.salePriceEffectiveDate", null] },
+                          { $lte: ["$$variant.salePriceEffectiveDate", now] },
+                        ],
+                      },
+                      {
+                        $or: [
+                          { $eq: ["$$variant.salePriceExpiryDate", null] },
+                          { $gte: ["$$variant.salePriceExpiryDate", now] },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    });
+
+    // Giai đoạn 3: Lọc ra những sản phẩm thỏa mãn điều kiện `onSale`
+    aggregationPipeline.push({
+      $match: {
+        $or: [{ mainProductOnSale: true }, { anyVariantOnSale: true }],
+      },
     });
   }
 
-  // Chạy song song query lấy sản phẩm và query đếm tổng số
-  const [productsFromDB, totalProducts] = await Promise.all([
-    productsQuery.exec(),
-    Product.countDocuments(filter),
+  // --- 4. TÍNH TỔNG SỐ LƯỢNG VÀ LẤY DỮ LIỆU PHÂN TRANG ---
+
+  // Tạo một pipeline riêng để đếm, hiệu quả hơn
+  const countPipeline = [...aggregationPipeline, { $count: "totalCount" }];
+
+  // Pipeline để lấy dữ liệu, thêm các bước cuối
+  const dataPipeline = [
+    ...aggregationPipeline,
+    { $sort: sortOptions },
+    { $skip: skip },
+    { $limit: limit },
+    // Chọn các trường cần thiết để giảm lượng dữ liệu truyền đi
+    {
+      $project: {
+        name: 1,
+        slug: 1,
+        price: 1,
+        salePrice: 1,
+        salePriceEffectiveDate: 1,
+        salePriceExpiryDate: 1,
+        sku: 1,
+        images: { $slice: ["$images", 2] },
+        category: 1,
+        averageRating: 1,
+        numReviews: 1,
+        totalSold: 1,
+        createdAt: 1,
+        isPublished: 1,
+        isActive: 1,
+        variants: 1,
+        attributes: 1,
+      },
+    },
+  ];
+
+  // Thực thi song song pipeline đếm và pipeline lấy dữ liệu
+  const [totalResult, productsFromDB] = await Promise.all([
+    Product.aggregate(countPipeline),
+    Product.aggregate(dataPipeline),
   ]);
 
-  // 5. "LÀM PHẲNG" DỮ LIỆU ĐA NGÔN NGỮ
-  const flattenedProducts = productsFromDB.map((p) => {
-    // 1. Chuyển Mongoose doc thành object thuần túy VÀ lấy trường ảo
-    const productObject = p.toObject({ virtuals: true });
+  const totalProducts = totalResult[0]?.totalCount || 0;
 
-    // 2. Làm phẳng các trường đa ngôn ngữ
+  // Populate category thủ công sau khi aggregate
+  await Category.populate(productsFromDB, {
+    path: "category",
+    select: "name slug parent",
+  });
+
+  // --- 5. "LÀM PHẲNG" DỮ LIỆU ĐA NGÔN NGỮ VÀ THÊM VIRTUALS ---
+  const flattenedProducts = productsFromDB.map((p) => {
+    // Dữ liệu từ aggregate đã là object thuần túy, không cần .toObject()
+    const productObject = p;
+
+    // Tính toán các trường virtual thủ công
+    const now = new Date();
+    productObject.isOnSale =
+      productObject.salePrice &&
+      productObject.salePrice < productObject.price &&
+      (!productObject.salePriceEffectiveDate ||
+        new Date(productObject.salePriceEffectiveDate) <= now) &&
+      (!productObject.salePriceExpiryDate ||
+        new Date(productObject.salePriceExpiryDate) >= now);
+    productObject.displayPrice = productObject.isOnSale
+      ? productObject.salePrice
+      : productObject.price;
+    productObject.isConsideredNew =
+      (new Date() - new Date(productObject.createdAt)) / (1000 * 3600 * 24) <
+      30; // Ví dụ: mới trong 30 ngày
+
+    // Làm phẳng các trường đa ngôn ngữ
     if (productObject.name) {
       productObject.name = productObject.name[locale] || productObject.name.vi;
     }
     if (productObject.description) {
+      // Mặc dù không select, phòng trường hợp thay đổi project
       productObject.description =
         productObject.description[locale] || productObject.description.vi;
     }
@@ -463,17 +568,10 @@ const getProducts = asyncHandler(async (req, res) => {
         productObject.category.name[locale] || productObject.category.name.vi;
     }
 
-    // 3. Giới hạn ảnh cho variants (nếu cần)
-    if (productObject.variants) {
-      productObject.variants.forEach((v) => {
-        if (v.images) v.images = v.images.slice(0, 2);
-      });
-    }
-
     return productObject;
   });
 
-  // 6. TRẢ VỀ RESPONSE
+  // --- 6. TRẢ VỀ RESPONSE ---
   res.json({
     currentPage: page,
     totalPages: Math.ceil(totalProducts / limit),
@@ -481,6 +579,64 @@ const getProducts = asyncHandler(async (req, res) => {
     limit: limit,
     products: flattenedProducts,
   });
+});
+
+// @desc    Lấy danh sách sản phẩm GỐC (chưa làm phẳng - cho Admin)
+// @route   GET /api/v1/products/admin
+// @access  Private/Admin
+const getAdminProducts = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
+  const isAdmin = true; // Luôn là admin ở route này
+
+  // Lấy các tham số phân trang và lọc
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter = await buildFilter(req.query, isAdmin, locale);
+  const sortOptions = buildSort(req.query, locale);
+
+  // Query dữ liệu gốc
+  const productsQuery = Product.find(filter)
+    .populate({ path: "category", select: "name slug" })
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(limit)
+    .lean(); // Dùng lean để có object thuần túy
+
+  const totalProductsQuery = Product.countDocuments(filter);
+
+  const [products, totalProducts] = await Promise.all([
+    productsQuery.exec(),
+    totalProductsQuery.exec(),
+  ]);
+
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  // Trả về dữ liệu gốc, không làm phẳng
+  res.json({
+    currentPage: page,
+    totalPages,
+    totalProducts,
+    limit,
+    products, // `products` ở đây chứa các object đa ngôn ngữ
+  });
+});
+
+// @desc    Lấy chi tiết sản phẩm gốc cho Admin (không làm phẳng)
+// @route   GET /api/v1/products/admin/:id
+// @access  Private/Admin
+const getAdminProductDetails = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+    .populate({ path: "category", select: "name slug _id" })
+    .populate({ path: "attributes.attribute", model: "Attribute" });
+
+  if (!product) {
+    res.status(404);
+    throw new Error("Sản phẩm không tồn tại");
+  }
+  // Trả về document Mongoose hoặc object đã có virtuals
+  res.json(product.toObject({ virtuals: true }));
 });
 
 // @desc    Lấy chi tiết một sản phẩm bằng ID hoặc Slug (đã cập nhật cho i18n)
@@ -1149,6 +1305,8 @@ const updateVariantStock = asyncHandler(async (req, res) => {
 module.exports = {
   createProduct,
   getProducts,
+  getAdminProducts,
+  getAdminProductDetails,
   getProductByIdOrSlug,
   updateProduct,
   deleteProduct,

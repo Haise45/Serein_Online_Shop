@@ -29,6 +29,7 @@ export interface ProductFilters {
   maxPrice?: number;
   attributes?: Record<string, string[]>; // Ví dụ: { "Màu sắc": ["Đỏ", "Xanh"], "Size": ["M"] }
   minRating?: number;
+  onSale?: boolean;
   // search term được quản lý bởi state `searchTerm` riêng
 }
 
@@ -62,7 +63,13 @@ const parseSearchParamsToFilters = (
       }
     }
   });
+
   if (Object.keys(attrs).length > 0) filters.attributes = attrs;
+
+  if (searchParams?.onSale === "true") {
+    filters.onSale = true;
+  }
+
   return filters;
 };
 
@@ -162,6 +169,10 @@ export default function ProductsPageClient({
       });
     }
 
+    if (filters.onSale) {
+      params.set("onSale", "true");
+    }
+
     // Chỉ thêm vào URL nếu khác giá trị mặc định để URL gọn hơn
     const defaultSortBy = "createdAt";
     const defaultSortOrder = "desc";
@@ -220,6 +231,7 @@ export default function ProductsPageClient({
         Object.keys(attributesForApi).length > 0 ? attributesForApi : undefined,
       minRating: filters.minRating,
       search: searchTerm || undefined,
+      onSale: filters.onSale,
     };
   }, [currentPage, sortBy, sortOrder, filters, searchTerm, productsPerPage]);
 
@@ -277,7 +289,7 @@ export default function ProductsPageClient({
   }, []);
 
   const handleClearAllFilters = useCallback(() => {
-    setFilters({}); // Reset object filters
+    setFilters({ onSale: undefined }); // Reset object filters
     setSearchTerm(""); // Reset search term
     setCurrentPage(1); // Quay về trang 1
     // Các giá trị sort có thể giữ nguyên hoặc reset tùy ý

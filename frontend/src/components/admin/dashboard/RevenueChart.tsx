@@ -6,6 +6,7 @@ import { CCard, CCardBody, CCardHeader, CSpinner } from "@coreui/react";
 import { TooltipItem } from "chart.js";
 import React from "react";
 import { Line } from "react-chartjs-2";
+import { useTranslations } from "next-intl";
 
 interface RevenueChartProps {
   data: ChartJsData | undefined;
@@ -20,6 +21,8 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   displayCurrency,
   rates,
 }) => {
+  const t = useTranslations("AdminDashboard.revenueChart");
+
   // 1. Chuyển đổi dữ liệu dataset MỘT LẦN DUY NHẤT ở đây
   const convertedData =
     data?.datasets[0]?.data.map((valueInVND) => {
@@ -33,7 +36,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
     labels: data?.labels || [],
     datasets: [
       {
-        label: data?.datasets[0]?.label || "Doanh thu",
+        label: t("revenueLabel"),
         backgroundColor: "rgba(59, 130, 246, 0.2)",
         borderColor: "rgba(59, 130, 246, 1)",
         pointBackgroundColor: "rgba(59, 130, 246, 1)",
@@ -102,7 +105,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
 
   return (
     <CCard className="h-100 shadow-sm">
-      <CCardHeader>Biểu đồ doanh thu ({displayCurrency})</CCardHeader>
+      <CCardHeader>{t("title", { currency: displayCurrency })}</CCardHeader>
       <CCardBody>
         {isLoading ? (
           <div className="d-flex justify-content-center align-items-center h-100 p-10 text-center">

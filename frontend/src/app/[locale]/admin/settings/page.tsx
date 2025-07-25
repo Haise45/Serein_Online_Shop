@@ -1,19 +1,32 @@
 import PageHeader from "@/components/shared/PageHeader";
-import { Metadata } from "next";
 import AdminSettingsClient from "./AdminSettingsClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Cài đặt Cửa hàng | Admin Serein Shop",
-  description: "Quản lý các cấu hình chung cho trang web và trang quản trị."
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function AdminSettingsPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "AdminSettings.meta" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
+
+export default async function AdminSettingsPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminSettings.pageHeader",
+  });
+
   return (
     <div>
-      <PageHeader
-        title="Cài đặt Cửa hàng"
-        description="Thay đổi các cấu hình chung ảnh hưởng đến toàn bộ trang web."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <AdminSettingsClient />
     </div>
   );

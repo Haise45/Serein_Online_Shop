@@ -12,6 +12,7 @@ import {
   CSpinner,
 } from "@coreui/react";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface DeleteConfirmationModalProps {
   visible: boolean;
@@ -29,11 +30,15 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   onClose,
   onConfirm,
   isDeleting,
-  title = "Xác nhận hành động",
+  title,
   message,
-  confirmButtonText = "Đồng ý Xóa",
-  cancelButtonText = "Hủy",
+  confirmButtonText,
+  cancelButtonText,
 }) => {
+  const t = useTranslations("Shared.deleteConfirm");
+  const finalConfirmText = confirmButtonText || t("confirmButton");
+  const finalCancelText = cancelButtonText || t("cancelButton");
+
   return (
     <CModal
       alignment="center"
@@ -44,7 +49,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
       <CModalHeader className="border-b-0 pb-0">
         <CModalTitle className="flex items-center text-xl font-bold">
           <CIcon icon={cilWarning} className="text-danger mr-3" size="xl" />
-          {title}
+          {title || t("title")}
         </CModalTitle>
       </CModalHeader>
       <CModalBody className="py-4 text-gray-700">{message}</CModalBody>
@@ -55,7 +60,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           onClick={onClose}
           disabled={isDeleting}
         >
-          {cancelButtonText}
+          {finalCancelText}
         </CButton>
         <CButton color="danger" onClick={onConfirm} disabled={isDeleting}>
           {isDeleting && (
@@ -66,7 +71,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
               className="mr-2"
             />
           )}
-          {isDeleting ? "Đang xóa..." : confirmButtonText}
+          {isDeleting ? t("deleting") : finalConfirmText}
         </CButton>
       </CModalFooter>
     </CModal>

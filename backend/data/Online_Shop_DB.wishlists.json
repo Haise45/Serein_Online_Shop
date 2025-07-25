@@ -1,0 +1,240 @@
+[{
+  "_id": {
+    "$oid": "6835419fee5ca6fea26ce80e"
+  },
+  "user": {
+    "$oid": "68234adc93dbf2053ca6023e"
+  },
+  "guestId": null,
+  "items": [
+    {
+      "product": {
+        "$oid": "681d9d2c878f5d7af823b8a7"
+      },
+      "variant": {
+        "$oid": "681d9d2c878f5d7af823b8a8"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-05-27T04:37:51.663Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-27T04:37:51.714Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683541d3ee5ca6fea26ce8d9"
+  },
+  "user": {
+    "$oid": "682835f2ec1e0536a6154cb5"
+  },
+  "guestId": null,
+  "items": [
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae806"
+      },
+      "variant": {
+        "$oid": "6818db68cece2901692ae80d"
+      }
+    },
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae824"
+      },
+      "variant": {
+        "$oid": "6818db68cece2901692ae828"
+      }
+    },
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae834"
+      },
+      "variant": {
+        "$oid": "6818db68cece2901692ae839"
+      }
+    },
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae82c"
+      },
+      "variant": {
+        "$oid": "6818db68cece2901692ae830"
+      }
+    },
+    {
+      "product": {
+        "$oid": "684d5b1f06c2345c64cac7d3"
+      },
+      "variant": {
+        "$oid": "684d5b4306c2345c64cac8c9"
+      }
+    },
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae83b"
+      },
+      "variant": {
+        "$oid": "684a951575712ab4353a075a"
+      }
+    },
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae83b"
+      },
+      "variant": {
+        "$oid": "684a951575712ab4353a075d"
+      }
+    },
+    {
+      "product": {
+        "$oid": "6818db68cece2901692ae843"
+      },
+      "variant": {
+        "$oid": "6818db68cece2901692ae844"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-05-27T04:38:43.006Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-03T13:14:40.413Z"
+  },
+  "__v": 3
+},
+{
+  "_id": {
+    "$oid": "683ff11b8cb5588d2ee982bc"
+  },
+  "user": {
+    "$oid": "682ef3f9c542a48aefb45495"
+  },
+  "guestId": null,
+  "items": [],
+  "createdAt": {
+    "$date": "2025-06-04T07:09:15.726Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-04T07:16:38.383Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684112c70010910241f57fff"
+  },
+  "user": {
+    "$oid": "680f2ecae16cffa286aa2fc1"
+  },
+  "guestId": null,
+  "items": [
+    {
+      "product": {
+        "$oid": "681d9d2c878f5d7af823b8a7"
+      },
+      "variant": {
+        "$oid": "681d9d2c878f5d7af823b8a8"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-05T03:45:11.731Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-05T13:33:19.872Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684e54148546059e69776c4e"
+  },
+  "user": {
+    "$oid": "680f2e82e16cffa286aa2fbd"
+  },
+  "guestId": null,
+  "items": [
+    {
+      "product": {
+        "$oid": "684d5b1f06c2345c64cac7d3"
+      },
+      "variant": {
+        "$oid": "685eaccec6af5fbcc225accd"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-15T05:03:16.322Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-01T15:31:54.360Z"
+  },
+  "__v": 1
+},
+{
+  "_id": {
+    "$oid": "684e74a3af8247daf92fadbd"
+  },
+  "user": null,
+  "guestId": "4c684f4b-164b-460d-9bcc-f62481072cac",
+  "items": [],
+  "createdAt": {
+    "$date": "2025-06-15T07:22:11.314Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-15T16:35:06.824Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516a2da3308580f6bf73f0"
+  },
+  "user": null,
+  "guestId": "1976d92b-5afc-459e-907e-509903203c76",
+  "items": [
+    {
+      "product": {
+        "$oid": "684d5b1f06c2345c64cac7d3"
+      },
+      "variant": {
+        "$oid": "685100b1b2186d23622834f8"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-17T13:14:21.687Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-17T13:14:21.742Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68600000df06a5bf0e32a03b"
+  },
+  "user": null,
+  "guestId": "7eb1e31a-0f13-4585-91a9-45bf386dfbf8",
+  "items": [
+    {
+      "product": {
+        "$oid": "684d5b1f06c2345c64cac7d3"
+      },
+      "variant": {
+        "$oid": "685eaccec6af5fbcc225accd"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-28T14:45:20.957Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-28T14:45:21.014Z"
+  },
+  "__v": 0
+}]

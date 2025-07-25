@@ -32,8 +32,15 @@ import {
 } from "@coreui/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function AdminUsersClient() {
+  const t = useTranslations("AdminUsers.list");
+  const tAdmin = useTranslations("Admin");
+  const tSuspend = useTranslations("AdminUsers.suspendModal");
+  const tReactivate = useTranslations("AdminUsers.reactivateModal");
+  const tShared = useTranslations("Shared.confirmModal");
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -219,17 +226,17 @@ export default function AdminUsersClient() {
       <CRow>
         <CCol xs={12}>
           <CCard className="mb-4">
-            <CCardHeader>Lỗi</CCardHeader>
+            <CCardHeader>{t("errorTitle")}</CCardHeader>
             <CCardBody className="p-5 text-center">
               <CIcon icon={cilWarning} size="xl" className="text-danger mb-3" />
-              <p className="text-danger">Không thể tải danh sách người dùng.</p>
+              <p className="text-danger">{t("errorMessage")}</p>
               <p className="text-muted text-sm">{error?.message}</p>
               <CButton
                 color="primary"
                 onClick={() => refetch()}
                 className="mt-3"
               >
-                Thử lại
+                {t("retryButton")}
               </CButton>
             </CCardBody>
           </CCard>
@@ -245,13 +252,11 @@ export default function AdminUsersClient() {
         <CCol xs={12}>
           <CCard className="mb-4 shadow-sm">
             <CCardHeader className="border-b bg-white !p-4">
-              <h4 className="fw-semibold text-dark mb-0">Quản lý Người dùng</h4>
+              <h4 className="fw-semibold text-dark mb-0">{t("title")}</h4>
             </CCardHeader>
             <CCardBody className="p-5 text-center">
               <CSpinner color="primary" />
-              <p className="text-muted mt-2">
-                Đang tải danh sách người dùng...
-              </p>
+              <p className="text-muted mt-2">{t("loading")}</p>
             </CCardBody>
           </CCard>
         </CCol>
@@ -265,10 +270,10 @@ export default function AdminUsersClient() {
         <CCard className="mb-4 shadow-sm">
           <CCardHeader className="border-b bg-white !p-4">
             <div className="d-flex align-items-center mb-3">
-              <h4 className="fw-semibold text-dark mb-0">Quản lý Người dùng</h4>
+              <h4 className="fw-semibold text-dark mb-0">{t("title")}</h4>
               {hasActiveFilters && (
                 <CBadge color="info" className="ms-2 px-2 py-1">
-                  {totalUsers} kết quả
+                  {t("results", { count: totalUsers })}
                 </CBadge>
               )}
             </div>
@@ -298,8 +303,8 @@ export default function AdminUsersClient() {
                 />
                 <p className="text-muted mb-0">
                   {hasActiveFilters
-                    ? "Không tìm thấy người dùng nào phù hợp."
-                    : "Chưa có người dùng nào."}
+                    ? t("noResultsWithFilter")
+                    : t("noUsersYet")}
                 </p>
               </div>
             )}
@@ -337,7 +342,7 @@ export default function AdminUsersClient() {
               limit={limitFromData}
               onPageChange={setCurrentPage}
               onLimitChange={handleLimitChange}
-              itemType="người dùng"
+              itemType={tAdmin("breadcrumbs.users", { count: 2 }).toLowerCase()}
               defaultLimitFromSettings={defaultLimitFromSettings}
             />
           )}
@@ -354,18 +359,18 @@ export default function AdminUsersClient() {
       >
         <CModalHeader>
           <CModalTitle>
-            Đình chỉ tài khoản: {suspendModalState.userToSuspend?.name}
+            {tSuspend("title", { name: suspendModalState.userToSuspend?.name ?? "User"})}
           </CModalTitle>
         </CModalHeader>
         <CModalBody>
           <div className="mb-3">
             <label htmlFor="suspendReason" className="form-label">
-              Lý do đình chỉ <span className="text-danger">*</span>
+              {tSuspend("reasonLabel")}
             </label>
             <CFormTextarea
               id="suspendReason"
               rows={4}
-              placeholder="Ví dụ: Vi phạm điều khoản, spam,..."
+              placeholder={tSuspend("reasonPlaceholder")}
               value={suspendModalState.reason}
               onChange={(e) =>
                 setSuspendModalState((prev) => ({
@@ -378,7 +383,7 @@ export default function AdminUsersClient() {
           </div>
           <div className="mb-3">
             <label htmlFor="suspendEndDate" className="form-label">
-              Ngày hết hạn đình chỉ (tùy chọn)
+              {tSuspend("endDateLabel")}
             </label>
             <CFormInput
               type="date"
@@ -402,7 +407,7 @@ export default function AdminUsersClient() {
               setSuspendModalState((prev) => ({ ...prev, isOpen: false }))
             }
           >
-            Hủy
+            {tShared("cancel")}
           </CButton>
           <CButton
             color="danger"
@@ -413,8 +418,8 @@ export default function AdminUsersClient() {
             }
           >
             {updateUserStatusMutation.isPending
-              ? "Đang xử lý..."
-              : "Xác nhận đình chỉ"}
+              ? tSuspend("processing")
+              : tSuspend("confirmButton")}
           </CButton>
         </CModalFooter>
       </CModal>
@@ -427,9 +432,12 @@ export default function AdminUsersClient() {
         }
         onConfirm={handleConfirmReactivate}
         isConfirming={updateUserStatusMutation.isPending}
-        title="Xác nhận Kích hoạt lại"
-        body={`Bạn có chắc muốn kích hoạt lại tài khoản cho người dùng "${reactivateModalState.userToReactivate?.name}"?`}
-        confirmButtonText="Đồng ý kích hoạt"
+        title={tReactivate("title")}
+        body={tReactivate("body", {
+          name: reactivateModalState.userToReactivate?.name || "User",
+        })}
+        confirmButtonText={tReactivate("confirmButton")}
+        cancelButtonText={tShared("cancel")}
         confirmButtonColor="success"
       />
     </CRow>

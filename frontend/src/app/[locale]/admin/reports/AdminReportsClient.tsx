@@ -9,8 +9,11 @@ import SalesReport from "@/components/admin/reports/SalesReport";
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from "@coreui/react";
 import { format, sub } from "date-fns";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function AdminReportsClient() {
+  const t = useTranslations("AdminReports.tabs");
+
   const [dateRange, setDateRange] = useState({
     startDate: format(sub(new Date(), { days: 29 }), "yyyy-MM-dd"),
     endDate: format(new Date(), "yyyy-MM-dd"),
@@ -34,22 +37,22 @@ export default function AdminReportsClient() {
       <CNav variant="tabs" role="tablist" className="mb-0">
         <CNavItem role="presentation" className="cursor-pointer">
           <CNavLink active={activeKey === 1} onClick={() => setActiveKey(1)}>
-            Bán hàng
+            {t("sales")}
           </CNavLink>
         </CNavItem>
         <CNavItem role="presentation" className="cursor-pointer">
           <CNavLink active={activeKey === 2} onClick={() => setActiveKey(2)}>
-            Sản phẩm
+            {t("products")}
           </CNavLink>
         </CNavItem>
         <CNavItem role="presentation" className="cursor-pointer">
           <CNavLink active={activeKey === 3} onClick={() => setActiveKey(3)}>
-            Khách hàng
+            {t("customers")}
           </CNavLink>
         </CNavItem>
         <CNavItem role="presentation" className="cursor-pointer">
           <CNavLink active={activeKey === 4} onClick={() => setActiveKey(4)}>
-            Tồn kho
+            {t("inventory")}
           </CNavLink>
         </CNavItem>
       </CNav>

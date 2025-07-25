@@ -18,6 +18,7 @@ const {
   capturePayPalOrder,
   refundPayPalOrder,
 } = require("../utils/paypalClient");
+const { getVndToUsdRate } = require("../utils/paypalClient");
 
 require("dotenv").config();
 
@@ -230,26 +231,11 @@ const flattenOrderItems = (order, locale) => {
 // @route   POST /api/v1/orders/create-paypal-order
 // @access  Public (sử dụng protectOptional)
 const createPayPalOrderController = asyncHandler(async (req, res) => {
+  // 1. Lấy dữ liệu cần thiết từ request
   const locale = req.locale || "vi";
-
-  // 1. Lấy dữ liệu cần thiết từ body của request
   const { selectedCartItemIds, shippingAddress } = req.body;
 
-  // Kiểm tra đầu vào cơ bản
-  if (
-    !selectedCartItemIds ||
-    !Array.isArray(selectedCartItemIds) ||
-    selectedCartItemIds.length === 0
-  ) {
-    res.status(400);
-    throw new Error("Vui lòng chọn sản phẩm để thanh toán.");
-  }
-  if (!shippingAddress) {
-    res.status(400);
-    throw new Error("Vui lòng cung cấp địa chỉ giao hàng.");
-  }
-
-  // 2. Xác định người dùng (tương tự hàm createOrder)
+  // 2. Xác định người dùng và lấy thông tin giỏ hàng đã được tính toán
   const loggedInUser = req.user;
   const cartGuestId = req.cookies.cartGuestId;
   let cartIdentifier;
@@ -261,8 +247,6 @@ const createPayPalOrderController = asyncHandler(async (req, res) => {
     throw new Error("Không tìm thấy thông tin giỏ hàng.");
   }
 
-  // 3. Lấy và tính toán thông tin giỏ hàng cho các sản phẩm đã chọn
-  // Hàm getAndValidateCartForOrder sẽ trả về giá cuối cùng (đã sale) của mỗi sản phẩm
   const { calculatedData } = await getAndValidateCartForOrder(
     cartIdentifier,
     selectedCartItemIds.map((id) => new mongoose.Types.ObjectId(id)),
@@ -270,33 +254,34 @@ const createPayPalOrderController = asyncHandler(async (req, res) => {
     locale
   );
 
-  // 4. Chuẩn bị danh sách các sản phẩm với giá bằng VND để gửi cho paypalClient
-  // paypalClient sẽ tự động chuyển đổi sang USD
-  const itemsForPayPal = calculatedData.items.map((item) => {
-    // Tạo tên hiển thị đầy đủ cho PayPal
-    const variantDisplayName =
-      item.variantInfo?.options
-        ?.map((opt) => opt.valueName) // Lấy valueName đã được dịch
-        .join(" / ") || "";
+  // 3. Chuyển đổi các giá trị tiền tệ cần thiết sang USD
+  const exchangeRate = await getVndToUsdRate(); // Hàm lấy tỷ giá từ paypalClient
 
-    const fullItemName = variantDisplayName
-      ? `${item.name} (${variantDisplayName})`
-      : item.name;
+  // Lấy các giá trị đã được tính toán chính xác bằng VND từ giỏ hàng
+  const subtotalVND = calculatedData.subtotal;
+  const discountVND = calculatedData.discountAmount;
+  const finalTotalVND = calculatedData.finalTotal;
 
-    return {
-      name: fullItemName, // Tên sản phẩm đã được dịch
-      quantity: item.quantity,
-      priceVND: item.price, // `price` là giá cuối cùng của item (displayPrice)
-      sku: item.sku,
-      productId: item.productId.toString(),
-    };
-  });
+  // Quy đổi sang USD
+  const subtotalUSD = subtotalVND * exchangeRate;
+  const discountUSD = discountVND * exchangeRate;
+  const totalAmountUSD = finalTotalVND * exchangeRate;
 
-  // 5. Gọi hàm helper để tạo đơn hàng trên PayPal
-  // Hàm này sẽ xử lý việc lấy tỷ giá, tính toán tổng tiền USD, và gọi API của PayPal
+  // 4. Tạo mô tả ngắn gọn cho đơn hàng để hiển thị trên PayPal
+  const firstItemName = calculatedData.items[0]?.name || "sản phẩm";
+  const totalItems = calculatedData.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  const orderDescription = `Thanh toán cho ${totalItems} sản phẩm tại Serein Shop (VD: ${firstItemName}...)`;
+
+  // 5. Gọi hàm helper để tạo đơn hàng trên PayPal với payload đã được chuẩn bị
   const paypalOrder = await createPayPalOrder({
-    items: itemsForPayPal,
+    subtotalUSD,
+    discountUSD,
+    totalAmountUSD,
     shippingDetails: shippingAddress,
+    orderDescription: orderDescription.substring(0, 127), // Giới hạn 127 ký tự theo yêu cầu của PayPal
   });
 
   // 6. Trả về orderID của PayPal cho frontend
@@ -339,9 +324,14 @@ const capturePayPalOrderController = asyncHandler(async (req, res) => {
         const customerName = flatOrderForEmail.user
           ? flatOrderForEmail.user.name
           : flatOrderForEmail.shippingAddress.fullName;
-        const emailHtml = paymentSuccessTemplate(customerName, flatOrderForEmail);
+        const emailHtml = paymentSuccessTemplate(
+          customerName,
+          flatOrderForEmail
+        );
         await sendEmail({
-          email: flatOrderForEmail.user ? flatOrderForEmail.user.email : flatOrderForEmail.guestOrderEmail,
+          email: flatOrderForEmail.user
+            ? flatOrderForEmail.user.email
+            : flatOrderForEmail.guestOrderEmail,
           subject: `Thanh toán thành công cho đơn hàng #${flatOrderForEmail._id
             .toString()
             .slice(-6)}`,
@@ -354,7 +344,9 @@ const capturePayPalOrderController = asyncHandler(async (req, res) => {
         );
       }
       const responseOrder = flattenOrderItems(order, locale);
-      res.status(200).json({ message: "Thanh toán thành công!", responseOrder });
+      res
+        .status(200)
+        .json({ responseOrder });
     } else {
       res.status(404);
       throw new Error("Không tìm thấy đơn hàng để cập nhật.");
@@ -978,12 +970,13 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
 
   const updatedOrder = await order.save();
   await updatedOrder.populate("user", "name email phone");
+  let flatOrderForEmail;
 
   // --- Gửi Email xác nhận đã giao ---
   if (updatedOrder && updatedOrder.user) {
     // Đảm bảo có user để lấy email và tên
     try {
-      const flatOrderForEmail = flattenOrderItems(updatedOrder, locale);
+      flatOrderForEmail = flattenOrderItems(updatedOrder, locale);
       const guestTrackingUrl = null;
       const userEmailHtml = orderDeliveredTemplate(
         flatOrderForEmail.user.name,

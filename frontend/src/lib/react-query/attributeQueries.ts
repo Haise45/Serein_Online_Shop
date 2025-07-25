@@ -1,12 +1,14 @@
 import {
-  getAttributes as getAttributesApi,
+  getAttributesApi,
   createAttribute as createAttributeApi,
   addAttributeValue as addAttributeValueApi,
   updateAttributeValue as updateAttributeValueApi,
   deleteAttributeValue as deleteAttributeValueApi,
+  getAdminAttributesApi,
 } from "@/services/attributeService";
 import {
   Attribute,
+  AttributeAdmin,
   AttributeCreationData,
   AttributeValue,
   AttributeValueCreationData,
@@ -20,7 +22,9 @@ import {
   UseMutationOptions,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
+import { useLocale } from "next-intl";
 
 // --- Query Keys ---
 export const attributeKeys = {
@@ -54,26 +58,42 @@ export const useGetAttributes = (options?: CustomQueryOptions<Attribute[]>) => {
   });
 };
 
+export const useGetAdminAttributes = (
+  options?: CustomQueryOptions<AttributeAdmin[]>,
+) => {
+  return useQuery<AttributeAdmin[], AxiosError<{ message?: string }>>({
+    // Dùng một key riêng để không xung đột cache
+    queryKey: [...attributeKeys.lists(), "admin"],
+    queryFn: getAdminAttributesApi,
+    staleTime: 1000 * 60 * 5, // Admin có thể cần dữ liệu mới hơn
+    ...options,
+  });
+};
+
 // =================================================================
 // --- CẬP NHẬT CÁC MUTATION HOOKS Ở ĐÂY ---
 // =================================================================
 
 export const useCreateAttribute = (
-  options?: CustomMutationOptions<Attribute, AttributeCreationData>,
+  options?: CustomMutationOptions<AttributeAdmin, AttributeCreationData>,
 ) => {
+  const t = useTranslations("reactQuery.attribute");
   const queryClient = useQueryClient(); // Lấy queryClient instance
+  const locale = useLocale();
   return useMutation({
     mutationFn: createAttributeApi,
     onSuccess: (newAttr, variables, context) => {
       // === BƯỚC QUAN TRỌNG ===
       // Sau khi tạo thành công, làm mới lại query có key là ['attributes', 'list']
       queryClient.invalidateQueries({ queryKey: attributeKeys.lists() });
-      toast.success(`Đã tạo thuộc tính "${newAttr.label}"!`);
+      const localizedLabel =
+        newAttr.label[locale as "vi" | "en"] || newAttr.label.vi;
+      toast.success(t("createSuccess", { label: localizedLabel }));
       // Gọi lại onSuccess gốc nếu có
       options?.onSuccess?.(newAttr, variables, context);
     },
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Lỗi khi tạo thuộc tính."),
+      toast.error(error.response?.data?.message || t("createError")),
     ...options,
   });
 };
@@ -84,6 +104,7 @@ export const useAddAttributeValue = (
     { attributeId: string; valueData: AttributeValueCreationData }
   >,
 ) => {
+  const t = useTranslations("reactQuery.attribute");
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ attributeId, valueData }) =>
@@ -91,11 +112,11 @@ export const useAddAttributeValue = (
     onSuccess: (newValue, variables, context) => {
       // === BƯỚC QUAN TRỌNG ===
       queryClient.invalidateQueries({ queryKey: attributeKeys.lists() });
-      toast.success("Đã thêm giá trị mới!");
+      toast.success(t("addValueSuccess"));
       options?.onSuccess?.(newValue, variables, context);
     },
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Lỗi khi thêm giá trị."),
+      toast.error(error.response?.data?.message || t("addValueError")),
     ...options,
   });
 };
@@ -110,6 +131,7 @@ export const useUpdateAttributeValue = (
     }
   >,
 ) => {
+  const t = useTranslations("reactQuery.attribute");
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ attributeId, valueId, valueData }) =>
@@ -117,11 +139,11 @@ export const useUpdateAttributeValue = (
     onSuccess: (updatedValue, variables, context) => {
       // === BƯỚC QUAN TRỌNG ===
       queryClient.invalidateQueries({ queryKey: attributeKeys.lists() });
-      toast.success("Đã cập nhật giá trị!");
+      toast.success(t("updateValueSuccess"));
       options?.onSuccess?.(updatedValue, variables, context);
     },
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Lỗi khi cập nhật giá trị."),
+      toast.error(error.response?.data?.message || t("updateValueError")),
     ...options,
   });
 };
@@ -132,6 +154,7 @@ export const useDeleteAttributeValue = (
     { attributeId: string; valueId: string }
   >,
 ) => {
+  const t = useTranslations("reactQuery.attribute");
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ attributeId, valueId }) =>
@@ -143,7 +166,7 @@ export const useDeleteAttributeValue = (
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Lỗi khi xóa giá trị."),
+      toast.error(error.response?.data?.message || t("deleteValueError")),
     ...options,
   });
 };

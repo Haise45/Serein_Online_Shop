@@ -4,6 +4,7 @@ import { cilChart, cilList } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import { CButton, CButtonGroup } from "@coreui/react";
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ReportBlockProps {
   title: string;
@@ -17,6 +18,7 @@ const ReportBlock: React.FC<ReportBlockProps> = ({
   renderTable,
   renderChart,
 }) => {
+  const t = useTranslations("AdminReports.shared");
   // Mặc định là 'table', chỉ chuyển sang 'chart' nếu có renderChart
   const [viewMode, setViewMode] = useState<"table" | "chart">("table");
 
@@ -32,7 +34,7 @@ const ReportBlock: React.FC<ReportBlockProps> = ({
               variant="outline"
               active={viewMode === "table"} // ✅ sử dụng prop active
               onClick={() => setViewMode("table")}
-              title="Xem dạng bảng"
+              title={t("viewAsTable")}
             >
               <CIcon icon={cilList} />
             </CButton>
@@ -41,7 +43,7 @@ const ReportBlock: React.FC<ReportBlockProps> = ({
               variant="outline"
               active={viewMode === "chart"}
               onClick={() => setViewMode("chart")}
-              title="Xem dạng biểu đồ"
+              title={t("viewAsChart")}
             >
               <CIcon icon={cilChart} />
             </CButton>

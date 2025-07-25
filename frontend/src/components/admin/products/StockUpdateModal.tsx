@@ -10,6 +10,7 @@ import {
   CSpinner,
 } from "@coreui/react";
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface StockUpdateModalProps {
   visible: boolean;
@@ -28,6 +29,7 @@ const StockUpdateModal: React.FC<StockUpdateModalProps> = ({
   itemName,
   currentStock,
 }) => {
+  const t = useTranslations("AdminProducts.stockModal");
   const [changeAmount, setChangeAmount] = useState<string>("");
   const [setAmount, setSetAmount] = useState<string>("");
 
@@ -42,18 +44,21 @@ const StockUpdateModal: React.FC<StockUpdateModalProps> = ({
   return (
     <CModal visible={visible} onClose={onClose} alignment="center">
       <CModalHeader>
-        <CModalTitle>Cập nhật tồn kho cho: {itemName}</CModalTitle>
+        <CModalTitle>{t("title", { name: itemName })}</CModalTitle>
       </CModalHeader>
       <CModalBody>
         <p>
-          Tồn kho hiện tại: <strong>{currentStock}</strong>
+          {t.rich("currentStock", {
+            stock: currentStock,
+            bold: (chunks) => <strong>{chunks}</strong>,
+          })}
         </p>
         <div className="mb-3">
-          <CFormLabel htmlFor="setStock">Đặt số lượng mới</CFormLabel>
+          <CFormLabel htmlFor="setStock">{t("setNewLabel")}</CFormLabel>
           <CFormInput
             id="setStock"
             type="number"
-            placeholder="Ví dụ: 100"
+            placeholder={t("setNewPlaceholder")}
             value={setAmount}
             onChange={(e) => {
               setSetAmount(e.target.value);
@@ -61,15 +66,13 @@ const StockUpdateModal: React.FC<StockUpdateModalProps> = ({
             }}
           />
         </div>
-        <div className="font-weight-bold my-2 text-center">HOẶC</div>
+        <div className="font-weight-bold my-2 text-center">{t("or")}</div>
         <div className="mb-3">
-          <CFormLabel htmlFor="changeStock">
-            Thay đổi một lượng (+/-)
-          </CFormLabel>
+          <CFormLabel htmlFor="changeStock">{t("changeLabel")}</CFormLabel>
           <CFormInput
             id="changeStock"
             type="number"
-            placeholder="Ví dụ: 5 (thêm 5) hoặc -10 (bớt 10)"
+            placeholder={t("changePlaceholder")}
             value={changeAmount}
             onChange={(e) => {
               setChangeAmount(e.target.value);
@@ -80,7 +83,7 @@ const StockUpdateModal: React.FC<StockUpdateModalProps> = ({
       </CModalBody>
       <CModalFooter>
         <CButton color="secondary" onClick={onClose}>
-          Hủy
+          {t("cancelButton")}
         </CButton>
         <CButton
           color="primary"
@@ -90,7 +93,7 @@ const StockUpdateModal: React.FC<StockUpdateModalProps> = ({
           }
         >
           {isSaving && <CSpinner size="sm" className="mr-2" />}
-          Lưu thay đổi
+          {t("saveButton")}
         </CButton>
       </CModalFooter>
     </CModal>

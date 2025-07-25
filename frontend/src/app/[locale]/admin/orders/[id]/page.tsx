@@ -1,31 +1,42 @@
 import PageHeader from "@/components/shared/PageHeader";
-import type { Metadata } from "next";
 import AdminOrderDetailClient from "./AdminOrderDetailClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Chi tiết Đơn hàng | Admin Serein Shop",
-  description: "Xem chi tiết, cập nhật trạng thái và xử lý đơn hàng.",
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
 };
 
-// Interface để định nghĩa props cho page, bao gồm params từ URL động
-interface AdminOrderDetailPageProps {
-  params: Promise<{
-    id: string; // id của đơn hàng sẽ được truyền vào đây
-  }>;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, id } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminOrderDetail.meta",
+  });
+
+  const shortId = id.slice(-6).toUpperCase();
+
+  return {
+    title: t("title", { id: shortId }),
+    description: t("description", { id: shortId }),
+  };
 }
 
-export default async function AdminOrderDetailPage({
-  params,
-}: AdminOrderDetailPageProps) {
-  const { id } = await params; // Lấy ID đơn hàng từ params
+export default async function AdminOrderDetailPage({ params }: Props) {
+  const { locale, id } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminOrderDetail.pageHeader",
+  });
+
+  const shortId = id.slice(-6).toUpperCase();
 
   return (
     <div>
       <PageHeader
-        title={`Chi tiết Đơn hàng #${id.slice(-6).toUpperCase()}`}
-        description="Xem thông tin chi tiết, cập nhật trạng thái và xử lý các yêu cầu của khách hàng."
+        title={t("title", { id: shortId })}
+        description={t("description")}
       />
-      {/* Truyền orderId vào component Client để nó fetch dữ liệu và hiển thị */}
       <AdminOrderDetailClient orderId={id} />
     </div>
   );

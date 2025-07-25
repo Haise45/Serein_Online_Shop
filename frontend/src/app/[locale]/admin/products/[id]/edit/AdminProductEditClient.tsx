@@ -8,7 +8,7 @@ import ProductOrganizationCard from "@/components/admin/products/ProductOrganiza
 import ProductPricingCard from "@/components/admin/products/ProductPricingCard";
 
 // --- Import các hằng số ---
-import { useGetAttributes } from "@/lib/react-query/attributeQueries";
+import { useGetAdminAttributes } from "@/lib/react-query/attributeQueries";
 
 // --- Import các hooks và utilities ---
 import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
@@ -17,7 +17,12 @@ import {
   useUpdateAdminProduct,
 } from "@/lib/react-query/productQueries";
 import { useUploadImages } from "@/lib/react-query/uploadQueries";
-import { buildCategoryTree, flattenTreeForSelect } from "@/lib/utils";
+import {
+  buildCategoryTree,
+  flattenTreeForSelect,
+  getLocalizedName,
+} from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 // --- Import các types ---
 import {
@@ -26,7 +31,7 @@ import {
   VariantCreationData,
   VariantOptionValueCreation,
 } from "@/services/productService";
-import { Variant } from "@/types";
+import { Variant, I18nField } from "@/types";
 
 // --- Import các component từ CoreUI ---
 import { cilWarning } from "@coreui/icons";
@@ -43,6 +48,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
+import { useLocale } from "next-intl";
 
 // --- Type Definitions ---
 // Định nghĩa kiểu cho hàm xử lý thay đổi biến thể, cần export để component con dùng
@@ -81,13 +87,18 @@ interface AdminProductEditClientProps {
 export default function AdminProductEditClient({
   productId,
 }: AdminProductEditClientProps) {
+  const t = useTranslations("AdminProductForm");
+  const tValidation = useTranslations("AdminProductForm.validation");
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
+  const locale = useLocale() as "vi" | "en";
 
   // --- States cho Form ---
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [i18nData, setI18nData] = useState({
+    name: { vi: "", en: "" },
+    description: { vi: "", en: "" },
+  });
   const [price, setPrice] = useState<number>(0);
   const [salePrice, setSalePrice] = useState<number>(0);
   const [sku, setSku] = useState("");
@@ -120,7 +131,7 @@ export default function AdminProductEditClient({
   } = useGetAdminProductDetails(productId);
   const { data: categoriesPaginatedData, isLoading: isLoadingCategories } =
     useGetAllCategories({ limit: 9999, isActive: true });
-  const { data: availableAttributes } = useGetAttributes();
+  const { data: availableAttributes } = useGetAdminAttributes();
   const uploadImagesMutation = useUploadImages();
   const updateProductMutation = useUpdateAdminProduct();
 
@@ -128,8 +139,10 @@ export default function AdminProductEditClient({
   useEffect(() => {
     // Chỉ chạy khi có dữ liệu sản phẩm và chưa được khởi tạo
     if (product && !isInitialized && availableAttributes) {
-      setName(product.name);
-      setDescription(product.description || "");
+      setI18nData({
+        name: product.name,
+        description: product.description || { vi: "", en: "" },
+      });
       setPrice(product.price);
       setSalePrice(product.salePrice || 0);
 
@@ -217,14 +230,18 @@ export default function AdminProductEditClient({
   }, [product, isInitialized, availableAttributes]);
 
   useEffect(() => {
-    if (product?.name) {
-      dispatch(setBreadcrumbDynamicData({ productName: product.name }));
+    if (i18nData.name) {
+      dispatch(
+        setBreadcrumbDynamicData({
+          productName: getLocalizedName(i18nData.name, locale),
+        }),
+      );
     }
 
     return () => {
       dispatch(clearBreadcrumbDynamicData());
     };
-  }, [product?.name, dispatch]);
+  }, [i18nData.name, dispatch, locale]);
 
   // --- Dữ liệu được tính toán (Memoized) ---
   const categoriesForSelect = useMemo(() => {
@@ -270,10 +287,14 @@ export default function AdminProductEditClient({
     )?._id;
 
     const newVariants = combinations.map((combo): VariantFormState => {
-      const key = combo.map((opt) => opt.value).join("-"); // Tạo key duy nhất từ các value ID
-      const existingVariant = variants.find(
-        (v) => v.optionValues.map((opt) => opt.value).join("-") === key,
-      );
+      const existingVariant = originalVariantsRef.current.find((v) => {
+        if (v.optionValues.length !== combo.length) return false;
+        return combo.every((c) =>
+          v.optionValues.some(
+            (vo) => vo.attribute === c.attribute && vo.value === c.value,
+          ),
+        );
+      });
 
       const colorValueOpt = colorAttrId
         ? combo.find((opt) => opt.attribute === colorAttrId)
@@ -292,11 +313,12 @@ export default function AdminProductEditClient({
         salePrice:
           existingVariant?.salePrice ??
           (salePrice > 0 ? String(salePrice) : ""),
+        salePriceEffectiveDate: existingVariant?.salePriceEffectiveDate || "",
+        salePriceExpiryDate: existingVariant?.salePriceExpiryDate || "",
       };
     });
 
     setVariants(newVariants);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedAttributes,
     price,
@@ -307,6 +329,17 @@ export default function AdminProductEditClient({
   ]);
 
   // --- Handlers ---
+  const handleI18nFieldChange = (
+    field: "name" | "description",
+    locale: "vi" | "en",
+    value: string,
+  ) => {
+    setI18nData((prev) => ({
+      ...prev,
+      [field]: { ...prev[field], [locale]: value },
+    }));
+  };
+
   // Khi admin check/uncheck một thuộc tính (VD: "Màu sắc")
   const handleAttributeToggle = (attributeId: string) => {
     setSelectedAttributes((prev) => {
@@ -352,65 +385,77 @@ export default function AdminProductEditClient({
     setVariants((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
+  const removeVietnameseTones = (str: string): string => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // xóa dấu
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+  };
+  
   const generateAllVariantSKUs = () => {
     // 1. Kiểm tra điều kiện đầu vào
     const baseSku =
-      sku || name.substring(0, 6).toUpperCase().replace(/\s/g, "");
+      sku || i18nData.name.vi.substring(0, 6).toUpperCase().replace(/\s/g, "");
     if (!baseSku) {
-      toast.error(
-        "Vui lòng nhập Tên sản phẩm hoặc SKU chính để tạo SKU hàng loạt.",
-      );
+      toast.error(t("toasts.baseSkuRequired"));
       return;
     }
     if (!availableAttributes) {
-      toast.error("Dữ liệu thuộc tính chưa sẵn sàng, vui lòng thử lại.");
+      toast.error(t("toasts.attributesNotReady"));
       return;
     }
 
     // 2. Tạo một bộ đệm tra cứu (lookup map) để tăng tốc
     const attributeLookupMap = new Map<
       string,
-      { values: Map<string, string> }
+      { values: Map<string, I18nField> }
     >();
-    availableAttributes.forEach((attr) => {
-      const valueMap = new Map<string, string>();
-      attr.values.forEach((val) => {
-        valueMap.set(val._id, val.value);
+    if (availableAttributes) {
+      availableAttributes.forEach((attr) => {
+        const valueMap = new Map<string, I18nField>();
+        attr.values.forEach((val) => {
+          valueMap.set(val._id, val.value);
+        });
+        attributeLookupMap.set(attr._id, { values: valueMap });
       });
-      attributeLookupMap.set(attr._id, { values: valueMap });
-    });
+    }
 
-    // 3. Lặp qua các biến thể và tạo SKU mới
+    // 3. Tạo mã SKU cho từng biến thể
     const updatedVariants = variants.map((v) => {
       const optionPart = v.optionValues
         .map((opt) => {
-          // Lấy ra tên giá trị từ ID
-          const valueName = attributeLookupMap
+          const valueObject = attributeLookupMap
             .get(opt.attribute)
             ?.values.get(opt.value);
-          if (!valueName) return "??"; // Fallback nếu không tìm thấy
 
-          // Tạo mã viết tắt (ví dụ: "Xanh Lá" -> "XL", "S" -> "S")
-          // Logic này có thể tùy chỉnh theo ý bạn
-          const parts = valueName.split(" ");
-          if (parts.length > 1) {
-            return parts.map((p) => p.charAt(0)).join(""); // "Xanh Lá" -> "XL"
+          // Luôn lấy value Tiếng Việt
+          let valueName = valueObject?.vi || "??";
+          valueName = removeVietnameseTones(valueName.trim()); // Bỏ dấu
+
+          const words = valueName.split(/\s+/); // Tách từ
+
+          if (words.length === 1) {
+            return words[0].substring(0, 2).toUpperCase(); // "Nau" => "NA"
           }
-          return valueName; // "S" -> "S"
+
+          return words
+            .map((w) => w[0])
+            .join("")
+            .toUpperCase(); // "Xanh La" => "XL"
         })
-        .join("-") // Nối các phần lại bằng dấu gạch ngang
-        .toUpperCase();
+        .join("-");
 
       return { ...v, sku: `${baseSku}-${optionPart}` };
     });
 
     // 4. Cập nhật state
     setVariants(updatedVariants);
-    toast.success("Đã tạo SKU hàng loạt cho các biến thể!");
+    toast.success(t("toasts.bulkSkuSuccess"));
   };
 
   const generateSKU = () => {
-    const namePart = name.substring(0, 3).toUpperCase();
+    const namePart = i18nData.name.vi.substring(0, 3).toUpperCase();
     const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
     setSku(`${namePart}-${randomPart}`);
   };
@@ -418,13 +463,13 @@ export default function AdminProductEditClient({
   const handleImageUpload = (files: File[], colorValueId?: string) => {
     if (files.length === 0) return;
     setIsUploading(true);
-    const toastId = toast.loading(`Đang tải ảnh lên...`);
+    const toastId = toast.loading(t("toasts.uploading"));
 
     uploadImagesMutation.mutate(
       { files, area: "products" },
       {
         onSuccess: (data) => {
-          toast.success("Tải ảnh lên thành công!", { id: toastId });
+          toast.success(t("toasts.uploadSuccess"), { id: toastId });
           if (colorValueId) {
             // Dùng colorValueId làm key
             setColorImages((prev) => ({
@@ -438,7 +483,7 @@ export default function AdminProductEditClient({
             setImages((prev) => [...prev, ...data.imageUrls]);
           }
         },
-        onError: () => toast.error("Tải ảnh thất bại.", { id: toastId }),
+        onError: () => toast.error(t("toasts.uploadError"), { id: toastId }),
         onSettled: () => setIsUploading(false),
       },
     );
@@ -457,25 +502,41 @@ export default function AdminProductEditClient({
 
   const validateForm = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = "Tên sản phẩm là bắt buộc.";
-    if (!category) newErrors.category = "Vui lòng chọn danh mục.";
+
+    if (!i18nData.name.vi.trim())
+      newErrors.name_vi = tValidation("nameRequired", { locale: "Tiếng Việt" });
+    if (!i18nData.name.en.trim())
+      newErrors.name_en = tValidation("nameRequired", { locale: "English" });
+
+    if (!category) newErrors.category = tValidation("categoryRequired");
+
     if (isNaN(price) || price < 0)
-      newErrors.price = "Giá sản phẩm không hợp lệ.";
-    if (images.length === 0)
-      newErrors.images = "Cần ít nhất một ảnh chính cho sản phẩm.";
+      newErrors.price = tValidation("priceInvalid");
+
+    if (images.length === 0) newErrors.images = tValidation("imagesRequired");
+
     variants.forEach((v, i) => {
       if (!v.sku.trim())
-        newErrors[`variant_sku_${i}`] = "SKU biến thể là bắt buộc.";
+        newErrors[`variant_sku_${i}`] = tValidation("variantSkuRequired");
     });
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [name, category, price, images, variants]);
+  }, [
+    i18nData.name.vi,
+    i18nData.name.en,
+    category,
+    price,
+    images.length,
+    variants,
+    tValidation,
+  ]);
 
   // --- Form Submission ---
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error("Vui lòng kiểm tra lại các trường thông tin bắt buộc.");
+      toast.error(t("toasts.validationError"));
       return;
     }
 
@@ -491,8 +552,8 @@ export default function AdminProductEditClient({
     }));
 
     const productData: ProductUpdateData = {
-      name,
-      description,
+      name: i18nData.name,
+      description: i18nData.description,
       price,
       salePrice: salePrice > 0 ? salePrice : null,
       salePriceEffectiveDate: saleStartDate || null,
@@ -536,18 +597,17 @@ export default function AdminProductEditClient({
           variant="outline"
           onClick={() => router.push(backLink)}
         >
-          ← Quay lại danh sách
+          {t("backToList")}
         </CButton>
       </div>
 
       <CRow>
         <CCol xs={12} lg={8}>
           <ProductInfoCard
-            name={name}
-            setName={setName}
-            description={description}
-            setDescription={setDescription}
-            error={errors.name}
+            name={i18nData.name}
+            description={i18nData.description}
+            onFieldChange={handleI18nFieldChange}
+            errors={errors}
           />
           <ProductImageCard
             images={images}
@@ -608,7 +668,7 @@ export default function AdminProductEditClient({
               {updateProductMutation.isPending && (
                 <CSpinner size="sm" className="me-2" />
               )}
-              Cập nhật sản phẩm
+              {t("updateProduct")}
             </CButton>
           </div>
         </CCol>

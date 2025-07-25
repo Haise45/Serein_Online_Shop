@@ -1,4 +1,4 @@
-import { Attribute, AttributeValue } from "@/types";
+import { AttributeAdmin, AttributeValueAdmin } from "@/types";
 import { cilPen, cilPlus, cilTrash } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import {
@@ -14,12 +14,15 @@ import {
   CTableRow,
 } from "@coreui/react";
 import React from "react";
+import { useLocale } from "next-intl";
+import { getLocalizedName } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface AttributeValueTableProps {
-  selectedAttribute: Attribute;
+  selectedAttribute: AttributeAdmin;
   onAddValue: () => void;
-  onEditValue: (value: AttributeValue) => void;
-  onDeleteValue: (value: AttributeValue) => void;
+  onEditValue: (value: AttributeValueAdmin) => void;
+  onDeleteValue: (value: AttributeValueAdmin) => void;
 }
 
 const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
@@ -28,14 +31,20 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
   onEditValue,
   onDeleteValue,
 }) => {
+  const locale = useLocale() as "vi" | "en";
+  const t = useTranslations("AdminAttributes.valueTable");
+
   return (
     <CCard>
       <CCardHeader className="flex items-center justify-between">
         <h5 className="mb-0">
-          Giá trị cho: <strong>{selectedAttribute.label}</strong>
+          {t.rich("title", {
+            label: getLocalizedName(selectedAttribute.label, locale),
+            bold: (chunks) => <strong>{chunks}</strong>,
+          })}
         </h5>
         <CButton size="sm" color="primary" onClick={onAddValue}>
-          <CIcon icon={cilPlus} className="mr-1" /> Thêm giá trị
+          <CIcon icon={cilPlus} className="mr-1" /> {t("add")}
         </CButton>
       </CCardHeader>
       <CCardBody>
@@ -43,10 +52,10 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
           <CTable hover align="middle">
             <CTableHead>
               <CTableRow>
-                <CTableHeaderCell>Giá trị</CTableHeaderCell>
-                <CTableHeaderCell>Mã màu</CTableHeaderCell>
+                <CTableHeaderCell>{t("colValue")}</CTableHeaderCell>
+                <CTableHeaderCell>{t("colHex")}</CTableHeaderCell>
                 <CTableHeaderCell className="text-center">
-                  Hành động
+                  {t("colActions")}
                 </CTableHeaderCell>
               </CTableRow>
             </CTableHead>
@@ -59,7 +68,9 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
                 return (
                   <CTableRow key={val._id}>
                     <CTableDataCell>
-                      <strong>{val.value}</strong>
+                      <p className="mb-0 font-medium">
+                        {getLocalizedName(val.value, locale)}
+                      </p>
                     </CTableDataCell>
                     <CTableDataCell>
                       <div className="flex items-center">
@@ -69,7 +80,7 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
                             style={{ backgroundColor: hexColor }}
                           ></span>
                         )}
-                        <code>{hexColor || "N/A"}</code>
+                        <code>{hexColor || t("noHex")}</code>
                       </div>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
@@ -77,8 +88,8 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
                         size="sm"
                         color="info"
                         variant="outline"
-                        className="mr-2"
-                        title="Sửa"
+                        className="me-2"
+                        title={t("editTitle")}
                         onClick={() => onEditValue(val)}
                       >
                         <CIcon icon={cilPen} />
@@ -87,7 +98,7 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
                         size="sm"
                         color="danger"
                         variant="outline"
-                        title="Xóa"
+                        title={t("deleteTitle")}
                         onClick={() => onDeleteValue(val)}
                       >
                         <CIcon icon={cilTrash} />
@@ -100,7 +111,9 @@ const AttributeValueTable: React.FC<AttributeValueTableProps> = ({
           </CTable>
         ) : (
           <div className="py-5 text-center text-gray-500">
-            Chưa có giá trị nào. Nhấn <strong>Thêm giá trị</strong> để bắt đầu.
+            {t.rich("noValues", {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </div>
         )}
       </CCardBody>

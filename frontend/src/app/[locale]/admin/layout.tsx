@@ -1,9 +1,9 @@
 "use client";
 
+import { usePathname } from "@/i18n/navigation";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import { CSpinner } from "@coreui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,7 +17,11 @@ import { getMyProfile } from "@/services/authService";
 import { AppDispatch, RootState } from "@/store";
 import { logout, setUser } from "@/store/slices/authSlice";
 import { BreadcrumbItem } from "@/types";
-import { generateAdminBreadcrumbs } from "@/utils/adminBreadcrumbs";
+import {
+  AdminBreadcrumbsTranslator,
+  generateAdminBreadcrumbs,
+} from "@/utils/adminBreadcrumbs";
+import { useTranslations } from "next-intl";
 
 // Constants for localStorage keys
 const SIDEBAR_VISIBLE_KEY = "admin_sidebar_visible";
@@ -28,6 +32,7 @@ const SIDEBAR_UNFOLDABLE_KEY = "admin_sidebar_unfoldable";
  * Component này sẽ render children (AdminLayoutContent) chỉ khi user hợp lệ.
  */
 function AdminAuthGuard({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("Admin.auth");
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const { isAuthenticated, user, accessToken } = useSelector(
@@ -39,7 +44,7 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     const verifyUser = async () => {
       // 1. Nếu không có token, chuyển hướng ngay lập tức
       if (!accessToken) {
-        toast.error("Yêu cầu đăng nhập để truy cập trang quản trị.");
+        toast.error(t("loginRequired"));
         window.location.replace("/login?redirect=/admin/dashboard");
         // Không cần set isVerifying thành false, vì trang sẽ được thay thế
         return;
@@ -50,7 +55,7 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
         try {
           const profile = await getMyProfile();
           if (profile.role !== "admin") {
-            toast.error("Bạn không có quyền truy cập trang quản trị.");
+            toast.error(t("noPermission"));
             dispatch(logout());
             queryClient.clear();
             window.location.replace("/login");
@@ -58,7 +63,7 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
           }
           dispatch(setUser(profile));
         } catch {
-          toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+          toast.error(t("sessionExpired"));
           dispatch(logout());
           queryClient.clear();
           window.location.replace("/login");
@@ -71,14 +76,14 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     };
 
     verifyUser();
-  }, [accessToken, user, dispatch, queryClient]);
+  }, [accessToken, user, dispatch, queryClient, t]);
 
   // Trong khi đang xác thực, hiển thị một màn hình tải duy nhất
   if (isVerifying) {
     return (
       <div className="bg-light flex min-h-screen items-center justify-center">
         <CSpinner color="primary" className="mr-3" />
-        <p className="m-0 text-lg">Đang tải và xác thực...</p>
+        <p className="m-0 text-lg">{t("verifyingAuth")}</p>
       </div>
     );
   }
@@ -98,6 +103,8 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
  * Component này có thể giả định rằng nó chỉ được render khi user đã được xác thực là admin.
  */
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+  const tMeta = useTranslations("Admin.meta");
+  const tBreadcrumbs = useTranslations("Admin.breadcrumbs");
   const pathname = usePathname();
   const dynamicData = useSelector(
     (state: RootState) => state.breadcrumbAdmin.dynamicData,
@@ -130,9 +137,15 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   // Cập nhật breadcrumbs khi đường dẫn thay đổi
   useEffect(() => {
-    document.title = "Trang Quản Trị | Serein Shop";
-    setBreadcrumbItems(generateAdminBreadcrumbs(pathname, dynamicData));
-  }, [pathname, dynamicData]);
+    document.title = tMeta("title");
+    setBreadcrumbItems(
+      generateAdminBreadcrumbs(
+        pathname,
+        dynamicData,
+        tBreadcrumbs as AdminBreadcrumbsTranslator,
+      ),
+    );
+  }, [pathname, dynamicData, tMeta, tBreadcrumbs]);
 
   // Tính toán margin cho nội dung
   const getContentMarginLeft = () => {

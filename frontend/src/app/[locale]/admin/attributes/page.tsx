@@ -1,18 +1,34 @@
 import PageHeader from "@/components/shared/PageHeader";
-import { Metadata } from "next";
 import AdminAttributesClient from "./AdminAttributesClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Quản lý Thuộc tính | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function AdminAttributesPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminAttributes.meta",
+  });
+
+  return {
+    title: t("title"),
+  };
+}
+
+export default async function AdminAttributesPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "AdminAttributes.pageHeader",
+  });
+
   return (
     <div>
-      <PageHeader
-        title="Quản lý Thuộc tính"
-        description="Thêm, sửa, xóa các thuộc tính sản phẩm và giá trị của chúng (Màu sắc, Size...)."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <AdminAttributesClient />
     </div>
   );

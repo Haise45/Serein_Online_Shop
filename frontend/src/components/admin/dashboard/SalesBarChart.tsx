@@ -1,44 +1,46 @@
 "use client";
 
-import { useSettings } from "@/app/SettingsContext";
 import "@/components/shared/charts/ChartJsDefaults";
-import { formatCurrency } from "@/lib/utils";
 import { ChartJsData } from "@/types/dashboard";
 import { CCard, CCardBody, CSpinner } from "@coreui/react";
 import { TooltipItem } from "chart.js";
 import React from "react";
 import { Bar } from "react-chartjs-2";
+import { useTranslations } from "next-intl";
 
 interface SalesBarChartProps {
   data: ChartJsData | undefined;
   isLoading: boolean;
-  mode: "orders" | "products" | "revenue";
+  mode: "orders" | "products";
 }
+
+const API_DATASET_LABELS = {
+  orders: "Số đơn hàng",
+  products: "Số sản phẩm đã bán",
+};
+
 
 const SalesBarChart: React.FC<SalesBarChartProps> = ({
   data,
   isLoading,
   mode,
 }) => {
-  const settingsContext = useSettings();
-  const displayCurrency = settingsContext?.displayCurrency;
-  const rates = settingsContext?.rates;
+  const t = useTranslations("AdminDashboard.quantityChart");
 
   const chartConfig = {
     orders: {
-      label: "Số đơn hàng",
+      label: t("ordersLabel"),
       backgroundColor: "rgba(54, 162, 235, 0.6)",
     },
     products: {
-      label: "Số sản phẩm đã bán",
+      label: t("productsLabel"),
       backgroundColor: "rgba(75, 192, 192, 0.6)",
     },
-    revenue: { label: "Doanh thu", backgroundColor: "rgba(255, 159, 64, 0.6)" },
   };
 
   const currentConfig = chartConfig[mode];
   const currentDataset = data?.datasets.find(
-    (ds) => ds.label === currentConfig.label,
+    (ds) => ds.label === API_DATASET_LABELS[mode],
   );
 
   const chartData = {
@@ -60,10 +62,6 @@ const SalesBarChart: React.FC<SalesBarChartProps> = ({
           // Tùy chỉnh tick cho trục Y
           callback: function (value: string | number) {
             const numericValue = Number(value);
-            if (mode === "revenue") {
-              if (numericValue >= 1000000) return numericValue / 1000000 + "tr";
-              if (numericValue >= 1000) return numericValue / 1000 + "k";
-            }
             if (Number.isInteger(numericValue)) return numericValue; // Chỉ hiển thị số nguyên
             return null;
           },
@@ -81,14 +79,7 @@ const SalesBarChart: React.FC<SalesBarChartProps> = ({
             }
             const value = context.parsed.y;
             if (value !== null) {
-              if (mode === "revenue") {
-                label += formatCurrency(value, {
-                  currency: displayCurrency,
-                  rates,
-                });
-              } else {
-                label += value.toLocaleString("vi-VN");
-              }
+              label += value.toLocaleString("vi-VN");
             }
             return label;
           },

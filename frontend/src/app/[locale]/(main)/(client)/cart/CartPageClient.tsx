@@ -4,13 +4,20 @@ import { useSettings } from "@/app/SettingsContext";
 import CartItemList from "@/components/client/cart/CartItemList";
 import CartSummary from "@/components/client/cart/CartSummary";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
-import { useGetCart } from "@/lib/react-query/cartQueries";
+import { useClearCart, useGetCart } from "@/lib/react-query/cartQueries";
 import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import { Category } from "@/types/category";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { FiAlertCircle, FiLoader, FiShoppingCart, FiTag } from "react-icons/fi";
+import toast from "react-hot-toast";
+import {
+  FiAlertCircle,
+  FiLoader,
+  FiShoppingCart,
+  FiTag,
+  FiTrash2,
+} from "react-icons/fi";
 
 export default function CartPageClient() {
   const t = useTranslations("CartPage");
@@ -22,6 +29,8 @@ export default function CartPageClient() {
     error,
     refetch,
   } = useGetCart();
+
+  const { mutate: clearCart, isPending: isClearingCart } = useClearCart();
 
   // State để lưu trữ ID của các cart items đã được chọn
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
@@ -60,6 +69,45 @@ export default function CartPageClient() {
       }
       return newSelectedIds;
     });
+  };
+
+  const handleRequestClearCart = () => {
+    // Ngăn chặn việc bấm nút khi đang xử lý
+    if (isClearingCart) return;
+
+    toast(
+      (toastInstance) => (
+        <div className="flex flex-col items-center p-1">
+          <p className="mb-3 text-sm font-medium text-gray-800">
+            {t("clearCartConfirmTitle")}
+          </p>
+          <div className="flex w-full space-x-3">
+            <button
+              onClick={() => {
+                clearCart(); // Gọi mutation
+                toast.dismiss(toastInstance.id);
+              }}
+              className="flex-1 rounded-md bg-red-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            >
+              {t("clearCartConfirmButton")}
+            </button>
+            <button
+              onClick={() => toast.dismiss(toastInstance.id)}
+              className="flex-1 rounded-md bg-white px-3.5 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+            >
+              {t("cancelButton")}
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        // Tùy chọn cho toast
+        duration: 6000, // Tự động đóng sau 6 giây nếu không tương tác
+        position: "top-center",
+        // Bạn có thể thêm icon ở đây nếu muốn
+        icon: <FiAlertCircle className="text-yellow-500" />,
+      },
+    );
   };
 
   const handleSelectAllItems = (isSelected: boolean) => {
@@ -192,12 +240,13 @@ export default function CartPageClient() {
         <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
           {t("pageTitle")}
         </h1>
-        {cart.items.length > 0 && (
+        <div className="flex items-center space-x-4">
+          {/* Checkbox chọn tất cả */}
           <div className="flex items-center">
             <input
               id="select-all-cart-items"
               type="checkbox"
-              className="h-5 w-5 rounded border-gray-300 text-indigo-600"
+              className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               checked={isAllSelected}
               onChange={(e) => handleSelectAllItems(e.target.checked)}
             />
@@ -208,7 +257,22 @@ export default function CartPageClient() {
               {t("selectAllLabel")}
             </label>
           </div>
-        )}
+
+          {/* 4. Thêm nút Xóa Giỏ Hàng */}
+          <div className="h-4 w-px bg-gray-300"></div>
+          <button
+            onClick={handleRequestClearCart}
+            disabled={isClearingCart}
+            className="flex items-center text-sm font-medium text-red-600 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isClearingCart ? (
+              <FiLoader className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <FiTrash2 className="mr-1.5 h-4 w-4" />
+            )}
+            {t("clearCartButton")}
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-12">
         <section aria-labelledby="cart-heading" className="lg:col-span-8">

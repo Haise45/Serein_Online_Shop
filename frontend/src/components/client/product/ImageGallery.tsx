@@ -149,6 +149,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             alt={t("mainImageAlt", { name: productName })}
             fill
             priority={selectedImageIndex === 0}
+            quality={100}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 70vw, 60vw"
             className="h-full w-full object-cover object-center transition-opacity duration-500"
             onLoad={() => handleImageLoad(selectedImageIndex)}

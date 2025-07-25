@@ -1,0 +1,126 @@
+[{
+  "_id": {
+    "$oid": "681d65b36f0f6668f7ae65d9"
+  },
+  "user": {
+    "$oid": "680f2ecae16cffa286aa2fc1"
+  },
+  "product": {
+    "$oid": "681c272f5229ce3466cf2426"
+  },
+  "order": {
+    "$oid": "681d61e8c2feb6f62b5b16af"
+  },
+  "rating": 5,
+  "comment": "Sản phẩm tuyệt vời! Chất vải đẹp, giao hàng nhanh.",
+  "userImages": [],
+  "isApproved": true,
+  "adminReply": {
+    "user": {
+      "$oid": "680f2e82e16cffa286aa2fbd"
+    },
+    "comment": "Cảm ơn đánh giá của bạn! Shop rất vui vì bạn hài lòng.",
+    "createAt": {
+      "$date": "2025-05-09T02:49:39.061Z"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-09T02:17:23.431Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-09T02:49:39.073Z"
+  },
+  "__v": 0,
+  "approvedAt": {
+    "$date": "2025-05-09T02:41:30.862Z"
+  },
+  "approvedBy": {
+    "$oid": "680f2e82e16cffa286aa2fbd"
+  }
+},
+{
+  "_id": {
+    "$oid": "683e99848960c1cecc515e82"
+  },
+  "user": {
+    "$oid": "680f2ecae16cffa286aa2fc1"
+  },
+  "product": {
+    "$oid": "6818db68cece2901692ae843"
+  },
+  "order": {
+    "$oid": "68307f6db985c2f5791dd733"
+  },
+  "rating": 5,
+  "userImages": [
+    "https://res.cloudinary.com/dh7mq8bgc/image/upload/v1748932995/shop/product_reviews/mnyq1lephsopold5h9ul.png",
+    "https://res.cloudinary.com/dh7mq8bgc/image/upload/v1748932992/shop/product_reviews/nkhtoc6gkeekkpbrkh3k.png"
+  ],
+  "isApproved": true,
+  "adminReply": {
+    "user": {
+      "$oid": "680f2e82e16cffa286aa2fbd"
+    },
+    "comment": "Cảm ơn đánh giá của bạn! Shop rất vui vì bạn hài lòng với sản phẩm.",
+    "createdAt": {
+      "$date": "2025-06-03T06:45:57.260Z"
+    }
+  },
+  "isEdited": false,
+  "createdAt": {
+    "$date": "2025-06-03T06:43:16.671Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-03T06:45:57.262Z"
+  },
+  "__v": 0,
+  "approvedAt": {
+    "$date": "2025-06-03T06:45:19.269Z"
+  },
+  "approvedBy": {
+    "$oid": "680f2e82e16cffa286aa2fbd"
+  }
+},
+{
+  "_id": {
+    "$oid": "68789d60edf89eee81f1ab09"
+  },
+  "user": {
+    "$oid": "680f2ecae16cffa286aa2fc1"
+  },
+  "product": {
+    "$oid": "681d9d2c878f5d7af823b8a7"
+  },
+  "order": {
+    "$oid": "6877a4a0c88cf3a294db2e67"
+  },
+  "rating": 5,
+  "comment": "Test",
+  "userImages": [
+    "https://res.cloudinary.com/dh7mq8bgc/image/upload/v1752735074/shop/product_reviews/ibig8nne7zjc8ewxylvu.jpg"
+  ],
+  "isApproved": false,
+  "adminReply": {
+    "user": {
+      "$oid": "680f2e82e16cffa286aa2fbd"
+    },
+    "comment": "Test",
+    "createdAt": {
+      "$date": "2025-07-17T12:40:53.980Z"
+    }
+  },
+  "isEdited": false,
+  "createdAt": {
+    "$date": "2025-07-17T06:51:12.671Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-17T12:48:49.470Z"
+  },
+  "__v": 0,
+  "approvedAt": {
+    "$date": "2025-07-17T12:48:43.589Z"
+  },
+  "approvedBy": {
+    "$oid": "680f2e82e16cffa286aa2fbd"
+  }
+}]

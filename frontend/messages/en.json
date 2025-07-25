@@ -77,6 +77,17 @@
     "setting": "Settings"
   },
 
+  "NotFoundPage": {
+    "meta": {
+      "title": "Page Not Found | Serein Shop"
+    },
+    "imageAlt": "Illustration of a lost page",
+    "title": "Oops! Page Not Found",
+    "subtitle": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+    "backToHome": "Back to Homepage",
+    "contactSupport": "Contact Support"
+  },
+
   "SettingDropdown": {
     "language": "Language",
     "currency": "Currency",
@@ -344,7 +355,11 @@
     "startShoppingButton": "Start Shopping",
     "pageTitle": "Shopping Cart",
     "selectAllLabel": "Select all",
-    "srOnlyTitle": "Items in your shopping cart"
+    "srOnlyTitle": "Items in your shopping cart",
+    "clearCartButton": "Clear Cart",
+    "clearCartConfirmTitle": "Are you sure you want to clear your entire cart?",
+    "clearCartConfirmButton": "Yes, Clear",
+    "cancelButton": "Cancel"
   },
 
   "AddedToCartPopup": {
@@ -549,6 +564,7 @@
     "categoryTitle": "Category",
     "allCategories": "All Categories",
     "priceTitle": "Price",
+    "onSale": "On Sale",
     "applyButton": "Apply",
     "fromPlaceholder": "From",
     "toPlaceholder": "To",
@@ -841,7 +857,7 @@
     "CancellationPending": "Cancellation Request Pending",
     "RefundPending": "Refund Request Pending"
   },
-  
+
   "OrderRow": {
     "orderCode": "Order Code: #{code}",
     "orderDate": "Order Date: {date}",
@@ -941,7 +957,7 @@
     "submitEditButton": "Save Changes",
     "submitCreateButton": "Submit Review",
     "closeButton": "Close",
-    "yourRatingLabel": "Your rating *",
+    "yourRatingLabel": "Your rating ",
     "ratingLabel": "{count}/5 stars",
     "commentLabel": "Review content",
     "commentOptional": "(Optional)",
@@ -999,5 +1015,1128 @@
     "copy": "Copy",
     "copySuccess": "Code copied: {code}",
     "copyError": "Could not copy code. Error: {error}"
+  },
+
+  "reactQuery": {
+    "attribute": {
+      "createSuccess": "Attribute '{label}' created!",
+      "createError": "Error creating attribute.",
+      "addValueSuccess": "New value added!",
+      "addValueError": "Error adding value.",
+      "updateValueSuccess": "Value updated!",
+      "updateValueError": "Error updating value.",
+      "deleteValueError": "Error deleting value."
+    },
+    "cart": {
+      "addError": "Failed to add to cart.",
+      "updateSuccess": "Cart updated.",
+      "updateError": "Failed to update cart.",
+      "removeSuccess": "Product removed from cart.",
+      "removeError": "Failed to remove product.",
+      "clearSuccess": "Cart has been cleared.",
+      "clearError": "Failed to clear cart.",
+      "applyCouponSuccess": "Coupon applied successfully!",
+      "applyCouponError": "Failed to apply coupon.",
+      "removeCouponSuccess": "Coupon removed.",
+      "removeCouponError": "Failed to remove coupon."
+    },
+    "category": {
+      "createSuccess": "Category '{name}' created successfully!",
+      "createError": "Failed to create category.",
+      "updateSuccess": "Category '{name}' updated!",
+      "updateError": "Failed to update category.",
+      "deleteSuccess": "Category deleted successfully.",
+      "deleteError": "Failed to delete category."
+    },
+    "coupon": {
+      "createSuccess": "Coupon '{code}' created successfully!",
+      "createError": "Failed to create coupon.",
+      "updateSuccess": "Coupon '{code}' updated!",
+      "updateError": "Failed to update coupon.",
+      "deleteError": "Failed to deactivate coupon."
+    },
+    "order": {
+      "createSuccess": "Order placed successfully! Order ID: #{id}",
+      "createError": "Failed to place order.",
+      "requestCancelError": "Failed to send cancellation request.",
+      "requestRefundError": "Failed to send refund request.",
+      "markAsDeliveredSuccess": "Confirmed delivery!",
+      "markAsDeliveredError": "Failed to confirm delivery.",
+      "updateStatusSuccess": "Order status for #{id} updated successfully.",
+      "updateStatusError": "Failed to update status.",
+      "restockError": "Failed to restock items.",
+      "capturePayPalError": "Failed to confirm payment.",
+      "capturePayPalSuccess": "Payment Paypal confirmed successfully!"
+    },
+    "product": {
+      "createSuccess": "Product '{name}' created successfully!",
+      "createError": "Failed to create product.",
+      "updateSuccess": "Product '{name}' updated!",
+      "updateError": "Failed to update product.",
+      "deleteSuccess": "Product has been deleted (hidden).",
+      "deleteError": "Failed to delete product.",
+      "updateStockSuccess": "Stock updated!",
+      "updateStockError": "Error updating stock.",
+      "updateVariantStockSuccess": "Variant stock updated!"
+    },
+    "review": {
+      "createSuccess": "Your review has been submitted!",
+      "createError": "Failed to submit review.",
+      "updateSuccess": "Review updated.",
+      "updateError": "Failed to update review.",
+      "deleteSuccess": "Review deleted.",
+      "deleteError": "Failed to delete review.",
+      "approveSuccess": "Review approved.",
+      "approveError": "Failed to approve review.",
+      "rejectSuccess": "Review has been hidden.",
+      "rejectError": "Failed to hide review.",
+      "deleteAdminError": "Failed to delete review.",
+      "replySuccess": "Reply sent.",
+      "replyError": "Failed to send reply."
+    },
+    "setting": {
+      "saveSuccess": "Settings have been saved successfully!",
+      "saveError": "Failed to save settings."
+    },
+    "user": {
+      "updateProfileSuccess": "Information updated successfully!",
+      "updateProfileError": "Failed to update information.",
+      "addAddressSuccess": "New address added successfully!",
+      "addAddressError": "Failed to add address.",
+      "updateAddressSuccess": "Address updated successfully!",
+      "updateAddressError": "Failed to update address.",
+      "deleteAddressSuccess": "Address deleted successfully!",
+      "deleteAddressError": "Failed to delete address.",
+      "setDefaultAddressSuccess": "Default address set successfully!",
+      "setDefaultAddressError": "Failed to set default address.",
+      "updateStatusError": "Failed to update status."
+    },
+    "wishlist": {
+      "addSuccess": "Added to wishlist!",
+      "addError": "Failed to add to wishlist.",
+      "removeSuccess": "Removed from wishlist.",
+      "removeError": "Failed to remove from wishlist."
+    }
+  },
+
+  "Admin": {
+    "meta": {
+      "title": "Admin Dashboard | Serein Shop"
+    },
+    "auth": {
+      "loginRequired": "Login required to access the admin page.",
+      "noPermission": "You do not have permission to access the admin page.",
+      "sessionExpired": "Session expired. Please log in again.",
+      "verifyingAuth": "Loading and verifying..."
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "categories": "Categories",
+      "orders": "Orders",
+      "attributes": "Attributes",
+      "users": "Users",
+      "coupons": "Coupons",
+      "reviews": "Reviews",
+      "settings": "Settings",
+      "create": "Create",
+      "edit": "Edit",
+      "notifications": "Notifications",
+      "reports": "Reports",
+      "print": "Print Order",
+      "productWithId": "Product #{id}",
+      "orderWithId": "Order #{id}",
+      "userWithId": "User #{id}",
+      "editObject": "Edit: {objectLabel}",
+      "createObject": "Create {objectTypeLabel}"
+    },
+    "languageSwitcher": {
+      "vietnamese": "Vietnamese",
+      "english": "English"
+    },
+    "header": {
+      "logoutSuccess": "Logged out successfully!",
+      "logoutTitle": "Log Out"
+    },
+    "sidebar": {
+      "manageShop": "Manage Shop",
+      "dashboard": "Dashboard",
+      "productsGroup": "Products",
+      "allProducts": "All Products",
+      "addNewProduct": "Add New Product",
+      "categories": "Categories",
+      "attributes": "Attributes",
+      "orders": "Orders",
+      "users": "Users",
+      "coupons": "Coupons",
+      "reviews": "Reviews",
+      "reports": "Reports",
+      "system": "System",
+      "shopSettings": "Shop Settings"
+    },
+    "pagination": {
+      "showing": "Showing <bold>{from}</bold>-<bold>{to}</bold> of <bold>{total}</bold> {itemType}",
+      "show": "Show",
+      "itemsPerPage": "items/page",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "noNew": "No new notifications",
+      "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}",
+      "markAllAsRead": "Mark all as read",
+      "markAllAsReadTitle": "Mark all as read",
+      "markAllAsReadSuccess": "All notifications have been marked as read.",
+      "loading": "Loading...",
+      "emptyState": "No new notifications",
+      "emptyStateSubtitle": "When there are new notifications, they will appear here.",
+      "viewAll": "View all notifications",
+      "viewAllTitle": "View all notifications",
+      "toastJustNow": "just now",
+      "toastSuccessTitle": "Success",
+      "labels": {
+        "NEW_USER_REGISTERED": "New User",
+        "NEW_ORDER_PLACED": "New Order",
+        "ORDER_STATUS_SHIPPED": "Shipped",
+        "ORDER_STATUS_DELIVERED": "Delivered",
+        "ORDER_CANCELLATION_REQUESTED": "Cancellation Request",
+        "ORDER_REFUND_REQUESTED": "Refund Request",
+        "ORDER_CANCELLATION_APPROVED": "Cancellation Approved",
+        "ORDER_CANCELLATION_REJECTED": "Cancellation Rejected",
+        "ORDER_REFUND_APPROVED": "Refund Approved",
+        "ORDER_REFUND_REJECTED": "Refund Rejected",
+        "PRODUCT_LOW_STOCK": "Low Stock",
+        "PRODUCT_OUT_OF_STOCK": "Out of Stock",
+        "NEW_REVIEW_SUBMITTED": "New Review",
+        "REVIEW_APPROVED": "Review Approved",
+        "UNKNOWN": "Notification"
+      }
+    }
+  },
+
+  "AdminDashboard": {
+    "meta": {
+      "title": "Statistics | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Statistics",
+      "description": "Overview of the store's business activities."
+    },
+    "dateRange": {
+      "from": "From Date",
+      "to": "To Date",
+      "quickSelect": "Quick Select",
+      "quickSelectAriaLabel": "Quickly select a time range",
+      "presets": {
+        "last7days": "Last 7 days",
+        "last30days": "Last 30 days",
+        "thisMonth": "This month",
+        "thisQuarter": "This quarter",
+        "lastQuarter": "Last quarter",
+        "thisYear": "This year"
+      }
+    },
+    "stats": {
+      "revenue": "Revenue",
+      "newOrders": "New Orders",
+      "newCustomers": "New Customers",
+      "totalProducts": "Total Products"
+    },
+    "quantityChart": {
+      "title": "Quantity Statistics",
+      "byOrders": "By Orders",
+      "byProducts": "By Products",
+      "ordersLabel": "Number of orders",
+      "productsLabel": "Number of products sold",
+      "revenueLabel": "Revenue"
+    },
+    "orderStatusChart": {
+      "title": "Order Status Distribution",
+      "noData": "No order data available.",
+      "tooltipLabel": "{label}: {value} orders"
+    },
+    "revenueChart": {
+      "title": "Revenue Chart ({currency})",
+      "revenueLabel": "Revenue"
+    },
+    "topProductsTable": {
+      "title": "Top 10 Best-Selling Products",
+      "colProduct": "Product",
+      "colSold": "Sold",
+      "colRating": "Rating"
+    }
+  },
+  "AdminProducts": {
+    "meta": {
+      "title": "Product Management | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Product List",
+      "description": "Manage all products in the store."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, SKU...",
+      "allCategories": "All categories",
+      "loading": "Loading...",
+      "onSale": "On Sale",
+      "priceFrom": "Price from",
+      "priceTo": "Price to",
+      "addProduct": "Add Product",
+      "publishedStatus": "Published Status (All)",
+      "published": "Published",
+      "unpublished": "Unpublished",
+      "activeStatus": "Active Status (All)",
+      "active": "Active",
+      "inactive": "Inactive",
+      "allAttributes": "All {label}",
+      "clearFilters": "Clear Filters",
+      "clearFiltersTitle": "Clear filters",
+      "filterByAttributeAriaLabel": "Filter by {label}"
+    },
+    "list": {
+      "title": "Product Management",
+      "results": "{count, plural, one {# result} other {# results}}",
+      "loading": "Loading...",
+      "noResultsWithFilter": "No products found matching the filters.",
+      "noProductsYet": "No products yet.",
+      "errorTitle": "Error",
+      "errorMessage": "Could not load the product list.",
+      "retryButton": "Retry"
+    },
+    "table": {
+      "colProductId": "ID",
+      "colImage": "Image",
+      "colName": "Product Name",
+      "colSku": "SKU",
+      "colPrice": "Price",
+      "colStock": "Stock",
+      "colAttributes": "Attributes",
+      "colCategory": "Category",
+      "colPublished": "Published",
+      "colActive": "Active",
+      "colActions": "Actions",
+      "stockStatus": {
+        "outOfStock": "Out of Stock",
+        "lowStock": "Low Stock",
+        "inStock": "In Stock"
+      },
+      "noSku": "No SKU",
+      "viewOnShop": "View on shop",
+      "originalPrice": "Original price: {price}",
+      "variantTooltip": "{name} | Stock: {stock} | SKU: {sku}",
+      "moreVariants": "+{count} more variants...",
+      "noVariants": "None",
+      "noCategory": "N/A",
+      "tooltipPublished": "Published",
+      "tooltipUnpublished": "Unpublished",
+      "tooltipActive": "Active",
+      "tooltipInactive": "Inactive",
+      "tooltipEdit": "View details and edit information",
+      "tooltipDelete": "Hide product",
+      "variantsModalTitle": "All variants: {name}",
+      "variantsColVersion": "Version",
+      "variantsColSku": "SKU",
+      "variantsColPrice": "Price",
+      "variantsColStock": "Stock",
+      "variantsColActions": "Actions",
+      "variantsUpdateStock": "Update stock for {name}",
+      "variantsUpdateStockTitle": "Update stock"
+    },
+    "deleteModal": {
+      "title": "Confirm Hide Product",
+      "body": "Are you sure you want to hide the product \"<strong>{name}</strong>\"?",
+      "note": "This action will set the product to inactive and unpublished.",
+      "confirmButton": "Confirm Hide"
+    },
+    "stockModal": {
+      "title": "Update stock for: {name}",
+      "currentStock": "Current stock: <bold>{stock}</bold>",
+      "setNewLabel": "Set new quantity",
+      "setNewPlaceholder": "e.g., 100",
+      "or": "OR",
+      "changeLabel": "Change by an amount (+/-)",
+      "changePlaceholder": "e.g., 5 (adds 5) or -10 (removes 10)",
+      "cancelButton": "Cancel",
+      "saveButton": "Save Changes"
+    }
+  },
+
+  "AdminProductForm": {
+    "meta": {
+      "createTitle": "Add New Product | Admin Serein Shop",
+      "editTitle": "Edit Product | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "createTitle": "Add New Product",
+      "createDescription": "Fill in the details to create a new product in the store.",
+      "editTitle": "Edit Product",
+      "editDescription": "Update the details, variants, and images of the product."
+    },
+    "backToList": "← Back to list",
+    "saveProduct": "Save Product",
+    "updateProduct": "Update Product",
+    "processing": "Processing...",
+    "productInfo": {
+      "title": "Product Information",
+      "subtitle": "Enter information for different language versions.",
+      "nameLabel": "Product Name ({locale})*",
+      "namePlaceholder": "e.g., {placeholder}",
+      "descriptionLabel": "Detailed Description ({locale})",
+      "descriptionHelpText": "A detailed description helps customers understand the product better.",
+      "editorLoading": "Loading editor..."
+    },
+    "productImages": {
+      "title": "Product Images*",
+      "uploading": "Uploading...",
+      "deleteImage": "Delete image",
+      "coverImage": "Cover"
+    },
+    "attributes": {
+      "title": "Attributes & Variants",
+      "selectAttributes": "Select attributes for the product",
+      "imagesByColor": "Images by Color",
+      "imagesForColor": "Images for color: {color}",
+      "variantList": "Variant List ({count})",
+      "generateSku": "Generate Bulk SKUs",
+      "version": "Version: {name}",
+      "deleteVariant": "Delete variant",
+      "skuLabel": "SKU*",
+      "priceLabel": "Price*",
+      "salePriceLabel": "Sale Price",
+      "stockLabel": "Stock*",
+      "loadingError": "Error loading attributes"
+    },
+    "pricing": {
+      "title": "Pricing & Inventory",
+      "selectCurrency": "Select input currency",
+      "enterPriceVND": "Enter price (VND)",
+      "enterPriceUSD": "Enter price (USD)",
+      "retailPriceLabel": "Retail Price*",
+      "salePriceLabel": "Sale Price",
+      "enteringVND": "← Entering VND",
+      "enteringUSD": "← Entering USD",
+      "saleStartDate": "Sale Start Date",
+      "saleEndDate": "Sale End Date",
+      "skuLabel": "SKU (Main Product ID)",
+      "skuPlaceholder": "Leave blank if only selling by variants",
+      "skuHelpText": "Unique product identifier in the inventory.",
+      "generateSku": "Generate"
+    },
+    "organization": {
+      "title": "Product Organization",
+      "categoryLabel": "Category*",
+      "selectCategory": "Select category",
+      "loadingCategories": "Loading categories...",
+      "statusLabel": "Status",
+      "publishLabel": "Publish product",
+      "publishHelpText": "When enabled, the product will be visible to customers.",
+      "activateLabel": "Activate for sale",
+      "activateHelpText": "When disabled, the product will be hidden and cannot be purchased."
+    },
+    "toasts": {
+      "baseSkuRequired": "Please enter a Product Name (Vietnamese) or main SKU to generate bulk SKUs.",
+      "attributesNotReady": "Attribute data is not ready, please try again.",
+      "bulkSkuSuccess": "Bulk SKUs have been generated for variants!",
+      "uploading": "Uploading images...",
+      "uploadSuccess": "Image upload successful!",
+      "uploadError": "Image upload failed.",
+      "validationError": "Please check the required information fields again."
+    },
+    "validation": {
+      "nameRequired": "{locale} name is required.",
+      "categoryRequired": "Please select a category.",
+      "priceInvalid": "Product price is invalid.",
+      "imagesRequired": "At least one main product image is required.",
+      "variantSkuRequired": "Variant SKU is required."
+    }
+  },
+
+  "AdminCategories": {
+    "meta": {
+      "title": "Category Management | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Category List",
+      "description": "Manage and organize product categories in the store."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name or slug...",
+      "searchAriaLabel": "Search categories",
+      "allParentCategories": "All parent categories",
+      "onlyTopLevel": "- Only top-level categories -",
+      "loading": "Loading...",
+      "allStatuses": "All statuses",
+      "active": "Active",
+      "hidden": "Hidden",
+      "addNew": "Add Category"
+    },
+    "list": {
+      "loading": "Loading category list...",
+      "loadingErrorTitle": "Could not load categories",
+      "loadingErrorSubtitle": "An error occurred.",
+      "retryButton": "Retry",
+      "noResults": "No categories found.",
+      "colCategoryName": "Category Name",
+      "colParentCategory": "Parent Category",
+      "colProducts": "Products",
+      "colStatus": "Status",
+      "colActions": "Actions",
+      "statusActive": "Active",
+      "statusHidden": "Hidden",
+      "noParent": "—",
+      "editTitle": "Edit",
+      "deleteTitle": "Delete"
+    },
+    "formModal": {
+      "editTitle": "Edit Category",
+      "createTitle": "Create New Category",
+      "categoryNameLabel": "Category Name ({locale})*",
+      "descriptionLabel": "Description ({locale})",
+      "parentCategoryLabel": "Parent Category",
+      "noParentOption": "-- None --",
+      "imageLabel": "Cover Image",
+      "isActiveLabel": "Activate category",
+      "cancelButton": "Cancel",
+      "saveButton": "Save",
+      "nameRequiredError": "{locale} name is required."
+    },
+    "deleteModal": {
+      "title": "Confirm Deletion",
+      "confirmMessage": "Are you sure you want to delete (hide) the category <strong>{name}</strong>?",
+      "warningMessage": "This action can only be performed if the category does not contain any active products or subcategories.",
+      "cancelButton": "Cancel",
+      "confirmButton": "Confirm Delete"
+    },
+    "toasts": {
+      "uploadError": "Image upload failed!"
+    }
+  },
+
+  "AdminAttributes": {
+    "meta": {
+      "title": "Attribute Management | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Attribute Management",
+      "description": "Add, edit, delete product attributes and their values (Color, Size...)."
+    },
+    "loading": "Loading...",
+    "loadingError": "Error: {error}",
+    "selectAttributePrompt": "Select an attribute to view details",
+    "attributeList": {
+      "title": "Attributes",
+      "add": "Add"
+    },
+    "valueTable": {
+      "title": "Values for: <bold>{label}</bold>",
+      "add": "Add Value",
+      "noValues": "No values yet. Click <strong>Add Value</strong> to start.",
+      "colValue": "Value",
+      "colHex": "Hex Code",
+      "colActions": "Actions",
+      "editTitle": "Edit",
+      "deleteTitle": "Delete",
+      "noHex": "N/A"
+    },
+    "attributeForm": {
+      "title": "Create New Attribute",
+      "nameLabel": "Attribute Name (key, no accents)*",
+      "namePlaceholder": "e.g., color, size",
+      "displayLabel": "Display Label ({locale})*",
+      "displayPlaceholder": "e.g., Color",
+      "displayPlaceholder_en": "Example: Color",
+      "cancel": "Cancel",
+      "create": "Create",
+      "validationError": "Please fill in all required fields."
+    },
+    "valueForm": {
+      "editTitle": "Edit Value",
+      "addTitle": "Add New Value",
+      "nameLabel": "Value Name ({locale})*",
+      "namePlaceholder": "e.g., Bright Red",
+      "hexLabel": "Hex Code (optional, for colors)",
+      "hexPlaceholder": "#FF0000",
+      "cancel": "Cancel",
+      "save": "Save",
+      "validationError": "Value name cannot be empty."
+    }
+  },
+  "AdminOrders": {
+    "meta": {
+      "title": "Order Management | Admin Serein Shop",
+      "description": "View and manage all store orders."
+    },
+    "pageHeader": {
+      "title": "Order List",
+      "description": "Manage and track all orders in the system."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by Order ID, Name, Email...",
+      "filterByStatus": "Filter by status",
+      "allStatuses": "All statuses",
+      "startDateAria": "Start Date",
+      "endDateAria": "End Date",
+      "clearFiltersTitle": "Clear filters",
+      "clearFilters": "Clear"
+    },
+    "list": {
+      "title": "Order Management",
+      "results": "{count, plural, one {# result} other {# results}}",
+      "loading": "Loading...",
+      "noResultsWithFilter": "No matching orders found.",
+      "noOrdersYet": "No orders yet.",
+      "errorTitle": "Error",
+      "errorMessage": "Could not load the order list.",
+      "retryButton": "Retry"
+    },
+    "table": {
+      "colOrderId": "Order ID",
+      "colCustomer": "Customer",
+      "colDate": "Date",
+      "colProducts": "Products",
+      "colTotal": "Total",
+      "colStatus": "Status",
+      "colPayment": "Payment",
+      "colActions": "Actions",
+      "guest": "Guest",
+      "moreProducts": "+{count, plural, one {# more product} other {# more products}}...",
+      "paidTooltip": "Paid at {date}",
+      "unpaidTooltip": "Unpaid",
+      "viewDetailsTooltip": "View details and process order",
+      "restockTooltip": "Restock",
+      "restockDoneTooltip": "Stock has been restored",
+      "itemsModalTitle": "Product details in order <primary>#{id}</primary>",
+      "itemsModalColImage": "Image",
+      "itemsModalColName": "Product Name",
+      "itemsModalColSku": "SKU",
+      "itemsModalColQty": "Qty",
+      "itemsModalColPrice": "Unit Price",
+      "itemsModalColTotal": "Total",
+      "itemsModalClose": "Close",
+      "itemsModalViewDetails": "View Order Details",
+      "restockModalTitle": "Confirm Restock",
+      "restockModalBody": "Are you sure you want to add the product quantities of order <bold>#{id}</bold> back to the inventory? This action may affect inventory reports."
+    }
+  },
+
+  "AdminNotifications": {
+    "meta": {
+      "title": "All Notifications | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "All Notifications",
+      "description": "Review the history of all received notifications."
+    },
+    "list": {
+      "title": "All Notifications",
+      "markAllAsRead": "Mark all as read",
+      "markAllAsReadSuccess": "All notifications have been marked as read.",
+      "loading": "Loading...",
+      "error": "Error: {message}",
+      "noNotifications": "No notifications available.",
+      "loadingMore": "Loading more...",
+      "endOfList": "All notifications have been loaded."
+    },
+    "item": {
+      "unreadTooltip": "Unread"
+    }
+  },
+
+  "AdminOrderDetail": {
+    "meta": {
+      "title": "Order Details #{id} | Admin Serein Shop",
+      "description": "View details, update status, and process order #{id}."
+    },
+    "pageHeader": {
+      "title": "Order Details #{id}",
+      "description": "View details, update status, and handle customer requests."
+    },
+    "loading": "Loading...",
+    "loadingError": "Error loading order: {error}",
+    "retry": "Retry",
+    "notFound": "Order not found.",
+    "backToList": "← Back to list",
+    "itemsInOrder": "Products in Order",
+    "customerInfo": "Customer Information",
+    "financialSummary": {
+      "title": "Financial Summary",
+      "subtotal": "Subtotal:",
+      "discount": "Discount:",
+      "shippingFee": "Shipping Fee:",
+      "total": "Total:"
+    },
+    "paymentInfo": {
+      "method": "Method: <bold>{method}</bold>",
+      "shipping": "Shipping: <bold>{method}</bold>",
+      "notes": "Customer Note: <italic>{notes}</italic>",
+      "paymentDetails": "Payment Details:",
+      "transactionId": "Transaction ID:",
+      "status": "Status:",
+      "captureId": "Capture ID:"
+    },
+    "printOrder": "Print Order",
+    "header": {
+      "order": "Order #{id}",
+      "placedAt": "Placed at: {date}",
+      "restock": "Restock",
+      "restockTooltipDone": "This action cannot be performed again",
+      "restockTooltip": "Add product quantities back to inventory",
+      "restored": "Restored",
+      "updateStatus": "Update Status",
+      "moveTo": "Move to \"{status}\""
+    },
+    "itemsTable": {
+      "colProduct": "Product",
+      "colPrice": "Unit Price",
+      "colQty": "Quantity",
+      "colTotal": "Subtotal",
+      "deletedProductTooltip": "This product has been deleted from the system"
+    },
+    "customerInfoCard": {
+      "title": "Customer Information",
+      "name": "Name:",
+      "email": "Email:",
+      "phone": "Phone:",
+      "type": "Type:",
+      "member": "Member",
+      "guest": "Guest",
+      "shippingAddress": "Shipping Address"
+    },
+    "requestPanel": {
+      "cancelTitle": "Order Cancellation Request",
+      "refundTitle": "Return/Refund Request",
+      "customerReason": "Customer's Reason:",
+      "attachedImages": "Attached Images:",
+      "imageProof": "Proof image {index}",
+      "reject": "Reject",
+      "approve": "Approve",
+      "confirmApproveTitle": "Confirm Request Approval",
+      "confirmApproveBody": "Are you sure you want to approve the {type} request for this order? This action cannot be undone.",
+      "requestType_cancellation": "Cancellation",
+      "requestType_refund": "Refund",
+      "rejectModalTitle": "Reject Request",
+      "rejectModalBody": "Please enter the reason for rejecting the request. The customer will be notified of this reason.",
+      "rejectModalPlaceholder": "e.g., Product has been used, invalid request...",
+      "rejectModalConfirm": "Confirm Rejection"
+    },
+    "restockModal": {
+      "title": "Confirm Restock",
+      "body": "Are you sure you want to add the product quantities of order <bold>#{id}</bold> back to the inventory?"
+    }
+  },
+
+  "AdminUsers": {
+    "meta": {
+      "listTitle": "User Management | Admin Serein Shop",
+      "detailTitle": "User Details | Admin Serein Shop"
+    },
+    "listPageHeader": {
+      "title": "User List",
+      "description": "Manage customer and administrator accounts."
+    },
+    "detailPageHeader": {
+      "title": "User Details",
+      "description": "View personal information and purchase history of the user."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, email, phone...",
+      "filterRole": "Filter by role",
+      "filterStatus": "Filter by status",
+      "allRoles": "All roles",
+      "customer": "Customer",
+      "admin": "Administrator",
+      "allStatuses": "All statuses",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "list": {
+      "title": "User Management",
+      "results": "{count, plural, one {# result} other {# results}}",
+      "errorTitle": "Error",
+      "errorMessage": "Could not load the user list.",
+      "retryButton": "Retry",
+      "loading": "Loading user list...",
+      "noResultsWithFilter": "No users found matching the filters.",
+      "noUsersYet": "No users yet."
+    },
+    "table": {
+      "colUser": "User",
+      "colContact": "Contact",
+      "colOrders": "Orders",
+      "colTotalSpent": "Total Spent",
+      "colRole": "Role",
+      "colStatus": "Status",
+      "colJoined": "Joined",
+      "colActions": "Actions",
+      "roleAdmin": "Admin",
+      "roleCustomer": "Customer",
+      "statusActive": "Active",
+      "statusSuspended": "Suspended",
+      "tooltipEdit": "View details and edit",
+      "tooltipSuspend": "Suspend user",
+      "tooltipReactivate": "Reactivate"
+    },
+    "suspendModal": {
+      "title": "Suspend Account: {name}",
+      "reasonLabel": "Reason for suspension*",
+      "reasonPlaceholder": "e.g., Violated terms, spam,...",
+      "endDateLabel": "Suspension end date (optional)",
+      "confirmButton": "Confirm Suspension",
+      "processing": "Processing..."
+    },
+    "reactivateModal": {
+      "title": "Confirm Reactivation",
+      "body": "Are you sure you want to reactivate the account for user \"{name}\"?",
+      "confirmButton": "Confirm Activation"
+    },
+    "detail": {
+      "loading": "Loading user data...",
+      "error": "Error: {message}",
+      "notFound": "User not found.",
+      "backToList": "← Back to list",
+      "role": "Role",
+      "roleAdmin": "Administrator",
+      "roleCustomer": "Customer",
+      "phone": "Phone:",
+      "joined": "Joined:",
+      "totalSpent": "Total spent:",
+      "orderHistory": "Order History ({count})",
+      "noOrders": "This user has no orders yet."
+    },
+    "userOrdersTable": {
+      "colOrderId": "Order ID",
+      "colDate": "Date",
+      "colProducts": "Products",
+      "colTotal": "Total",
+      "colStatus": "Status",
+      "colPayment": "Payment",
+      "colActions": "Actions",
+      "moreProducts": "+{count} more...",
+      "paidTooltip": "Paid at {date}",
+      "unpaidTooltip": "Unpaid",
+      "viewDetailsTooltip": "View order details"
+    }
+  },
+
+  "AdminCoupons": {
+    "meta": {
+      "title": "Coupon Management | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Coupons",
+      "description": "Create and manage promotional programs for the store."
+    },
+    "list": {
+      "title": "Coupons",
+      "results": "{count, plural, one {# result} other {# results}}",
+      "errorTitle": "Error",
+      "errorMessage": "Could not load the coupon list.",
+      "retryButton": "Retry",
+      "loading": "Loading list...",
+      "noResultsWithFilter": "No coupons found matching the filters.",
+      "noCouponsYet": "No coupons yet."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by code...",
+      "discountType": "Discount Type",
+      "percentage": "Percentage",
+      "fixedAmount": "Fixed Amount",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "clearFilters": "Clear",
+      "addNew": "Add Coupon"
+    },
+    "table": {
+      "colCode": "Code",
+      "colDescription": "Description",
+      "colValue": "Value",
+      "colCondition": "Condition",
+      "colUsage": "Usage",
+      "colValidity": "Validity",
+      "colStatus": "Status",
+      "colActions": "Actions",
+      "noDescription": "N/A",
+      "minOrder": "Min. order: {value}",
+      "appliesTo": "Applies to: ",
+      "usageCount": "{count} / {max}",
+      "unlimited": "∞",
+      "starts": "Starts: {date}",
+      "expires": "Expires: {date}",
+      "statusActive": "Active",
+      "statusInactive": "Inactive/Expired",
+      "editTitle": "Edit coupon",
+      "deactivateTitle": "Deactivate",
+      "applicableTo": {
+        "all": "All",
+        "products": "Products",
+        "categories": "Categories"
+      }
+    },
+    "form": {
+      "createTitle": "Create New Coupon",
+      "editTitle": "Edit Coupon",
+      "enterPriceBy": "Enter price in:",
+      "enterPriceVND": "Vietnamese Dong (VND)",
+      "enterPriceUSD": "US Dollar (USD)",
+      "codeLabel": "Code*",
+      "typeLabel": "Discount Type*",
+      "typePercentage": "Percentage (%)",
+      "typeFixedAmount": "Fixed Amount",
+      "descriptionLabel": "Description ({locale})",
+      "valueLabel": "Discount Value*",
+      "valuePercentageLabel": "Discount Value (%)*",
+      "minOrderLabel": "Minimum Order Value to Apply",
+      "priceVNDPlaceholder": "VND value",
+      "priceUSDPlaceholder": "USD value",
+      "startDateLabel": "Start Date",
+      "expiryDateLabel": "Expiry Date*",
+      "totalUsageLabel": "Total Uses (blank for unlimited)",
+      "totalUsagePlaceholder": "∞",
+      "usagePerUserLabel": "Uses per User*",
+      "applicableToLabel": "Applicable To*",
+      "applicableToAll": "All products",
+      "applicableToProducts": "Selected products",
+      "applicableToCategories": "Selected categories",
+      "activateLabel": "Activate this coupon",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "validation": {
+        "codeRequired": "Code is required.",
+        "valuePositive": "Discount value must be a number greater than 0.",
+        "valuePercentageLimit": "Percentage discount cannot exceed 100.",
+        "expiryDateRequired": "Expiry date is required.",
+        "expiryDateAfterStart": "Expiry date must be after the start date.",
+        "applicableIdsRequired": "Please select at least one item.",
+        "maxUsageInvalid": "Must be a non-negative number.",
+        "maxUsagePerUserInvalid": "Must be at least 1.",
+        "formError": "Please check the fields with errors."
+      }
+    },
+    "applicableSelector": {
+      "productsLabel": "Select applicable products",
+      "categoriesLabel": "Select applicable categories",
+      "noItemSelected": "No items have been selected.",
+      "searchProducts": "Search for products...",
+      "searchCategories": "Search for categories...",
+      "loading": "Searching...",
+      "noResults": "No results found.",
+      "removeAria": "Remove {name}"
+    },
+    "deleteModal": {
+      "title": "Confirm Deactivation",
+      "body": "Are you sure you want to deactivate the coupon \"{code}\"?"
+    }
+  },
+
+  "AdminReviews": {
+    "meta": {
+      "title": "Review Management | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Review Management",
+      "description": "Approve, reply to, and manage all customer reviews."
+    },
+    "list": {
+      "title": "Review Management",
+      "results": "{count, plural, one {# result} other {# results}}",
+      "errorTitle": "Error",
+      "errorMessage": "Could not load the review list.",
+      "retryButton": "Retry",
+      "loading": "Loading...",
+      "noResultsWithFilter": "No reviews found matching the filters.",
+      "noReviewsYet": "No reviews yet."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by comment content...",
+      "allStatuses": "All statuses",
+      "approved": "Approved",
+      "pending": "Pending",
+      "allRatings": "All ratings",
+      "star": "{count, plural, one {# star} other {# stars}}",
+      "clearFiltersTitle": "Clear filters",
+      "clearFilters": "Clear"
+    },
+    "table": {
+      "colReviewer": "Reviewer",
+      "colRating": "Rating",
+      "colComment": "Comment",
+      "colProduct": "Product",
+      "colStatus": "Status",
+      "colActions": "Actions",
+      "noComment": "No comment",
+      "noUserImages": "No user images",
+      "shopReply": "Shop's reply:",
+      "inactive": "Inactive",
+      "deletedProduct": "Product has been deleted",
+      "statusApproved": "Approved",
+      "statusPending": "Pending",
+      "tooltipApproved": "Approved",
+      "tooltipPending": "Pending",
+      "actionHide": "Hide review",
+      "actionApprove": "Approve review",
+      "actionEditReply": "Edit reply",
+      "actionAddReply": "Add reply",
+      "actionDelete": "Delete permanently"
+    },
+    "replyModal": {
+      "title": "Reply to Review",
+      "reviewBy": "Review by: <bold>{name}</bold>",
+      "commentPlaceholder": "Enter your reply...",
+      "cancel": "Cancel",
+      "submit": "Submit Reply",
+      "processing": "Processing...",
+      "emptyReplyError": "Reply cannot be empty."
+    },
+    "deleteModal": {
+      "title": "Confirm Review Deletion",
+      "body": "Are you sure you want to permanently delete the review by \"{author}\"? This action cannot be undone."
+    }
+  },
+
+  "AdminReports": {
+    "meta": {
+      "title": "Reports & Statistics | Admin Serein Shop"
+    },
+    "pageHeader": {
+      "title": "Reports & Statistics",
+      "description": "Detailed analysis of the store's business activities."
+    },
+    "tabs": {
+      "sales": "Sales",
+      "products": "Products",
+      "customers": "Customers",
+      "inventory": "Inventory"
+    },
+    "sales": {
+      "totalRevenue": "Total Revenue",
+      "totalOrders": "Total Orders",
+      "itemsSold": "Items Sold",
+      "avgOrderValue": "Avg. Order Value",
+      "revenueByPayment": "Revenue by Payment Method",
+      "tableColMethod": "Method",
+      "tableColOrders": "Orders",
+      "tableColValue": "Total Value",
+      "chartTooltipOrders": "{count} orders"
+    },
+    "products": {
+      "topByQuantity": "Top Selling Products (Quantity)",
+      "topByRevenue": "Top Products by Revenue",
+      "tableColProduct": "Product",
+      "tableColSold": "Sold",
+      "tableColRevenue": "Revenue",
+      "chartLabelQuantity": "Quantity Sold",
+      "chartLabelRevenue": "Revenue"
+    },
+    "customers": {
+      "newCustomers": "New Customers",
+      "description": "In the selected time range",
+      "topSpenders": "Top Spending Customers",
+      "tableColCustomer": "Customer",
+      "tableColOrders": "Orders",
+      "tableColSpent": "Total Spent"
+    },
+    "inventory": {
+      "totalValue": "Total Inventory Value",
+      "lowStock": "Low Stock Products",
+      "lowStockThreshold": "(Threshold: {count})",
+      "outOfStock": "Out of Stock Products",
+      "listLowStock": "Low Stock Product List",
+      "listOutOfStock": "Out of Stock Product List",
+      "tableColProduct": "Product",
+      "tableColSku": "SKU",
+      "tableColStock": "Stock",
+      "noLowStock": "All products are above the low stock threshold.",
+      "noOutOfStock": "No products are out of stock."
+    },
+    "shared": {
+      "viewAsTable": "View as table",
+      "viewAsChart": "View as chart",
+      "noData": "No data available."
+    }
+  },
+
+  "AdminSettings": {
+    "meta": {
+      "title": "Store Settings | Admin Serein Shop",
+      "description": "Manage general configurations for the website and admin dashboard."
+    },
+    "pageHeader": {
+      "title": "Store Settings",
+      "description": "Change general configurations that affect the entire website."
+    },
+    "loading": "Loading settings...",
+    "systemConfig": "System Configuration",
+    "clientSettings": {
+      "title": "Client Settings",
+      "defaultLanguage": "Default Language",
+      "defaultCurrency": "Default Currency"
+    },
+    "adminSettings": {
+      "title": "Administrator Settings",
+      "defaultLanguage": "Default Language",
+      "defaultCurrency": "Default Currency"
+    },
+    "homepageUI": {
+      "title": "Homepage Interface",
+      "bannerManager": "Banner Management",
+      "featuredProducts": "Featured Products (Homepage)",
+      "newestProducts": "Newest Products (Homepage)",
+      "productsPerPage": "Products/page (List Page)"
+    },
+    "adminUI": {
+      "title": "Admin Interface",
+      "rowsPerPage": "Rows/page in data tables"
+    },
+    "bannerManager": {
+      "deleteBanner": "Delete banner",
+      "bannerImage": "Banner Image",
+      "changeImage": "Change image",
+      "titleLabel": "Title ({locale})",
+      "subtitleLabel": "Subtitle ({locale})",
+      "buttonTextLabel": "Button Text ({locale})",
+      "buttonLinkLabel": "Button Link",
+      "showBanner": "Show this banner",
+      "addBanner": "Add Banner",
+      "newBanner": {
+        "title_vi": "Tiêu đề mới",
+        "title_en": "New Title",
+        "subtitle_vi": "Phụ đề mới",
+        "subtitle_en": "New Subtitle",
+        "buttonText_vi": "Xem ngay",
+        "buttonText_en": "Shop Now"
+      }
+    },
+    "languages": {
+      "vi": "Vietnamese",
+      "en": "English"
+    },
+    "currencies": {
+      "VND": "VND",
+      "USD": "USD"
+    },
+    "saveChanges": "Save Changes",
+    "processing": "Processing...",
+    "uploadingImages": "Uploading images..."
+  },
+
+  "Shared": {
+    "confirmModal": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "processing": "Processing...",
+      "confirmActive": "Confirm Active",
+      "confirmRestock": "Confirm Restock"
+    },
+    "deleteConfirm": {
+      "title": "Confirm Value Deletion",
+      "message": "Are you sure you want to delete the value \"<strong>{name}</strong>\"?",
+      "warning": "This action cannot be undone.",
+      "confirmButton": "Confirm Delete",
+      "cancelButton": "Cancel",
+      "deleting": "Deleting..."
+    }
   }
 }

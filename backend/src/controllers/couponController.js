@@ -304,6 +304,89 @@ const getCouponByCodeOrId = asyncHandler(async (req, res) => {
   res.json(coupon);
 });
 
+/// @desc    Lấy danh sách coupon GỐC (chưa làm phẳng - cho Admin)
+// @route   GET /api/v1/coupons/admin
+// @access  Private/Admin
+const getAdminCoupons = asyncHandler(async (req, res) => {
+  // 1. Lấy tham số phân trang
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+
+  // 2. Xây dựng bộ lọc và sắp xếp từ query params
+  const filter = buildCouponFilter(req.query);
+  const sort = buildCouponSort(req.query);
+
+  // 3. Thực hiện query lấy danh sách coupons và tổng số lượng song song
+  // Lấy dữ liệu gốc, chưa "làm phẳng" description
+  const couponsQuery = Coupon.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .lean(); // Dùng lean() để tăng hiệu suất vì chúng ta chỉ đọc dữ liệu
+
+  // Đếm tổng số coupon khớp với bộ lọc (để phân trang)
+  const totalCouponsQuery = Coupon.countDocuments(filter);
+
+  // Chạy đồng thời cả hai query để tiết kiệm thời gian
+  const [coupons, totalCoupons] = await Promise.all([
+    couponsQuery.exec(),
+    totalCouponsQuery.exec(),
+  ]);
+
+  // 4. Tính toán thông tin phân trang
+  const totalPages = Math.ceil(totalCoupons / limit);
+
+  // 5. Trả về kết quả với cấu trúc PaginatedAdminCouponsResponse
+  // `coupons` ở đây là một mảng các object CouponAdmin gốc
+  res.json({
+    currentPage: page,
+    totalPages,
+    totalCoupons,
+    limit,
+    coupons,
+  });
+});
+
+// @desc    Lấy chi tiết coupon GỐC bằng ID (cho Admin)
+// @route   GET /api/v1/coupons/admin/:id
+// @access  Private/Admin
+const getAdminCouponById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const coupon = await Coupon.findById(id);
+
+  if (!coupon) {
+    res.status(404);
+    throw new Error("Không tìm thấy mã giảm giá.");
+  }
+
+  const couponObject = coupon.toObject();
+
+  // Populate chi tiết các item được áp dụng
+  if (couponObject.applicableIds && couponObject.applicableIds.length > 0) {
+    let details = [];
+    const ids = couponObject.applicableIds;
+
+    // Luôn lấy cả object đa ngôn ngữ cho tên
+    const selectFields = "name slug _id";
+
+    if (couponObject.applicableTo === "products") {
+      details = await Product.find({ _id: { $in: ids } })
+        .select(selectFields)
+        .lean();
+    } else if (couponObject.applicableTo === "categories") {
+      details = await Category.find({ _id: { $in: ids } })
+        .select(selectFields)
+        .lean();
+    }
+
+    // Gắn kết quả populate vào object trả về
+    couponObject.applicableDetails = details;
+  }
+
+  res.json(couponObject);
+});
+
 // @desc    Cập nhật mã giảm giá
 // @route   PUT /api/v1/coupons/:id
 // @access  Private/Admin
@@ -362,6 +445,8 @@ module.exports = {
   createCoupon,
   getCoupons,
   getCouponByCodeOrId,
+  getAdminCoupons,
+  getAdminCouponById,
   updateCoupon,
   deleteCoupon,
 };

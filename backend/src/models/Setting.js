@@ -1,4 +1,14 @@
 const mongoose = require("mongoose");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
+
+const bannerSlideSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: i18nStringSchema, required: true },
+  subtitle: { type: i18nStringSchema, required: true },
+  buttonText: { type: i18nStringSchema, required: true },
+  buttonLink: { type: String, required: true },
+  isActive: { type: Boolean, default: true },
+});
 
 // Dùng một schema duy nhất để lưu tất cả cài đặt
 const settingSchema = new mongoose.Schema(
@@ -12,21 +22,21 @@ const settingSchema = new mongoose.Schema(
     },
 
     // -- Cài đặt chung --
-    defaultLanguage: {
-      type: String,
-      enum: ["vi", "en"],
-      default: "vi",
+    clientSettings: {
+      defaultLanguage: { type: String, enum: ["vi", "en"], default: "vi" },
+      defaultCurrency: { type: String, enum: ["VND", "USD"], default: "VND" },
     },
-    defaultCurrency: {
-      type: String,
-      enum: ["VND", "USD"],
-      default: "VND",
+
+    adminSettings: {
+      defaultLanguage: { type: String, enum: ["vi", "en"], default: "vi" },
+      defaultCurrency: { type: String, enum: ["VND", "USD"], default: "VND" },
     },
 
     // -- Cài đặt giao diện Client --
     landingPage: {
       maxFeaturedProducts: { type: Number, default: 8 },
       maxNewestProducts: { type: Number, default: 8 },
+      banners: [bannerSlideSchema],
     },
     productListPage: {
       defaultProductsPerPage: { type: Number, default: 12 },

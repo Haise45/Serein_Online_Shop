@@ -16,6 +16,7 @@ interface SettingsContextValue {
   displayCurrency: "VND" | "USD";
   setDisplayCurrency: (currency: "VND" | "USD") => void;
   isLoading: boolean;
+  adminDefaultLocale: "vi" | "en";
 }
 
 // Khởi tạo context với giá trị mặc định
@@ -25,6 +26,7 @@ const SettingsContext = createContext<SettingsContextValue>({
   displayCurrency: "VND", // Mặc định ban đầu luôn là VND
   setDisplayCurrency: () => {},
   isLoading: true,
+  adminDefaultLocale: "vi",
 });
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -73,13 +75,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // 2. Nếu không có trong localStorage, thì lấy từ cài đặt của admin
       if (!preferredCurrency) {
-        preferredCurrency = settings.defaultCurrency;
+        preferredCurrency = settings.clientSettings.defaultCurrency;
       }
 
       // 3. Cập nhật state
-      setDisplayCurrencyState(preferredCurrency);
+      if (preferredCurrency !== displayCurrency) {
+        setDisplayCurrencyState(preferredCurrency);
+      }
     }
-  }, [settings]); // Chạy lại khi settings thay đổi
+  }, [settings, displayCurrency]);
 
   // *** Cập nhật state VÀ localStorage ***
   const setDisplayCurrency = (currency: "VND" | "USD") => {
@@ -101,11 +105,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     displayCurrency,
     setDisplayCurrency,
     isLoading,
+    adminDefaultLocale: settings?.adminSettings.defaultLanguage || "vi",
   };
-
-  // !!! ĐÃ XÓA MÀN HÌNH LOADING TẠI ĐÂY !!!
-  // Provider giờ sẽ luôn render children, việc hiển thị loading
-  // sẽ do AppLoadingManager bên ngoài đảm nhiệm.
 
   return (
     <SettingsContext.Provider value={value}>
