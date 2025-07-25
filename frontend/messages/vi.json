@@ -572,7 +572,8 @@
     "sizeTitle": "Kích cỡ",
     "ratingTitle": "Đánh giá",
     "fromXStars": "Từ {count} sao trở lên",
-    "clearRatingFilter": "Xóa bộ lọc đánh giá"
+    "clearRatingFilter": "Xóa bộ lọc đánh giá",
+    "clearAllFiltersButton": "Xóa tất cả bộ lọc"
   },
 
   "PriceRanges": {
