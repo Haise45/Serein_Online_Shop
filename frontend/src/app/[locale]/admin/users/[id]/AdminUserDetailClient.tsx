@@ -20,6 +20,7 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -31,6 +32,9 @@ interface AdminUserDetailClientProps {
 const AdminUserDetailClient: React.FC<AdminUserDetailClientProps> = ({
   userId,
 }) => {
+  const t = useTranslations("AdminUsers.detail");
+  const tStatus = useTranslations("AdminUsers.filters");
+  const tAdmin = useTranslations("Admin");
   const { settings, displayCurrency, rates } = useSettings();
   const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch<AppDispatch>();
@@ -77,15 +81,16 @@ const AdminUserDetailClient: React.FC<AdminUserDetailClientProps> = ({
   if (isLoading)
     return (
       <div className="p-10 text-center">
-        <CSpinner />
+        <CSpinner /> <span className="ms-2">{t("loading")}</span>
       </div>
     );
   if (isError)
     return (
-      <div className="p-10 text-center text-red-600">Lỗi: {error.message}</div>
+      <div className="p-10 text-center text-red-600">
+        {t("error", { message: error.message })}
+      </div>
     );
-  if (!data)
-    return <div className="p-10 text-center">Không tìm thấy người dùng.</div>;
+  if (!data) return <div className="p-10 text-center">{t("notFound")}</div>;
 
   const { user, orders } = data;
 
@@ -97,7 +102,7 @@ const AdminUserDetailClient: React.FC<AdminUserDetailClientProps> = ({
           variant="outline"
           onClick={() => router.push(backLink)}
         >
-          ← Quay lại danh sách
+          {t("backToList")}
         </CButton>
       </div>
 
@@ -118,24 +123,24 @@ const AdminUserDetailClient: React.FC<AdminUserDetailClientProps> = ({
                 <h5 className="mb-1">{user.name}</h5>
                 <p className="text-muted mb-2">{user.email}</p>
                 <CBadge color={user.isActive ? "success" : "danger"}>
-                  {user.isActive ? "Hoạt động" : "Đình chỉ"}
+                  {user.isActive ? tStatus("active") : tStatus("suspended")}
                 </CBadge>
               </div>
               <hr className="my-4" />
               <div className="space-y-2 text-sm">
                 <p>
-                  <strong>Vai trò:</strong>{" "}
-                  {user.role === "admin" ? "Quản trị viên" : "Khách hàng"}
+                  <strong>{t("role")}:</strong>{" "}
+                  {user.role === "admin" ? t("roleAdmin") : t("roleCustomer")}
                 </p>
                 <p>
-                  <strong>Điện thoại:</strong> {user.phone}
+                  <strong>{t("phone")}</strong> {user.phone}
                 </p>
                 <p>
-                  <strong>Ngày tham gia:</strong>{" "}
+                  <strong>{t("joined")}</strong>{" "}
                   {new Date(user.createdAt!).toLocaleDateString("vi-VN")}
                 </p>
                 <p>
-                  <strong>Tổng chi tiêu:</strong>{" "}
+                  <strong>{t("totalSpent")}</strong>{" "}
                   <span className="fw-semibold text-gray-800">
                     {formatCurrency(user.totalSpent ?? 0, {
                       currency: displayCurrency,
@@ -153,7 +158,7 @@ const AdminUserDetailClient: React.FC<AdminUserDetailClientProps> = ({
           <CCard className="shadow-sm">
             <CCardBody>
               <h5 className="mb-4 font-semibold">
-                Lịch sử đơn hàng ({orders.totalOrders})
+                {t("orderHistory", { count: orders.totalOrders })}
               </h5>
               {orders.items.length > 0 ? (
                 <>
@@ -167,14 +172,16 @@ const AdminUserDetailClient: React.FC<AdminUserDetailClientProps> = ({
                       limit={limit}
                       onPageChange={setCurrentPage}
                       onLimitChange={handleLimitChange}
-                      itemType="đơn hàng"
+                      itemType={tAdmin("breadcrumbs.orders", {
+                        count: 2,
+                      }).toLowerCase()}
                       defaultLimitFromSettings={defaultLimitFromSettings}
                     />
                   </div>
                 </>
               ) : (
                 <p className="py-5 text-center text-gray-500">
-                  Người dùng này chưa có đơn hàng nào.
+                  {t("noOrders")}
                 </p>
               )}
             </CCardBody>

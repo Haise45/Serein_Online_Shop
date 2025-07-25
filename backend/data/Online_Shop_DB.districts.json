@@ -1,0 +1,6264 @@
+[{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d929"
+  },
+  "code": "001",
+  "name": "Quận Ba Đình",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d92a"
+  },
+  "code": "002",
+  "name": "Quận Hoàn Kiếm",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d92b"
+  },
+  "code": "003",
+  "name": "Quận Tây Hồ",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d92c"
+  },
+  "code": "004",
+  "name": "Quận Long Biên",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d92d"
+  },
+  "code": "005",
+  "name": "Quận Cầu Giấy",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d92e"
+  },
+  "code": "006",
+  "name": "Quận Đống Đa",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d92f"
+  },
+  "code": "007",
+  "name": "Quận Hai Bà Trưng",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d930"
+  },
+  "code": "008",
+  "name": "Quận Hoàng Mai",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d931"
+  },
+  "code": "009",
+  "name": "Quận Thanh Xuân",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d932"
+  },
+  "code": "016",
+  "name": "Huyện Sóc Sơn",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d933"
+  },
+  "code": "017",
+  "name": "Huyện Đông Anh",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d934"
+  },
+  "code": "018",
+  "name": "Huyện Gia Lâm",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d935"
+  },
+  "code": "019",
+  "name": "Quận Nam Từ Liêm",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d936"
+  },
+  "code": "020",
+  "name": "Huyện Thanh Trì",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d937"
+  },
+  "code": "021",
+  "name": "Quận Bắc Từ Liêm",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d938"
+  },
+  "code": "250",
+  "name": "Huyện Mê Linh",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d939"
+  },
+  "code": "268",
+  "name": "Quận Hà Đông",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d93a"
+  },
+  "code": "269",
+  "name": "Thị xã Sơn Tây",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d93b"
+  },
+  "code": "271",
+  "name": "Huyện Ba Vì",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d93c"
+  },
+  "code": "272",
+  "name": "Huyện Phúc Thọ",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d93d"
+  },
+  "code": "273",
+  "name": "Huyện Đan Phượng",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d93e"
+  },
+  "code": "274",
+  "name": "Huyện Hoài Đức",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d93f"
+  },
+  "code": "275",
+  "name": "Huyện Quốc Oai",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d940"
+  },
+  "code": "276",
+  "name": "Huyện Thạch Thất",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d941"
+  },
+  "code": "277",
+  "name": "Huyện Chương Mỹ",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d942"
+  },
+  "code": "278",
+  "name": "Huyện Thanh Oai",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d943"
+  },
+  "code": "279",
+  "name": "Huyện Thường Tín",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d944"
+  },
+  "code": "280",
+  "name": "Huyện Phú Xuyên",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d945"
+  },
+  "code": "281",
+  "name": "Huyện Ứng Hòa",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d946"
+  },
+  "code": "282",
+  "name": "Huyện Mỹ Đức",
+  "provinceCode": "01",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d947"
+  },
+  "code": "024",
+  "name": "Thành phố Hà Giang",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d948"
+  },
+  "code": "026",
+  "name": "Huyện Đồng Văn",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d949"
+  },
+  "code": "027",
+  "name": "Huyện Mèo Vạc",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d94a"
+  },
+  "code": "028",
+  "name": "Huyện Yên Minh",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d94b"
+  },
+  "code": "029",
+  "name": "Huyện Quản Bạ",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d94c"
+  },
+  "code": "030",
+  "name": "Huyện Vị Xuyên",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d94d"
+  },
+  "code": "031",
+  "name": "Huyện Bắc Mê",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d94e"
+  },
+  "code": "032",
+  "name": "Huyện Hoàng Su Phì",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d94f"
+  },
+  "code": "033",
+  "name": "Huyện Xín Mần",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d950"
+  },
+  "code": "034",
+  "name": "Huyện Bắc Quang",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d951"
+  },
+  "code": "035",
+  "name": "Huyện Quang Bình",
+  "provinceCode": "02",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d952"
+  },
+  "code": "040",
+  "name": "Thành phố Cao Bằng",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d953"
+  },
+  "code": "042",
+  "name": "Huyện Bảo Lâm",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d954"
+  },
+  "code": "043",
+  "name": "Huyện Bảo Lạc",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d955"
+  },
+  "code": "045",
+  "name": "Huyện Hà Quảng",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d956"
+  },
+  "code": "047",
+  "name": "Huyện Trùng Khánh",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d957"
+  },
+  "code": "048",
+  "name": "Huyện Hạ Lang",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d958"
+  },
+  "code": "049",
+  "name": "Huyện Quảng Hòa",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d959"
+  },
+  "code": "051",
+  "name": "Huyện Hoà An",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d95a"
+  },
+  "code": "052",
+  "name": "Huyện Nguyên Bình",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d95b"
+  },
+  "code": "053",
+  "name": "Huyện Thạch An",
+  "provinceCode": "04",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d95c"
+  },
+  "code": "058",
+  "name": "Thành Phố Bắc Kạn",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d95d"
+  },
+  "code": "060",
+  "name": "Huyện Pác Nặm",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d95e"
+  },
+  "code": "061",
+  "name": "Huyện Ba Bể",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d95f"
+  },
+  "code": "062",
+  "name": "Huyện Ngân Sơn",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d960"
+  },
+  "code": "063",
+  "name": "Huyện Bạch Thông",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d961"
+  },
+  "code": "064",
+  "name": "Huyện Chợ Đồn",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d962"
+  },
+  "code": "065",
+  "name": "Huyện Chợ Mới",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d963"
+  },
+  "code": "066",
+  "name": "Huyện Na Rì",
+  "provinceCode": "06",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d964"
+  },
+  "code": "070",
+  "name": "Thành phố Tuyên Quang",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d965"
+  },
+  "code": "071",
+  "name": "Huyện Lâm Bình",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d966"
+  },
+  "code": "072",
+  "name": "Huyện Na Hang",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d967"
+  },
+  "code": "073",
+  "name": "Huyện Chiêm Hóa",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d968"
+  },
+  "code": "074",
+  "name": "Huyện Hàm Yên",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d969"
+  },
+  "code": "075",
+  "name": "Huyện Yên Sơn",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d96a"
+  },
+  "code": "076",
+  "name": "Huyện Sơn Dương",
+  "provinceCode": "08",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d96b"
+  },
+  "code": "080",
+  "name": "Thành phố Lào Cai",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d96c"
+  },
+  "code": "082",
+  "name": "Huyện Bát Xát",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d96d"
+  },
+  "code": "083",
+  "name": "Huyện Mường Khương",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d96e"
+  },
+  "code": "084",
+  "name": "Huyện Si Ma Cai",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d96f"
+  },
+  "code": "085",
+  "name": "Huyện Bắc Hà",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d970"
+  },
+  "code": "086",
+  "name": "Huyện Bảo Thắng",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d971"
+  },
+  "code": "087",
+  "name": "Huyện Bảo Yên",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d972"
+  },
+  "code": "088",
+  "name": "Thị xã Sa Pa",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d973"
+  },
+  "code": "089",
+  "name": "Huyện Văn Bàn",
+  "provinceCode": "10",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d974"
+  },
+  "code": "094",
+  "name": "Thành phố Điện Biên Phủ",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d975"
+  },
+  "code": "095",
+  "name": "Thị Xã Mường Lay",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d976"
+  },
+  "code": "096",
+  "name": "Huyện Mường Nhé",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d977"
+  },
+  "code": "097",
+  "name": "Huyện Mường Chà",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d978"
+  },
+  "code": "098",
+  "name": "Huyện Tủa Chùa",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d979"
+  },
+  "code": "099",
+  "name": "Huyện Tuần Giáo",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d97a"
+  },
+  "code": "100",
+  "name": "Huyện Điện Biên",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d97b"
+  },
+  "code": "101",
+  "name": "Huyện Điện Biên Đông",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d97c"
+  },
+  "code": "102",
+  "name": "Huyện Mường Ảng",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d97d"
+  },
+  "code": "103",
+  "name": "Huyện Nậm Pồ",
+  "provinceCode": "11",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d97e"
+  },
+  "code": "105",
+  "name": "Thành phố Lai Châu",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d97f"
+  },
+  "code": "106",
+  "name": "Huyện Tam Đường",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d980"
+  },
+  "code": "107",
+  "name": "Huyện Mường Tè",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d981"
+  },
+  "code": "108",
+  "name": "Huyện Sìn Hồ",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d982"
+  },
+  "code": "109",
+  "name": "Huyện Phong Thổ",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d983"
+  },
+  "code": "110",
+  "name": "Huyện Than Uyên",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d984"
+  },
+  "code": "111",
+  "name": "Huyện Tân Uyên",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d985"
+  },
+  "code": "112",
+  "name": "Huyện Nậm Nhùn",
+  "provinceCode": "12",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d986"
+  },
+  "code": "116",
+  "name": "Thành phố Sơn La",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d987"
+  },
+  "code": "118",
+  "name": "Huyện Quỳnh Nhai",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d988"
+  },
+  "code": "119",
+  "name": "Huyện Thuận Châu",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d989"
+  },
+  "code": "120",
+  "name": "Huyện Mường La",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d98a"
+  },
+  "code": "121",
+  "name": "Huyện Bắc Yên",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d98b"
+  },
+  "code": "122",
+  "name": "Huyện Phù Yên",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d98c"
+  },
+  "code": "123",
+  "name": "Thị xã Mộc Châu",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d98d"
+  },
+  "code": "124",
+  "name": "Huyện Yên Châu",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d98e"
+  },
+  "code": "125",
+  "name": "Huyện Mai Sơn",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d98f"
+  },
+  "code": "126",
+  "name": "Huyện Sông Mã",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d990"
+  },
+  "code": "127",
+  "name": "Huyện Sốp Cộp",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d991"
+  },
+  "code": "128",
+  "name": "Huyện Vân Hồ",
+  "provinceCode": "14",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d992"
+  },
+  "code": "132",
+  "name": "Thành phố Yên Bái",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d993"
+  },
+  "code": "133",
+  "name": "Thị xã Nghĩa Lộ",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d994"
+  },
+  "code": "135",
+  "name": "Huyện Lục Yên",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d995"
+  },
+  "code": "136",
+  "name": "Huyện Văn Yên",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d996"
+  },
+  "code": "137",
+  "name": "Huyện Mù Căng Chải",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d997"
+  },
+  "code": "138",
+  "name": "Huyện Trấn Yên",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d998"
+  },
+  "code": "139",
+  "name": "Huyện Trạm Tấu",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d999"
+  },
+  "code": "140",
+  "name": "Huyện Văn Chấn",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d99a"
+  },
+  "code": "141",
+  "name": "Huyện Yên Bình",
+  "provinceCode": "15",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d99b"
+  },
+  "code": "148",
+  "name": "Thành phố Hòa Bình",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d99c"
+  },
+  "code": "150",
+  "name": "Huyện Đà Bắc",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d99d"
+  },
+  "code": "152",
+  "name": "Huyện Lương Sơn",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d99e"
+  },
+  "code": "153",
+  "name": "Huyện Kim Bôi",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d99f"
+  },
+  "code": "154",
+  "name": "Huyện Cao Phong",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a0"
+  },
+  "code": "155",
+  "name": "Huyện Tân Lạc",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a1"
+  },
+  "code": "156",
+  "name": "Huyện Mai Châu",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a2"
+  },
+  "code": "157",
+  "name": "Huyện Lạc Sơn",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a3"
+  },
+  "code": "158",
+  "name": "Huyện Yên Thủy",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a4"
+  },
+  "code": "159",
+  "name": "Huyện Lạc Thủy",
+  "provinceCode": "17",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a5"
+  },
+  "code": "164",
+  "name": "Thành phố Thái Nguyên",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a6"
+  },
+  "code": "165",
+  "name": "Thành phố Sông Công",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a7"
+  },
+  "code": "167",
+  "name": "Huyện Định Hóa",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a8"
+  },
+  "code": "168",
+  "name": "Huyện Phú Lương",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9a9"
+  },
+  "code": "169",
+  "name": "Huyện Đồng Hỷ",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9aa"
+  },
+  "code": "170",
+  "name": "Huyện Võ Nhai",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ab"
+  },
+  "code": "171",
+  "name": "Huyện Đại Từ",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ac"
+  },
+  "code": "172",
+  "name": "Thành phố Phổ Yên",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ad"
+  },
+  "code": "173",
+  "name": "Huyện Phú Bình",
+  "provinceCode": "19",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ae"
+  },
+  "code": "178",
+  "name": "Thành phố Lạng Sơn",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9af"
+  },
+  "code": "180",
+  "name": "Huyện Tràng Định",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b0"
+  },
+  "code": "181",
+  "name": "Huyện Bình Gia",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b1"
+  },
+  "code": "182",
+  "name": "Huyện Văn Lãng",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b2"
+  },
+  "code": "183",
+  "name": "Huyện Cao Lộc",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b3"
+  },
+  "code": "184",
+  "name": "Huyện Văn Quan",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b4"
+  },
+  "code": "185",
+  "name": "Huyện Bắc Sơn",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b5"
+  },
+  "code": "186",
+  "name": "Huyện Hữu Lũng",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b6"
+  },
+  "code": "187",
+  "name": "Huyện Chi Lăng",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b7"
+  },
+  "code": "188",
+  "name": "Huyện Lộc Bình",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b8"
+  },
+  "code": "189",
+  "name": "Huyện Đình Lập",
+  "provinceCode": "20",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9b9"
+  },
+  "code": "193",
+  "name": "Thành phố Hạ Long",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ba"
+  },
+  "code": "194",
+  "name": "Thành phố Móng Cái",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9bb"
+  },
+  "code": "195",
+  "name": "Thành phố Cẩm Phả",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9bc"
+  },
+  "code": "196",
+  "name": "Thành phố Uông Bí",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9bd"
+  },
+  "code": "198",
+  "name": "Huyện Bình Liêu",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9be"
+  },
+  "code": "199",
+  "name": "Huyện Tiên Yên",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9bf"
+  },
+  "code": "200",
+  "name": "Huyện Đầm Hà",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c0"
+  },
+  "code": "201",
+  "name": "Huyện Hải Hà",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c1"
+  },
+  "code": "202",
+  "name": "Huyện Ba Chẽ",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c2"
+  },
+  "code": "203",
+  "name": "Huyện Vân Đồn",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c3"
+  },
+  "code": "205",
+  "name": "Thành phố Đông Triều",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c4"
+  },
+  "code": "206",
+  "name": "Thị xã Quảng Yên",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c5"
+  },
+  "code": "207",
+  "name": "Huyện Cô Tô",
+  "provinceCode": "22",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c6"
+  },
+  "code": "213",
+  "name": "Thành phố Bắc Giang",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c7"
+  },
+  "code": "215",
+  "name": "Huyện Yên Thế",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c8"
+  },
+  "code": "216",
+  "name": "Huyện Tân Yên",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9c9"
+  },
+  "code": "217",
+  "name": "Huyện Lạng Giang",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ca"
+  },
+  "code": "218",
+  "name": "Huyện Lục Nam",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9cb"
+  },
+  "code": "219",
+  "name": "Huyện Lục Ngạn",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9cc"
+  },
+  "code": "220",
+  "name": "Huyện Sơn Động",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9cd"
+  },
+  "code": "222",
+  "name": "Thị Xã Việt Yên",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ce"
+  },
+  "code": "223",
+  "name": "Huyện Hiệp Hòa",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9cf"
+  },
+  "code": "224",
+  "name": "Thị xã Chũ",
+  "provinceCode": "24",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d0"
+  },
+  "code": "227",
+  "name": "Thành phố Việt Trì",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d1"
+  },
+  "code": "228",
+  "name": "Thị xã Phú Thọ",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d2"
+  },
+  "code": "230",
+  "name": "Huyện Đoan Hùng",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d3"
+  },
+  "code": "231",
+  "name": "Huyện Hạ Hoà",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d4"
+  },
+  "code": "232",
+  "name": "Huyện Thanh Ba",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d5"
+  },
+  "code": "233",
+  "name": "Huyện Phù Ninh",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d6"
+  },
+  "code": "234",
+  "name": "Huyện Yên Lập",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d7"
+  },
+  "code": "235",
+  "name": "Huyện Cẩm Khê",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d8"
+  },
+  "code": "236",
+  "name": "Huyện Tam Nông",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9d9"
+  },
+  "code": "237",
+  "name": "Huyện Lâm Thao",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9da"
+  },
+  "code": "238",
+  "name": "Huyện Thanh Sơn",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9db"
+  },
+  "code": "239",
+  "name": "Huyện Thanh Thuỷ",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9dc"
+  },
+  "code": "240",
+  "name": "Huyện Tân Sơn",
+  "provinceCode": "25",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9dd"
+  },
+  "code": "243",
+  "name": "Thành phố Vĩnh Yên",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9de"
+  },
+  "code": "244",
+  "name": "Thành phố Phúc Yên",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9df"
+  },
+  "code": "246",
+  "name": "Huyện Lập Thạch",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e0"
+  },
+  "code": "247",
+  "name": "Huyện Tam Dương",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e1"
+  },
+  "code": "248",
+  "name": "Huyện Tam Đảo",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e2"
+  },
+  "code": "249",
+  "name": "Huyện Bình Xuyên",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e3"
+  },
+  "code": "251",
+  "name": "Huyện Yên Lạc",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e4"
+  },
+  "code": "252",
+  "name": "Huyện Vĩnh Tường",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e5"
+  },
+  "code": "253",
+  "name": "Huyện Sông Lô",
+  "provinceCode": "26",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e6"
+  },
+  "code": "256",
+  "name": "Thành phố Bắc Ninh",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e7"
+  },
+  "code": "258",
+  "name": "Huyện Yên Phong",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e8"
+  },
+  "code": "259",
+  "name": "Thị xã Quế Võ",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9e9"
+  },
+  "code": "260",
+  "name": "Huyện Tiên Du",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ea"
+  },
+  "code": "261",
+  "name": "Thành phố Từ Sơn",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9eb"
+  },
+  "code": "262",
+  "name": "Thị xã Thuận Thành",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ec"
+  },
+  "code": "263",
+  "name": "Huyện Gia Bình",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ed"
+  },
+  "code": "264",
+  "name": "Huyện Lương Tài",
+  "provinceCode": "27",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ee"
+  },
+  "code": "288",
+  "name": "Thành phố Hải Dương",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ef"
+  },
+  "code": "290",
+  "name": "Thành phố Chí Linh",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f0"
+  },
+  "code": "291",
+  "name": "Huyện Nam Sách",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f1"
+  },
+  "code": "292",
+  "name": "Thị xã Kinh Môn",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f2"
+  },
+  "code": "293",
+  "name": "Huyện Kim Thành",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f3"
+  },
+  "code": "294",
+  "name": "Huyện Thanh Hà",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f4"
+  },
+  "code": "295",
+  "name": "Huyện Cẩm Giàng",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f5"
+  },
+  "code": "296",
+  "name": "Huyện Bình Giang",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f6"
+  },
+  "code": "297",
+  "name": "Huyện Gia Lộc",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f7"
+  },
+  "code": "298",
+  "name": "Huyện Tứ Kỳ",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f8"
+  },
+  "code": "299",
+  "name": "Huyện Ninh Giang",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9f9"
+  },
+  "code": "300",
+  "name": "Huyện Thanh Miện",
+  "provinceCode": "30",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9fa"
+  },
+  "code": "303",
+  "name": "Quận Hồng Bàng",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9fb"
+  },
+  "code": "304",
+  "name": "Quận Ngô Quyền",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9fc"
+  },
+  "code": "305",
+  "name": "Quận Lê Chân",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9fd"
+  },
+  "code": "306",
+  "name": "Quận Hải An",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9fe"
+  },
+  "code": "307",
+  "name": "Quận Kiến An",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98d9ff"
+  },
+  "code": "308",
+  "name": "Quận Đồ Sơn",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da00"
+  },
+  "code": "309",
+  "name": "Quận Dương Kinh",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da01"
+  },
+  "code": "311",
+  "name": "Thành phố Thuỷ Nguyên",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da02"
+  },
+  "code": "312",
+  "name": "Quận An Dương",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da03"
+  },
+  "code": "313",
+  "name": "Huyện An Lão",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da04"
+  },
+  "code": "314",
+  "name": "Huyện Kiến Thuỵ",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da05"
+  },
+  "code": "315",
+  "name": "Huyện Tiên Lãng",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da06"
+  },
+  "code": "316",
+  "name": "Huyện Vĩnh Bảo",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da07"
+  },
+  "code": "317",
+  "name": "Huyện Cát Hải",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da08"
+  },
+  "code": "318",
+  "name": "Huyện Bạch Long Vĩ",
+  "provinceCode": "31",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da09"
+  },
+  "code": "323",
+  "name": "Thành phố Hưng Yên",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da0a"
+  },
+  "code": "325",
+  "name": "Huyện Văn Lâm",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da0b"
+  },
+  "code": "326",
+  "name": "Huyện Văn Giang",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da0c"
+  },
+  "code": "327",
+  "name": "Huyện Yên Mỹ",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da0d"
+  },
+  "code": "328",
+  "name": "Thị xã Mỹ Hào",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da0e"
+  },
+  "code": "329",
+  "name": "Huyện Ân Thi",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da0f"
+  },
+  "code": "330",
+  "name": "Huyện Khoái Châu",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da10"
+  },
+  "code": "331",
+  "name": "Huyện Kim Động",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da11"
+  },
+  "code": "332",
+  "name": "Huyện Tiên Lữ",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da12"
+  },
+  "code": "333",
+  "name": "Huyện Phù Cừ",
+  "provinceCode": "33",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da13"
+  },
+  "code": "336",
+  "name": "Thành phố Thái Bình",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da14"
+  },
+  "code": "338",
+  "name": "Huyện Quỳnh Phụ",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da15"
+  },
+  "code": "339",
+  "name": "Huyện Hưng Hà",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da16"
+  },
+  "code": "340",
+  "name": "Huyện Đông Hưng",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da17"
+  },
+  "code": "341",
+  "name": "Huyện Thái Thụy",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da18"
+  },
+  "code": "342",
+  "name": "Huyện Tiền Hải",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da19"
+  },
+  "code": "343",
+  "name": "Huyện Kiến Xương",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da1a"
+  },
+  "code": "344",
+  "name": "Huyện Vũ Thư",
+  "provinceCode": "34",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da1b"
+  },
+  "code": "347",
+  "name": "Thành phố Phủ Lý",
+  "provinceCode": "35",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da1c"
+  },
+  "code": "349",
+  "name": "Thị xã Duy Tiên",
+  "provinceCode": "35",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da1d"
+  },
+  "code": "350",
+  "name": "Thị xã Kim Bảng",
+  "provinceCode": "35",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da1e"
+  },
+  "code": "351",
+  "name": "Huyện Thanh Liêm",
+  "provinceCode": "35",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da1f"
+  },
+  "code": "352",
+  "name": "Huyện Bình Lục",
+  "provinceCode": "35",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da20"
+  },
+  "code": "353",
+  "name": "Huyện Lý Nhân",
+  "provinceCode": "35",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da21"
+  },
+  "code": "356",
+  "name": "Thành phố Nam Định",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da22"
+  },
+  "code": "359",
+  "name": "Huyện Vụ Bản",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da23"
+  },
+  "code": "360",
+  "name": "Huyện Ý Yên",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da24"
+  },
+  "code": "361",
+  "name": "Huyện Nghĩa Hưng",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da25"
+  },
+  "code": "362",
+  "name": "Huyện Nam Trực",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da26"
+  },
+  "code": "363",
+  "name": "Huyện Trực Ninh",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da27"
+  },
+  "code": "364",
+  "name": "Huyện Xuân Trường",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da28"
+  },
+  "code": "365",
+  "name": "Huyện Giao Thủy",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da29"
+  },
+  "code": "366",
+  "name": "Huyện Hải Hậu",
+  "provinceCode": "36",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da2a"
+  },
+  "code": "370",
+  "name": "Thành phố Tam Điệp",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da2b"
+  },
+  "code": "372",
+  "name": "Huyện Nho Quan",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da2c"
+  },
+  "code": "373",
+  "name": "Huyện Gia Viễn",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da2d"
+  },
+  "code": "374",
+  "name": "Thành phố Hoa Lư",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da2e"
+  },
+  "code": "375",
+  "name": "Huyện Yên Khánh",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da2f"
+  },
+  "code": "376",
+  "name": "Huyện Kim Sơn",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da30"
+  },
+  "code": "377",
+  "name": "Huyện Yên Mô",
+  "provinceCode": "37",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da31"
+  },
+  "code": "380",
+  "name": "Thành phố Thanh Hóa",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da32"
+  },
+  "code": "381",
+  "name": "Thị xã Bỉm Sơn",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da33"
+  },
+  "code": "382",
+  "name": "Thành phố Sầm Sơn",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da34"
+  },
+  "code": "384",
+  "name": "Huyện Mường Lát",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da35"
+  },
+  "code": "385",
+  "name": "Huyện Quan Hóa",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da36"
+  },
+  "code": "386",
+  "name": "Huyện Bá Thước",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da37"
+  },
+  "code": "387",
+  "name": "Huyện Quan Sơn",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da38"
+  },
+  "code": "388",
+  "name": "Huyện Lang Chánh",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da39"
+  },
+  "code": "389",
+  "name": "Huyện Ngọc Lặc",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da3a"
+  },
+  "code": "390",
+  "name": "Huyện Cẩm Thủy",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da3b"
+  },
+  "code": "391",
+  "name": "Huyện Thạch Thành",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da3c"
+  },
+  "code": "392",
+  "name": "Huyện Hà Trung",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da3d"
+  },
+  "code": "393",
+  "name": "Huyện Vĩnh Lộc",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da3e"
+  },
+  "code": "394",
+  "name": "Huyện Yên Định",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da3f"
+  },
+  "code": "395",
+  "name": "Huyện Thọ Xuân",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da40"
+  },
+  "code": "396",
+  "name": "Huyện Thường Xuân",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da41"
+  },
+  "code": "397",
+  "name": "Huyện Triệu Sơn",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da42"
+  },
+  "code": "398",
+  "name": "Huyện Thiệu Hóa",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da43"
+  },
+  "code": "399",
+  "name": "Huyện Hoằng Hóa",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da44"
+  },
+  "code": "400",
+  "name": "Huyện Hậu Lộc",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da45"
+  },
+  "code": "401",
+  "name": "Huyện Nga Sơn",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da46"
+  },
+  "code": "402",
+  "name": "Huyện Như Xuân",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da47"
+  },
+  "code": "403",
+  "name": "Huyện Như Thanh",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da48"
+  },
+  "code": "404",
+  "name": "Huyện Nông Cống",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da49"
+  },
+  "code": "406",
+  "name": "Huyện Quảng Xương",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da4a"
+  },
+  "code": "407",
+  "name": "Thị xã Nghi Sơn",
+  "provinceCode": "38",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da4b"
+  },
+  "code": "412",
+  "name": "Thành phố Vinh",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da4c"
+  },
+  "code": "414",
+  "name": "Thị xã Thái Hoà",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da4d"
+  },
+  "code": "415",
+  "name": "Huyện Quế Phong",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da4e"
+  },
+  "code": "416",
+  "name": "Huyện Quỳ Châu",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da4f"
+  },
+  "code": "417",
+  "name": "Huyện Kỳ Sơn",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da50"
+  },
+  "code": "418",
+  "name": "Huyện Tương Dương",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da51"
+  },
+  "code": "419",
+  "name": "Huyện Nghĩa Đàn",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da52"
+  },
+  "code": "420",
+  "name": "Huyện Quỳ Hợp",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da53"
+  },
+  "code": "421",
+  "name": "Huyện Quỳnh Lưu",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da54"
+  },
+  "code": "422",
+  "name": "Huyện Con Cuông",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da55"
+  },
+  "code": "423",
+  "name": "Huyện Tân Kỳ",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da56"
+  },
+  "code": "424",
+  "name": "Huyện Anh Sơn",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da57"
+  },
+  "code": "425",
+  "name": "Huyện Diễn Châu",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da58"
+  },
+  "code": "426",
+  "name": "Huyện Yên Thành",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da59"
+  },
+  "code": "427",
+  "name": "Huyện Đô Lương",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da5a"
+  },
+  "code": "428",
+  "name": "Huyện Thanh Chương",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da5b"
+  },
+  "code": "429",
+  "name": "Huyện Nghi Lộc",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da5c"
+  },
+  "code": "430",
+  "name": "Huyện Nam Đàn",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da5d"
+  },
+  "code": "431",
+  "name": "Huyện Hưng Nguyên",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da5e"
+  },
+  "code": "432",
+  "name": "Thị xã Hoàng Mai",
+  "provinceCode": "40",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da5f"
+  },
+  "code": "436",
+  "name": "Thành phố Hà Tĩnh",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da60"
+  },
+  "code": "437",
+  "name": "Thị xã Hồng Lĩnh",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da61"
+  },
+  "code": "439",
+  "name": "Huyện Hương Sơn",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da62"
+  },
+  "code": "440",
+  "name": "Huyện Đức Thọ",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da63"
+  },
+  "code": "441",
+  "name": "Huyện Vũ Quang",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da64"
+  },
+  "code": "442",
+  "name": "Huyện Nghi Xuân",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da65"
+  },
+  "code": "443",
+  "name": "Huyện Can Lộc",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da66"
+  },
+  "code": "444",
+  "name": "Huyện Hương Khê",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da67"
+  },
+  "code": "445",
+  "name": "Huyện Thạch Hà",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da68"
+  },
+  "code": "446",
+  "name": "Huyện Cẩm Xuyên",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da69"
+  },
+  "code": "447",
+  "name": "Huyện Kỳ Anh",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da6a"
+  },
+  "code": "449",
+  "name": "Thị xã Kỳ Anh",
+  "provinceCode": "42",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da6b"
+  },
+  "code": "450",
+  "name": "Thành Phố Đồng Hới",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da6c"
+  },
+  "code": "452",
+  "name": "Huyện Minh Hóa",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da6d"
+  },
+  "code": "453",
+  "name": "Huyện Tuyên Hóa",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da6e"
+  },
+  "code": "454",
+  "name": "Huyện Quảng Trạch",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da6f"
+  },
+  "code": "455",
+  "name": "Huyện Bố Trạch",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da70"
+  },
+  "code": "456",
+  "name": "Huyện Quảng Ninh",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da71"
+  },
+  "code": "457",
+  "name": "Huyện Lệ Thủy",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da72"
+  },
+  "code": "458",
+  "name": "Thị xã Ba Đồn",
+  "provinceCode": "44",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da73"
+  },
+  "code": "461",
+  "name": "Thành phố Đông Hà",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da74"
+  },
+  "code": "462",
+  "name": "Thị xã Quảng Trị",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da75"
+  },
+  "code": "464",
+  "name": "Huyện Vĩnh Linh",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da76"
+  },
+  "code": "465",
+  "name": "Huyện Hướng Hóa",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da77"
+  },
+  "code": "466",
+  "name": "Huyện Gio Linh",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da78"
+  },
+  "code": "467",
+  "name": "Huyện Đa Krông",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da79"
+  },
+  "code": "468",
+  "name": "Huyện Cam Lộ",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da7a"
+  },
+  "code": "469",
+  "name": "Huyện Triệu Phong",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da7b"
+  },
+  "code": "470",
+  "name": "Huyện Hải Lăng",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da7c"
+  },
+  "code": "471",
+  "name": "Huyện Cồn Cỏ",
+  "provinceCode": "45",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da7d"
+  },
+  "code": "474",
+  "name": "Quận Thuận Hóa",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da7e"
+  },
+  "code": "475",
+  "name": "Quận Phú Xuân",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da7f"
+  },
+  "code": "476",
+  "name": "Thị xã Phong Điền",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da80"
+  },
+  "code": "477",
+  "name": "Huyện Quảng Điền",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da81"
+  },
+  "code": "478",
+  "name": "Huyện Phú Vang",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da82"
+  },
+  "code": "479",
+  "name": "Thị xã Hương Thủy",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da83"
+  },
+  "code": "480",
+  "name": "Thị xã Hương Trà",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da84"
+  },
+  "code": "481",
+  "name": "Huyện A Lưới",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da85"
+  },
+  "code": "482",
+  "name": "Huyện Phú Lộc",
+  "provinceCode": "46",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da86"
+  },
+  "code": "490",
+  "name": "Quận Liên Chiểu",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da87"
+  },
+  "code": "491",
+  "name": "Quận Thanh Khê",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da88"
+  },
+  "code": "492",
+  "name": "Quận Hải Châu",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da89"
+  },
+  "code": "493",
+  "name": "Quận Sơn Trà",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da8a"
+  },
+  "code": "494",
+  "name": "Quận Ngũ Hành Sơn",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da8b"
+  },
+  "code": "495",
+  "name": "Quận Cẩm Lệ",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da8c"
+  },
+  "code": "497",
+  "name": "Huyện Hòa Vang",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da8d"
+  },
+  "code": "498",
+  "name": "Huyện Hoàng Sa",
+  "provinceCode": "48",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da8e"
+  },
+  "code": "502",
+  "name": "Thành phố Tam Kỳ",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da8f"
+  },
+  "code": "503",
+  "name": "Thành phố Hội An",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da90"
+  },
+  "code": "504",
+  "name": "Huyện Tây Giang",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da91"
+  },
+  "code": "505",
+  "name": "Huyện Đông Giang",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da92"
+  },
+  "code": "506",
+  "name": "Huyện Đại Lộc",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da93"
+  },
+  "code": "507",
+  "name": "Thị xã Điện Bàn",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da94"
+  },
+  "code": "508",
+  "name": "Huyện Duy Xuyên",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da95"
+  },
+  "code": "509",
+  "name": "Huyện Quế Sơn",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da96"
+  },
+  "code": "510",
+  "name": "Huyện Nam Giang",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da97"
+  },
+  "code": "511",
+  "name": "Huyện Phước Sơn",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da98"
+  },
+  "code": "512",
+  "name": "Huyện Hiệp Đức",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da99"
+  },
+  "code": "513",
+  "name": "Huyện Thăng Bình",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da9a"
+  },
+  "code": "514",
+  "name": "Huyện Tiên Phước",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da9b"
+  },
+  "code": "515",
+  "name": "Huyện Bắc Trà My",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da9c"
+  },
+  "code": "516",
+  "name": "Huyện Nam Trà My",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da9d"
+  },
+  "code": "517",
+  "name": "Huyện Núi Thành",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da9e"
+  },
+  "code": "518",
+  "name": "Huyện Phú Ninh",
+  "provinceCode": "49",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98da9f"
+  },
+  "code": "522",
+  "name": "Thành phố Quảng Ngãi",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa0"
+  },
+  "code": "524",
+  "name": "Huyện Bình Sơn",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa1"
+  },
+  "code": "525",
+  "name": "Huyện Trà Bồng",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa2"
+  },
+  "code": "527",
+  "name": "Huyện Sơn Tịnh",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa3"
+  },
+  "code": "528",
+  "name": "Huyện Tư Nghĩa",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa4"
+  },
+  "code": "529",
+  "name": "Huyện Sơn Hà",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa5"
+  },
+  "code": "530",
+  "name": "Huyện Sơn Tây",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa6"
+  },
+  "code": "531",
+  "name": "Huyện Minh Long",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa7"
+  },
+  "code": "532",
+  "name": "Huyện Nghĩa Hành",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa8"
+  },
+  "code": "533",
+  "name": "Huyện Mộ Đức",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daa9"
+  },
+  "code": "534",
+  "name": "Thị xã Đức Phổ",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daaa"
+  },
+  "code": "535",
+  "name": "Huyện Ba Tơ",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daab"
+  },
+  "code": "536",
+  "name": "Huyện Lý Sơn",
+  "provinceCode": "51",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daac"
+  },
+  "code": "540",
+  "name": "Thành phố Quy Nhơn",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daad"
+  },
+  "code": "542",
+  "name": "Huyện An Lão",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daae"
+  },
+  "code": "543",
+  "name": "Thị xã Hoài Nhơn",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daaf"
+  },
+  "code": "544",
+  "name": "Huyện Hoài Ân",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab0"
+  },
+  "code": "545",
+  "name": "Huyện Phù Mỹ",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab1"
+  },
+  "code": "546",
+  "name": "Huyện Vĩnh Thạnh",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab2"
+  },
+  "code": "547",
+  "name": "Huyện Tây Sơn",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab3"
+  },
+  "code": "548",
+  "name": "Huyện Phù Cát",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab4"
+  },
+  "code": "549",
+  "name": "Thị xã An Nhơn",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab5"
+  },
+  "code": "550",
+  "name": "Huyện Tuy Phước",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab6"
+  },
+  "code": "551",
+  "name": "Huyện Vân Canh",
+  "provinceCode": "52",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab7"
+  },
+  "code": "555",
+  "name": "Thành phố Tuy Hoà",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab8"
+  },
+  "code": "557",
+  "name": "Thị xã Sông Cầu",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dab9"
+  },
+  "code": "558",
+  "name": "Huyện Đồng Xuân",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daba"
+  },
+  "code": "559",
+  "name": "Huyện Tuy An",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dabb"
+  },
+  "code": "560",
+  "name": "Huyện Sơn Hòa",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dabc"
+  },
+  "code": "561",
+  "name": "Huyện Sông Hinh",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dabd"
+  },
+  "code": "562",
+  "name": "Huyện Tây Hoà",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dabe"
+  },
+  "code": "563",
+  "name": "Huyện Phú Hoà",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dabf"
+  },
+  "code": "564",
+  "name": "Thị xã Đông Hòa",
+  "provinceCode": "54",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac0"
+  },
+  "code": "568",
+  "name": "Thành phố Nha Trang",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac1"
+  },
+  "code": "569",
+  "name": "Thành phố Cam Ranh",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac2"
+  },
+  "code": "570",
+  "name": "Huyện Cam Lâm",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac3"
+  },
+  "code": "571",
+  "name": "Huyện Vạn Ninh",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac4"
+  },
+  "code": "572",
+  "name": "Thị xã Ninh Hòa",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac5"
+  },
+  "code": "573",
+  "name": "Huyện Khánh Vĩnh",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac6"
+  },
+  "code": "574",
+  "name": "Huyện Diên Khánh",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac7"
+  },
+  "code": "575",
+  "name": "Huyện Khánh Sơn",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac8"
+  },
+  "code": "576",
+  "name": "Huyện Trường Sa",
+  "provinceCode": "56",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dac9"
+  },
+  "code": "582",
+  "name": "Thành phố Phan Rang-Tháp Chàm",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daca"
+  },
+  "code": "584",
+  "name": "Huyện Bác Ái",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dacb"
+  },
+  "code": "585",
+  "name": "Huyện Ninh Sơn",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dacc"
+  },
+  "code": "586",
+  "name": "Huyện Ninh Hải",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dacd"
+  },
+  "code": "587",
+  "name": "Huyện Ninh Phước",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dace"
+  },
+  "code": "588",
+  "name": "Huyện Thuận Bắc",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dacf"
+  },
+  "code": "589",
+  "name": "Huyện Thuận Nam",
+  "provinceCode": "58",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad0"
+  },
+  "code": "593",
+  "name": "Thành phố Phan Thiết",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad1"
+  },
+  "code": "594",
+  "name": "Thị xã La Gi",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad2"
+  },
+  "code": "595",
+  "name": "Huyện Tuy Phong",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad3"
+  },
+  "code": "596",
+  "name": "Huyện Bắc Bình",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad4"
+  },
+  "code": "597",
+  "name": "Huyện Hàm Thuận Bắc",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad5"
+  },
+  "code": "598",
+  "name": "Huyện Hàm Thuận Nam",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad6"
+  },
+  "code": "599",
+  "name": "Huyện Tánh Linh",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad7"
+  },
+  "code": "600",
+  "name": "Huyện Đức Linh",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad8"
+  },
+  "code": "601",
+  "name": "Huyện Hàm Tân",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dad9"
+  },
+  "code": "602",
+  "name": "Huyện Phú Quí",
+  "provinceCode": "60",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dada"
+  },
+  "code": "608",
+  "name": "Thành phố Kon Tum",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dadb"
+  },
+  "code": "610",
+  "name": "Huyện Đắk Glei",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dadc"
+  },
+  "code": "611",
+  "name": "Huyện Ngọc Hồi",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dadd"
+  },
+  "code": "612",
+  "name": "Huyện Đắk Tô",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dade"
+  },
+  "code": "613",
+  "name": "Huyện Kon Plông",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dadf"
+  },
+  "code": "614",
+  "name": "Huyện Kon Rẫy",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae0"
+  },
+  "code": "615",
+  "name": "Huyện Đắk Hà",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae1"
+  },
+  "code": "616",
+  "name": "Huyện Sa Thầy",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae2"
+  },
+  "code": "617",
+  "name": "Huyện Tu Mơ Rông",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae3"
+  },
+  "code": "618",
+  "name": "Huyện Ia H' Drai",
+  "provinceCode": "62",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae4"
+  },
+  "code": "622",
+  "name": "Thành phố Pleiku",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae5"
+  },
+  "code": "623",
+  "name": "Thị xã An Khê",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae6"
+  },
+  "code": "624",
+  "name": "Thị xã Ayun Pa",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae7"
+  },
+  "code": "625",
+  "name": "Huyện KBang",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae8"
+  },
+  "code": "626",
+  "name": "Huyện Đăk Đoa",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dae9"
+  },
+  "code": "627",
+  "name": "Huyện Chư Păh",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daea"
+  },
+  "code": "628",
+  "name": "Huyện Ia Grai",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daeb"
+  },
+  "code": "629",
+  "name": "Huyện Mang Yang",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daec"
+  },
+  "code": "630",
+  "name": "Huyện Kông Chro",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daed"
+  },
+  "code": "631",
+  "name": "Huyện Đức Cơ",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daee"
+  },
+  "code": "632",
+  "name": "Huyện Chư Prông",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daef"
+  },
+  "code": "633",
+  "name": "Huyện Chư Sê",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf0"
+  },
+  "code": "634",
+  "name": "Huyện Đăk Pơ",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf1"
+  },
+  "code": "635",
+  "name": "Huyện Ia Pa",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf2"
+  },
+  "code": "637",
+  "name": "Huyện Krông Pa",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf3"
+  },
+  "code": "638",
+  "name": "Huyện Phú Thiện",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf4"
+  },
+  "code": "639",
+  "name": "Huyện Chư Pưh",
+  "provinceCode": "64",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf5"
+  },
+  "code": "643",
+  "name": "Thành phố Buôn Ma Thuột",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf6"
+  },
+  "code": "644",
+  "name": "Thị Xã Buôn Hồ",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf7"
+  },
+  "code": "645",
+  "name": "Huyện Ea H'leo",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf8"
+  },
+  "code": "646",
+  "name": "Huyện Ea Súp",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daf9"
+  },
+  "code": "647",
+  "name": "Huyện Buôn Đôn",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dafa"
+  },
+  "code": "648",
+  "name": "Huyện Cư M'gar",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dafb"
+  },
+  "code": "649",
+  "name": "Huyện Krông Búk",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dafc"
+  },
+  "code": "650",
+  "name": "Huyện Krông Năng",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dafd"
+  },
+  "code": "651",
+  "name": "Huyện Ea Kar",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dafe"
+  },
+  "code": "652",
+  "name": "Huyện M'Đrắk",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98daff"
+  },
+  "code": "653",
+  "name": "Huyện Krông Bông",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db00"
+  },
+  "code": "654",
+  "name": "Huyện Krông Pắc",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db01"
+  },
+  "code": "655",
+  "name": "Huyện Krông A Na",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db02"
+  },
+  "code": "656",
+  "name": "Huyện Lắk",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db03"
+  },
+  "code": "657",
+  "name": "Huyện Cư Kuin",
+  "provinceCode": "66",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db04"
+  },
+  "code": "660",
+  "name": "Thành phố Gia Nghĩa",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db05"
+  },
+  "code": "661",
+  "name": "Huyện Đăk Glong",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db06"
+  },
+  "code": "662",
+  "name": "Huyện Cư Jút",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db07"
+  },
+  "code": "663",
+  "name": "Huyện Đắk Mil",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db08"
+  },
+  "code": "664",
+  "name": "Huyện Krông Nô",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db09"
+  },
+  "code": "665",
+  "name": "Huyện Đắk Song",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db0a"
+  },
+  "code": "666",
+  "name": "Huyện Đắk R'Lấp",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db0b"
+  },
+  "code": "667",
+  "name": "Huyện Tuy Đức",
+  "provinceCode": "67",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db0c"
+  },
+  "code": "672",
+  "name": "Thành phố Đà Lạt",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db0d"
+  },
+  "code": "673",
+  "name": "Thành phố Bảo Lộc",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db0e"
+  },
+  "code": "674",
+  "name": "Huyện Đam Rông",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db0f"
+  },
+  "code": "675",
+  "name": "Huyện Lạc Dương",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db10"
+  },
+  "code": "676",
+  "name": "Huyện Lâm Hà",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db11"
+  },
+  "code": "677",
+  "name": "Huyện Đơn Dương",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db12"
+  },
+  "code": "678",
+  "name": "Huyện Đức Trọng",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db13"
+  },
+  "code": "679",
+  "name": "Huyện Di Linh",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db14"
+  },
+  "code": "680",
+  "name": "Huyện Bảo Lâm",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db15"
+  },
+  "code": "682",
+  "name": "Huyện Đạ Huoai",
+  "provinceCode": "68",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db16"
+  },
+  "code": "688",
+  "name": "Thị xã Phước Long",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db17"
+  },
+  "code": "689",
+  "name": "Thành phố Đồng Xoài",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db18"
+  },
+  "code": "690",
+  "name": "Thị xã Bình Long",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db19"
+  },
+  "code": "691",
+  "name": "Huyện Bù Gia Mập",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db1a"
+  },
+  "code": "692",
+  "name": "Huyện Lộc Ninh",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db1b"
+  },
+  "code": "693",
+  "name": "Huyện Bù Đốp",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db1c"
+  },
+  "code": "694",
+  "name": "Huyện Hớn Quản",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db1d"
+  },
+  "code": "695",
+  "name": "Huyện Đồng Phú",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db1e"
+  },
+  "code": "696",
+  "name": "Huyện Bù Đăng",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db1f"
+  },
+  "code": "697",
+  "name": "Thị xã Chơn Thành",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db20"
+  },
+  "code": "698",
+  "name": "Huyện Phú Riềng",
+  "provinceCode": "70",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db21"
+  },
+  "code": "703",
+  "name": "Thành phố Tây Ninh",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db22"
+  },
+  "code": "705",
+  "name": "Huyện Tân Biên",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db23"
+  },
+  "code": "706",
+  "name": "Huyện Tân Châu",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db24"
+  },
+  "code": "707",
+  "name": "Huyện Dương Minh Châu",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db25"
+  },
+  "code": "708",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db26"
+  },
+  "code": "709",
+  "name": "Thị xã Hòa Thành",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db27"
+  },
+  "code": "710",
+  "name": "Huyện Gò Dầu",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db28"
+  },
+  "code": "711",
+  "name": "Huyện Bến Cầu",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db29"
+  },
+  "code": "712",
+  "name": "Thị xã Trảng Bàng",
+  "provinceCode": "72",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db2a"
+  },
+  "code": "718",
+  "name": "Thành phố Thủ Dầu Một",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db2b"
+  },
+  "code": "719",
+  "name": "Huyện Bàu Bàng",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db2c"
+  },
+  "code": "720",
+  "name": "Huyện Dầu Tiếng",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db2d"
+  },
+  "code": "721",
+  "name": "Thành phố Bến Cát",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db2e"
+  },
+  "code": "722",
+  "name": "Huyện Phú Giáo",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db2f"
+  },
+  "code": "723",
+  "name": "Thành phố Tân Uyên",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db30"
+  },
+  "code": "724",
+  "name": "Thành phố Dĩ An",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db31"
+  },
+  "code": "725",
+  "name": "Thành phố Thuận An",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db32"
+  },
+  "code": "726",
+  "name": "Huyện Bắc Tân Uyên",
+  "provinceCode": "74",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db33"
+  },
+  "code": "731",
+  "name": "Thành phố Biên Hòa",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db34"
+  },
+  "code": "732",
+  "name": "Thành phố Long Khánh",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db35"
+  },
+  "code": "734",
+  "name": "Huyện Tân Phú",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db36"
+  },
+  "code": "735",
+  "name": "Huyện Vĩnh Cửu",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db37"
+  },
+  "code": "736",
+  "name": "Huyện Định Quán",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db38"
+  },
+  "code": "737",
+  "name": "Huyện Trảng Bom",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db39"
+  },
+  "code": "738",
+  "name": "Huyện Thống Nhất",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db3a"
+  },
+  "code": "739",
+  "name": "Huyện Cẩm Mỹ",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db3b"
+  },
+  "code": "740",
+  "name": "Huyện Long Thành",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db3c"
+  },
+  "code": "741",
+  "name": "Huyện Xuân Lộc",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db3d"
+  },
+  "code": "742",
+  "name": "Huyện Nhơn Trạch",
+  "provinceCode": "75",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db3e"
+  },
+  "code": "747",
+  "name": "Thành phố Vũng Tàu",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db3f"
+  },
+  "code": "748",
+  "name": "Thành phố Bà Rịa",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db40"
+  },
+  "code": "750",
+  "name": "Huyện Châu Đức",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db41"
+  },
+  "code": "751",
+  "name": "Huyện Xuyên Mộc",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db42"
+  },
+  "code": "753",
+  "name": "Huyện Long Đất",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db43"
+  },
+  "code": "754",
+  "name": "Thành phố Phú Mỹ",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db44"
+  },
+  "code": "755",
+  "name": "Huyện Côn Đảo",
+  "provinceCode": "77",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db45"
+  },
+  "code": "760",
+  "name": "Quận 1",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db46"
+  },
+  "code": "761",
+  "name": "Quận 12",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db47"
+  },
+  "code": "764",
+  "name": "Quận Gò Vấp",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db48"
+  },
+  "code": "765",
+  "name": "Quận Bình Thạnh",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db49"
+  },
+  "code": "766",
+  "name": "Quận Tân Bình",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db4a"
+  },
+  "code": "767",
+  "name": "Quận Tân Phú",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db4b"
+  },
+  "code": "768",
+  "name": "Quận Phú Nhuận",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db4c"
+  },
+  "code": "769",
+  "name": "Thành phố Thủ Đức",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db4d"
+  },
+  "code": "770",
+  "name": "Quận 3",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db4e"
+  },
+  "code": "771",
+  "name": "Quận 10",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db4f"
+  },
+  "code": "772",
+  "name": "Quận 11",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db50"
+  },
+  "code": "773",
+  "name": "Quận 4",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db51"
+  },
+  "code": "774",
+  "name": "Quận 5",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db52"
+  },
+  "code": "775",
+  "name": "Quận 6",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db53"
+  },
+  "code": "776",
+  "name": "Quận 8",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db54"
+  },
+  "code": "777",
+  "name": "Quận Bình Tân",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db55"
+  },
+  "code": "778",
+  "name": "Quận 7",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db56"
+  },
+  "code": "783",
+  "name": "Huyện Củ Chi",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db57"
+  },
+  "code": "784",
+  "name": "Huyện Hóc Môn",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db58"
+  },
+  "code": "785",
+  "name": "Huyện Bình Chánh",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db59"
+  },
+  "code": "786",
+  "name": "Huyện Nhà Bè",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db5a"
+  },
+  "code": "787",
+  "name": "Huyện Cần Giờ",
+  "provinceCode": "79",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db5b"
+  },
+  "code": "794",
+  "name": "Thành phố Tân An",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db5c"
+  },
+  "code": "795",
+  "name": "Thị xã Kiến Tường",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db5d"
+  },
+  "code": "796",
+  "name": "Huyện Tân Hưng",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db5e"
+  },
+  "code": "797",
+  "name": "Huyện Vĩnh Hưng",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db5f"
+  },
+  "code": "798",
+  "name": "Huyện Mộc Hóa",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db60"
+  },
+  "code": "799",
+  "name": "Huyện Tân Thạnh",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db61"
+  },
+  "code": "800",
+  "name": "Huyện Thạnh Hóa",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db62"
+  },
+  "code": "801",
+  "name": "Huyện Đức Huệ",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db63"
+  },
+  "code": "802",
+  "name": "Huyện Đức Hòa",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db64"
+  },
+  "code": "803",
+  "name": "Huyện Bến Lức",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db65"
+  },
+  "code": "804",
+  "name": "Huyện Thủ Thừa",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db66"
+  },
+  "code": "805",
+  "name": "Huyện Tân Trụ",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db67"
+  },
+  "code": "806",
+  "name": "Huyện Cần Đước",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db68"
+  },
+  "code": "807",
+  "name": "Huyện Cần Giuộc",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db69"
+  },
+  "code": "808",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "80",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db6a"
+  },
+  "code": "815",
+  "name": "Thành phố Mỹ Tho",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db6b"
+  },
+  "code": "816",
+  "name": "Thành phố Gò Công",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db6c"
+  },
+  "code": "817",
+  "name": "Thị xã Cai Lậy",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db6d"
+  },
+  "code": "818",
+  "name": "Huyện Tân Phước",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db6e"
+  },
+  "code": "819",
+  "name": "Huyện Cái Bè",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db6f"
+  },
+  "code": "820",
+  "name": "Huyện Cai Lậy",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db70"
+  },
+  "code": "821",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db71"
+  },
+  "code": "822",
+  "name": "Huyện Chợ Gạo",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db72"
+  },
+  "code": "823",
+  "name": "Huyện Gò Công Tây",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db73"
+  },
+  "code": "824",
+  "name": "Huyện Gò Công Đông",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db74"
+  },
+  "code": "825",
+  "name": "Huyện Tân Phú Đông",
+  "provinceCode": "82",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db75"
+  },
+  "code": "829",
+  "name": "Thành phố Bến Tre",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db76"
+  },
+  "code": "831",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db77"
+  },
+  "code": "832",
+  "name": "Huyện Chợ Lách",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db78"
+  },
+  "code": "833",
+  "name": "Huyện Mỏ Cày Nam",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db79"
+  },
+  "code": "834",
+  "name": "Huyện Giồng Trôm",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db7a"
+  },
+  "code": "835",
+  "name": "Huyện Bình Đại",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db7b"
+  },
+  "code": "836",
+  "name": "Huyện Ba Tri",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db7c"
+  },
+  "code": "837",
+  "name": "Huyện Thạnh Phú",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db7d"
+  },
+  "code": "838",
+  "name": "Huyện Mỏ Cày Bắc",
+  "provinceCode": "83",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db7e"
+  },
+  "code": "842",
+  "name": "Thành phố Trà Vinh",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db7f"
+  },
+  "code": "844",
+  "name": "Huyện Càng Long",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db80"
+  },
+  "code": "845",
+  "name": "Huyện Cầu Kè",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db81"
+  },
+  "code": "846",
+  "name": "Huyện Tiểu Cần",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db82"
+  },
+  "code": "847",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db83"
+  },
+  "code": "848",
+  "name": "Huyện Cầu Ngang",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db84"
+  },
+  "code": "849",
+  "name": "Huyện Trà Cú",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db85"
+  },
+  "code": "850",
+  "name": "Huyện Duyên Hải",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db86"
+  },
+  "code": "851",
+  "name": "Thị xã Duyên Hải",
+  "provinceCode": "84",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db87"
+  },
+  "code": "855",
+  "name": "Thành phố Vĩnh Long",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db88"
+  },
+  "code": "857",
+  "name": "Huyện Long Hồ",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db89"
+  },
+  "code": "858",
+  "name": "Huyện Mang Thít",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db8a"
+  },
+  "code": "859",
+  "name": "Huyện  Vũng Liêm",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db8b"
+  },
+  "code": "860",
+  "name": "Huyện Tam Bình",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db8c"
+  },
+  "code": "861",
+  "name": "Thị xã Bình Minh",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db8d"
+  },
+  "code": "862",
+  "name": "Huyện Trà Ôn",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db8e"
+  },
+  "code": "863",
+  "name": "Huyện Bình Tân",
+  "provinceCode": "86",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db8f"
+  },
+  "code": "866",
+  "name": "Thành phố Cao Lãnh",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db90"
+  },
+  "code": "867",
+  "name": "Thành phố Sa Đéc",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db91"
+  },
+  "code": "868",
+  "name": "Thành phố Hồng Ngự",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db92"
+  },
+  "code": "869",
+  "name": "Huyện Tân Hồng",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db93"
+  },
+  "code": "870",
+  "name": "Huyện Hồng Ngự",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db94"
+  },
+  "code": "871",
+  "name": "Huyện Tam Nông",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db95"
+  },
+  "code": "872",
+  "name": "Huyện Tháp Mười",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db96"
+  },
+  "code": "873",
+  "name": "Huyện Cao Lãnh",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db97"
+  },
+  "code": "874",
+  "name": "Huyện Thanh Bình",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db98"
+  },
+  "code": "875",
+  "name": "Huyện Lấp Vò",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db99"
+  },
+  "code": "876",
+  "name": "Huyện Lai Vung",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db9a"
+  },
+  "code": "877",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "87",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db9b"
+  },
+  "code": "883",
+  "name": "Thành phố Long Xuyên",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db9c"
+  },
+  "code": "884",
+  "name": "Thành phố Châu Đốc",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db9d"
+  },
+  "code": "886",
+  "name": "Huyện An Phú",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db9e"
+  },
+  "code": "887",
+  "name": "Thị xã Tân Châu",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98db9f"
+  },
+  "code": "888",
+  "name": "Huyện Phú Tân",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba0"
+  },
+  "code": "889",
+  "name": "Huyện Châu Phú",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba1"
+  },
+  "code": "890",
+  "name": "Thị xã Tịnh Biên",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba2"
+  },
+  "code": "891",
+  "name": "Huyện Tri Tôn",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba3"
+  },
+  "code": "892",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba4"
+  },
+  "code": "893",
+  "name": "Huyện Chợ Mới",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba5"
+  },
+  "code": "894",
+  "name": "Huyện Thoại Sơn",
+  "provinceCode": "89",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba6"
+  },
+  "code": "899",
+  "name": "Thành phố Rạch Giá",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba7"
+  },
+  "code": "900",
+  "name": "Thành phố Hà Tiên",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba8"
+  },
+  "code": "902",
+  "name": "Huyện Kiên Lương",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dba9"
+  },
+  "code": "903",
+  "name": "Huyện Hòn Đất",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbaa"
+  },
+  "code": "904",
+  "name": "Huyện Tân Hiệp",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbab"
+  },
+  "code": "905",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbac"
+  },
+  "code": "906",
+  "name": "Huyện Giồng Riềng",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbad"
+  },
+  "code": "907",
+  "name": "Huyện Gò Quao",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbae"
+  },
+  "code": "908",
+  "name": "Huyện An Biên",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbaf"
+  },
+  "code": "909",
+  "name": "Huyện An Minh",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb0"
+  },
+  "code": "910",
+  "name": "Huyện Vĩnh Thuận",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb1"
+  },
+  "code": "911",
+  "name": "Thành phố Phú Quốc",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb2"
+  },
+  "code": "912",
+  "name": "Huyện Kiên Hải",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb3"
+  },
+  "code": "913",
+  "name": "Huyện U Minh Thượng",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb4"
+  },
+  "code": "914",
+  "name": "Huyện Giang Thành",
+  "provinceCode": "91",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb5"
+  },
+  "code": "916",
+  "name": "Quận Ninh Kiều",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb6"
+  },
+  "code": "917",
+  "name": "Quận Ô Môn",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb7"
+  },
+  "code": "918",
+  "name": "Quận Bình Thuỷ",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb8"
+  },
+  "code": "919",
+  "name": "Quận Cái Răng",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbb9"
+  },
+  "code": "923",
+  "name": "Quận Thốt Nốt",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbba"
+  },
+  "code": "924",
+  "name": "Huyện Vĩnh Thạnh",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbbb"
+  },
+  "code": "925",
+  "name": "Huyện Cờ Đỏ",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbbc"
+  },
+  "code": "926",
+  "name": "Huyện Phong Điền",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbbd"
+  },
+  "code": "927",
+  "name": "Huyện Thới Lai",
+  "provinceCode": "92",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbbe"
+  },
+  "code": "930",
+  "name": "Thành phố Vị Thanh",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbbf"
+  },
+  "code": "931",
+  "name": "Thành phố Ngã Bảy",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc0"
+  },
+  "code": "932",
+  "name": "Huyện Châu Thành A",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc1"
+  },
+  "code": "933",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc2"
+  },
+  "code": "934",
+  "name": "Huyện Phụng Hiệp",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc3"
+  },
+  "code": "935",
+  "name": "Huyện Vị Thuỷ",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc4"
+  },
+  "code": "936",
+  "name": "Huyện Long Mỹ",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc5"
+  },
+  "code": "937",
+  "name": "Thị xã Long Mỹ",
+  "provinceCode": "93",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc6"
+  },
+  "code": "941",
+  "name": "Thành phố Sóc Trăng",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc7"
+  },
+  "code": "942",
+  "name": "Huyện Châu Thành",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc8"
+  },
+  "code": "943",
+  "name": "Huyện Kế Sách",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbc9"
+  },
+  "code": "944",
+  "name": "Huyện Mỹ Tú",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbca"
+  },
+  "code": "945",
+  "name": "Huyện Cù Lao Dung",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbcb"
+  },
+  "code": "946",
+  "name": "Huyện Long Phú",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbcc"
+  },
+  "code": "947",
+  "name": "Huyện Mỹ Xuyên",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbcd"
+  },
+  "code": "948",
+  "name": "Thị xã Ngã Năm",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbce"
+  },
+  "code": "949",
+  "name": "Huyện Thạnh Trị",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbcf"
+  },
+  "code": "950",
+  "name": "Thị xã Vĩnh Châu",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd0"
+  },
+  "code": "951",
+  "name": "Huyện Trần Đề",
+  "provinceCode": "94",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd1"
+  },
+  "code": "954",
+  "name": "Thành phố Bạc Liêu",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd2"
+  },
+  "code": "956",
+  "name": "Huyện Hồng Dân",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd3"
+  },
+  "code": "957",
+  "name": "Huyện Phước Long",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd4"
+  },
+  "code": "958",
+  "name": "Huyện Vĩnh Lợi",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd5"
+  },
+  "code": "959",
+  "name": "Thị xã Giá Rai",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd6"
+  },
+  "code": "960",
+  "name": "Huyện Đông Hải",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd7"
+  },
+  "code": "961",
+  "name": "Huyện Hoà Bình",
+  "provinceCode": "95",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd8"
+  },
+  "code": "964",
+  "name": "Thành phố Cà Mau",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbd9"
+  },
+  "code": "966",
+  "name": "Huyện U Minh",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbda"
+  },
+  "code": "967",
+  "name": "Huyện Thới Bình",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbdb"
+  },
+  "code": "968",
+  "name": "Huyện Trần Văn Thời",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbdc"
+  },
+  "code": "969",
+  "name": "Huyện Cái Nước",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbdd"
+  },
+  "code": "970",
+  "name": "Huyện Đầm Dơi",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbde"
+  },
+  "code": "971",
+  "name": "Huyện Năm Căn",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbdf"
+  },
+  "code": "972",
+  "name": "Huyện Phú Tân",
+  "provinceCode": "96",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680f0b502efce763aa98dbe0"
+  },
+  "code": "973",
+  "name": "Huyện Ngọc Hiển",
+  "provinceCode": "96",
+  "__v": 0
+}]

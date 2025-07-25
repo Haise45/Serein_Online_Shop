@@ -25,10 +25,12 @@ import {
 import { format, sub } from "date-fns";
 import { useState } from "react";
 import { useSettings } from "@/app/SettingsContext";
+import { useTranslations } from "next-intl";
 
 export default function AdminDashboardClient() {
   // *** LẤY THÔNG TIN TIỀN TỆ TỪ CONTEXT ***
   const { displayCurrency, rates } = useSettings();
+  const t = useTranslations("AdminDashboard");
 
   const [dateRange, setDateRange] = useState({
     // Mặc định lọc 7 ngày qua
@@ -55,7 +57,7 @@ export default function AdminDashboardClient() {
       <CRow>
         <CCol sm={6} lg={3}>
           <StatsCard
-            title="Doanh thu"
+            title={t("stats.revenue")}
             value={statsData?.totalRevenue}
             isLoading={isLoadingStats}
             color="success"
@@ -67,7 +69,7 @@ export default function AdminDashboardClient() {
         </CCol>
         <CCol sm={6} lg={3}>
           <StatsCard
-            title="Đơn hàng mới"
+            title={t("stats.newOrders")}
             value={statsData?.totalOrders}
             isLoading={isLoadingStats}
             color="info"
@@ -76,7 +78,7 @@ export default function AdminDashboardClient() {
         </CCol>
         <CCol sm={6} lg={3}>
           <StatsCard
-            title="Khách hàng mới"
+            title={t("stats.newCustomers")}
             value={statsData?.newUsers}
             isLoading={isLoadingStats}
             color="warning"
@@ -85,7 +87,7 @@ export default function AdminDashboardClient() {
         </CCol>
         <CCol sm={6} lg={3}>
           <StatsCard
-            title="Tổng sản phẩm"
+            title={t("stats.totalProducts")}
             value={statsData?.totalProducts}
             isLoading={isLoadingStats}
             color="primary"
@@ -99,21 +101,21 @@ export default function AdminDashboardClient() {
         <CCol lg={7}>
           <CCard className="h-100 shadow-sm">
             <CCardHeader className="d-flex justify-content-between align-items-center">
-              <span>Thống kê Số lượng</span>
+              <span>{t("quantityChart.title")}</span>
               <CButtonGroup role="group" size="sm">
                 <CButton
                   color={barChartMode === "orders" ? "primary" : "secondary"}
                   variant="outline"
                   onClick={() => setBarChartMode("orders")}
                 >
-                  Theo Đơn hàng
+                  {t("quantityChart.byOrders")}
                 </CButton>
                 <CButton
                   color={barChartMode === "products" ? "primary" : "secondary"}
                   variant="outline"
                   onClick={() => setBarChartMode("products")}
                 >
-                  Theo Sản phẩm
+                  {t("quantityChart.byProducts")}
                 </CButton>
               </CButtonGroup>
             </CCardHeader>

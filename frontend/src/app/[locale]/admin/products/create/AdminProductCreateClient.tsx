@@ -13,6 +13,7 @@ import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import { useCreateAdminProduct } from "@/lib/react-query/productQueries";
 import { useUploadImages } from "@/lib/react-query/uploadQueries";
 import { buildCategoryTree, flattenTreeForSelect } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 // --- Import các types ---
 import {
@@ -61,11 +62,15 @@ interface ColorImageMap {
 
 // --- Component Chính ---
 export default function AdminProductCreateClient() {
+  const t = useTranslations("AdminProductForm");
+  const tValidation = useTranslations("AdminProductForm.validation");
   const router = useRouter();
 
   // --- States cho Form ---
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [i18nData, setI18nData] = useState({
+    name: { vi: "", en: "" },
+    description: { vi: "", en: "" },
+  });
   const [price, setPrice] = useState<number>(0);
   const [salePrice, setSalePrice] = useState<number>(0);
   const [sku, setSku] = useState("");
@@ -104,6 +109,21 @@ export default function AdminProductCreateClient() {
   }, [categoriesPaginatedData]);
 
   // --- Handlers cho thuộc tính và giá trị ---
+
+  // --- HÀM ĐỂ XỬ LÝ THAY ĐỔI ĐA NGÔN NGỮ ---
+  const handleI18nFieldChange = (
+    field: "name" | "description",
+    locale: "vi" | "en",
+    value: string,
+  ) => {
+    setI18nData((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        [locale]: value,
+      },
+    }));
+  };
 
   // Khi admin check/uncheck một thuộc tính (VD: "Màu sắc")
   const handleAttributeToggle = (attributeId: string) => {
@@ -222,15 +242,13 @@ export default function AdminProductCreateClient() {
   const generateAllVariantSKUs = () => {
     // 1. Kiểm tra điều kiện đầu vào
     const baseSku =
-      sku || name.substring(0, 6).toUpperCase().replace(/\s/g, "");
+      sku || i18nData.name.vi.substring(0, 6).toUpperCase().replace(/\s/g, "");
     if (!baseSku) {
-      toast.error(
-        "Vui lòng nhập Tên sản phẩm hoặc SKU chính để tạo SKU hàng loạt.",
-      );
+      toast.error(t("toasts.baseSkuRequired"));
       return;
     }
     if (!availableAttributes) {
-      toast.error("Dữ liệu thuộc tính chưa sẵn sàng, vui lòng thử lại.");
+      toast.error(t("toasts.attributesNotReady"));
       return;
     }
 
@@ -283,11 +301,11 @@ export default function AdminProductCreateClient() {
 
     // 4. Cập nhật state
     setVariants(updatedVariants);
-    toast.success("Đã tạo SKU hàng loạt cho các biến thể!");
+    toast.success(t("toasts.bulkSkuSuccess"));
   };
 
   const generateSKU = () => {
-    const namePart = name.substring(0, 3).toUpperCase();
+    const namePart = i18nData.name.vi.substring(0, 3).toUpperCase();
     const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
     setSku(`${namePart}-${randomPart}`);
   };
@@ -295,13 +313,13 @@ export default function AdminProductCreateClient() {
   const handleImageUpload = (files: File[], colorValueId?: string) => {
     if (files.length === 0) return;
     setIsUploading(true);
-    const toastId = toast.loading(`Đang tải ảnh lên...`);
+    const toastId = toast.loading(t("toasts.uploading"));
 
     uploadImagesMutation.mutate(
       { files, area: "products" },
       {
         onSuccess: (data) => {
-          toast.success("Tải ảnh lên thành công!", { id: toastId });
+          toast.success(t("toasts.uploadSuccess"), { id: toastId });
           if (colorValueId) {
             setColorImages((prev) => ({
               ...prev,
@@ -314,7 +332,7 @@ export default function AdminProductCreateClient() {
             setImages((prev) => [...prev, ...data.imageUrls]);
           }
         },
-        onError: () => toast.error("Tải ảnh thất bại.", { id: toastId }),
+        onError: () => toast.error(t("toasts.uploadError"), { id: toastId }),
         onSettled: () => setIsUploading(false),
       },
     );
@@ -333,30 +351,46 @@ export default function AdminProductCreateClient() {
 
   const validateForm = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = "Tên sản phẩm là bắt buộc.";
-    if (!category) newErrors.category = "Vui lòng chọn danh mục.";
+
+    if (!i18nData.name.vi.trim())
+      newErrors.name_vi = tValidation("nameRequired", { locale: "Tiếng Việt" });
+    if (!i18nData.name.en.trim())
+      newErrors.name_en = tValidation("nameRequired", { locale: "English" });
+
+    if (!category) newErrors.category = tValidation("categoryRequired");
+
     if (isNaN(price) || price < 0)
-      newErrors.price = "Giá sản phẩm không hợp lệ.";
-    if (images.length === 0)
-      newErrors.images = "Cần ít nhất một ảnh chính cho sản phẩm.";
+      newErrors.price = tValidation("priceInvalid");
+
+    if (images.length === 0) newErrors.images = tValidation("imagesRequired");
+
     variants.forEach((v, i) => {
       if (!v.sku.trim())
-        newErrors[`variant_sku_${i}`] = "SKU biến thể là bắt buộc.";
+        newErrors[`variant_sku_${i}`] = tValidation("variantSkuRequired");
     });
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [name, category, price, images, variants]);
+  }, [
+    i18nData.name.vi,
+    i18nData.name.en,
+    category,
+    price,
+    images.length,
+    variants,
+    tValidation,
+  ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error("Vui lòng kiểm tra lại các trường thông tin bắt buộc.");
+      toast.error(t("toasts.validationError"));
       return;
     }
 
     const productData: ProductCreationData = {
-      name,
-      description,
+      name: i18nData.name,
+      description: i18nData.description,
       price,
       category,
       images,
@@ -389,11 +423,10 @@ export default function AdminProductCreateClient() {
       <CRow>
         <CCol xs={12} lg={8}>
           <ProductInfoCard
-            name={name}
-            setName={setName}
-            description={description}
-            setDescription={setDescription}
-            error={errors.name}
+            name={i18nData.name}
+            description={i18nData.description}
+            onFieldChange={handleI18nFieldChange}
+            errors={errors}
           />
           <ProductImageCard
             images={images}
@@ -455,7 +488,7 @@ export default function AdminProductCreateClient() {
               {createProductMutation.isPending && (
                 <CSpinner size="sm" className="me-2" />
               )}
-              Lưu sản phẩm
+              {t("saveProduct")}
             </CButton>
           </div>
         </CCol>

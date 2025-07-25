@@ -1,0 +1,505 @@
+[{
+  "_id": {
+    "$oid": "684c325bc1631b1dbcd0dc21"
+  },
+  "name": "color",
+  "label": {
+    "vi": "Màu sắc",
+    "en": "Color"
+  },
+  "values": [
+    {
+      "value": {
+        "vi": "Đen",
+        "en": "Black"
+      },
+      "meta": {
+        "hex": "#000000"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc24"
+      }
+    },
+    {
+      "value": {
+        "vi": "Trắng",
+        "en": "White"
+      },
+      "meta": {
+        "hex": "#FFFFFF"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc25"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xám",
+        "en": "Gray"
+      },
+      "meta": {
+        "hex": "#A0AEC0"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc26"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xám Đậm",
+        "en": "Slate Gray"
+      },
+      "meta": {
+        "hex": "#4A5568"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc27"
+      }
+    },
+    {
+      "value": {
+        "vi": "Be",
+        "en": "Beige"
+      },
+      "meta": {
+        "hex": "#F5F5DC"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc28"
+      }
+    },
+    {
+      "value": {
+        "vi": "Đỏ",
+        "en": "Red"
+      },
+      "meta": {
+        "hex": "#E53E3E"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc29"
+      }
+    },
+    {
+      "value": {
+        "vi": "Cam",
+        "en": "Amber"
+      },
+      "meta": {
+        "hex": "#F59E0B"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc2a"
+      }
+    },
+    {
+      "value": {
+        "vi": "Vàng",
+        "en": "Yellow"
+      },
+      "meta": {
+        "hex": "#ECC94B"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc2b"
+      }
+    },
+    {
+      "value": {
+        "vi": "Nâu",
+        "en": "Brown"
+      },
+      "meta": {
+        "hex": "#A16207"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc2c"
+      }
+    },
+    {
+      "value": {
+        "vi": "Hồng",
+        "en": "Pink"
+      },
+      "meta": {
+        "hex": "#FBB6CE"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc2d"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Lá",
+        "en": "Green"
+      },
+      "meta": {
+        "hex": "#48BB78"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc2e"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Dương",
+        "en": "Blue"
+      },
+      "meta": {
+        "hex": "#3182CE"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc2f"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Navy",
+        "en": "Navy Blue"
+      },
+      "meta": {
+        "hex": "#1A365D"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc30"
+      }
+    },
+    {
+      "value": {
+        "vi": "Tím",
+        "en": "Purple"
+      },
+      "meta": {
+        "hex": "#805AD5"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc31"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Rêu",
+        "en": "Olive Green"
+      },
+      "meta": {
+        "hex": "#3A5F0B"
+      },
+      "_id": {
+        "$oid": "684cce7ac8c03cb7a7e90d6f"
+      }
+    },
+    {
+      "value": {
+        "vi": "Kem",
+        "en": "Cream"
+      },
+      "meta": {
+        "hex": "#FFFDD0"
+      },
+      "_id": {
+        "$oid": "684ccf75c8c03cb7a7e90e16"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Coban",
+        "en": "Coban Blue"
+      },
+      "meta": {
+        "hex": "#0047AB"
+      },
+      "_id": {
+        "$oid": "684ccfcec8c03cb7a7e90e9f"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Dương Đậm",
+        "en": "Slate Blue"
+      },
+      "meta": {
+        "hex": "#00008B"
+      },
+      "_id": {
+        "$oid": "684cd23dc8c03cb7a7e910ba"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Khói",
+        "en": "Steel Blue"
+      },
+      "meta": {
+        "hex": "#4A708B"
+      },
+      "_id": {
+        "$oid": "684cd379c8c03cb7a7e91112"
+      }
+    },
+    {
+      "value": {
+        "vi": "Xanh Lá Đậm",
+        "en": "Stale Green"
+      },
+      "meta": {
+        "hex": "#006400"
+      },
+      "_id": {
+        "$oid": "684cdde0c8c03cb7a7e911ee"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-13T14:14:51.074Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-13T07:04:26.260Z"
+  },
+  "slug": "color",
+  "__v": 13
+},
+{
+  "_id": {
+    "$oid": "684c325bc1631b1dbcd0dc36"
+  },
+  "name": "size",
+  "label": {
+    "vi": "Kích cỡ",
+    "en": "Size"
+  },
+  "values": [
+    {
+      "value": {
+        "vi": "XS",
+        "en": "XS"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc39"
+      }
+    },
+    {
+      "value": {
+        "vi": "S",
+        "en": "S"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc3a"
+      }
+    },
+    {
+      "value": {
+        "vi": "M",
+        "en": "M"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc3b"
+      }
+    },
+    {
+      "value": {
+        "vi": "L",
+        "en": "L"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc3c"
+      }
+    },
+    {
+      "value": {
+        "vi": "XL",
+        "en": "XL"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc3d"
+      }
+    },
+    {
+      "value": {
+        "vi": "2XL",
+        "en": "2XL"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc3e"
+      }
+    },
+    {
+      "value": {
+        "vi": "3XL",
+        "en": "3XL"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc3f"
+      }
+    },
+    {
+      "value": {
+        "vi": "4XL",
+        "en": "4XL"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc40"
+      }
+    },
+    {
+      "value": {
+        "vi": "28",
+        "en": "28"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc41"
+      }
+    },
+    {
+      "value": {
+        "vi": "29",
+        "en": "29"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc42"
+      }
+    },
+    {
+      "value": {
+        "vi": "30",
+        "en": "30"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc43"
+      }
+    },
+    {
+      "value": {
+        "vi": "31",
+        "en": "31"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc44"
+      }
+    },
+    {
+      "value": {
+        "vi": "32",
+        "en": "32"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc45"
+      }
+    },
+    {
+      "value": {
+        "vi": "33",
+        "en": "33"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc46"
+      }
+    },
+    {
+      "value": {
+        "vi": "34",
+        "en": "34"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc47"
+      }
+    },
+    {
+      "value": {
+        "vi": "35",
+        "en": "35"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc48"
+      }
+    },
+    {
+      "value": {
+        "vi": "36",
+        "en": "36"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc49"
+      }
+    },
+    {
+      "value": {
+        "vi": "38",
+        "en": "38"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc4a"
+      }
+    },
+    {
+      "value": {
+        "vi": "40",
+        "en": "40"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc4b"
+      }
+    },
+    {
+      "value": {
+        "vi": "42",
+        "en": "42"
+      },
+      "_id": {
+        "$oid": "684c325bc1631b1dbcd0dc4c"
+      }
+    },
+    {
+      "value": {
+        "vi": "37",
+        "en": "37"
+      },
+      "_id": {
+        "$oid": "684ccca2c8c03cb7a7e90c2a"
+      }
+    },
+    {
+      "value": {
+        "vi": "39",
+        "en": "39"
+      },
+      "_id": {
+        "$oid": "684cccb5c8c03cb7a7e90c68"
+      }
+    },
+    {
+      "value": {
+        "vi": "41",
+        "en": "41"
+      },
+      "_id": {
+        "$oid": "684cccbac8c03cb7a7e90cae"
+      }
+    },
+    {
+      "value": {
+        "vi": "26",
+        "en": "26"
+      },
+      "_id": {
+        "$oid": "684ccdbdc8c03cb7a7e90cf0"
+      }
+    },
+    {
+      "value": {
+        "vi": "27",
+        "en": "27"
+      },
+      "_id": {
+        "$oid": "684ccdc2c8c03cb7a7e90d34"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-13T14:14:51.258Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-01T14:20:38.587Z"
+  },
+  "slug": "size",
+  "__v": 7
+}]

@@ -23,8 +23,11 @@ import {
 } from "@coreui/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function AdminOrdersClient() {
+  const t = useTranslations("AdminOrders.list");
+  const tAdmin = useTranslations("Admin");
   const router = useRouter();
   const pathname = usePathname();
   const currentSearchParams = useSearchParams();
@@ -174,17 +177,17 @@ export default function AdminOrdersClient() {
       <CRow>
         <CCol xs={12}>
           <CCard className="mb-4">
-            <CCardHeader>Lỗi</CCardHeader>
+            <CCardHeader>{t("errorTitle")}</CCardHeader>
             <CCardBody className="p-5 text-center">
               <CIcon icon={cilWarning} size="xl" className="text-danger mb-3" />
-              <p className="text-danger">Không thể tải danh sách đơn hàng.</p>
+              <p className="text-danger">{t("errorMessage")}</p>
               <p className="text-muted text-sm">{error?.message}</p>
               <CButton
                 color="primary"
                 onClick={() => refetch()}
                 className="mt-3"
               >
-                Thử lại
+                {t("retryButton")}
               </CButton>
             </CCardBody>
           </CCard>
@@ -199,10 +202,10 @@ export default function AdminOrdersClient() {
         <CCard className="mb-4 shadow-sm">
           <CCardHeader className="border-b bg-white !p-4">
             <div className="d-flex align-items-center mb-3">
-              <h4 className="fw-semibold text-dark mb-0">Quản lý Đơn hàng</h4>
+              <h4 className="fw-semibold text-dark mb-0">{t("title")}</h4>
               {hasActiveFilters && (
                 <CBadge color="info" className="ms-2 px-2 py-1">
-                  {paginatedData?.totalOrders || 0} kết quả
+                  {t("results", { count: paginatedData?.totalOrders || 0 })}
                 </CBadge>
               )}
             </div>
@@ -240,9 +243,7 @@ export default function AdminOrdersClient() {
             ) : orders.length === 0 ? (
               <div className="p-5 text-center">
                 <p className="text-muted mb-0">
-                  {hasActiveFilters
-                    ? "Không tìm thấy đơn hàng nào phù hợp."
-                    : "Chưa có đơn hàng nào."}
+                  {hasActiveFilters ? t("noResultsWithFilter") : t("noOrdersYet")}
                 </p>
               </div>
             ) : (
@@ -270,7 +271,7 @@ export default function AdminOrdersClient() {
             limit={limit}
             onPageChange={setCurrentPage}
             onLimitChange={handleLimitChange}
-            itemType="đơn hàng"
+            itemType={tAdmin("breadcrumbs.orders", { count: 2 }).toLowerCase()}
             defaultLimitFromSettings={defaultLimitFromSettings}
           />
         </CCard>

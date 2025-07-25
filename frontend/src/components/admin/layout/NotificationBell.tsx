@@ -7,7 +7,7 @@ import {
   useMarkAllNotificationsAsRead,
   useMarkNotificationAsRead,
 } from "@/lib/react-query/notificationQueries";
-import { timeAgo } from "@/lib/utils";
+import RelativeTime from "@/components/shared/RelativeTime";
 import { RootState } from "@/store";
 import { Notification } from "@/types/notification";
 import {
@@ -36,98 +36,88 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
+import { useTranslations } from "next-intl";
 
 // Helper hiển thị icon cho từng loại notification
-export const getNotificationIcon = (type: Notification["type"]) => {
+export const getNotificationIcon = (
+  type: Notification["type"],
+  t: ReturnType<typeof useTranslations>,
+) => {
   const iconMap: Partial<
     Record<
       Notification["type"],
-      { icon: string[]; color: string; bgColor: string; label: string }
+      { icon: string[]; color: string; bgColor: string }
     >
   > = {
     NEW_USER_REGISTERED: {
       icon: cilUserFollow,
       color: "text-purple-500",
       bgColor: "bg-purple-50",
-      label: "Người dùng mới",
     },
     NEW_ORDER_PLACED: {
       icon: cilCart,
       color: "text-emerald-500",
       bgColor: "bg-emerald-50",
-      label: "Đơn hàng mới",
     },
     ORDER_STATUS_SHIPPED: {
       icon: cilTruck,
       color: "text-blue-500",
       bgColor: "bg-blue-50",
-      label: "Vận chuyển",
     },
     ORDER_STATUS_DELIVERED: {
       icon: cilCheck,
       color: "text-green-500",
       bgColor: "bg-green-50",
-      label: "Đã giao hàng",
     },
     ORDER_CANCELLATION_REQUESTED: {
       icon: cilX,
       color: "text-orange-500",
       bgColor: "bg-orange-50",
-      label: "Yêu cầu hủy đơn",
     },
     ORDER_REFUND_REQUESTED: {
       icon: cilX,
       color: "text-orange-500",
       bgColor: "bg-orange-50",
-      label: "Yêu cầu hoàn tiền",
     },
     ORDER_CANCELLATION_APPROVED: {
       icon: cilCheckAlt,
       color: "text-green-500",
       bgColor: "bg-green-50",
-      label: "Hủy đơn được duyệt",
     },
     ORDER_CANCELLATION_REJECTED: {
       icon: cilX,
       color: "text-red-500",
       bgColor: "bg-red-50",
-      label: "Hủy đơn bị từ chối",
     },
     ORDER_REFUND_APPROVED: {
       icon: cilCheckAlt,
       color: "text-green-500",
       bgColor: "bg-green-50",
-      label: "Hoàn tiền được duyệt",
     },
     ORDER_REFUND_REJECTED: {
       icon: cilX,
       color: "text-red-500",
       bgColor: "bg-red-50",
-      label: "Hoàn tiền bị từ chối",
     },
     PRODUCT_LOW_STOCK: {
       icon: cilBellExclamation,
       color: "text-orange-500",
       bgColor: "bg-orange-50",
-      label: "Sắp hết hàng",
     },
     PRODUCT_OUT_OF_STOCK: {
       icon: cilBellExclamation,
       color: "text-red-500",
       bgColor: "bg-red-50",
-      label: "Hết hàng",
     },
     NEW_REVIEW_SUBMITTED: {
       icon: cilCommentSquare,
       color: "text-amber-500",
       bgColor: "bg-amber-50",
-      label: "Đánh giá mới",
     },
     REVIEW_APPROVED: {
       icon: cilCheckAlt,
       color: "text-green-500",
       bgColor: "bg-green-50",
-      label: "Đánh giá được duyệt",
     },
   };
 
@@ -135,12 +125,14 @@ export const getNotificationIcon = (type: Notification["type"]) => {
     icon: cilBell,
     color: "text-gray-500",
     bgColor: "bg-gray-50",
-    label: "Thông báo",
   };
+  // Lấy label từ hàm dịch, fallback về UNKNOWN
+  const label = t(`labels.${type}`) || t("labels.UNKNOWN");
+
   return {
     icon: <CIcon icon={config.icon} className={`h-4 w-4 ${config.color}`} />,
     bgColor: config.bgColor,
-    label: config.label,
+    label: label,
   };
 };
 
@@ -162,6 +154,7 @@ interface ToastMessage {
 }
 
 const NotificationBell = () => {
+  const t = useTranslations("Admin.notifications");
   const queryClient = useQueryClient();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -211,7 +204,7 @@ const NotificationBell = () => {
   const handleNotificationReceived = useCallback(
     (newNotification: Notification) => {
       try {
-        const { icon } = getNotificationIcon(newNotification.type);
+        const { icon } = getNotificationIcon(newNotification.type, t);
         addToast({
           title: newNotification.title,
           message: newNotification.message,
@@ -231,7 +224,7 @@ const NotificationBell = () => {
         console.error("Error handling notification:", error);
       }
     },
-    [queryClient],
+    [queryClient, t],
   );
 
   // useEffect cho Socket.IO
@@ -282,14 +275,14 @@ const NotificationBell = () => {
     markAllAsReadMutation.mutate(undefined, {
       onSuccess: () => {
         addToast({
-          title: "Thành công",
-          message: "Đã đánh dấu tất cả thông báo là đã đọc.",
+          title: t("toastSuccessTitle"),
+          message: t("markAllAsReadSuccess"),
           color: "success",
           icon: <CIcon icon={cilCheckAlt} />,
         });
       },
     });
-  }, [markAllAsReadMutation]);
+  }, [markAllAsReadMutation, t]);
 
   const handleViewAllNotifications = useCallback(() => {
     setIsOpen(false);
@@ -314,7 +307,7 @@ const NotificationBell = () => {
             <CToastHeader closeButton>
               {toast.icon && <span className="me-2">{toast.icon}</span>}
               <strong className="me-auto">{toast.title}</strong>
-              <small>vừa xong</small>
+              <small>{t("toastJustNow")}</small>
             </CToastHeader>
             <CToastBody>{toast.message}</CToastBody>
           </CToast>
@@ -330,7 +323,7 @@ const NotificationBell = () => {
           isOpen && "bg-blue-50 text-blue-600",
           isAnimating && "cursor-not-allowed opacity-75",
         )}
-        title="Thông báo"
+        title={t("title")}
       >
         <CIcon
           icon={unreadCount && unreadCount > 0 ? cilBellExclamation : cilBell}
@@ -365,12 +358,12 @@ const NotificationBell = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="m-0 text-lg font-semibold text-white">
-                  Thông báo
+                  {t("title")}
                 </h3>
                 <span className="text-sm text-blue-100">
                   {(unreadCount ?? 0) > 0
-                    ? `${unreadCount} thông báo chưa đọc`
-                    : "Hiện chưa có thông báo nào"}
+                    ? t("unreadCount", { count: unreadCount ?? 0 })
+                    : t("noNew")}
                 </span>
               </div>
               {(unreadCount ?? 0) > 0 && (
@@ -385,7 +378,7 @@ const NotificationBell = () => {
                   ) : (
                     <CIcon icon={cilCheckAlt} className="h-4 w-4" />
                   )}
-                  <span>Đã đọc</span>
+                  <span>{t("markAllAsRead")}</span>
                 </button>
               )}
             </div>
@@ -395,7 +388,7 @@ const NotificationBell = () => {
             {isLoading && (
               <div className="flex items-center justify-center py-8">
                 <CSpinner size="sm" className="text-blue-500" />
-                <span className="ml-2 text-gray-500">Đang tải...</span>
+                <span className="ml-2 text-gray-500">{t("loading")}</span>
               </div>
             )}
             {!isLoading && notifications.length === 0 && (
@@ -403,17 +396,16 @@ const NotificationBell = () => {
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                   <CIcon icon={cilBell} className="h-8 w-8 text-gray-400" />
                 </div>
-                <p className="text-center text-gray-500">
-                  Không có thông báo mới
-                </p>
+                <p className="text-center text-gray-500">{t("emptyState")}</p>
                 <p className="mt-1 text-center text-sm text-gray-400">
-                  Khi có thông báo mới, chúng sẽ xuất hiện ở đây
+                  {t("emptyStateSubtitle")}
                 </p>
               </div>
             )}
             {notifications.map((notification) => {
               const { icon, bgColor, label } = getNotificationIcon(
                 notification.type,
+                t,
               );
               return (
                 <div
@@ -450,7 +442,7 @@ const NotificationBell = () => {
                             </p>
                             <div className="mt-2 flex items-center justify-between">
                               <span className="text-xs text-gray-400">
-                                {timeAgo(notification.createdAt)}
+                                <RelativeTime date={notification.createdAt} />
                               </span>
                               <span
                                 className={classNames(
@@ -489,9 +481,9 @@ const NotificationBell = () => {
               <button
                 onClick={handleViewAllNotifications}
                 className="flex w-full items-center justify-center space-x-2 rounded-lg px-4 py-2 text-center text-sm font-medium text-blue-600 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-700"
-                title="Xem tất cả thông báo"
+                title={t("viewAllTitle")}
               >
-                <span>Xem tất cả thông báo</span>
+                <span>{t("viewAll")}</span>
                 <CIcon icon={cilExternalLink} className="h-4 w-4" />
               </button>
             </div>

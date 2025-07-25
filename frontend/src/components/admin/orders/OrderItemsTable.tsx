@@ -16,6 +16,7 @@ import {
 } from "@coreui/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface OrderItemsTableProps {
   items: OrderItem[];
@@ -24,18 +25,17 @@ interface OrderItemsTableProps {
 const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ items }) => {
   // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
   const { displayCurrency, rates } = useSettings();
+  const t = useTranslations("AdminOrderDetail.itemsTable");
 
   return (
     <div className="overflow-x-auto">
       <CTable hover className="align-middle" style={{ minWidth: "700px" }}>
         <CTableHead>
           <CTableRow>
-            <CTableHeaderCell colSpan={2}>Sản phẩm</CTableHeaderCell>
-            <CTableHeaderCell className="text-end">Đơn giá</CTableHeaderCell>
-            <CTableHeaderCell className="text-center">
-              Số lượng
-            </CTableHeaderCell>
-            <CTableHeaderCell className="text-end">Thành tiền</CTableHeaderCell>
+            <CTableHeaderCell colSpan={2}>{t("colProduct")}</CTableHeaderCell>
+            <CTableHeaderCell className="text-end">{t("colPrice")}</CTableHeaderCell>
+            <CTableHeaderCell className="text-center">{t("colQty")}</CTableHeaderCell>
+            <CTableHeaderCell className="text-end">{t("colTotal")}</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>

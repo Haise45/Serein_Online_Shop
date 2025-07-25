@@ -1,7 +1,9 @@
+import { getLocalizedName } from "@/lib/utils";
 import { Attribute, Category } from "@/types";
 import { cilFilterX, cilPlus } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import { CButton, CCol, CFormInput, CFormSelect, CRow } from "@coreui/react";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import React from "react";
 
@@ -48,6 +50,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   selectedAttributeFilters,
   onAttributeChange,
 }) => {
+  const t = useTranslations("AdminProducts.filters");
+  const locale = useLocale() as "vi" | "en";
+
   return (
     <div className="mb-4">
       {/* Main Filters Row */}
@@ -57,7 +62,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           <CFormInput
             type="search"
             size="sm"
-            placeholder="Tìm theo tên, SKU..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border-gray-300"
@@ -71,15 +76,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
             className="border-gray-300"
-            aria-label="Lọc theo danh mục"
+            aria-label={t("allCategories")}
           >
-            <option value="">Tất cả danh mục</option>
+            <option value="">{t("allCategories")}</option>
             {isLoadingCategories ? (
-              <option>Đang tải...</option>
+              <option>{t("loading")}</option>
             ) : (
               categories.map((cat) => (
                 <option key={cat._id.toString()} value={cat.slug}>
-                  {cat.name}
+                  {getLocalizedName(cat.name, locale)}
                 </option>
               ))
             )}
@@ -91,7 +96,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           <CFormInput
             type="number"
             size="sm"
-            placeholder="Giá từ"
+            placeholder={t("priceFrom")}
             value={filterMinPrice}
             onChange={(e) => setFilterMinPrice(e.target.value)}
             className="border-gray-300"
@@ -102,7 +107,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           <CFormInput
             type="number"
             size="sm"
-            placeholder="Giá đến"
+            placeholder={t("priceTo")}
             value={filterMaxPrice}
             onChange={(e) => setFilterMaxPrice(e.target.value)}
             className="border-gray-300"
@@ -115,7 +120,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           <Link href="/admin/products/create" passHref>
             <CButton color="primary" size="sm" className="w-md-auto w-100">
               <CIcon icon={cilPlus} className="me-1" />
-              Thêm sản phẩm
+              {t("addProduct")}
             </CButton>
           </Link>
         </CCol>
@@ -130,11 +135,11 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             value={filterIsPublished}
             onChange={(e) => setFilterIsPublished(e.target.value)}
             className="border-gray-300"
-            aria-label="Lọc theo trạng thái công khai"
+             aria-label={t("publishedStatus")}
           >
-            <option value="">Công khai (Tất cả)</option>
-            <option value="true">Đã công khai</option>
-            <option value="false">Chưa công khai</option>
+            <option value="">{t("publishedStatus")}</option>
+            <option value="true">{t("published")}</option>
+            <option value="false">{t("unpublished")}</option>
           </CFormSelect>
         </CCol>
 
@@ -145,11 +150,11 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             value={filterIsActive}
             onChange={(e) => setFilterIsActive(e.target.value)}
             className="border-gray-300"
-            aria-label="Lọc theo trạng thái kích hoạt"
+            aria-label={t("activeStatus")}
           >
-            <option value="">Kích hoạt (Tất cả)</option>
-            <option value="true">Đang kích hoạt</option>
-            <option value="false">Ngừng kích hoạt</option>
+            <option value="">{t("activeStatus")}</option>
+            <option value="true">{t("active")}</option>
+            <option value="false">{t("inactive")}</option>
           </CFormSelect>
         </CCol>
 
@@ -170,12 +175,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
                 value={selectedAttributeFilters[attr.label] || ""}
                 onChange={(e) => onAttributeChange(attr.label, e.target.value)}
                 className="border-gray-300"
-                aria-label={`Lọc theo ${attr.label}`}
+                aria-label={t("filterByAttributeAriaLabel", { label: attr.label })}
               >
-                <option value="">Tất cả {attr.label.toLowerCase()}</option>
+                <option value="">{t("allAttributes", { label: getLocalizedName(attr.label, locale).toLowerCase() })}</option>
                 {attr.values.map((val) => (
-                  <option key={val._id} value={val.value}>
-                    {val.value}
+                  <option
+                    key={val._id}
+                    value={getLocalizedName(val.value, locale)}
+                  >
+                    {getLocalizedName(val.value, locale)}
                   </option>
                 ))}
               </CFormSelect>
@@ -190,11 +198,11 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             variant="outline"
             size="sm"
             onClick={clearFilters}
-            title="Xóa bộ lọc"
+            title={t("clearFiltersTitle")}
             className="px-3"
           >
             <CIcon icon={cilFilterX} className="me-1" />
-            Xóa lọc
+            {t("clearFilters")}
           </CButton>
         </CCol>
       </CRow>

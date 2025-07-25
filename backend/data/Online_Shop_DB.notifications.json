@@ -1,0 +1,4044 @@
+[{
+  "_id": {
+    "$oid": "6821ffc2b17dfb71caeb1987"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"BaoPhuoc45\" (Email: ayaseyuuki2003@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/6821ffc2b17dfb71caeb1984",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "6821ffc2b17dfb71caeb1984"
+    }
+  },
+  "readBy": [],
+  "createdAt": {
+    "$date": "2025-05-12T14:03:46.322Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-12T14:08:25.427Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6822c31865fe0b80c5257b27"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"BaoPhuoc45\" (Email: ayaseyuuki2003@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/6822c31865fe0b80c5257b24",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "6822c31865fe0b80c5257b24"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-13T03:57:12.635Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6822c3d465fe0b80c5257b30"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"BaoPhuoc45\" (Email: ayaseyuuki2003@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/6822c3d465fe0b80c5257b2d",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "6822c3d465fe0b80c5257b2d"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-13T04:00:20.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6823064261316b9fabac112b"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"BaoPhuoc45\" (Email: ayaseyuuki2003@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/6823064261316b9fabac1128",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "6823064261316b9fabac1128"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-13T08:43:46.177Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68234adc93dbf2053ca60241"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"BaoPhuoc45\" (Email: ayaseyuuki2003@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/68234adc93dbf2053ca6023e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "68234adc93dbf2053ca6023e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-13T13:36:28.499Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68245d71823148e2e96a3c2a"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Nguyễn Lê Bảo Phước\" (Email: haiseayasa2104@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/68245d71823148e2e96a3c27",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "68245d71823148e2e96a3c27"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-14T09:08:01.855Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6825ee72523f384147ac500f"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Bao Phuoc\" (Email: ayaseyuuki.2003@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/6825ee72523f384147ac500c",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "6825ee72523f384147ac500c"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-15T13:38:58.265Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6825efac523f384147ac501b"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Bảo Phước\" (Email: haiseayasa2104@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/6825efac523f384147ac5018",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "6825efac523f384147ac5018"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-15T13:44:12.122Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68283504ec1e0536a6154b77"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Nguyễn Lê Bảo Phước\" (Email: haiseayasa2104@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/68283504ec1e0536a6154b74",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "68283504ec1e0536a6154b74"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-17T07:04:36.491Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682835f2ec1e0536a6154cb8"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Nguyễn Lê Bảo Phước\" (Email: haiseayasa2104@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/682835f2ec1e0536a6154cb5",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-17T07:08:34.408Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6828c07c568ba8d5036e76a6"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #6e769e bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6828c078568ba8d5036e769e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6828c078568ba8d5036e769e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-17T16:59:40.062Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682ef37bc542a48aefb45273"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Phước Bảo\" (Email: nguyenvanphuong5646@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/682ef37ac542a48aefb45270",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682ef37ac542a48aefb45270"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-22T09:50:51.022Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682ef3f9c542a48aefb45498"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"hoàng\" (Email: nguyenhoang01656140986@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/682ef3f9c542a48aefb45495",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682ef3f9c542a48aefb45495"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-22T09:52:57.583Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683052f70c36599fe03b3308"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #3b3300 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683052f60c36599fe03b3300",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683052f60c36599fe03b3300"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T10:50:31.512Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683054737b990b9305f0cb69"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #f0cb61 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 2.980.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683054727b990b9305f0cb61",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683054727b990b9305f0cb61"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T10:56:51.545Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683055aaf95cc64e7e525802"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #5257fa bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683055a6f95cc64e7e5257fa",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683055a6f95cc64e7e5257fa"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T11:02:02.370Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68305a8d23b806e3d105ce5c"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #05ce54 bởi \"Khách (Email: nguyenvanphuong5646@gmail.com)\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68305a8a23b806e3d105ce54",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68305a8a23b806e3d105ce54"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T11:22:53.965Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68305ada23b806e3d105ce64"
+  },
+  "title": "Người dùng mới đăng ký",
+  "message": "Người dùng \"Phước Bảo\" (Email: nguyenvanphuong5646@gmail.com) vừa đăng ký tài khoản.",
+  "type": "NEW_USER_REGISTERED",
+  "link": "/admin/users/68305ada23b806e3d105ce61",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "68305ada23b806e3d105ce61"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T11:24:10.693Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68307dbc970fb9661419a99a"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #19a991 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.250.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68307dbb970fb9661419a991",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68307dbb970fb9661419a991"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T13:53:00.261Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68307eaeb981e4a02bf1e8fc"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #f1e8f4 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68307eadb981e4a02bf1e8f4",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68307eadb981e4a02bf1e8f4"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T13:57:02.062Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68307f71b985c2f5791dd73b"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #1dd733 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68307f6db985c2f5791dd733",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68307f6db985c2f5791dd733"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-23T14:00:17.139Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683126e2c94cf4ce5750dac2"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #50dabb bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683126e0c94cf4ce5750dabb",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683126e0c94cf4ce5750dabb"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-24T01:54:42.610Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68312bfe8bd164c29929726e"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #297265 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 2.690.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68312bfb8bd164c299297265",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68312bfb8bd164c299297265"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-24T02:16:30.758Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6833d91f4fecc26ab3f149bd"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #f149b4 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6833d91c4fecc26ab3f149b4",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6833d91c4fecc26ab3f149b4"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T02:59:43.285Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6833d9574fecc26ab3f149f8"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #f149ef bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6833d9534fecc26ab3f149ef",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6833d9534fecc26ab3f149ef"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T03:00:39.388Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68342141a44498d2c9b1cf8d"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #b1cf82 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 2.402.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6834213ea44498d2c9b1cf82",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6834213ea44498d2c9b1cf82"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T08:07:29.242Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6834219ea44498d2c9b1d053"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #b1d048 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 2.402.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6834219ba44498d2c9b1d048",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6834219ba44498d2c9b1d048"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T08:09:02.018Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68347b499d496db4f75b2a5c"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #5b2a50 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.690.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68347b469d496db4f75b2a50",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68347b469d496db4f75b2a50"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T14:31:37.402Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68348016fd25e8925187fab8"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #87faaf bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68348013fd25e8925187faaf",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68348013fd25e8925187faaf"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T14:52:06.100Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683482d34261870f598ce606"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #8ce5fc bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 880.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683482d04261870f598ce5fc",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "683482d04261870f598ce5fc"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-26T15:03:47.656Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68353b2dee5ca6fea26ce65b"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #6ce653 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 2.400.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68353b2aee5ca6fea26ce653",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68353b2aee5ca6fea26ce653"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T04:10:21.014Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683540e5ee5ca6fea26ce6b0"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #6ce6a8 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 360.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683540e2ee5ca6fea26ce6a8",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683540e2ee5ca6fea26ce6a8"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T04:34:45.179Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68354c0423f9fc3056fca93f"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fca936 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68354c0223f9fc3056fca936",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68354c0223f9fc3056fca936"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T05:22:12.671Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68354c2d23f9fc3056fcaa2c"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcaa23 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68354c2a23f9fc3056fcaa23",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68354c2a23f9fc3056fcaa23"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T05:22:53.868Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683558a723f9fc3056fcab53"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcab4a bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 280.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683558a523f9fc3056fcab4a",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "683558a523f9fc3056fcab4a"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T06:16:07.649Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683565e523f9fc3056fcace4"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcacdb bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 220.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683565e223f9fc3056fcacdb",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "683565e223f9fc3056fcacdb"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T07:12:37.705Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835671823f9fc3056fcae3d"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcae34 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 185.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835671523f9fc3056fcae34",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6835671523f9fc3056fcae34"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T07:17:44.764Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68356bf123f9fc3056fcaf86"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcaf7d bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 190.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68356bee23f9fc3056fcaf7d",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68356bee23f9fc3056fcaf7d"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T07:38:25.163Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68356c3c23f9fc3056fcafe0"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcafd7 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 240.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68356c3a23f9fc3056fcafd7",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68356c3a23f9fc3056fcafd7"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T07:39:40.764Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68356c6823f9fc3056fcb01b"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcb012 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68356c6623f9fc3056fcb012",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68356c6623f9fc3056fcb012"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T07:40:24.776Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68356fbb23f9fc3056fcb0f2"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcb0e9 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 350.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68356fb923f9fc3056fcb0e9",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68356fb923f9fc3056fcb0e9"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T07:54:35.901Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68357f2923f9fc3056fcb3f9"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #fcb3ef bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 960.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68357f2623f9fc3056fcb3ef",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68357f2623f9fc3056fcb3ef"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T09:00:25.794Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835b9f95991fc52de4fba74"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #4fba6b bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835b9f75991fc52de4fba6b",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6835b9f75991fc52de4fba6b"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T13:11:21.849Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835ba674ed0d03c1e2e0b3f"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #2e0b36 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835ba644ed0d03c1e2e0b36",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6835ba644ed0d03c1e2e0b36"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T13:13:11.282Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835bf07fe38126a81cb9613"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #cb9609 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 460.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835bf04fe38126a81cb9609",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6835bf04fe38126a81cb9609"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T13:32:55.964Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835c171fe38126a81cb9717"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #cb970e bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 550.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835c16efe38126a81cb970e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6835c16efe38126a81cb970e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T13:43:13.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835c206fe38126a81cb980c"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #cb9802 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 960.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835c203fe38126a81cb9802",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6835c203fe38126a81cb9802"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T13:45:42.297Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835d29ffe38126a81cb990a"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #cb9901 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 190.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835d29dfe38126a81cb9901",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6835d29dfe38126a81cb9901"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T14:56:31.429Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6835d4b050a5108557f7abe4"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #f7abdb bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 240.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6835d4ad50a5108557f7abdb",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6835d4ad50a5108557f7abdb"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-27T15:05:20.002Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6836eb1df35d928d7b1ab40d"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #1ab402 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.630.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6836eb1af35d928d7b1ab402",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6836eb1af35d928d7b1ab402"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-28T10:53:17.357Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6836eb8ef35d928d7b1ab561"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #1ab559 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 560.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6836eb8bf35d928d7b1ab559",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6836eb8bf35d928d7b1ab559"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-28T10:55:10.510Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683861ebcfcc925ce0ee95ef"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #ee95e4 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.152.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683861e8cfcc925ce0ee95e4",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683861e8cfcc925ce0ee95e4"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-29T13:32:27.514Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683862bdcfcc925ce0ee974d"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #ee9744 bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 550.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683862b9cfcc925ce0ee9744",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "683862b9cfcc925ce0ee9744"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-29T13:35:57.055Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683a5ba05411519bf9339ee4"
+  },
+  "title": "Đơn hàng #1dd733 đã giao thành công",
+  "message": "Khách hàng \"BaoPhuoc\" đã xác nhận nhận hàng.",
+  "type": "ORDER_STATUS_DELIVERED",
+  "link": "/admin/orders/68307f6db985c2f5791dd733",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68307f6db985c2f5791dd733"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-31T01:30:08.138Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683a64035411519bf933a143"
+  },
+  "title": "Đơn hàng #ee95e4 đã giao thành công",
+  "message": "Khách hàng \"BaoPhuoc\" đã xác nhận nhận hàng.",
+  "type": "ORDER_STATUS_DELIVERED",
+  "link": "/admin/orders/683861e8cfcc925ce0ee95e4",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "683861e8cfcc925ce0ee95e4"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-05-31T02:05:55.664Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683d55fe7d925071b423c0c0"
+  },
+  "title": "Yêu cầu hủy đơn hàng #d4a8fb",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hủy đơn. Lý do: Hiện tại tôi không muốn mua đơn hàng này nữa.",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/681a16b575d59273e0d4a8fb",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "681a16b575d59273e0d4a8fb"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-02T07:42:54.806Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683d77951ef3949f8b41e163"
+  },
+  "title": "Yêu cầu hoàn tiền đơn #5b16af",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hoàn tiền. Lý do: Hiện tại sản phẩm đang có vấn đề.",
+  "type": "ORDER_REFUND_REQUESTED",
+  "link": "/admin/orders/681d61e8c2feb6f62b5b16af",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "681d61e8c2feb6f62b5b16af"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-02T10:06:13.767Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683e83128bae9eb669841c5c"
+  },
+  "title": "Đánh giá sản phẩm mới",
+  "message": "Có đánh giá mới cho sản phẩm \"Áo Croptop MLB Korea Women's Basic Varsity Cultive LA Dodgers\" từ người dùng \"BaoPhuoc\".",
+  "type": "NEW_REVIEW_SUBMITTED",
+  "link": "/admin/reviews?isApproved=false",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "productId": {
+      "$oid": "681d9d2c878f5d7af823b8a7"
+    },
+    "reviewId": {
+      "$oid": "683e83118bae9eb669841c59"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-03T05:07:30.034Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683e8bcd8960c1cecc515e25"
+  },
+  "title": "Đánh giá sản phẩm mới",
+  "message": "Có đánh giá mới cho sản phẩm \"Áo Sơ Mi Nam Caro Ngắn Tay Form Regular\" từ người dùng \"BaoPhuoc\".",
+  "type": "NEW_REVIEW_SUBMITTED",
+  "link": "/admin/reviews?isApproved=false",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "productId": {
+      "$oid": "6818db68cece2901692ae843"
+    },
+    "reviewId": {
+      "$oid": "683e8bcd8960c1cecc515e22"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-03T05:44:45.356Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683e99848960c1cecc515e85"
+  },
+  "title": "Đánh giá sản phẩm mới",
+  "message": "Có đánh giá mới cho sản phẩm \"Áo Sơ Mi Nam Caro Ngắn Tay Form Regular\" từ người dùng \"BaoPhuoc\".",
+  "type": "NEW_REVIEW_SUBMITTED",
+  "link": "/admin/reviews?isApproved=false",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "productId": {
+      "$oid": "6818db68cece2901692ae843"
+    },
+    "reviewId": {
+      "$oid": "683e99848960c1cecc515e82"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-03T06:43:16.776Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683ef99aa31c958643cb8307"
+  },
+  "title": "Đánh giá sản phẩm mới",
+  "message": "Có đánh giá mới cho sản phẩm \"Áo Croptop MLB Korea Women's Basic Varsity Cultive LA Dodgers\" từ người dùng \"BaoPhuoc\".",
+  "type": "NEW_REVIEW_SUBMITTED",
+  "link": "/admin/reviews?isApproved=false",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "productId": {
+      "$oid": "681d9d2c878f5d7af823b8a7"
+    },
+    "reviewId": {
+      "$oid": "683ef99aa31c958643cb8304"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-03T13:33:14.567Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "683fefa18cb5588d2ee980fe"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #e980f6 bởi \"Khách (Email: dasda@gmail.com)\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/683fef9e8cb5588d2ee980f6",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "683fef9e8cb5588d2ee980f6"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-04T07:02:57.088Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68404a4bfddf1d6a375d3e7e"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #5d3e75 bởi \"BaoPhuoc\" vừa được đặt. Tổng tiền: 230.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68404a47fddf1d6a375d3e75",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68404a47fddf1d6a375d3e75"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-04T13:29:47.149Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T04:37:37.756Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6847d8f1030d2a74b104a81b"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #04a813 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6847d8ee030d2a74b104a813",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6847d8ee030d2a74b104a813"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T07:04:17.961Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T07:06:46.386Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6847da23030d2a74b104a948"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #04a940 bởi \"Khách (Email: haiseayasa2104@gmail.com)\" vừa được đặt. Tổng tiền: 460.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6847da20030d2a74b104a940",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6847da20030d2a74b104a940"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T07:09:23.352Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T07:17:24.544Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6847f9e53cc8568f67dc7ded"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #dc7de5 bởi \"Khách (Email: haiseayasa2104@gmail.com)\" vừa được đặt. Tổng tiền: 240.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6847f9e23cc8568f67dc7de5",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6847f9e23cc8568f67dc7de5"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T09:24:53.310Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T09:34:18.582Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6847fbc43cc8568f67dc7f92"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #dc7f88 bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 1.490.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6847fbc23cc8568f67dc7f88",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6847fbc23cc8568f67dc7f88"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T09:32:52.963Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T09:34:18.582Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684834743cc8568f67dc9154"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #dc9145 bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 1.200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/684834713cc8568f67dc9145",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "684834713cc8568f67dc9145"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T13:34:44.392Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T13:58:58.144Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684838fa3cc8568f67dc931c"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #dc930e bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 360.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/684838f73cc8568f67dc930e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "684838f73cc8568f67dc930e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T13:54:02.719Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T13:58:58.144Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68483a423cc8568f67dc9481"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #dc9478 bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 310.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68483a3f3cc8568f67dc9478",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "68483a3f3cc8568f67dc9478"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T13:59:30.010Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T14:00:41.145Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68483b7b3cc8568f67dc967e"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #dc9675 bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt. Tổng tiền: 230.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68483b793cc8568f67dc9675",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "68483b793cc8568f67dc9675"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-10T14:04:43.880Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-10T14:05:02.803Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684937464f3bfae8246175e1"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #6175d6 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 2.880.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/684937434f3bfae8246175d6",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "684937434f3bfae8246175d6"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-11T07:59:02.110Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-11T08:23:23.345Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684937d04f3bfae8246176aa"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #6176a2 bởi \"Khách (Email: phuocnlb@devcamp.edu.vn)\" vừa được đặt. Tổng tiền: 240.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/684937ce4f3bfae8246176a2",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "684937ce4f3bfae8246176a2"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-11T08:01:20.327Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-11T08:23:23.345Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68493da44f3bfae824617abf"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #617ab7 bởi \"Khách (Email: haiseayasa2104@gmail.com)\" vừa được đặt. Tổng tiền: 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68493da14f3bfae824617ab7",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68493da14f3bfae824617ab7"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-11T08:26:12.776Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-11T08:33:56.891Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684940bc4f3bfae824617dab"
+  },
+  "title": "Đơn hàng mới được đặt",
+  "message": "Đơn hàng #617da3 bởi \"Khách (Email: haiseayasa2104@gmail.com)\" vừa được đặt. Tổng tiền: 230.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/684940ba4f3bfae824617da3",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "684940ba4f3bfae824617da3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-11T08:39:24.657Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-11T08:39:34.445Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684d7e83d73abadc5ad36ea9"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 6).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-14T13:52:03.417Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684d7e92d73abadc5ad36ef0"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-14T13:52:18.964Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-14T13:52:44.985Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684d7ebbd73abadc5ad36f7a"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 6).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-14T13:52:59.664Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684d7ed5d73abadc5ad36fc1"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3b)\" (SKU: AOSOMITAYDAY-XN-M) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 7).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-14T13:53:25.106Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684d8ab9d73abadc5ad373b3"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 10).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-14T14:44:09.282Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684d8ae4d73abadc5ad373fa"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 6).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-14T14:44:52.775Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684fc5beee0590e92c78d117"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 1).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T07:20:30.829Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684fcb91ee0590e92c78d289"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 5).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T07:45:21.476Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684fcba0ee0590e92c78d2f8"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 8).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T07:45:36.893Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684fcbc9ee0590e92c78d4a4"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 3).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T07:46:17.175Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684fd69eee0590e92c78d73e"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 2).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T08:32:30.184Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685012603fbbab4335828bc2"
+  },
+  "title": "Đơn hàng mới #828bb9",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 220.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6850125c3fbbab4335828bb9",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6850125c3fbbab4335828bb9"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T12:47:28.058Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685014b23fbbab4335828d85"
+  },
+  "title": "Đơn hàng mới #828d7e",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685014af3fbbab4335828d7e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "685014af3fbbab4335828d7e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T12:57:22.090Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6850193d3fbbab4335828f27"
+  },
+  "title": "Đơn hàng mới #828f1f",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6850193b3fbbab4335828f1f",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6850193b3fbbab4335828f1f"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:16:45.624Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68501df951c9f805d89a1e5c"
+  },
+  "title": "Đơn hàng mới #9a1e53",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68501df651c9f805d89a1e53",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68501df651c9f805d89a1e53"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:36:57.208Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68501e5151c9f805d89a1ff9"
+  },
+  "title": "Đơn hàng mới #9a1ff0",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 400.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68501e4f51c9f805d89a1ff0",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68501e4f51c9f805d89a1ff0"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:38:25.904Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68501ffc201e6eaefcd0a492"
+  },
+  "title": "Đơn hàng mới #d0a48b",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 310.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68501ffa201e6eaefcd0a48b",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68501ffa201e6eaefcd0a48b"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:45:32.479Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68502220201e6eaefcd0a4f3"
+  },
+  "title": "Đơn hàng mới #d0a4ec",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 220.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6850221d201e6eaefcd0a4ec",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6850221d201e6eaefcd0a4ec"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:54:40.169Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685022a0201e6eaefcd0a658"
+  },
+  "title": "Đơn hàng mới #d0a651",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 560.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6850229e201e6eaefcd0a651",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6850229e201e6eaefcd0a651"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:56:48.855Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68502332201e6eaefcd0a70e"
+  },
+  "title": "Đơn hàng mới #d0a707",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6850232f201e6eaefcd0a707",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "6850232f201e6eaefcd0a707"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T13:59:14.137Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685023c9201e6eaefcd0a860"
+  },
+  "title": "Đơn hàng mới #d0a859",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 250.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685023c6201e6eaefcd0a859",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "685023c6201e6eaefcd0a859"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T14:01:45.093Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68502c0f201e6eaefcd0b05d"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (684cd379c8c03cb7a7e91112/684c325bc1631b1dbcd0dc3a)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 6).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T14:37:03.969Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68502e874547543c3c8a03b1"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 3).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T14:47:35.536Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-16T14:47:46.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68502e9e4547543c3c8a0431"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 8).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-16T14:47:58.295Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6851310fdbf29bd78ffb60b8"
+  },
+  "title": "Đơn hàng #d0a859 đã giao thành công",
+  "message": "Khách hàng \"BaoPhuoc\" đã xác nhận nhận hàng.",
+  "type": "ORDER_STATUS_DELIVERED",
+  "link": "/admin/orders/685023c6201e6eaefcd0a859",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "685023c6201e6eaefcd0a859"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T09:10:39.931Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516a79a3308580f6bf750e"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 8).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T13:15:37.332Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516a81a3308580f6bf7587"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T13:15:45.405Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516d5ca3308580f6bf7766"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / M)\" (SKU: AOSOMITAYDAY-XN-M) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T13:27:56.706Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516d64a3308580f6bf77df"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / L)\" (SKU: AOSOMITAYDAY-XN-L) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T13:28:04.085Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516d70a3308580f6bf7858"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / XL)\" (SKU: AOSOMITAYDAY-XN-XL) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T13:28:16.355Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68516d7aa3308580f6bf78d1"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / 2XL)\" (SKU: AOSOMITAYDAY-XN-2XL) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-17T13:28:26.052Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68523b7e9d3abb96a0a769a0"
+  },
+  "title": "Yêu cầu hủy đơn hàng #d0a707",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hủy đơn. Lý do: Hiện tại không thích sản phẩm này nữa.",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/6850232f201e6eaefcd0a707",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6850232f201e6eaefcd0a707"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T04:07:26.645Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68523b899d3abb96a0a769bc"
+  },
+  "title": "Yêu cầu hủy đơn hàng #9a1e53",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hủy đơn. Lý do: Hiện tại không thích sản phẩm này nữa.",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/68501df651c9f805d89a1e53",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68501df651c9f805d89a1e53"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T04:07:37.601Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-18T04:07:46.514Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68523ec49d3abb96a0a76b0b"
+  },
+  "title": "Yêu cầu hủy đơn hàng #d0a4ec",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hủy đơn. Lý do: Hiện tại không thích món hàng này nữa",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/6850221d201e6eaefcd0a4ec",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6850221d201e6eaefcd0a4ec"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T04:21:24.381Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-18T04:21:30.210Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685265d57eca41a265561fa4"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 10).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T07:08:05.618Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685265f97eca41a26556204e"
+  },
+  "title": "Biến thể hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" đã hết hàng (Tồn kho: 0).",
+  "type": "PRODUCT_OUT_OF_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T07:08:41.998Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685267127eca41a265562167"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / S)\" (SKU: AOSOMITAYDAY-XN-S) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 10).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T07:13:22.247Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685282437eca41a26556258c"
+  },
+  "title": "Biến thể sắp hết hàng!",
+  "message": "Biến thể \"Áo sơ mi dài tay cổ tàu Premium Poplin (Xanh Nhạt / M)\" (SKU: AOSOMITAYDAY-XN-M) của sản phẩm \"Áo sơ mi dài tay cổ tàu Premium Poplin\" sắp hết hàng (Tồn kho: 10).",
+  "type": "PRODUCT_LOW_STOCK",
+  "link": "/admin/products/684d5b1f06c2345c64cac7d3/edit",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "productId": {
+      "$oid": "684d5b1f06c2345c64cac7d3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-18T09:09:23.296Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853aac84855ae749e4ebe07"
+  },
+  "title": "Yêu cầu hủy đơn hàng #9a1ff0",
+  "message": "Khách hàng \"Nguyễn Lê Bảo Phước\" yêu cầu hủy đơn. Lý do: Không thích",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/68501e4f51c9f805d89a1ff0",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "68501e4f51c9f805d89a1ff0"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T06:14:32.836Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-19T06:14:38.887Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853ab9d41dbd948d49df67f"
+  },
+  "title": "Yêu cầu hủy đơn hàng #9a1ff0",
+  "message": "Khách hàng \"Nguyễn Lê Bảo Phước\" yêu cầu hủy đơn. Lý do: Test",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/68501e4f51c9f805d89a1ff0",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "68501e4f51c9f805d89a1ff0"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T06:18:05.318Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-19T06:18:26.118Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853ba1f0d615b65bb4e670e"
+  },
+  "title": "Yêu cầu hủy đơn hàng #9a1ff0",
+  "message": "Khách hàng \"Nguyễn Lê Bảo Phước\" yêu cầu hủy đơn. Lý do: Test",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/68501e4f51c9f805d89a1ff0",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "68501e4f51c9f805d89a1ff0"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T07:19:59.701Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-19T07:21:04.533Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853ba998ee0e95d8d154bb4"
+  },
+  "title": "Yêu cầu hủy đơn hàng #828d7e",
+  "message": "Khách hàng \"Nguyễn Lê Bảo Phước\" yêu cầu hủy đơn. Lý do: Test",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/685014af3fbbab4335828d7e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "685014af3fbbab4335828d7e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T07:22:01.635Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853bb3a9cda4438a7048083"
+  },
+  "title": "Đơn hàng mới #04807a",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6853bb379cda4438a704807a",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6853bb379cda4438a704807a"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T07:24:42.207Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-19T07:27:20.635Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853bc899cda4438a70481dd"
+  },
+  "title": "Đơn hàng mới #0481d5",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 200.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6853bc879cda4438a70481d5",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6853bc879cda4438a70481d5"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T07:30:17.431Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6853bcd1519bc376c20ab5d4"
+  },
+  "title": "Yêu cầu hủy đơn hàng #0481d5",
+  "message": "Khách hàng \"Nguyễn Lê Bảo Phước\" yêu cầu hủy đơn. Lý do: Tôi muốn mua mặc hàng khác. Hiện tôi không thích màu này.",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/6853bc879cda4438a70481d5",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6853bc879cda4438a70481d5"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-19T07:31:29.038Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685539858fb85238d2229ed0"
+  },
+  "title": "Đơn hàng mới #229ec7",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 359.100đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685539818fb85238d2229ec7",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "685539818fb85238d2229ec7"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-20T10:35:49.056Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:04.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68555a618fb85238d222a5aa"
+  },
+  "title": "Đánh giá sản phẩm mới",
+  "message": "Có đánh giá mới cho sản phẩm \"Áo Croptop MLB Korea Women's Basic Varsity Cultive LA Dodgers\" từ người dùng \"BaoPhuoc\".",
+  "type": "NEW_REVIEW_SUBMITTED",
+  "link": "/admin/reviews?isApproved=false",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "productId": {
+      "$oid": "681d9d2c878f5d7af823b8a7"
+    },
+    "reviewId": {
+      "$oid": "68555a608fb85238d222a5a7"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-20T12:56:01.036Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T09:27:10.892Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6858cd14e97dd27d88020435"
+  },
+  "title": "Đơn hàng mới #02042d",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6858cd12e97dd27d8802042d",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6858cd12e97dd27d8802042d"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T03:42:12.825Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6858ce41e97dd27d88020641"
+  },
+  "title": "Đơn hàng mới #020639",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6858ce3fe97dd27d88020639",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6858ce3fe97dd27d88020639"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T03:47:13.214Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6858d067e97dd27d880207fb"
+  },
+  "title": "Đơn hàng mới #0207f2",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 180.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6858d064e97dd27d880207f2",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6858d064e97dd27d880207f2"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T03:56:23.016Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6858f21ae97dd27d88020af3"
+  },
+  "title": "Đơn hàng mới #020aea",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6858f218e97dd27d88020aea",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6858f218e97dd27d88020aea"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T06:20:10.899Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6858f7830ba15b3145c4d893"
+  },
+  "title": "Đơn hàng mới #c4d88a",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6858f77f0ba15b3145c4d88a",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6858f77f0ba15b3145c4d88a"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T06:43:15.605Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6858fa98958463adac47339f"
+  },
+  "title": "Đơn hàng mới #473396",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 220.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6858fa95958463adac473396",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6858fa95958463adac473396"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T06:56:24.590Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-23T08:16:55.661Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68590e1f9e3283ee7fd3e876"
+  },
+  "title": "Đơn hàng mới #d3e86e",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 310.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68590e1c9e3283ee7fd3e86e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68590e1c9e3283ee7fd3e86e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T08:19:43.444Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-23T08:19:50.941Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68590ec49e3283ee7fd3e8cb"
+  },
+  "title": "Yêu cầu hủy đơn hàng #d3e86e",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hủy đơn. Lý do: Hiện không còn thích đơn hàng này nữa.",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/68590e1c9e3283ee7fd3e86e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68590e1c9e3283ee7fd3e86e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T08:22:28.524Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-23T08:22:37.560Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685926d8aeeafe6cc2e0e61e"
+  },
+  "title": "Đơn hàng mới #e0e615",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 560.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685926d6aeeafe6cc2e0e615",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "685926d6aeeafe6cc2e0e615"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T10:05:12.607Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68592d4d14d753ab7708b124"
+  },
+  "title": "Đơn hàng mới #08b11c",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 550.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68592d4a14d753ab7708b11c",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68592d4a14d753ab7708b11c"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T10:32:45.356Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685931f453a86a024da5d17f"
+  },
+  "title": "Đơn hàng mới #a5d177",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685931f253a86a024da5d177",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "685931f253a86a024da5d177"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T10:52:36.488Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6859322053a86a024da5d1a7"
+  },
+  "title": "Đơn hàng #08b11c đã giao thành công",
+  "message": "Khách hàng \"BaoPhuoc\" đã xác nhận nhận hàng.",
+  "type": "ORDER_STATUS_DELIVERED",
+  "link": "/admin/orders/68592d4a14d753ab7708b11c",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68592d4a14d753ab7708b11c"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T10:53:20.980Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685934c840cb75cf8b8fee88"
+  },
+  "title": "Đơn hàng #e0e615 đã giao thành công",
+  "message": "Khách hàng \"BaoPhuoc\" đã xác nhận nhận hàng.",
+  "type": "ORDER_STATUS_DELIVERED",
+  "link": "/admin/orders/685926d6aeeafe6cc2e0e615",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "685926d6aeeafe6cc2e0e615"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T11:04:40.935Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68593624cb93122e5dd89d72"
+  },
+  "title": "Đơn hàng mới #d89d66",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 1.170.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68593621cb93122e5dd89d66",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68593621cb93122e5dd89d66"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T11:10:28.566Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-23T11:10:48.336Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68595028cb93122e5dd8a429"
+  },
+  "title": "Đơn hàng mới #d8a421",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 380.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68595026cb93122e5dd8a421",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "68595026cb93122e5dd8a421"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T13:01:28.830Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68595328cb93122e5dd8a629"
+  },
+  "title": "Đơn hàng mới #d8a622",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 220.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68595325cb93122e5dd8a622",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68595325cb93122e5dd8a622"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T13:14:16.353Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68595e60e3941b6c1dbdd9e1"
+  },
+  "title": "Đơn hàng mới #bdd9d9",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 580.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68595e5ae3941b6c1dbdd9d9",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "68595e5ae3941b6c1dbdd9d9"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T14:02:08.600Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685980a297f82a28009860c0"
+  },
+  "title": "Đơn hàng mới #9860b8",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 150.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6859809f97f82a28009860b8",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6859809f97f82a28009860b8"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-23T16:28:18.192Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685a12d9e89852d8286e9e19"
+  },
+  "title": "Đơn hàng mới #6e9e11",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 310.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685a12d5e89852d8286e9e11",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "685a12d5e89852d8286e9e11"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-24T02:52:09.643Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685a1ab6e89852d8286e9f01"
+  },
+  "title": "Đơn hàng mới #6e9efa",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685a1ab4e89852d8286e9efa",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "685a1ab4e89852d8286e9efa"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-24T03:25:42.669Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685a2591e89852d8286ea0bb"
+  },
+  "title": "Đơn hàng mới #6ea0b3",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685a258fe89852d8286ea0b3",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": null,
+    "orderId": {
+      "$oid": "685a258fe89852d8286ea0b3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-24T04:12:01.974Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685aa95edef3dfb9f5555b46"
+  },
+  "title": "Đơn hàng mới #555b3b",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 1.120.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/685aa95bdef3dfb9f5555b3b",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "685aa95bdef3dfb9f5555b3b"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-24T13:34:22.913Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:41:30.636Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685aa9ecdef3dfb9f5555bd4"
+  },
+  "title": "Yêu cầu hủy đơn hàng #555b3b",
+  "message": "Khách hàng \"BaoPhuoc\" yêu cầu hủy đơn. Lý do: Testing",
+  "type": "ORDER_CANCELLATION_REQUESTED",
+  "link": "/admin/orders/685aa95bdef3dfb9f5555b3b",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "685aa95bdef3dfb9f5555b3b"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-24T13:36:44.516Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-24T13:36:54.120Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6860bbd23aafc0e8f5047e31"
+  },
+  "title": "Đơn hàng mới #047e28",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 599.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6860bbd03aafc0e8f5047e28",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6860bbd03aafc0e8f5047e28"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-06-29T04:06:42.746Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6864e64b227647b896bccfba"
+  },
+  "title": "Đơn hàng mới #bccfb1",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 399.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6864e648227647b896bccfb1",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "6864e648227647b896bccfb1"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-02T07:56:59.702Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68650df20857a433ad8b3892"
+  },
+  "title": "Đơn hàng mới #8b3889",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 240.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/68650def0857a433ad8b3889",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "68650def0857a433ad8b3889"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-02T10:46:10.387Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a51cc93220cc15446dc6b"
+  },
+  "title": "Đơn hàng mới #46dc61",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 689.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a51c993220cc15446dc61",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a51c993220cc15446dc61"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T10:37:00.794Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a7064908378756d982dec"
+  },
+  "title": "Đơn hàng mới #982de2",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 1.430.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a7061908378756d982de2",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a7061908378756d982de2"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T12:47:32.592Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a73e6a9ae4c6f2ba81aa3"
+  },
+  "title": "Đơn hàng mới #a81a9b",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 240.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a73e2a9ae4c6f2ba81a9b",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a73e2a9ae4c6f2ba81a9b"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T13:02:30.118Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a7a4fd240bb198bef9417"
+  },
+  "title": "Đơn hàng mới #ef940e",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 510.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a7a4dd240bb198bef940e",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a7a4dd240bb198bef940e"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T13:29:51.516Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a7ae5d240bb198bef9597"
+  },
+  "title": "Đơn hàng mới #ef958f",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 499.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a7ae2d240bb198bef958f",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a7ae2d240bb198bef958f"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T13:32:21.447Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a7c44a2e650210c959448"
+  },
+  "title": "Đơn hàng mới #959440",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 300.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a7c42a2e650210c959440",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a7c42a2e650210c959440"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T13:38:12.761Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:15.852Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a829cc16c8dc6f84b4af7"
+  },
+  "title": "Đơn hàng mới #4b4aef",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 560.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a8298c16c8dc6f84b4aef",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a8298c16c8dc6f84b4aef"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T14:05:16.032Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a833c2b1f7a23edfab0cd"
+  },
+  "title": "Đơn hàng mới #fab0c3",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 510.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a833a2b1f7a23edfab0c3",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a833a2b1f7a23edfab0c3"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T14:07:56.887Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686a845a4a19ed933639ad5c"
+  },
+  "title": "Đơn hàng mới #39ad53",
+  "message": "Đơn hàng bởi \"Nguyễn Lê Bảo Phước\" vừa được đặt với tổng tiền 360.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/686a84584a19ed933639ad53",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "682835f2ec1e0536a6154cb5"
+    },
+    "orderId": {
+      "$oid": "686a84584a19ed933639ad53"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-06T14:12:42.858Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-14T07:29:32.652Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6877a190317d157244407dd9"
+  },
+  "title": "Đơn hàng mới #407dcf",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 359.100đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6877a18c317d157244407dcf",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6877a18c317d157244407dcf"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-16T12:56:48.474Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-16T13:07:43.114Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6877a4a3c88cf3a294db2e71"
+  },
+  "title": "Đơn hàng mới #db2e67",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 1.150.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6877a4a0c88cf3a294db2e67",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6877a4a0c88cf3a294db2e67"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-16T13:09:55.577Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-22T13:19:00.082Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6877a50f8c2d60d9d716695f"
+  },
+  "title": "Đơn hàng #db2e67 đã giao thành công",
+  "message": "Khách hàng \"BaoPhuoc\" đã xác nhận nhận hàng.",
+  "type": "ORDER_STATUS_DELIVERED",
+  "link": "/admin/orders/6877a4a0c88cf3a294db2e67",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6877a4a0c88cf3a294db2e67"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-16T13:11:43.205Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-22T13:19:00.082Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6877c31b8c2d60d9d7166ad3"
+  },
+  "title": "Đơn hàng mới #166acb",
+  "message": "Đơn hàng bởi \"BaoPhuoc\" vừa được đặt với tổng tiền 290.000đ.",
+  "type": "NEW_ORDER_PLACED",
+  "link": "/admin/orders/6877c3188c2d60d9d7166acb",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "orderId": {
+      "$oid": "6877c3188c2d60d9d7166acb"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-16T15:19:55.260Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-22T13:19:00.082Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68789d60edf89eee81f1ab0c"
+  },
+  "title": "Đánh giá sản phẩm mới",
+  "message": "Có đánh giá mới cho sản phẩm \"[object Object]\" từ người dùng \"BaoPhuoc\".",
+  "type": "NEW_REVIEW_SUBMITTED",
+  "link": "/admin/reviews?isApproved=false",
+  "isRead": true,
+  "recipientType": "ADMIN",
+  "metadata": {
+    "userId": {
+      "$oid": "680f2ecae16cffa286aa2fc1"
+    },
+    "productId": {
+      "$oid": "681d9d2c878f5d7af823b8a7"
+    },
+    "reviewId": {
+      "$oid": "68789d60edf89eee81f1ab09"
+    }
+  },
+  "createdAt": {
+    "$date": "2025-07-17T06:51:12.782Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-22T13:19:00.082Z"
+  },
+  "__v": 0
+}]

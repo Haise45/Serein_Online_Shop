@@ -13,12 +13,19 @@ import useDebounce from "@/hooks/useDebounce";
 import {
   useCreateCategory,
   useDeleteCategory,
+  useGetAdminCategoryDetails,
   useGetAllCategories,
   useUpdateCategory,
 } from "@/lib/react-query/categoryQueries";
 import { useUploadImages } from "@/lib/react-query/uploadQueries";
 import {
+  buildCategoryTree,
+  flattenTreeForSelect,
+  getLocalizedName,
+} from "@/lib/utils";
+import {
   Category,
+  CategoryAdmin,
   CategoryCreationData,
   CategoryUpdateData,
   GetCategoriesParams,
@@ -35,18 +42,22 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 // --- Type cho State của Form trong Modal ---
 // Dùng Partial<Category> để có thể dùng chung cho cả Create và Edit
 // `parent` được định nghĩa là string | null để khớp với value của <select>
 export type CategoryFormState = Partial<
-  Omit<Category, "parent"> & { parent: string | null }
+  Omit<CategoryAdmin, "parent"> & { parent: string | null }
 >;
 
 const AdminCategoriesClient = () => {
+  const t = useTranslations("AdminCategories");
+  const tAdmin = useTranslations("Admin");
+  const locale = useLocale() as "vi" | "en";
   const searchParams = useSearchParams();
   const { settings } = useSettings();
   // Lấy số item mỗi trang từ settings, nếu không có thì fallback về giá trị cũ
@@ -67,14 +78,22 @@ const AdminCategoriesClient = () => {
   // --- States cho Modal và Form ---
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState<CategoryFormState>({});
   const [deleteConfirm, setDeleteConfirm] = useState<{
     visible: boolean;
     category: Category | null;
   }>({ visible: false, category: null });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
-
+  const [currentCategory, setCurrentCategory] = useState<CategoryFormState>({
+    name: { vi: "", en: "" },
+    description: { vi: "", en: "" },
+    parent: null,
+    image: "",
+    isActive: true,
+  });
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
+    null,
+  );
   // --- React Query Hooks để tương tác với API ---
 
   // Tạo params object để truyền vào hook useGetAllCategories.
@@ -97,6 +116,10 @@ const AdminCategoriesClient = () => {
     error,
     refetch,
   } = useGetAllCategories(queryParams);
+  const { data: categoryToEdit, isLoading: isLoadingEditData } =
+    useGetAdminCategoryDetails(editingCategoryId!, {
+      enabled: !!editingCategoryId,
+    });
   const createCategoryMutation = useCreateCategory();
   const updateCategoryMutation = useUpdateCategory();
   const deleteCategoryMutation = useDeleteCategory();
@@ -124,11 +147,15 @@ const AdminCategoriesClient = () => {
   const { data: allCategoriesData, isLoading: isLoadingAllCategories } =
     useGetAllCategories({ limit: 9999, isActive: true });
 
-  // Danh sách này dùng cho cả 2 dropdown
-  const flatListOfAllActiveCategories = useMemo(
-    () => allCategoriesData?.categories || [],
-    [allCategoriesData],
-  );
+  // Tạo danh sách phẳng cho dropdown với tên đã được dịch
+  const flatListOfAllActiveCategories = useMemo(() => {
+    const allCats = allCategoriesData?.categories || [];
+    const tree = buildCategoryTree(allCats);
+    return flattenTreeForSelect(tree).map((cat) => ({
+      ...cat,
+      displayName: getLocalizedName(cat.name, locale),
+    }));
+  }, [allCategoriesData, locale]);
 
   // Tạo danh sách các danh mục để chọn làm parent (loại bỏ chính nó và các con của nó)
   const categoriesForSelect = useMemo(() => {
@@ -152,10 +179,10 @@ const AdminCategoriesClient = () => {
     };
     const descendantIds = getDescendantIds(currentCategory._id);
     const forbiddenIds = [currentCategory._id, ...descendantIds];
-    return flatListOfAllActiveCategories.filter(
-      (c) => !forbiddenIds.includes(c._id),
-    );
-  }, [flatListOfAllActiveCategories, isEditMode, currentCategory._id]);
+    return flatListOfAllActiveCategories
+      .filter((c) => !forbiddenIds.includes(c._id))
+      .map((cat) => ({ ...cat, displayName: getLocalizedName(cat.name, locale) }));
+  }, [flatListOfAllActiveCategories, isEditMode, currentCategory._id, locale]);
 
   // --- Các hàm xử lý sự kiện (Handlers) ---
 
@@ -180,8 +207,8 @@ const AdminCategoriesClient = () => {
   const openCreateModal = () => {
     setIsEditMode(false);
     setCurrentCategory({
-      name: "",
-      description: "",
+      name: { vi: "", en: "" },
+      description: { vi: "", en: "" },
       parent: null,
       image: "",
       isActive: true,
@@ -193,16 +220,39 @@ const AdminCategoriesClient = () => {
 
   // Mở modal để chỉnh sửa một danh mục đã có
   const openEditModal = (category: Category) => {
-    setIsEditMode(true);
-    // Chuyển đổi `parent` từ object/string thành string ID hoặc null
-    const parentId =
-      typeof category.parent === "string"
-        ? category.parent
-        : category.parent?._id || null;
-    setCurrentCategory({ ...category, parent: parentId });
-    setImageFile(null);
-    setFormErrors({});
+    setEditingCategoryId(category._id); // Set ID để trigger query
     setModalVisible(true);
+    setIsEditMode(true);
+  };
+
+  useEffect(() => {
+    if (categoryToEdit && editingCategoryId) {
+      const parentId =
+        typeof categoryToEdit.parent === "string"
+          ? categoryToEdit.parent
+          : categoryToEdit.parent?._id || null;
+      setCurrentCategory({
+        ...categoryToEdit,
+        parent: parentId,
+      });
+    }
+  }, [categoryToEdit, editingCategoryId]);
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setIsEditMode(false);
+    setEditingCategoryId(null);
+  };
+
+  const handleI18nChange = (
+    field: "name" | "description",
+    locale: "vi" | "en",
+    value: string,
+  ) => {
+    setCurrentCategory((prev) => ({
+      ...prev,
+      [field]: { ...(prev[field] as object), [locale]: value },
+    }));
   };
 
   // Xử lý thay đổi trên các trường của form
@@ -235,9 +285,14 @@ const AdminCategoriesClient = () => {
   // Kiểm tra tính hợp lệ của form
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    if (!currentCategory.name?.trim()) {
-      errors.name = "Tên danh mục là bắt buộc.";
-    }
+    if (!currentCategory.name?.vi.trim())
+      errors.name_vi = t("formModal.nameRequiredError", {
+        locale: "Tiếng Việt",
+      });
+    if (!currentCategory.name?.en.trim())
+      errors.name_en = t("formModal.nameRequiredError", {
+        locale: "English",
+      });
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -258,7 +313,7 @@ const AdminCategoriesClient = () => {
         });
         imageUrl = uploadData.imageUrls[0]; // Lấy URL từ kết quả upload
       } catch {
-        toast.error("Upload ảnh thất bại!");
+        toast.error(t("toasts.uploadError"));
         return;
       }
     }
@@ -297,7 +352,7 @@ const AdminCategoriesClient = () => {
   if (isLoading) {
     return (
       <div className="p-5 text-center">
-        <CSpinner /> Đang tải danh sách danh mục...
+        <CSpinner /> {t("list.loading")}
       </div>
     );
   }
@@ -305,10 +360,10 @@ const AdminCategoriesClient = () => {
     return (
       <div className="text-danger bg-danger-light rounded border p-5 text-center">
         <CIcon icon={cilWarning} size="xl" className="mb-3" />
-        <h4 className="mb-2">Lỗi không thể tải danh mục</h4>
-        <p>{error?.message || "Đã có lỗi xảy ra."}</p>
+        <h4 className="mb-2">{t("list.loadingErrorTitle")}</h4>
+        <p>{error?.message || t("list.loadingErrorSubtitle")}</p>
         <CButton color="primary" onClick={() => refetch()} className="mt-3">
-          Thử lại
+          {t("list.retryButton")}
         </CButton>
       </div>
     );
@@ -336,7 +391,7 @@ const AdminCategoriesClient = () => {
             <CCardBody className="p-0">
               {isLoading && !paginatedData ? (
                 <div className="p-5 text-center">
-                  <CSpinner /> Đang tải dữ liệu...
+                  <CSpinner /> {t("list.loading")}
                 </div>
               ) : (
                 <CategoryListTable
@@ -357,7 +412,9 @@ const AdminCategoriesClient = () => {
                   limit={limit}
                   onPageChange={setCurrentPage}
                   onLimitChange={handleLimitChange}
-                  itemType="danh mục"
+                  itemType={tAdmin("breadcrumbs.categories", {
+                    count: 2,
+                  }).toLowerCase()}
                   defaultLimitFromSettings={defaultLimitFromSettings}
                 />
               </CCardFooter>
@@ -370,10 +427,11 @@ const AdminCategoriesClient = () => {
       {modalVisible && (
         <CategoryFormModal
           visible={modalVisible}
-          onClose={() => setModalVisible(false)}
+          onClose={handleCloseModal}
           onSubmit={handleSubmit}
           isEditMode={isEditMode}
           currentCategory={currentCategory}
+          onI18nChange={handleI18nChange}
           onFormChange={handleFormChange}
           onImageFileChange={handleImageFileChange}
           categoriesForSelect={categoriesForSelect}
@@ -383,6 +441,7 @@ const AdminCategoriesClient = () => {
             updateCategoryMutation.isPending ||
             uploadImageMutation.isPending
           }
+          isLoadingData={isLoadingEditData}
         />
       )}
 

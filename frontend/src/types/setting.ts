@@ -1,11 +1,30 @@
+import { I18nField } from ".";
+
+export interface BannerSlide {
+  _id?: string;
+  imageUrl: string;
+  title: I18nField;
+  subtitle: I18nField;
+  buttonText: I18nField;
+  buttonLink: string;
+  isActive: boolean;
+}
+
 export interface Setting {
   _id: string;
   key: string;
-  defaultLanguage: "vi" | "en";
-  defaultCurrency: "VND" | "USD";
+  clientSettings: {
+    defaultLanguage: "vi" | "en";
+    defaultCurrency: "VND" | "USD";
+  };
+  adminSettings: {
+    defaultLanguage: "vi" | "en";
+    defaultCurrency: "VND" | "USD";
+  };
   landingPage: {
     maxFeaturedProducts: number;
     maxNewestProducts: number;
+    banners: BannerSlide[];
   };
   productListPage: {
     defaultProductsPerPage: number;

@@ -1,0 +1,95 @@
+[{
+  "_id": {
+    "$oid": "685d1340b71eca612d2d9974"
+  },
+  "key": "main_settings",
+  "defaultLanguage": "vi",
+  "defaultCurrency": "VND",
+  "landingPage": {
+    "maxFeaturedProducts": 10,
+    "maxNewestProducts": 4,
+    "banners": [
+      {
+        "imageUrl": "https://res.cloudinary.com/dh7mq8bgc/image/upload/v1752736373/shop/settings/banners/yvumugqpao4ethgipwfz.webp",
+        "title": {
+          "vi": "Bộ Sưu Tập Hè 2025",
+          "en": "Summer Collection 2025"
+        },
+        "subtitle": {
+          "vi": "Khám phá phong cách nổi bật cho mùa hè năng động.",
+          "en": "Discover the standout style for a dynamic summer."
+        },
+        "buttonText": {
+          "vi": "Xem ngay",
+          "en": "Shop Now"
+        },
+        "buttonLink": "/products?collection=summer-2025",
+        "isActive": true,
+        "_id": {
+          "$oid": "6878a273edf89eee81f1ab74"
+        }
+      },
+      {
+        "imageUrl": "https://res.cloudinary.com/dh7mq8bgc/image/upload/v1752737583/shop/settings/banners/xpugws1ygdacf02wzmof.webp",
+        "title": {
+          "vi": "Ưu Đãi Lớn Tháng Này",
+          "en": "Big Promotion This Month"
+        },
+        "subtitle": {
+          "vi": "Giảm giá đến 50% cho hàng ngàn sản phẩm.",
+          "en": "Up to 50% off on thousands of products."
+        },
+        "buttonText": {
+          "vi": "Săn Sale Ngay",
+          "en": "Shop Sale Now"
+        },
+        "buttonLink": "/products?onSale=true",
+        "isActive": true,
+        "_id": {
+          "$oid": "6878a706edf89eee81f1ac51"
+        }
+      },
+      {
+        "imageUrl": "https://res.cloudinary.com/dh7mq8bgc/image/upload/v1752737544/shop/settings/banners/igz5zvcpywr6j2v855zx.webp",
+        "title": {
+          "vi": "Thanh Lịch Chốn Công Sở",
+          "en": "Elegant Office Wear"
+        },
+        "subtitle": {
+          "vi": "Những thiết kế tinh tế cho ngày làm việc hiệu quả.",
+          "en": "Sophisticated designs for a productive workday."
+        },
+        "buttonText": {
+          "vi": "Tìm Hiểu Thêm",
+          "en": "Learn More"
+        },
+        "buttonLink": "/products?category=office",
+        "isActive": true,
+        "_id": {
+          "$oid": "6878a706edf89eee81f1ac52"
+        }
+      }
+    ]
+  },
+  "productListPage": {
+    "defaultProductsPerPage": 8
+  },
+  "adminTable": {
+    "defaultItemsPerPage": 5
+  },
+  "createdAt": {
+    "$date": "2025-06-26T09:30:40.389Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-22T10:42:35.722Z"
+  },
+  "__v": 0,
+  "adminSettings": {
+    "defaultLanguage": "vi",
+    "defaultCurrency": "USD"
+  },
+  "clientSettings": {
+    "defaultLanguage": "en",
+    "defaultCurrency": "VND"
+  }
+}]

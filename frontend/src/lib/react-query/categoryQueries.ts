@@ -1,25 +1,30 @@
 import {
+  createCategory as createCategoryApi,
+  deleteCategory as deleteCategoryApi,
+  getAdminCategoriesApi,
+  getAdminCategoryDetailsApi,
   getAllCategories as getAllCategoriesApi,
   getCategoryByIdOrSlug as getCategoryByIdOrSlugApi,
-  createCategory as createCategoryApi,
   updateCategory as updateCategoryApi,
-  deleteCategory as deleteCategoryApi,
 } from "@/services/categoryService";
 import {
   Category,
+  CategoryAdmin,
   CategoryCreationData,
   CategoryUpdateData,
   GetCategoriesParams,
+  PaginatedAdminCategoriesResponse,
   PaginatedCategoriesResponse,
 } from "@/types";
 import {
-  useQuery,
   useMutation,
+  UseMutationOptions,
+  useQuery,
   useQueryClient,
   UseQueryOptions,
-  UseMutationOptions,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useLocale, useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 
 // --- Query Keys ---
@@ -48,9 +53,12 @@ type CustomMutationOptions<
 // Lấy tất cả danh mục (danh sách phẳng)
 export const useGetAllCategories = (
   params: GetCategoriesParams = {},
-  options?: CustomQueryOptions<PaginatedCategoriesResponse>
+  options?: CustomQueryOptions<PaginatedCategoriesResponse>,
 ) => {
-  return useQuery<PaginatedCategoriesResponse, AxiosError<{ message?: string }>>({
+  return useQuery<
+    PaginatedCategoriesResponse,
+    AxiosError<{ message?: string }>
+  >({
     queryKey: categoryKeys.list(params),
     queryFn: () => getAllCategoriesApi(params),
     placeholderData: (previousData) => previousData,
@@ -72,26 +80,52 @@ export const useGetCategoryDetails = (
 };
 
 // --- Mutation Hooks ---
+export const useGetAdminCategories = (
+  params: GetCategoriesParams,
+  options?: { enabled?: boolean },
+) => {
+  return useQuery<PaginatedAdminCategoriesResponse, Error>({
+    queryKey: [...categoryKeys.lists(), "admin", params],
+    queryFn: () => getAdminCategoriesApi(params),
+    enabled: options?.enabled ?? true,
+  });
+};
+
+export const useGetAdminCategoryDetails = (
+  id: string,
+  options?: { enabled?: boolean },
+) => {
+  return useQuery<CategoryAdmin, Error>({
+    queryKey: [...categoryKeys.detail(id), "admin"], // Thêm 'admin' để phân biệt cache
+    queryFn: () => getAdminCategoryDetailsApi(id),
+    enabled: !!id && (options?.enabled ?? true),
+  });
+};
 
 // Tạo danh mục mới
 export const useCreateCategory = (
-  options?: CustomMutationOptions<Category, CategoryCreationData>,
+  options?: CustomMutationOptions<CategoryAdmin, CategoryCreationData>,
 ) => {
+  const t = useTranslations("reactQuery.category");
+  const locale = useLocale();
   const queryClient = useQueryClient();
   return useMutation<
-    Category,
+    CategoryAdmin,
     AxiosError<{ message?: string }>,
     CategoryCreationData
   >({
     mutationFn: createCategoryApi,
     onSuccess: (newCategory, variables, context) => {
+      const localizedName =
+        newCategory.name[locale as "vi" | "en"] || newCategory.name.vi;
       // Invalidate toàn bộ cache danh mục để fetch lại danh sách mới nhất
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-      toast.success(`Đã tạo thành công danh mục "${newCategory.name}"!`);
+      const message = t("createSuccess").replace("{name}", localizedName);
+      toast.success(message);
       options?.onSuccess?.(newCategory, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(error.response?.data?.message || "Tạo danh mục thất bại.");
+      toast.error(error.response?.data?.message || t("createError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -104,17 +138,22 @@ interface UpdateCategoryVariables {
   categoryData: CategoryUpdateData;
 }
 export const useUpdateCategory = (
-  options?: CustomMutationOptions<Category, UpdateCategoryVariables>,
+  options?: CustomMutationOptions<CategoryAdmin, UpdateCategoryVariables>,
 ) => {
+  const t = useTranslations("reactQuery.category");
+  const locale = useLocale();
   const queryClient = useQueryClient();
   return useMutation<
-    Category,
+    CategoryAdmin,
     AxiosError<{ message?: string }>,
     UpdateCategoryVariables
   >({
     mutationFn: ({ categoryId, categoryData }) =>
       updateCategoryApi(categoryId, categoryData),
     onSuccess: (updatedCategory, variables, context) => {
+      const localizedName =
+        updatedCategory.name[locale as "vi" | "en"] || updatedCategory.name.vi;
+      // toast.success(`Đã cập nhật danh mục "${localizedName}"!`);
       // Cập nhật cache cho danh sách
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
       // Cập nhật cache cho chi tiết của danh mục vừa sửa
@@ -127,13 +166,12 @@ export const useUpdateCategory = (
         updatedCategory,
       );
 
-      toast.success(`Đã cập nhật danh mục "${updatedCategory.name}"!`);
+      const message = t("updateSuccess").replace("{name}", localizedName);
+      toast.success(message);
       options?.onSuccess?.(updatedCategory, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(
-        error.response?.data?.message || "Cập nhật danh mục thất bại.",
-      );
+      toast.error(error.response?.data?.message || t("updateError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -144,6 +182,7 @@ export const useUpdateCategory = (
 export const useDeleteCategory = (
   options?: CustomMutationOptions<{ message: string }, string>,
 ) => {
+  const t = useTranslations("reactQuery.category");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string },
@@ -155,11 +194,11 @@ export const useDeleteCategory = (
     onSuccess: (data, categoryId, context) => {
       // Invalidate danh sách để làm mới
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-      toast.success(data.message || "Đã xóa danh mục thành công.");
+      toast.success(data.message || t("deleteSuccess"));
       options?.onSuccess?.(data, categoryId, context);
     },
     onError: (error, variables, context) => {
-      toast.error(error.response?.data?.message || "Xóa danh mục thất bại.");
+      toast.error(error.response?.data?.message || t("deleteError"));
       options?.onError?.(error, variables, context);
     },
     ...options,

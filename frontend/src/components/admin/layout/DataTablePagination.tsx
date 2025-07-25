@@ -6,6 +6,7 @@ import {
   CRow,
 } from "@coreui/react";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface DataTablePaginationProps {
   currentPage: number;
@@ -28,6 +29,8 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
   itemType = "mục",
   defaultLimitFromSettings,
 }) => {
+  const t = useTranslations("Admin.pagination");
+
   if (totalItems === 0) {
     return null;
   }
@@ -51,9 +54,15 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
         {/* Cột bên trái: Hiển thị thông tin */}
         <CCol xs={12} md="auto" className="flex-grow-1">
           <div className="text-muted text-md-start text-center text-sm">
-            Hiển thị {(currentPage - 1) * limit + 1} -{" "}
-            {Math.min(currentPage * limit, totalItems)} trên tổng số{" "}
-            {totalItems} {itemType}
+            {t.rich("showing", {
+              from: (currentPage - 1) * limit + 1,
+              to: Math.min(currentPage * limit, totalItems),
+              total: totalItems,
+              itemType: itemType,
+              bold: (chunks) => (
+                <span className="font-medium text-gray-800">{chunks}</span>
+              ),
+            })}
           </div>
         </CCol>
 
@@ -62,7 +71,7 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
           <div className="d-flex align-items-center justify-content-center justify-content-md-end gap-4">
             {/* Group: Limit Selector */}
             <div className="d-flex align-items-center gap-2">
-              <span className="text-muted text-sm">Hiển thị</span>
+              <span className="text-muted text-sm">{t("show")}</span>
               <CFormSelect
                 size="sm"
                 style={{ width: "85px" }}
@@ -76,14 +85,14 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
                 ))}
               </CFormSelect>
               <span className="text-muted d-none d-sm-inline text-sm">
-                mục/trang
+                {t("itemsPerPage")}
               </span>
             </div>
 
             {/* Group: Pagination buttons */}
             <CPagination aria-label="Data list navigation" className="mb-0">
               <CPaginationItem
-                aria-label="Previous"
+                aria-label={t("prev")}
                 disabled={currentPage === 1}
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 className="user-select-none"
@@ -160,7 +169,7 @@ const DataTablePagination: React.FC<DataTablePaginationProps> = ({
               })()}
 
               <CPaginationItem
-                aria-label="Next"
+                aria-label={t("next")}
                 disabled={currentPage === totalPages}
                 onClick={() =>
                   onPageChange(Math.min(totalPages, currentPage + 1))

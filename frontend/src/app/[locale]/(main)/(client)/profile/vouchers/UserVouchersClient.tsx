@@ -1,9 +1,11 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import PaginationControls from "@/components/client/product/PaginationControls";
 import { useGetCoupons } from "@/lib/react-query/couponQueries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { GetCouponsParams } from "@/services/couponService";
+import { ExchangeRates } from "@/types";
 import { Coupon } from "@/types/coupon";
 import classNames from "classnames";
 import { useTranslations } from "next-intl";
@@ -21,9 +23,15 @@ import {
 const VOUCHERS_PER_PAGE = 9;
 
 // Component con để hiển thị một voucher
-const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
+const VoucherCard: React.FC<{
+  voucher: Coupon;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
+}> = ({ voucher, displayCurrency, rates }) => {
   const t = useTranslations("VoucherCard");
   const [copied, setCopied] = useState(false);
+
+  const currencyOptions = { currency: displayCurrency, rates };
 
   const handleCopyCode = () => {
     navigator.clipboard
@@ -45,7 +53,9 @@ const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
     if (voucher.discountType === "percentage") {
       return t("discountPercentage", { value: voucher.discountValue });
     }
-    return t("discountFixed", { value: formatCurrency(voucher.discountValue) });
+    return t("discountFixed", {
+      value: formatCurrency(voucher.discountValue, currencyOptions),
+    });
   };
 
   const isExpiredOrInactive =
@@ -117,7 +127,7 @@ const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
           {voucher.minOrderValue > 0 && (
             <p>
               {t.rich("minOrder", {
-                value: formatCurrency(voucher.minOrderValue),
+                value: formatCurrency(voucher.minOrderValue, currencyOptions),
                 bold: (chunks) => <span className="font-medium">{chunks}</span>,
               })}
             </p>
@@ -177,6 +187,11 @@ const VoucherCard: React.FC<{ voucher: Coupon }> = ({ voucher }) => {
 export default function UserVouchersClient() {
   const t = useTranslations("VoucherPage");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // *** LẤY THÔNG TIN TIỀN TỆ TỪ CONTEXT ***
+  const settingsContext = useSettings();
+  const displayCurrency = settingsContext?.displayCurrency || "VND";
+  const rates = settingsContext?.rates || null;
 
   const queryParams: GetCouponsParams = useMemo(
     () => ({
@@ -287,7 +302,12 @@ export default function UserVouchersClient() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {coupons.map((voucher) => (
-          <VoucherCard key={voucher._id.toString()} voucher={voucher} />
+          <VoucherCard
+            key={voucher._id.toString()}
+            voucher={voucher}
+            displayCurrency={displayCurrency}
+            rates={rates}
+          />
         ))}
       </div>
 

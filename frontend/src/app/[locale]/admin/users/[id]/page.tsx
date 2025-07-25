@@ -1,26 +1,28 @@
 import PageHeader from "@/components/shared/PageHeader";
-import { Metadata } from "next";
 import AdminUserDetailClient from "./AdminUserDetailClient";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Chi tiết Người dùng | Admin Serein Shop",
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
 };
 
-interface AdminUserDetailPageProps {
-  params: Promise<{ id: string }>;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "AdminUsers.meta" });
+
+  return {
+    title: t("detailTitle"),
+  };
 }
 
-export default async function AdminUserDetailPage({
-  params,
-}: AdminUserDetailPageProps) {
-    const { id } = await params;
-    
+export default async function AdminUserDetailPage({ params }: Props) {
+  const { locale, id } = await params;
+  const t = await getTranslations({ locale, namespace: "AdminUsers.detailPageHeader" });
+
   return (
     <div>
-      <PageHeader
-        title="Chi tiết Người dùng"
-        description="Xem thông tin cá nhân và lịch sử mua hàng của người dùng."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <AdminUserDetailClient userId={id} />
     </div>
   );

@@ -1,9 +1,11 @@
 "use client";
 
 import "@/app/globals.css";
+import { useSettings } from "@/app/SettingsContext";
 import DataTablePagination from "@/components/admin/layout/DataTablePagination";
 import ProductFilters from "@/components/admin/products/ProductFilters";
 import ProductTable from "@/components/admin/products/ProductTable";
+import StockUpdateModal from "@/components/admin/products/StockUpdateModal";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import useDebounce from "@/hooks/useDebounce";
 import { useGrabToScroll } from "@/hooks/useGrabToScroll";
@@ -11,15 +13,16 @@ import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import {
   useDeleteAdminProduct,
-  useGetAdminProducts,
+  useGetProducts,
   useUpdateProductStock,
   useUpdateVariantStock,
 } from "@/lib/react-query/productQueries";
+import { getLocalizedName, getVariantDisplayName } from "@/lib/utils";
 import {
   GetProductsParams,
   PaginatedProductsResponse,
 } from "@/services/productService";
-import { Product } from "@/types";
+import { Product, Variant } from "@/types";
 import { cilWarning } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import {
@@ -32,17 +35,14 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
+import { useTranslations, useLocale } from "next-intl";
 import {
   useSearchParams as useNextSearchParamsHook,
   usePathname,
   useRouter,
+  useSearchParams,
 } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Variant } from "@/types";
-import StockUpdateModal from "@/components/admin/products/StockUpdateModal";
-import { getVariantDisplayName } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
-import { useSettings } from "@/app/SettingsContext";
 
 export default function AdminProductsClient() {
   const router = useRouter();
@@ -53,7 +53,10 @@ export default function AdminProductsClient() {
   const { settings } = useSettings();
   const defaultLimitFromSettings =
     settings?.adminTable?.defaultItemsPerPage || 10;
-
+  const t = useTranslations("AdminProducts");
+  const tAdmin = useTranslations("Admin");
+  const tShared = useTranslations("Shared.confirmModal");
+  const locale = useLocale() as "vi" | "en";
   // --- States ---
   const [currentPage, setCurrentPage] = useState<number>(
     Number(currentNextSearchParams.get("page")) || 1,
@@ -139,12 +142,15 @@ export default function AdminProductsClient() {
     attributesForFilter.forEach((attr) => {
       const valueMap = new Map<string, string>();
       attr.values.forEach((val) => {
-        valueMap.set(val._id, val.value);
+        valueMap.set(val._id, getLocalizedName(val.value, locale));
       });
-      map.set(attr._id, { label: attr.label, values: valueMap });
+      map.set(attr._id, {
+        label: getLocalizedName(attr.label, locale),
+        values: valueMap,
+      });
     });
     return map;
-  }, [attributesForFilter]);
+  }, [attributesForFilter, locale]);
 
   const queryParams: GetProductsParams = useMemo(
     () => ({
@@ -182,7 +188,7 @@ export default function AdminProductsClient() {
     isError,
     error,
     refetch,
-  } = useGetAdminProducts(queryParams, {
+  } = useGetProducts(queryParams, {
     placeholderData: (previousData: PaginatedProductsResponse | undefined) =>
       previousData,
   }) as {
@@ -360,17 +366,17 @@ export default function AdminProductsClient() {
       <CRow>
         <CCol xs={12}>
           <CCard className="mb-4">
-            <CCardHeader>Lỗi</CCardHeader>
+            <CCardHeader>{t("list.errorTitle")}</CCardHeader>
             <CCardBody className="p-5 text-center">
               <CIcon icon={cilWarning} size="xl" className="text-danger mb-3" />
-              <p className="text-danger">Không thể tải danh sách sản phẩm.</p>
+              <p className="text-danger">{t("list.errorMessage")}</p>
               <p className="text-muted text-sm">{error?.message}</p>
               <CButton
                 color="primary"
                 onClick={() => refetch()}
                 className="mt-3"
               >
-                Thử lại
+                {t("list.retryButton")}
               </CButton>
             </CCardBody>
           </CCard>
@@ -385,10 +391,12 @@ export default function AdminProductsClient() {
         <CCard className="mb-4 shadow-sm">
           <CCardHeader className="border-b bg-white !p-4">
             <div className="d-flex align-items-center mb-3">
-              <h4 className="fw-semibold text-dark mb-0">Quản lý sản phẩm</h4>
+              <h4 className="fw-semibold text-dark mb-0">{t("list.title")}</h4>
               {hasActiveFilters && (
                 <CBadge color="info" className="ms-2 px-2 py-1">
-                  {paginatedData?.totalProducts || 0} kết quả
+                  {t("list.results", {
+                    count: paginatedData?.totalProducts || 0,
+                  })}
                 </CBadge>
               )}
             </div>
@@ -438,7 +446,7 @@ export default function AdminProductsClient() {
             {isLoading && !products.length ? (
               <div className="p-5 text-center">
                 <CSpinner color="primary" />
-                <div className="text-muted mt-2">Đang tải...</div>
+                <div className="text-muted mt-2">{t("list.loading")}</div>
               </div>
             ) : products.length === 0 ? (
               <div className="p-5 text-center">
@@ -451,8 +459,8 @@ export default function AdminProductsClient() {
                 </div>
                 <p className="text-muted mb-0">
                   {hasActiveFilters
-                    ? "Không tìm thấy sản phẩm nào phù hợp với bộ lọc."
-                    : "Chưa có sản phẩm nào."}
+                    ? t("list.noResultsWithFilter")
+                    : t("list.noProductsYet")}
                 </p>
               </div>
             ) : (
@@ -472,7 +480,7 @@ export default function AdminProductsClient() {
                 {isLoading && (
                   <div className="position-absolute d-flex align-items-center justify-content-center bg-opacity-75 start-0 top-0 z-3 h-100 w-100 bg-white">
                     <CSpinner color="primary" className="me-2" />
-                    <span className="text-muted">Đang tải...</span>
+                    <span className="text-muted">{t("list.loading")}</span>
                   </div>
                 )}
               </>
@@ -486,7 +494,7 @@ export default function AdminProductsClient() {
             limit={limit}
             onPageChange={setCurrentPage}
             onLimitChange={handleLimitChange}
-            itemType="sản phẩm"
+            itemType={tAdmin("breadcrumbs.products", { count: 2 }).toLowerCase()}
             defaultLimitFromSettings={defaultLimitFromSettings}
           />
         </CCard>
@@ -496,19 +504,21 @@ export default function AdminProductsClient() {
         visible={modalState.isOpen}
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
-        title="Xác nhận ẩn sản phẩm"
+        title={t("deleteModal.title")}
         body={
           <>
-            Bạn có chắc chắn muốn ẩn sản phẩm &quot;
-            <strong>{modalState.productToDelete?.name}</strong>&quot;?
+            <p>
+              {t.rich("deleteModal.body", {
+                name: modalState.productToDelete?.name ?? "",
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </p>
             <br />
-            <small className="text-muted">
-              Hành động này sẽ đặt sản phẩm về trạng thái không hoạt động và
-              không công khai.
-            </small>
+            <small className="text-muted">{t("deleteModal.note")}</small>
           </>
         }
-        confirmButtonText="Đồng ý ẩn"
+        confirmButtonText={tShared("confirm")}
+cancelButtonText={tShared("cancel")}
         confirmButtonColor="danger"
         isConfirming={deleteProductMutation.isPending}
       />
@@ -524,13 +534,13 @@ export default function AdminProductsClient() {
           }
           itemName={
             stockModal.variant
-              ? // Dùng hàm helper để lấy tên biến thể
-                getVariantDisplayName(
+              ? // Dùng hàm helper với attributeMap đã được dịch
+                `${getLocalizedName(stockModal.product.name, locale)} (${getVariantDisplayName(
                   stockModal.variant.optionValues,
-                  attributeMap,
-                )
-              : // Nếu không có variant, dùng tên sản phẩm
-                stockModal.product.name
+                  attributeMap, // Sử dụng map đã dịch
+                )})`
+              : // Nếu không có variant, dịch tên sản phẩm
+                getLocalizedName(stockModal.product.name, locale)
           }
           currentStock={
             stockModal.variant
