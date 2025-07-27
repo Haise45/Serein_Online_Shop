@@ -6,6 +6,7 @@ import UserFilters from "@/components/admin/users/UserFilters";
 import UserTable from "@/components/admin/users/UserTable";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import useDebounce from "@/hooks/useDebounce";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   useGetAllUsersAdmin,
   useUpdateUserStatusAdmin,
@@ -30,9 +31,9 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 export default function AdminUsersClient() {
   const t = useTranslations("AdminUsers.list");
@@ -359,7 +360,9 @@ export default function AdminUsersClient() {
       >
         <CModalHeader>
           <CModalTitle>
-            {tSuspend("title", { name: suspendModalState.userToSuspend?.name ?? "User"})}
+            {tSuspend("title", {
+              name: suspendModalState.userToSuspend?.name ?? "User",
+            })}
           </CModalTitle>
         </CModalHeader>
         <CModalBody>

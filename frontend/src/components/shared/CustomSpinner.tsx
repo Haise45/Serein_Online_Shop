@@ -1,4 +1,4 @@
-"use client"; // Nếu bạn dùng animation phức tạp có thể cần JS
+"use client";
 
 import { useTranslations } from "next-intl";
 import React from "react";

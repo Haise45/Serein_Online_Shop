@@ -2,6 +2,7 @@
 
 import { useSettings } from "@/app/SettingsContext";
 import PaginationControls from "@/components/client/product/PaginationControls";
+import { Link } from "@/i18n/navigation";
 import { useGetCoupons } from "@/lib/react-query/couponQueries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { GetCouponsParams } from "@/services/couponService";
@@ -9,7 +10,6 @@ import { ExchangeRates } from "@/types";
 import { Coupon } from "@/types/coupon";
 import classNames from "classnames";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {

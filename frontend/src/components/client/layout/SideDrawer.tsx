@@ -9,8 +9,7 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Fragment, useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import CategoryMenu from "../category/CategoryMenu";

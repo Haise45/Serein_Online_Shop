@@ -1,6 +1,7 @@
 "use client";
 
 import GuestGuard from "@/app/GuestGuard";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   resendVerificationEmail,
   verifyEmailOTP,
@@ -9,8 +10,7 @@ import { AppDispatch } from "@/store";
 import { loginSuccess } from "@/store/slices/authSlice";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";

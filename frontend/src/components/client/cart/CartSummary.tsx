@@ -1,5 +1,6 @@
 "use client";
 
+import { Link, useRouter } from "@/i18n/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { AppDispatch } from "@/store";
 import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
@@ -10,14 +11,12 @@ import {
   ExchangeRates,
 } from "@/types";
 import classNames from "classnames";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import toast from "react-hot-toast";
 import { FiAlertCircle } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import CouponSection from "./CouponSection";
-import { useTranslations } from "next-intl";
 
 interface CartSummaryProps {
   originalCart: CartData; // Giỏ hàng gốc với tất cả items và coupon (nếu có)

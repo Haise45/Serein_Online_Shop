@@ -6,7 +6,7 @@ import { InventoryReportParams } from "@/services/reportService";
 import { LowStockProductItem } from "@/types/report";
 import { CTableDataCell, CTableRow } from "@coreui/react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";

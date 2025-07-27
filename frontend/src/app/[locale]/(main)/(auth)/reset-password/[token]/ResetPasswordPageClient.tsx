@@ -4,8 +4,7 @@ import GuestGuard from "@/app/GuestGuard";
 import axiosInstance from "@/lib/axiosInstance";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 interface ResetPasswordPageClientProps {

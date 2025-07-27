@@ -27,7 +27,7 @@ import {
 } from "@coreui/react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 interface ReviewTableProps {
   reviews: Review[];

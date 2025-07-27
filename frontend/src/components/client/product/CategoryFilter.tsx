@@ -2,8 +2,7 @@
 import { Category } from "@/types/category";
 import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
 import FilterDisclosure from "./FilterDisclosure";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import classNames from "classnames";
 import { useTranslations } from "next-intl";
 

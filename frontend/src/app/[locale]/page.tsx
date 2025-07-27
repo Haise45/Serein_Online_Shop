@@ -6,7 +6,7 @@ import NavbarClient from "@/components/client/layout/NavbarClient";
 import ProductList from "@/components/client/product/ProductList";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetProducts } from "@/lib/react-query/productQueries";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useSettings } from "../SettingsContext";

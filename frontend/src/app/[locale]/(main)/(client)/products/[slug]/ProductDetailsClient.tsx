@@ -6,6 +6,7 @@ import ProductDescriptionAndReviews, {
   ProductReviewsRef,
 } from "@/components/client/product/ProductDescriptionAndReviews";
 import RatingStars from "@/components/shared/RatingStars";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useAddToCart } from "@/lib/react-query/cartQueries";
 import { useGetProductDetails } from "@/lib/react-query/productQueries";
@@ -26,8 +27,7 @@ import {
 } from "@/types";
 import classNames from "classnames";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {

@@ -16,7 +16,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Fragment } from "react";
 import {
   FiAlertTriangle,
@@ -28,7 +28,6 @@ import {
   FiX,
 } from "react-icons/fi";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
 import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
 import toast from "react-hot-toast";
 import { useSettings } from "@/app/SettingsContext";
@@ -292,7 +291,11 @@ export default function CartPreviewModal({
           </div>
           {cartData.appliedCoupon && cartData.discountAmount > 0 && (
             <div className="mt-1.5 flex justify-between text-xs text-green-600">
-              <p>{t("discountLabel", { code: cartData.appliedCoupon.code ?? "" })}</p>
+              <p>
+                {t("discountLabel", {
+                  code: cartData.appliedCoupon.code ?? "",
+                })}
+              </p>
               <p>−{formatCurrency(cartData.discountAmount, currencyOptions)}</p>
             </div>
           )}
