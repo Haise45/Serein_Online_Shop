@@ -1,10 +1,8 @@
-// FILE: src/app/[locale]/not-found.tsx
-
 import FooterClient from "@/components/client/layout/FooterClient";
 import NavbarClient from "@/components/client/layout/NavbarClient";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FiHome } from "react-icons/fi";
 
 // Lấy logo từ biến môi trường

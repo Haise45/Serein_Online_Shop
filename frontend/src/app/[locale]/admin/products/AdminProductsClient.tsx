@@ -38,10 +38,9 @@ import {
 import { useTranslations, useLocale } from "next-intl";
 import {
   useSearchParams as useNextSearchParamsHook,
-  usePathname,
-  useRouter,
   useSearchParams,
 } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function AdminProductsClient() {
@@ -494,7 +493,9 @@ export default function AdminProductsClient() {
             limit={limit}
             onPageChange={setCurrentPage}
             onLimitChange={handleLimitChange}
-            itemType={tAdmin("breadcrumbs.products", { count: 2 }).toLowerCase()}
+            itemType={tAdmin("breadcrumbs.products", {
+              count: 2,
+            }).toLowerCase()}
             defaultLimitFromSettings={defaultLimitFromSettings}
           />
         </CCard>
@@ -518,7 +519,7 @@ export default function AdminProductsClient() {
           </>
         }
         confirmButtonText={tShared("confirm")}
-cancelButtonText={tShared("cancel")}
+        cancelButtonText={tShared("cancel")}
         confirmButtonColor="danger"
         isConfirming={deleteProductMutation.isPending}
       />

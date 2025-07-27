@@ -29,8 +29,7 @@ import {
 import classNames from "classnames";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { getStatusBadge } from "../orders/OrderTable";
 
@@ -107,9 +106,7 @@ const UserOrdersTable: React.FC<UserOrdersTableProps> = ({ orders }) => {
                       #{order._id.slice(-6).toUpperCase()}
                     </Link>
                   </CTableDataCell>
-                  <CTableDataCell
-                    style={{ minWidth: "95px" }}
-                  >
+                  <CTableDataCell style={{ minWidth: "95px" }}>
                     <div
                       title={new Date(order.createdAt).toLocaleString(locale)}
                     >

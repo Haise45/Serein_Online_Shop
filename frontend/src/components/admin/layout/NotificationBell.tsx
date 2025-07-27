@@ -32,7 +32,7 @@ import {
 } from "@coreui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import classNames from "classnames";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";

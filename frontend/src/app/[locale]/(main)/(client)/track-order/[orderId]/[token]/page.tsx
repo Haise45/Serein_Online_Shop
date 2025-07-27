@@ -5,7 +5,7 @@ import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import { useGetGuestOrderByToken } from "@/lib/react-query/orderQueries";
 import { BreadcrumbItem } from "@/types";
 import type { AxiosError } from "axios";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";

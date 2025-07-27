@@ -1,4 +1,3 @@
-// OrderStatusStepper.tsx
 "use client";
 
 import { Order } from "@/types/order_model";

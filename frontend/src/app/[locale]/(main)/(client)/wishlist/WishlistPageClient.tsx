@@ -5,7 +5,7 @@ import {
   useGetWishlist,
   useRemoveFromWishlist,
 } from "@/lib/react-query/wishlistQueries";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FiAlertCircle, FiHeart, FiLoader } from "react-icons/fi";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useSettings } from "@/app/SettingsContext";

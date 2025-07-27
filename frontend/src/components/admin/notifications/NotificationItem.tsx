@@ -5,7 +5,7 @@ import RelativeTime from "@/components/shared/RelativeTime";
 import { Notification } from "@/types";
 import classNames from "classnames";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 interface NotificationItemProps {
   notification: Notification;

@@ -1,15 +1,12 @@
 "use client";
 
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import { useGetProducts } from "@/lib/react-query/productQueries";
 import { GetProductsParams } from "@/services/productService";
 import { PageSearchParams } from "@/types/next";
-import {
-  useSearchParams as useNextSearchParamsHook,
-  usePathname,
-  useRouter,
-} from "next/navigation";
+import { useSearchParams as useNextSearchParamsHook } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useSettings } from "@/app/SettingsContext";

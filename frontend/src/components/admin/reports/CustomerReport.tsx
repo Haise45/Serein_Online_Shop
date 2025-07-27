@@ -5,7 +5,7 @@ import { formatCurrency, getLocalizedName } from "@/lib/utils";
 import { CustomerReportParams } from "@/services/reportService";
 import { CustomerReportItem } from "@/types/report";
 import { CAvatar, CTableDataCell, CTableRow } from "@coreui/react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import ReportStatCard from "./ReportStatCard";
 import ReportTable from "./ReportTable";
 import { ExchangeRates } from "@/types";

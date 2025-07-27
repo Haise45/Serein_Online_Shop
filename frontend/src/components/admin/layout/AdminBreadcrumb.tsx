@@ -1,7 +1,7 @@
 "use client";
 import { BreadcrumbItem as BreadcrumbItemType } from "@/types";
 import { CBreadcrumb, CBreadcrumbItem } from "@coreui/react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import React from "react";
 
 interface AdminBreadcrumbProps {
