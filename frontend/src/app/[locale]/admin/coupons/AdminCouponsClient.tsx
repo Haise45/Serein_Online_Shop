@@ -30,7 +30,8 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect, useMemo, useState } from "react";
 import CouponForm from "@/components/admin/coupons/CouponForm";
 import { useSettings } from "@/app/SettingsContext";

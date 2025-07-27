@@ -14,7 +14,7 @@ import {
 import { useUpdateUserProfile } from "@/lib/react-query/userQueries";
 import { UpdateUserProfilePayload, User } from "@/types/user";
 import InfoDisplay from "./InfoDisplay";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
 interface UpdateInfoFormProps {

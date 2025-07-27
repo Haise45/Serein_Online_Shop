@@ -19,7 +19,7 @@ import {
   CTooltip,
 } from "@coreui/react";
 import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 interface UserTableProps {
   users: User[];

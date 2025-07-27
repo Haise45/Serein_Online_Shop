@@ -1,7 +1,7 @@
 import { Product } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import React from "react";
 import { FiLoader } from "react-icons/fi";
 import { useTranslations } from "next-intl";

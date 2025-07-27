@@ -44,7 +44,8 @@ import {
   clearBreadcrumbDynamicData,
   setBreadcrumbDynamicData,
 } from "@/store/slices/breadcrumbAdminSlice";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -386,13 +387,13 @@ export default function AdminProductEditClient({
   };
 
   const removeVietnameseTones = (str: string): string => {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // xóa dấu
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // xóa dấu
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D");
   };
-  
+
   const generateAllVariantSKUs = () => {
     // 1. Kiểm tra điều kiện đầu vào
     const baseSku =

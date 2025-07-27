@@ -5,7 +5,7 @@ import ReportTable from "./ReportTable";
 import { ProductReportParams } from "@/services/reportService";
 import { formatCurrency, getLocalizedName } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { CTableRow, CTableDataCell } from "@coreui/react";
 import ReportBlock from "./ReportBlock";
 import TopProductsChart from "./TopProductsChart";

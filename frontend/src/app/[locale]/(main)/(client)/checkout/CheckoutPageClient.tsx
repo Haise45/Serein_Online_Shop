@@ -16,7 +16,7 @@ import { OrderCreationPayload } from "@/types/order";
 import { User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FiAlertCircle, FiLoader } from "react-icons/fi";
@@ -346,8 +346,7 @@ export default function CheckoutPageClient() {
           {t("loadingErrorTitle")}
         </p>
         <p className="mt-1 text-gray-600">
-          {cartError?.message ||
-            t("loadingErrorMessage")}
+          {cartError?.message || t("loadingErrorMessage")}
         </p>
       </div>
     );
@@ -373,8 +372,8 @@ export default function CheckoutPageClient() {
         <div className="lg:col-span-7 xl:col-span-8">
           <CheckoutForm
             user={user as User | null}
-              userAddresses={userAddresses || []}
-              isLoadingAddresses={isLoadingUserAddresses}
+            userAddresses={userAddresses || []}
+            isLoadingAddresses={isLoadingUserAddresses}
             paymentMethod={paymentMethod}
             setPaymentMethod={setPaymentMethod}
             onSubmitOrder={handlePlaceOrder}

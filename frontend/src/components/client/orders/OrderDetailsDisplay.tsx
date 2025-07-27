@@ -17,7 +17,7 @@ import {
   UpdateReviewPayload,
 } from "@/types/review";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import {
   FiBox,
@@ -36,7 +36,7 @@ import {
 } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import OrderStatusStepper from "./OrderStatusStepper";
-import toast from "react-hot-toast"; // Đảm bảo đã import toast
+import toast from "react-hot-toast";
 import { FiAlertCircle } from "react-icons/fi";
 import { useSettings } from "@/app/SettingsContext";
 import { useTranslations } from "next-intl";

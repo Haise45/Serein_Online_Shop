@@ -10,11 +10,8 @@ import {
 import { GetMyOrdersParams } from "@/services/orderService";
 import { PageSearchParams } from "@/types/next";
 import { OrderRequestPayload } from "@/types/order";
-import {
-  useSearchParams as useNextSearchParamsHook,
-  usePathname,
-  useRouter,
-} from "next/navigation";
+import { useSearchParams as useNextSearchParamsHook } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiAlertCircle, FiLoader } from "react-icons/fi";
 import OrderFilters from "@/components/client/orders/OrderFilters";

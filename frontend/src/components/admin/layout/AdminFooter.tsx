@@ -1,4 +1,3 @@
-// src/components/admin/layout/AdminFooter.tsx
 "use client";
 import { CFooter } from "@coreui/react";
 import React from "react";

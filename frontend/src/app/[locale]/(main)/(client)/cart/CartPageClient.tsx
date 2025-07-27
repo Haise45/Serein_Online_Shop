@@ -3,12 +3,12 @@
 import { useSettings } from "@/app/SettingsContext";
 import CartItemList from "@/components/client/cart/CartItemList";
 import CartSummary from "@/components/client/cart/CartSummary";
+import { Link } from "@/i18n/navigation";
 import { useGetAttributes } from "@/lib/react-query/attributeQueries";
 import { useClearCart, useGetCart } from "@/lib/react-query/cartQueries";
 import { useGetAllCategories } from "@/lib/react-query/categoryQueries";
 import { Category } from "@/types/category";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
