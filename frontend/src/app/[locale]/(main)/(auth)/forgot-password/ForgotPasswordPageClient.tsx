@@ -4,7 +4,7 @@ import GuestGuard from "@/app/GuestGuard";
 import axiosInstance from "@/lib/axiosInstance";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FormEvent, useState } from "react";
 
 export default function ForgotPasswordPage() {

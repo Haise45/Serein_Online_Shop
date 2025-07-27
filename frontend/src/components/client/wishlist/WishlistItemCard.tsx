@@ -7,7 +7,7 @@ import { addPopup } from "@/store/slices/notificationPopupSlice";
 import { Attribute, ExchangeRates, WishlistItem } from "@/types";
 import classNames from "classnames";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {

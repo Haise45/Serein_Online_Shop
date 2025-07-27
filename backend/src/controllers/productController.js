@@ -516,23 +516,25 @@ const getProducts = asyncHandler(async (req, res) => {
   ];
 
   // Thực thi song song pipeline đếm và pipeline lấy dữ liệu
-  const [totalResult, productsFromDB] = await Promise.all([
+  const [totalResult, productsFromAggregation] = await Promise.all([
     Product.aggregate(countPipeline),
     Product.aggregate(dataPipeline),
   ]);
 
   const totalProducts = totalResult[0]?.totalCount || 0;
 
-  // Populate category thủ công sau khi aggregate
-  await Category.populate(productsFromDB, {
-    path: "category",
-    select: "name slug parent",
-  });
+  // Lấy ra các _id từ kết quả aggregation
+  const productIds = productsFromAggregation.map((p) => p._id);
+
+  // Query lại một lần nữa để lấy về Mongoose documents đầy đủ
+  const productsFromDB = await Product.find({ _id: { $in: productIds } })
+    .populate({ path: "category", select: "name slug parent" })
+    .sort(sortOptions);
 
   // --- 5. "LÀM PHẲNG" DỮ LIỆU ĐA NGÔN NGỮ VÀ THÊM VIRTUALS ---
   const flattenedProducts = productsFromDB.map((p) => {
     // Dữ liệu từ aggregate đã là object thuần túy, không cần .toObject()
-    const productObject = p;
+    const productObject = p.toObject({ virtuals: true });
 
     // Tính toán các trường virtual thủ công
     const now = new Date();

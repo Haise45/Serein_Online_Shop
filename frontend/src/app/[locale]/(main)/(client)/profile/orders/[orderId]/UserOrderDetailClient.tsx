@@ -1,14 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useGetOrderById } from "@/lib/react-query/orderQueries";
 import OrderDetailsDisplay from "@/components/client/orders/OrderDetailsDisplay";
-import { FiLoader, FiAlertCircle } from "react-icons/fi";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useGetOrderById } from "@/lib/react-query/orderQueries";
 import type { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import { FiAlertCircle, FiLoader } from "react-icons/fi";
 
 interface UserOrderDetailClientProps {
   orderId: string | undefined;

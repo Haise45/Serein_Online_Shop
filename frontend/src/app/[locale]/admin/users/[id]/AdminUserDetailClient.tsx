@@ -21,7 +21,8 @@ import {
   CSpinner,
 } from "@coreui/react";
 import { useTranslations } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 

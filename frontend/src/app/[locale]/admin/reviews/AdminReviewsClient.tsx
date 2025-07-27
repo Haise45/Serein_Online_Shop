@@ -6,6 +6,7 @@ import ReviewFilters from "@/components/admin/reviews/ReviewFilters";
 import ReviewTable from "@/components/admin/reviews/ReviewTable";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import useDebounce from "@/hooks/useDebounce";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   useAddAdminReply,
   useApproveReviewAdmin,
@@ -32,10 +33,10 @@ import {
   CRow,
   CSpinner,
 } from "@coreui/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { useTranslations } from "next-intl";
 
 export default function AdminReviewsClient() {
   const t = useTranslations("AdminReviews.list");

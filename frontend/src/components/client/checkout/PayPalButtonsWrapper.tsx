@@ -7,7 +7,7 @@ import {
 } from "@/lib/react-query/orderQueries";
 import { OrderCreationPayload } from "@/types";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store";
 import { clearSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";

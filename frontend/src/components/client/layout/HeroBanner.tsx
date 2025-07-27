@@ -11,7 +11,7 @@ import { useSettings } from "@/app/SettingsContext";
 import { getLocalizedName } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   A11y,
   Autoplay,

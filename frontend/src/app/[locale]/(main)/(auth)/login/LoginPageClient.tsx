@@ -1,6 +1,8 @@
 "use client";
 
 import GuestGuard from "@/app/GuestGuard";
+import { useSettings } from "@/app/SettingsContext";
+import { Link, useRouter } from "@/i18n/navigation";
 import { loginUser, loginUserWithRefresh } from "@/services/authService";
 import { AppDispatch } from "@/store";
 import {
@@ -12,13 +14,10 @@ import { LoginResponse } from "@/types/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { useSettings } from "@/app/SettingsContext";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
@@ -34,7 +33,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams(); // Hook để đọc query params
 
   const { settings } = useSettings();
-  const adminDefaultLocale = settings?.adminSettings.defaultLanguage || 'vi';
+  const adminDefaultLocale = settings?.adminSettings.defaultLanguage || "vi";
 
   // Lấy URL redirect từ query params khi component mount
   useEffect(() => {

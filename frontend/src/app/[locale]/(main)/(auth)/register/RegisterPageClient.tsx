@@ -4,8 +4,7 @@ import GuestGuard from "@/app/GuestGuard";
 import { registerUser } from "@/services/authService";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { FormEvent, useState } from "react";
 
 export default function RegisterPage() {

@@ -4,7 +4,7 @@ import { useSettings } from "@/app/SettingsContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { OrderSummary } from "@/types/order_model";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   FiCalendar,
   FiCheck,

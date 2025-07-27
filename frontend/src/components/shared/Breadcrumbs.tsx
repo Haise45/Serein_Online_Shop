@@ -1,7 +1,7 @@
 "use client";
 import { BreadcrumbItem } from "@/types"; // Import type đã tạo
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FiChevronRight, FiHome } from "react-icons/fi";
 
 interface BreadcrumbsProps {

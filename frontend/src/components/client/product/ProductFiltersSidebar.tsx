@@ -1,4 +1,5 @@
 "use client";
+
 import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
 import SearchSuggestionList from "@/components/shared/SearchSuggestionList";
 import useDebounce from "@/hooks/useDebounce";

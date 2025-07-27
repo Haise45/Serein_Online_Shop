@@ -1,16 +1,18 @@
 "use client";
 
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { logoutUserApi } from "@/services/authService";
 import { AppDispatch, RootState } from "@/store";
 import { logout as logoutAction } from "@/store/slices/authSlice";
 import { BreadcrumbItem } from "@/types";
-import { generateProfileBreadcrumbs, ProfileBreadcrumbsTranslator } from "@/utils/profileBreadcrumbs";
+import {
+  generateProfileBreadcrumbs,
+  ProfileBreadcrumbsTranslator,
+} from "@/utils/profileBreadcrumbs";
 import { Dialog, DialogPanel, Transition } from "@headlessui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { Fragment, ReactNode, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -335,7 +337,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
 
           {/* Main content area */}
           <main className="lg:col-span-9">
-            <div className="rounded-2xl bg-white py-6 px-4 shadow-sm ring-1 ring-gray-200 lg:p-8">
+            <div className="rounded-2xl bg-white px-4 py-6 shadow-sm ring-1 ring-gray-200 lg:p-8">
               {children}
             </div>
           </main>

@@ -33,7 +33,7 @@ import {
 import classNames from "classnames";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 

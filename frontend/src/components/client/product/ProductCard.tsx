@@ -22,7 +22,7 @@ import { CartItem } from "@/types/cart";
 import { useQuery } from "@tanstack/react-query";
 import classNames from "classnames";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FiHeart, FiLoader, FiShoppingCart } from "react-icons/fi";
