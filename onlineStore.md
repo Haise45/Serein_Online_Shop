@@ -132,6 +132,85 @@ Dự án được xây dựng trên nền tảng MERN stack đã được tùy c
 
 - **NoSQL:** [**MongoDB**](https://www.mongodb.com/)
 
+---
+
+## 🏛️ Sơ đồ Kiến trúc & Dữ liệu
+
+Phần này cung cấp cái nhìn tổng quan về kiến trúc chức năng và cấu trúc dữ liệu của dự án.
+
+### 1. Sơ đồ Phân rã Chức năng (Functional Decomposition Diagram)
+
+Sơ đồ dưới đây mô tả tổng quan các chức năng chính của hệ thống và cách chúng được phân chia thành các module nhỏ hơn cho Admin, Client, và Guest.
+
+**Sơ đồ Phân rã Chức năng (Admin)**
+![Sơ đồ Phân rã Chức năng (Admin)](https://res.cloudinary.com/dh7mq8bgc/image/upload/v1753614509/Functional_Decomposition_Diagram_Admin_qmcxq4.png)
+
+**Sơ đồ Phân rã Chức năng (Client)**
+![Sơ đồ Phân rã Chức năng (Client)](https://res.cloudinary.com/dh7mq8bgc/image/upload/v1753614509/Functional_Decomposition_Diagram_Client_gcbuik.png)
+
+**Sơ đồ Phân rã Chức năng (Guest)**
+![Sơ đồ Phân rã Chức năng (Guest)](https://res.cloudinary.com/dh7mq8bgc/image/upload/v1753614509/Functional_Decomposition_Diagram_Guest_nvhuvr.png)
+
+### 2. Sơ đồ Thực thể Liên kết (Entity-Relationship Diagram - ERD)
+
+Mặc dù sử dụng MongoDB (NoSQL), sơ đồ ERD logic dưới đây giúp trực quan hóa các "collection" chính và mối quan hệ tham chiếu (reference) giữa chúng, thể hiện cấu trúc dữ liệu cốt lõi của ứng dụng.
+
+**Sơ đồ ERD Serein Shop**
+![Sơ đồ ERD Serein Shop](https://res.cloudinary.com/dh7mq8bgc/image/upload/v1753614509/Entity_Relationship_Diagram_l754bv.png)
+
+---
+
+## ✨ Live Demo & Screenshots
+
+### 🌐 Live Demo
+
+- **Client Website (Vercel):** [https://online-store-delta-seven.vercel.app/](https://online-store-delta-seven.vercel.app/)
+- **Backend API Server (Render):** [https://online-store-pb1l.onrender.com/](https://online-store-pb1l.onrender.com/)
+
+### 🔑 Demo Accounts
+
+Bạn có thể sử dụng các tài khoản dưới đây để trải nghiệm các chức năng của trang web.
+
+| Vai trò      | Email                                  | Mật khẩu      |
+| :----------- | :------------------------------------- | :------------ |
+| **Admin**    | `adminexample@gmail.com`               | `Admin123!`   |
+| **Customer** | `customerexample@gmail.com`            | `Client123!`  |
+| **Paypal**   | `customerserein@persional.example.com` | `Client12345` |
+
+### 📸 Screenshots
+
+#### Giao diện Khách hàng (Client View)
+
+Giao diện được thiết kế hiện đại, responsive, và tập trung vào trải nghiệm người dùng.
+
+|                                                       Trang chủ Đa ngôn ngữ (English)                                                       |                                                  Trang Danh sách Sản phẩm                                                   |
+| :-----------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------: |
+|                     ![Trang chủ với banner và sản phẩm được quản lý từ admin](link_den_anh_cua_ban/client-homepage.png)                     | ![Trang danh sách sản phẩm với bộ lọc theo giá, thuộc tính, danh mục](link_den_anh_cua_ban/client-product-list-filters.png) |
+|                                                         **Trang Chi tiết Sản phẩm**                                                         |                                              **Trang danh sách yêu thích**                                               |
+| ![Trang chi tiết sản phẩm hiển thị các tùy chọn màu sắc, size, và tự động cập nhật giá/ảnh](link_den_anh_cua_ban/client-product-detail.png) |      ![Giao diện hiển thị giá bằng USD sau khi người dùng chuyển đổi](link_den_anh_cua_ban/client-multi-currency.png)       |
+|                                                      **Giỏ hàng & Thanh toán**                                                       |                                            **Trang Profile & Lịch sử Đơn hàng**                                             |
+|             ![Quy trình thanh toán với thông tin chi tiết và tích hợp PayPal](link_den_anh_cua_ban/client-checkout-paypal.png)              |      ![Trang quản lý thông tin cá nhân và xem lại các đơn hàng đã đặt](link_den_anh_cua_ban/client-profile-orders.png)      |
+
+---
+
+#### Giao diện Quản trị viên (Admin Panel)
+
+Bảng quản trị mạnh mẽ và đầy đủ chức năng, được xây dựng bằng CoreUI.
+
+|                                                Bảng điều khiển (Dashboard) Trực quan                                                 |                                                 Quản lý Sản phẩm với Form Đa ngôn ngữ                                                  |
+| :----------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------: |
+|        ![Dashboard với biểu đồ doanh thu, trạng thái đơn hàng và các thẻ thống kê](link_den_anh_cua_ban/admin-dashboard.png)         |       ![Form thêm/sửa sản phẩm với các tab nhập liệu Tiếng Việt và Tiếng Anh](link_den_anh_cua_ban/admin-product-edit-i18n.png)        |
+|                                                    **Quản lý Biến thể Sản phẩm**                                                     |                                                     **Quản lý Đơn hàng Chi tiết**                                                      |
+|         ![Giao diện quản lý thuộc tính, giá, kho và SKU cho từng biến thể](link_den_anh_cua_ban/admin-product-variants.png)          | ![Trang chi tiết đơn hàng hiển thị thông tin khách hàng, sản phẩm và các hành động xử lý](link_den_anh_cua_ban/admin-order-detail.png) |
+|                                                     **Xử lý Yêu cầu Hoàn tiền**                                                      |                                              **Quản lý Người dùng & Đình chỉ Tài khoản**                                               |
+| ![Panel xử lý yêu cầu trả hàng/hoàn tiền từ khách hàng với các nút Chấp nhận/Từ chối](link_den_anh_cua_ban/admin-order-request.png)  |     ![Danh sách người dùng hiển thị tổng chi tiêu và số đơn hàng, có chức năng đình chỉ](link_den_anh_cua_ban/admin-user-list.png)     |
+|                                                  **Quản lý Mã giảm giá Đa tiền tệ**                                                  |                                                   **Báo cáo & Thống kê Chuyên sâu**                                                    |
+| ![Form tạo coupon với tùy chọn nhập giá trị bằng VND hoặc USD và chọn đối tượng áp dụng](link_den_anh_cua_ban/admin-coupon-form.png) |           ![Trang báo cáo chi tiết về bán hàng, top sản phẩm, khách hàng và tồn kho](link_den_anh_cua_ban/admin-reports.png)           |
+|                                                **Cài đặt Hệ thống & Quản lý Banner**                                                 |                                                    **Quản lý Đánh giá & Phản hồi**                                                     |
+|     ![Trang cài đặt cho phép admin tùy chỉnh banner, ngôn ngữ/tiền tệ mặc định](link_den_anh_cua_ban/admin-settings-banners.png)     |          ![Trang quản lý đánh giá của khách hàng với chức năng duyệt, ẩn và phản hồi](link_den_anh_cua_ban/admin-reviews.png)          |
+
+---
+
 ## 💻 Code Explanation
 
 Phần này sẽ đi sâu vào chi tiết kiến trúc và logic của từng phần trong dự án.
@@ -297,7 +376,7 @@ Backend được xây dựng theo kiến trúc **MVC (Model-View-Controller)** m
   `router.post('/', protect, isAdmin, validateRequest(schema), controllerFunction);`
 - **Tách biệt Admin/Client:** Một số route có các endpoint `/admin` riêng biệt để trả về dữ liệu gốc, đa ngôn ngữ, phục vụ cho việc chỉnh sửa, trong khi các endpoint công khai trả về dữ liệu đã được làm phẳng.
 
-**Các API Endpoint chính:**
+**Một số các API Endpoint chính:**
 
 | Phương thức                 | Endpoint                     | Chức năng                                             |
 | :-------------------------- | :--------------------------- | :---------------------------------------------------- |
@@ -342,3 +421,71 @@ Backend được xây dựng theo kiến trúc **MVC (Model-View-Controller)** m
 - **Xác thực Admin:** Socket.IO có một middleware (`io.use`) riêng để xác thực các kết nối từ client admin. Nó yêu cầu client gửi JWT qua `socket.handshake.auth.token`, giải mã token, và kiểm tra vai trò `admin` trước khi cho phép kết nối.
 - **Quản lý kết nối:** Sử dụng một `Map` (`adminSockets`) để theo dõi các admin đang online (ánh xạ `userId` -> `socket.id`).
 - **Phát sự kiện:** Cung cấp một hàm `emitToAdmins` có thể được gọi từ bất kỳ đâu trong ứng dụng (ví dụ: từ `notificationUtils`) để gửi sự kiện đến một hoặc tất cả các admin đang kết nối, tạo ra các thông báo real-time.
+
+---
+
+## 🚀 Getting Started
+
+Hướng dẫn cài đặt và chạy dự án trên môi trường local.
+
+### Yêu cầu trước khi cài đặt
+
+- [Node.js](https://nodejs.org/) (phiên bản v18.x trở lên)
+- [MongoDB](https://www.mongodb.com/try/download/community) (đã được cài đặt và chạy) hoặc một tài khoản [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+- [Git](https://git-scm.com/)
+
+### Cài đặt & Thiết lập
+
+1. **Clone the repository:**
+
+   - [GitHub](https://github.com/Haise45/Serein_Online_Shop.git)
+   - [GitLab](https://gitlab.com/phuocnlb/online-store.git)
+
+   ```bash
+   git clone https://<choose-one>.git
+   cd your-project-folder
+   ```
+
+2. **Setup Backend:**
+
+   ```bash
+   cd backend
+   npm install
+   ```
+
+   - Tạo một file `.env` trong thư mục `backend` (bạn có thể sao chép từ file `.env.example` nếu có).
+   - Điền các biến môi trường cần thiết: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CLOUDINARY_*`, `PAYPAL_*`, `EXCHANGE_RATE_API_KEY`, `EMAIL_*`.
+
+3. **Setup Frontend:**
+
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+
+   - Tạo một file `.env.local` trong thư mục `frontend` (bạn có thể sao chép từ file `.env.example` nếu có).
+   - Điền các biến môi trường cần thiết:
+     - `NEXT_PUBLIC_API_URL`: URL mà trình duyệt sẽ gọi đến backend (ví dụ: `http://localhost:8080/api/v1`).
+     - `NEXT_PUBLIC_PAYPAL_CLIENT_ID`.
+
+### Chạy ứng dụng
+
+1. **Start the Backend Server:**
+
+   ```bash
+   # Trong thư mục /backend
+   npm run dev
+   ```
+
+   Server backend sẽ chạy tại port đã cấu hình (ví dụ: `http://localhost:8080`).
+
+2. **Start the Frontend Server:**
+
+   ```bash
+   # Trong thư mục /frontend (mở một terminal mới)
+   npm run dev
+   ```
+
+   Trang web sẽ có thể truy cập tại `http://localhost:3000`.
+
+---
