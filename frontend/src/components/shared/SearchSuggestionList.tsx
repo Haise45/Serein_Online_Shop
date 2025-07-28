@@ -23,6 +23,10 @@ const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
 }) => {
   const t = useTranslations("SearchSuggestion");
 
+  if (!searchTerm) {
+    return null;
+  }
+
   if (isLoading) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
@@ -31,7 +35,7 @@ const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
     );
   }
 
-  if (suggestions.length === 0 && searchTerm) {
+  if (suggestions.length === 0) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
         {t("noResults", { searchTerm })}

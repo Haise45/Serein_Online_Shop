@@ -168,11 +168,14 @@ const buildFilter = async (query, isAdmin = false, locale = "vi") => {
   // --- 6. Tìm kiếm Text ($text index) ---
   if (query.search && query.search.trim()) {
     // Bọc chuỗi tìm kiếm trong dấu ngoặc kép để tìm kiếm chính xác cụm từ
-    const searchTerm = `"${query.search.trim()}"`;
+    const searchRegex = new RegExp(query.search.trim(), "i");
     andConditions.push({
-      $text: {
-        $search: searchTerm,
-      },
+      // Chỉ tìm trên các trường liên quan đến ngôn ngữ hiện tại và các trường chung
+      $or: [
+        { [`name.${locale}`]: searchRegex },
+        { sku: searchRegex },
+        { "variants.sku": searchRegex },
+      ],
     });
   }
 
@@ -201,29 +204,13 @@ const buildSort = (query, locale = "vi") => {
   const sortByField = query.sortBy;
   const sortOrder = query.sortOrder === "asc" ? 1 : -1;
 
-  // 1. Nếu có tìm kiếm bằng text ($text index), ưu tiên sắp xếp theo độ liên quan
-  if (query.search && query.search.trim()) {
-    sort.score = { $meta: "textScore" };
-    // Bạn vẫn có thể thêm một tiêu chí sắp xếp phụ sau độ liên quan
-    if (sortByField && allowedSortFields.includes(sortByField)) {
-      // Nếu trường sắp xếp là 'name', hãy dùng trường ngôn ngữ tương ứng
-      const i18nSortField =
-        sortByField === "name" ? `name.${locale}` : sortByField;
-      sort[i18nSortField] = sortOrder;
-    }
-    return sort;
-  }
-
-  // 2. Nếu không có tìm kiếm, sắp xếp theo trường được chỉ định
   if (sortByField && allowedSortFields.includes(sortByField)) {
-    // Nếu trường sắp xếp là 'name', hãy dùng trường ngôn ngữ tương ứng
     const i18nSortField =
       sortByField === "name" ? `name.${locale}` : sortByField;
     sort[i18nSortField] = sortOrder;
-  }
-  // 3. Mặc định cuối cùng nếu không có sortBy nào được chỉ định
-  else {
-    sort.createdAt = -1; // Mặc định sắp xếp theo sản phẩm mới nhất
+  } else {
+    // Mặc định sắp xếp theo ngày tạo mới nhất
+    sort.createdAt = -1;
   }
 
   return sort;

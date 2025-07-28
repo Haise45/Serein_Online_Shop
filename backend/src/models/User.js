@@ -145,8 +145,9 @@ userSchema.methods.createEmailVerificationOTP = function () {
   this.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 phút\
 
   console.log(
-    `[OTP Gen] User: ${this.email}, OTP: ${otp}, Expires: ${this.emailVerificationExpires}`
-  );
+    `[OTP Gen] User: ${this.email}, OTP: ${hashedOTP}, Expires: ${this.emailVerificationExpires}`
+  );// Debug
+  
   return otp; // Trả về OTP gốc để gửi email
 };
 
