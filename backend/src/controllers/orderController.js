@@ -344,9 +344,7 @@ const capturePayPalOrderController = asyncHandler(async (req, res) => {
         );
       }
       const responseOrder = flattenOrderItems(order, locale);
-      res
-        .status(200)
-        .json({ responseOrder });
+      res.status(200).json({ responseOrder });
     } else {
       res.status(404);
       throw new Error("Không tìm thấy đơn hàng để cập nhật.");
@@ -616,7 +614,9 @@ const getMyOrders = asyncHandler(async (req, res) => {
     .sort(sort)
     .skip(skip)
     .limit(limit)
-    .select("_id status totalPrice createdAt orderItems.name orderItems.image")
+    .select(
+      "_id status totalPrice createdAt orderItems isDelivered deliveredAt"
+    )
     .lean();
 
   const totalOrdersQuery = Order.countDocuments(filter);
@@ -1082,7 +1082,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
     .skip(skip)
     .limit(limit)
     .select(
-      "_id user guestOrderEmail shippingAddress status totalPrice createdAt isPaid paidAt orderItems isStockRestored"
+      "_id user guestOrderEmail shippingAddress status totalPrice createdAt isPaid paidAt orderItems isStockRestored isDelivered deliveredAt"
     )
     .lean();
 

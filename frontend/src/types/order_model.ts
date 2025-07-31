@@ -97,7 +97,6 @@ export interface OrderSummary {
   status: string;
   totalPrice: number;
   createdAt: string | Date;
-  deliveredAt: string | Date;
   orderItems: OrderItem[]; // Chỉ lấy một phần của orderItems
 
   // Thêm các trường đã được populate từ API
@@ -105,6 +104,8 @@ export interface OrderSummary {
   guestOrderEmail?: string | null;
   isPaid: boolean;
   paidAt?: string | Date | null;
+  isDelivered?: boolean;
+  deliveredAt?: string | Date | null;
 
   // Thêm shippingAddress.fullName để hiển thị tên guest
   shippingAddress: Pick<OrderShippingAddress, "fullName">;

@@ -1,13 +1,15 @@
 "use client";
 
 import { useSettings } from "@/app/SettingsContext";
+import { Link } from "@/i18n/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { OrderSummary } from "@/types/order_model";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
 import {
   FiCalendar,
   FiCheck,
+  FiCheckCircle,
   FiChevronRight,
   FiDollarSign,
   FiLoader,
@@ -15,7 +17,6 @@ import {
   FiRotateCcw,
   FiXCircle,
 } from "react-icons/fi";
-import { useTranslations } from "next-intl";
 
 interface OrderRowProps {
   order: OrderSummary;
@@ -101,6 +102,13 @@ const OrderRow: React.FC<OrderRowProps> = ({
               <FiCalendar className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
               {t("orderDate", { date: formatDate(order.createdAt) })}
             </p>
+
+            {order.isDelivered && order.deliveredAt && (
+              <p className="mt-1 flex items-center text-xs text-green-600">
+                <FiCheckCircle className="mr-1.5 h-3.5 w-3.5" />
+                {t("deliveredDate", { date: formatDate(order.deliveredAt) })}
+              </p>
+            )}
           </div>
           <div
             className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusColor(order.status.toLowerCase())}`}

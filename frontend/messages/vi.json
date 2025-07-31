@@ -860,6 +860,7 @@
   "OrderRow": {
     "orderCode": "Mã đơn hàng: #{code}",
     "orderDate": "Ngày đặt: {date}",
+    "deliveredDate": "Đã nhận ngày: {date}",
     "andXMoreProducts": "và {count} sản phẩm khác",
     "totalAmount": "Tổng tiền:",
     "viewDetails": "Xem chi tiết",
@@ -915,6 +916,7 @@
     "orderInfoTitle": "Thông tin đơn hàng",
     "orderCodeLabel": "Mã ĐH:",
     "orderDateLabel": "Ngày đặt:",
+    "deliveredDateLabel": "Ngày nhận:",
     "customerLabel": "Người đặt:",
     "phoneLabel": "SĐT:",
     "guestEmailLabel": "Email khách:",
@@ -1676,6 +1678,7 @@
     "header": {
       "order": "Đơn hàng #{id}",
       "placedAt": "Đặt lúc: {date}",
+      "deliveredAt": "Đã giao lúc: {date}",
       "restock": "Khôi phục tồn kho",
       "restockTooltipDone": "Hành động này không thể thực hiện lại",
       "restockTooltip": "Cộng lại số lượng sản phẩm vào kho",
