@@ -91,11 +91,6 @@ const registerUser = asyncHandler(async (req, res) => {
   await user.save();
 
   // --- Gửi thông báo cho Admin ---
-  console.log(
-    ">>> [AUTH CTRL] Chuẩn bị gọi createAdminNotification cho user:",
-    user._id
-  ); // <<< THÊM LOG
-  // --- Gửi thông báo cho Admin ---
   await createAdminNotification(
     "Người dùng mới đăng ký",
     `Người dùng "${user.name}" (Email: ${user.email}) vừa đăng ký tài khoản.`,
@@ -103,7 +98,6 @@ const registerUser = asyncHandler(async (req, res) => {
     `/admin/users/${user._id}`,
     { userId: user._id }
   );
-  console.log(">>> [AUTH CTRL] ĐÃ GỌI createAdminNotification.");
 
   // --- Gửi Email chứa OTP ---
   try {

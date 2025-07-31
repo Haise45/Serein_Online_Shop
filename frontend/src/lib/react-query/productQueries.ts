@@ -1,6 +1,7 @@
 import {
   getProductByIdOrSlug as getProductByIdOrSlugApi,
   getProducts as getProductsApi,
+  getAdminProductsApi,
   createProduct as createProductApi,
   updateProduct as updateProductApi,
   deleteProduct as deleteProductApi,
@@ -11,8 +12,10 @@ import {
   StockUpdateResponse,
   updateVariantStockApi,
   updateProductStockApi,
+  getAdminProductDetailsApi,
+  PaginatedAdminProductsResponse,
 } from "@/services/productService";
-import { Product } from "@/types";
+import { Product, ProductAdmin } from "@/types";
 import {
   useQuery,
   useMutation,
@@ -22,6 +25,7 @@ import {
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { useLocale, useTranslations } from "next-intl";
 
 // --- Query Keys ---
 export const productKeys = {
@@ -98,59 +102,55 @@ export const useGetProductDetails = (
 
 // --- Custom Hook: Lấy danh sách sản phẩm (Admin) ---
 export const useGetAdminProducts = (
-  params?: GetProductsParams,
-  options?: CustomQueryOptions<PaginatedProductsResponse>,
+  params: GetProductsParams,
+  options?: { enabled?: boolean },
 ) => {
-  return useQuery<PaginatedProductsResponse, AxiosError<{ message?: string }>>({
-    queryKey: productKeys.adminList(params), // Sử dụng admin list key
-    queryFn: () => getProductsApi(params), // Gọi cùng service, backend sẽ phân quyền
-    placeholderData: (previousData) => previousData,
-    ...options,
+  return useQuery<PaginatedAdminProductsResponse, Error>({
+    queryKey: [...productKeys.lists(), "admin", params],
+    queryFn: () => getAdminProductsApi(params),
+    enabled: options?.enabled ?? true,
   });
 };
 
 // --- Custom Hook: Lấy chi tiết một sản phẩm (Admin) ---
 // Admin có thể xem cả sản phẩm chưa publish/active
-export const useGetAdminProductDetails = (
-  idOrSlug: string | undefined,
-  options?: CustomQueryOptions<Product | null>,
-) => {
-  return useQuery<Product | null, AxiosError<{ message?: string }>>({
-    queryKey: productKeys.adminDetail(idOrSlug), // Sử dụng admin detail key
-    queryFn: () => {
-      if (!idOrSlug) return Promise.resolve(null);
-      // Gọi cùng service, backend sẽ phân quyền
-      // Hoặc tạo getAdminProductByIdOrSlugApi nếu endpoint khác
-      return getProductByIdOrSlugApi(idOrSlug);
-    },
-    enabled: options?.enabled ?? !!idOrSlug,
-    ...options,
+export const useGetAdminProductDetails = (productId: string) => {
+  return useQuery<ProductAdmin, Error>({
+    queryKey: productKeys.adminDetail(productId),
+    queryFn: () => getAdminProductDetailsApi(productId),
+    enabled: !!productId,
   });
 };
 
 // --- Custom Hook: Tạo sản phẩm mới (Admin) ---
 export const useCreateAdminProduct = (
-  options?: CustomMutationOptions<Product, ProductCreationData>,
+  options?: CustomMutationOptions<ProductAdmin, ProductCreationData>,
 ) => {
+  const t = useTranslations("reactQuery.product");
   const queryClient = useQueryClient();
+  const locale = useLocale();
   return useMutation<
-    Product,
+    ProductAdmin,
     AxiosError<{ message?: string }>,
     ProductCreationData
   >({
     mutationFn: createProductApi,
     onSuccess: (newProduct, variables, context) => {
+      // Lấy tên sản phẩm theo ngôn ngữ hiện tại, fallback về tiếng Việt
+      const localizedName =
+        newProduct.name[locale as "vi" | "en"] || newProduct.name.vi;
       queryClient.invalidateQueries({ queryKey: productKeys.adminLists() }); // Invalidate danh sách admin
       // Có thể cập nhật cache trực tiếp cho chi tiết sản phẩm mới này
       queryClient.setQueryData(
         productKeys.adminDetail(newProduct._id),
         newProduct,
       );
-      toast.success(`Sản phẩm "${newProduct.name}" đã được tạo thành công!`);
+      const message = t("createSuccess").replace("{name}", localizedName);
+      toast.success(message);
       options?.onSuccess?.(newProduct, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(error.response?.data?.message || "Tạo sản phẩm thất bại.");
+      toast.error(error.response?.data?.message || t("createError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -163,38 +163,37 @@ interface UpdateAdminProductVariables {
   productData: ProductUpdateData;
 }
 export const useUpdateAdminProduct = (
-  options?: CustomMutationOptions<Product, UpdateAdminProductVariables>,
+  options?: CustomMutationOptions<ProductAdmin, UpdateAdminProductVariables>,
 ) => {
+  const t = useTranslations("reactQuery.product");
   const queryClient = useQueryClient();
+  const locale = useLocale();
   return useMutation<
-    Product,
+    ProductAdmin,
     AxiosError<{ message?: string }>,
     UpdateAdminProductVariables
   >({
     mutationFn: ({ productId, productData }) =>
       updateProductApi(productId, productData),
     onSuccess: (updatedProduct, variables, context) => {
+      const localizedName =
+        updatedProduct.name[locale as "vi" | "en"] || updatedProduct.name.vi;
       // Cập nhật cache cho chi tiết sản phẩm đã sửa
       queryClient.setQueryData(
         productKeys.adminDetail(variables.productId),
         updatedProduct,
       );
-      queryClient.setQueryData(
-        productKeys.detail(variables.productId),
-        updatedProduct,
-      ); // Cũng cập nhật cho client view nếu key giống
 
       // Invalidate danh sách để lấy lại
       queryClient.invalidateQueries({ queryKey: productKeys.adminLists() });
       queryClient.invalidateQueries({ queryKey: productKeys.lists() }); // Cả list của client
 
-      toast.success(`Sản phẩm "${updatedProduct.name}" đã được cập nhật!`);
+      const message = t("updateSuccess").replace("{name}", localizedName);
+      toast.success(message);
       options?.onSuccess?.(updatedProduct, variables, context);
     },
     onError: (error, variables, context) => {
-      toast.error(
-        error.response?.data?.message || "Cập nhật sản phẩm thất bại.",
-      );
+      toast.error(error.response?.data?.message || t("updateError"));
       options?.onError?.(error, variables, context);
     },
     ...options,
@@ -205,6 +204,7 @@ export const useUpdateAdminProduct = (
 export const useDeleteAdminProduct = (
   options?: CustomMutationOptions<{ message: string }, string>, // string là productId
 ) => {
+  const t = useTranslations("reactQuery.product");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string },
@@ -213,7 +213,7 @@ export const useDeleteAdminProduct = (
   >({
     mutationFn: deleteProductApi,
     onSuccess: (data, productId, context) => {
-      toast.success(data.message || "Sản phẩm đã được xóa (ẩn).");
+      toast.success(data.message || t("deleteSuccess"));
       // Xóa khỏi cache chi tiết
       queryClient.removeQueries({
         queryKey: productKeys.adminDetail(productId),
@@ -225,7 +225,7 @@ export const useDeleteAdminProduct = (
       options?.onSuccess?.(data, productId, context);
     },
     onError: (error, productId, context) => {
-      toast.error(error.response?.data?.message || "Xóa sản phẩm thất bại.");
+      toast.error(error.response?.data?.message || t("deleteError"));
       options?.onError?.(error, productId, context);
     },
     ...options,
@@ -240,12 +240,13 @@ interface UpdateStockVariables {
 export const useUpdateProductStock = (
   options?: CustomMutationOptions<StockUpdateResponse, UpdateStockVariables>,
 ) => {
+  const t = useTranslations("reactQuery.product");
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ productId, update }) =>
       updateProductStockApi(productId, update),
     onSuccess: (data) => {
-      toast.success("Đã cập nhật tồn kho!");
+      toast.success(t("updateStockSuccess"));
       // Invalidate cả danh sách và chi tiết để làm mới dữ liệu
       queryClient.invalidateQueries({ queryKey: productKeys.adminLists() });
       queryClient.invalidateQueries({
@@ -253,7 +254,7 @@ export const useUpdateProductStock = (
       });
     },
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Lỗi cập nhật tồn kho."),
+      toast.error(error.response?.data?.message || t("updateStockError")),
     ...options,
   });
 };
@@ -270,19 +271,20 @@ export const useUpdateVariantStock = (
     UpdateVariantStockVariables
   >,
 ) => {
+  const t = useTranslations("reactQuery.product");
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ productId, variantId, update }) =>
       updateVariantStockApi(productId, variantId, update),
     onSuccess: (data) => {
-      toast.success("Đã cập nhật tồn kho biến thể!");
+      toast.success(t("updateVariantStockSuccess"));
       queryClient.invalidateQueries({ queryKey: productKeys.adminLists() });
       queryClient.invalidateQueries({
         queryKey: productKeys.adminDetail(data.productId),
       });
     },
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Lỗi cập nhật tồn kho."),
+      toast.error(error.response?.data?.message || t("updateStockError")),
     ...options,
   });
 };

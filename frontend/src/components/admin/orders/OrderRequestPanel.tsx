@@ -19,13 +19,16 @@ import {
 } from "@coreui/react";
 import Image from "next/image";
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface OrderRequestPanelProps {
   order: Order;
 }
 
 const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
+  const t = useTranslations("AdminOrderDetail.requestPanel");
+  const tShared = useTranslations("Shared.confirmModal");
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [isConfirmApproveModalOpen, setIsConfirmApproveModalOpen] =
@@ -64,10 +67,10 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
     setIsRejectModalOpen(false);
   };
 
-  const requestTitle =
-    requestType === "cancellation"
-      ? "Yêu cầu Hủy Đơn hàng"
-      : "Yêu cầu Trả hàng/Hoàn tiền";
+  const requestTitle = t(
+    requestType === "cancellation" ? "cancelTitle" : "refundTitle",
+  );
+  const requestTypeName = t(`requestType_${requestType}` as string);
 
   return (
     <>
@@ -79,7 +82,7 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
 
         <div className="space-y-4">
           <div>
-            <p className="font-semibold text-gray-700">Lý do của khách hàng:</p>
+            <p className="font-semibold text-gray-700">{t("customerReason")}</p>
             <p className="mt-1 rounded-md border bg-white p-3 text-gray-800">
               {requestData.reason}
             </p>
@@ -88,7 +91,7 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
           {requestData.imageUrls && requestData.imageUrls.length > 0 && (
             <div>
               <p className="mb-2 font-semibold text-gray-700">
-                Hình ảnh đính kèm:
+                {t("attachedImages")}
               </p>
               <div className="flex flex-wrap gap-4">
                 {requestData.imageUrls.map((url, index) => (
@@ -100,7 +103,7 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
                   >
                     <Image
                       src={url}
-                      alt={`Ảnh bằng chứng ${index + 1}`}
+                      alt={t("imageProof", { index: index + 1 })}
                       width={100}
                       height={100}
                       className="rounded-lg border-2 border-white object-cover shadow-md transition-opacity hover:opacity-80"
@@ -120,7 +123,7 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
             disabled={approveMutation.isPending || rejectMutation.isPending}
           >
             <CIcon icon={cilThumbDown} className="me-2" />
-            Từ chối
+            {t("reject")}
           </CButton>
           <CButton
             color="success"
@@ -128,7 +131,7 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
             disabled={approveMutation.isPending || rejectMutation.isPending}
           >
             <CIcon icon={cilThumbUp} className="me-2" />
-            Chấp nhận
+            {t("approve")}
           </CButton>
         </div>
       </div>
@@ -139,9 +142,10 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
         onClose={() => setIsConfirmApproveModalOpen(false)}
         onConfirm={handleApprove}
         isConfirming={approveMutation.isPending}
-        title={`Xác nhận Chấp nhận Yêu cầu`}
-        body={`Bạn có chắc chắn muốn chấp nhận yêu cầu ${requestType === "cancellation" ? "hủy" : "hoàn tiền"} cho đơn hàng này? Hành động này không thể hoàn tác.`}
-        confirmButtonText="Đồng ý"
+        title={t("confirmApproveTitle")}
+        body={t("confirmApproveBody", { type: requestTypeName })}
+        confirmButtonText={tShared("confirm")}
+        cancelButtonText={tShared("cancel")}
         confirmButtonColor="success"
       />
 
@@ -152,16 +156,13 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
         alignment="center"
       >
         <CModalHeader>
-          <CModalTitle>Từ chối yêu cầu</CModalTitle>
+          <CModalTitle>{t("rejectModalTitle")}</CModalTitle>
         </CModalHeader>
         <CModalBody>
-          <p className="mb-3">
-            Vui lòng nhập lý do từ chối yêu cầu. Khách hàng sẽ nhận được thông
-            báo về lý do này.
-          </p>
+          <p className="mb-3">{t("rejectModalBody")}</p>
           <CFormTextarea
             rows={4}
-            placeholder="Ví dụ: Sản phẩm đã qua sử dụng, yêu cầu không hợp lệ..."
+            placeholder={t("rejectModalPlaceholder")}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             required
@@ -173,14 +174,16 @@ const OrderRequestPanel: React.FC<OrderRequestPanelProps> = ({ order }) => {
             variant="outline"
             onClick={() => setIsRejectModalOpen(false)}
           >
-            Hủy
+            {tShared("cancel")}
           </CButton>
           <CButton
             color="danger"
             onClick={handleReject}
             disabled={!rejectReason.trim() || rejectMutation.isPending}
           >
-            {rejectMutation.isPending ? "Đang xử lý..." : "Xác nhận từ chối"}
+            {rejectMutation.isPending
+              ? tShared("processing")
+              : t("rejectModalConfirm")}
           </CButton>
         </CModalFooter>
       </CModal>

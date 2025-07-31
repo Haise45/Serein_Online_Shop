@@ -1,3 +1,4 @@
+import { getLocalizedName } from "@/lib/utils";
 import { Category } from "@/types";
 import { cilFolder } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
@@ -9,7 +10,9 @@ import {
   CFormSelect,
   CFormSwitch,
 } from "@coreui/react";
+import { useLocale } from "next-intl";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface ProductOrganizationCardProps {
   category: string;
@@ -34,15 +37,18 @@ const ProductOrganizationCard: React.FC<ProductOrganizationCardProps> = ({
   isLoadingCategories,
   error,
 }) => {
+  const t = useTranslations("AdminProductForm.organization");
+  const locale = useLocale() as "vi" | "en";
+
   return (
     <CCard className="mb-4">
       <CCardHeader className="flex items-center gap-2">
         <CIcon icon={cilFolder} />
-        Tổ chức sản phẩm
+        {t("title")}
       </CCardHeader>
       <CCardBody>
         <div className="mb-4">
-          <CFormLabel htmlFor="category">Danh mục*</CFormLabel>
+          <CFormLabel htmlFor="category">{t("categoryLabel")}</CFormLabel>
           <CFormSelect
             id="category"
             value={category}
@@ -50,13 +56,13 @@ const ProductOrganizationCard: React.FC<ProductOrganizationCardProps> = ({
             invalid={!!error}
             className="mt-1"
           >
-            <option value="">Chọn danh mục</option>
+            <option value="">{t("selectCategory")}</option>
             {isLoadingCategories ? (
-              <option disabled>Đang tải danh mục...</option>
+              <option disabled>{t("loadingCategories")}</option>
             ) : (
               categoriesForSelect.map((cat) => (
                 <option key={cat._id} value={cat._id}>
-                  {cat.displayName}
+                  {getLocalizedName(cat.displayName, locale)}
                 </option>
               ))
             )}
@@ -64,24 +70,28 @@ const ProductOrganizationCard: React.FC<ProductOrganizationCardProps> = ({
           {error && <div className="mt-1 text-sm text-red-600">{error}</div>}
         </div>
         <div>
-          <CFormLabel>Trạng thái</CFormLabel>
+          <CFormLabel>{t("statusLabel")}</CFormLabel>
           <div className="mt-2 space-y-3">
             <CFormSwitch
               id="isPublished"
-              label="Công khai sản phẩm"
+              label={t("publishLabel")}
               checked={isPublished}
               onChange={(e) => setIsPublished(e.target.checked)}
               className="flex items-center"
             />
-             <p className="-mt-2 ml-12 text-xs text-gray-500">Khi bật, sản phẩm sẽ hiển thị cho khách hàng.</p>
+            <p className="-mt-2 ml-10 text-xs text-gray-500">
+              {t("publishHelpText")}
+            </p>
             <CFormSwitch
               id="isActive"
-              label="Kích hoạt kinh doanh"
+              label={t("activateLabel")}
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
               className="flex items-center"
             />
-            <p className="-mt-2 ml-12 text-xs text-gray-500">Khi tắt, sản phẩm sẽ bị ẩn và không thể mua.</p>
+            <p className="-mt-2 ml-10 text-xs text-gray-500">
+              {t("activateHelpText")}
+            </p>
           </div>
         </div>
       </CCardBody>

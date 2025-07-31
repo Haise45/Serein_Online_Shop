@@ -2,6 +2,7 @@
 import "@/app/globals.css";
 import {
   cilCart,
+  cilChartPie,
   cilCommentSquare,
   cilPuzzle,
   cilSettings,
@@ -17,13 +18,13 @@ import {
   CSidebar,
   CSidebarNav,
 } from "@coreui/react";
+import classNames from "classnames";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import React, { useEffect, useState } from "react";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
-import classNames from "classnames";
 
 // Các định nghĩa type và navigation không đổi...
 interface BaseNavItem {
@@ -55,62 +56,6 @@ type NavigationItem =
   | NavGroup
   | NavTitle;
 
-const adminNavigation: NavigationItem[] = [
-  {
-    component: CNavItem,
-    name: "Dashboard",
-    to: "/admin/dashboard",
-    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
-  },
-  { component: CNavTitle, name: "Quản lý Shop" },
-  {
-    component: CNavGroup,
-    name: "Sản phẩm",
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      { component: CNavItem, name: "Tất cả sản phẩm", to: "/admin/products" },
-      {
-        component: CNavItem,
-        name: "Thêm sản phẩm mới",
-        to: "/admin/products/create",
-      },
-      { component: CNavItem, name: "Danh mục", to: "/admin/categories" },
-      { component: CNavItem, name: "Thuộc tính", to: "/admin/attributes" },
-    ],
-  },
-  {
-    component: CNavItem,
-    name: "Đơn hàng",
-    to: "/admin/orders",
-    icon: <CIcon icon={cilCart} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: "Người dùng",
-    to: "/admin/users",
-    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: "Mã giảm giá",
-    to: "/admin/coupons",
-    icon: <CIcon icon={cilTags} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: "Đánh giá",
-    to: "/admin/reviews",
-    icon: <CIcon icon={cilCommentSquare} customClassName="nav-icon" />,
-  },
-  { component: CNavTitle, name: "Hệ thống" },
-  {
-    component: CNavItem,
-    name: "Cài đặt Shop",
-    to: "/admin/settings/shop",
-    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-  },
-];
-
 interface AdminSidebarProps {
   sidebarVisible: boolean;
   onVisibleChange: (visible: boolean) => void;
@@ -123,8 +68,71 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onVisibleChange,
   unfoldable,
 }) => {
+  const t = useTranslations("Admin.sidebar");
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
+
+  const adminNavigation = [
+    {
+      component: CNavItem,
+      name: "dashboard", // Key
+      to: "/admin/dashboard",
+      icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    },
+    { component: CNavTitle, name: "manageShop" }, // Key
+    {
+      component: CNavGroup,
+      name: "productsGroup", // Key
+      icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+      items: [
+        { component: CNavItem, name: "allProducts", to: "/admin/products" }, // Key
+        {
+          component: CNavItem,
+          name: "addNewProduct",
+          to: "/admin/products/create",
+        }, // Key
+        { component: CNavItem, name: "categories", to: "/admin/categories" }, // Key
+        { component: CNavItem, name: "attributes", to: "/admin/attributes" }, // Key
+      ],
+    },
+    {
+      component: CNavItem,
+      name: "orders",
+      to: "/admin/orders",
+      icon: <CIcon icon={cilCart} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: "users",
+      to: "/admin/users",
+      icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: "coupons",
+      to: "/admin/coupons",
+      icon: <CIcon icon={cilTags} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: "reviews",
+      to: "/admin/reviews",
+      icon: <CIcon icon={cilCommentSquare} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: "reports",
+      to: "/admin/reports",
+      icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
+    },
+    { component: CNavTitle, name: "system" }, // Key
+    {
+      component: CNavItem,
+      name: "shopSettings",
+      to: "/admin/settings",
+      icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+    },
+  ];
 
   useEffect(() => {
     const checkMobile = () => {
@@ -149,6 +157,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const renderNavItems = (items: NavigationItem[]): React.ReactNode[] => {
     return items.map((item, index) => {
+      const translatedName = t(item.name as string);
       const key = `${item.name}-${index}`;
 
       if (isNavGroup(item)) {
@@ -166,7 +175,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             toggler={
               <>
                 {item.icon}
-                {item.name}
+                {translatedName}
               </>
             }
             visible={isGroupActive}
@@ -186,20 +195,20 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               className={`nav-link ${isActive ? "active" : ""}`}
             >
               {item.icon}
-              {item.name}
+              {translatedName}
             </Link>
           </CNavItem>
         );
       }
 
       if (isNavTitle(item)) {
-        return <CNavTitle key={key}>{item.name}</CNavTitle>;
+        return <CNavTitle key={key}>{translatedName}</CNavTitle>;
       }
 
       return (
         <CNavItem key={key}>
           {item.icon}
-          {item.name}
+          {translatedName}
         </CNavItem>
       );
     });

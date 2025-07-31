@@ -1,14 +1,15 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
 
 const categorySchema = new mongoose.Schema(
   {
     name: {
-      type: String,
+      type: i18nStringSchema,
       required: [true, "Vui lòng nhập tên danh mục"],
       unique: true,
       trim: true,
-      maxlenght: [100, "Tên danh mục không được quá 100 ký tự"],
+      maxlength: [100, "Tên danh mục không được quá 100 ký tự"],
     },
     slug: {
       // Sẽ được tạo từ name
@@ -17,7 +18,7 @@ const categorySchema = new mongoose.Schema(
       index: true,
     },
     description: {
-      type: String,
+      type: i18nStringSchema,
       maxlenght: [500, "Mô tả không được quá 500 ký tự"],
       trim: true,
     },
@@ -43,14 +44,13 @@ const categorySchema = new mongoose.Schema(
 // Middleware: Tự động tạo slug trước khi lưu (create hoặc update)
 categorySchema.pre("save", function (next) {
   // Chỉ tạo slug nếu name được thay đổi hoặc là document mới
-  if (!this.isModified("name")) {
-    return next();
+  if (this.isModified("name.vi")) {
+    this.slug = slugify(this.name.vi, {
+      lower: true,
+      strict: true,
+      locale: "vi",
+    });
   }
-  this.slug = slugify(this.name, {
-    lower: true,
-    strict: true,
-    locale: "vi",
-  });
   next();
 });
 

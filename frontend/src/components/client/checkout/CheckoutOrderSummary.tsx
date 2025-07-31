@@ -1,13 +1,13 @@
-// src/components/checkout/CheckoutOrderSummary.tsx
 "use client";
 
 import { formatCurrency, getVariantDisplayNameClient } from "@/lib/utils";
-import { VariantOptionValue } from "@/types";
-import { CartItem as CartItemType } from "@/types/cart"; // Sử dụng Cart type cho originalCart
-import { Coupon } from "@/types/coupon"; // Import Coupon type
+import { ExchangeRates, VariantOptionValue } from "@/types";
+import { CartItem as CartItemType } from "@/types/cart";
+import { Coupon } from "@/types/coupon";
 import classNames from "classnames";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FiInfo, FiLoader, FiShoppingCart, FiTag } from "react-icons/fi";
 
 interface CheckoutOrderSummaryProps {
@@ -20,7 +20,10 @@ interface CheckoutOrderSummaryProps {
   isPlacingOrder: boolean; // Trạng thái khi đang gọi API tạo đơn hàng
   onPlaceOrderTriggerFromSummary: () => void; // Hàm để trigger submit form ở CheckoutForm
   attributeMap: Map<string, { label: string; values: Map<string, string> }>;
-  stockError: string | null;
+  stockErrorObject: { name: string; stock: number } | null;
+  paymentMethod: string;
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 export default function CheckoutOrderSummary({
@@ -33,11 +36,18 @@ export default function CheckoutOrderSummary({
   isPlacingOrder,
   onPlaceOrderTriggerFromSummary,
   attributeMap,
-  stockError,
+  stockErrorObject,
+  paymentMethod,
+  displayCurrency,
+  rates,
 }: CheckoutOrderSummaryProps) {
-  const numberOfItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const tSummary = useTranslations("CheckoutOrderSummary");
+  const tCheckoutPage = useTranslations("CheckoutPage");
 
-  const isButtonDisabled = isPlacingOrder || items.length === 0 || !!stockError;
+  const numberOfItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const currencyOptions = { currency: displayCurrency, rates };
+  const isButtonDisabled =
+    isPlacingOrder || items.length === 0 || !!stockErrorObject;
 
   return (
     <aside
@@ -50,18 +60,18 @@ export default function CheckoutOrderSummary({
         id="summary-heading"
         className="mb-4 border-b border-gray-200 pb-4 text-xl font-semibold text-gray-900"
       >
-        Tóm tắt đơn hàng
+        {tSummary("title")}
       </h2>
 
       {items.length === 0 ? (
         <div className="py-8 text-center text-gray-500">
           <FiShoppingCart className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-          <p>Không có sản phẩm nào được chọn để thanh toán.</p>
+          <p>{tSummary("noItemSelected")}</p>
           <Link
             href="/cart"
             className="mt-2 inline-block font-medium text-indigo-600 hover:text-indigo-500"
           >
-            Quay lại giỏ hàng
+            {tSummary("backToCartLink")}
           </Link>
         </div>
       ) : (
@@ -102,7 +112,10 @@ export default function CheckoutOrderSummary({
                           </Link>
                         </h3>
                         <p className="ml-4 whitespace-nowrap">
-                          {formatCurrency(item.price * item.quantity)}
+                          {formatCurrency(
+                            item.price * item.quantity,
+                            currencyOptions,
+                          )}
                         </p>
                       </div>
                       {variantDisplayName && (
@@ -111,7 +124,10 @@ export default function CheckoutOrderSummary({
                         </p>
                       )}
                       <p className="mt-0.5 text-xs text-gray-500">
-                        SL: {item.quantity} x {formatCurrency(item.price)}
+                        {tSummary("productQuantity", {
+                          quantity: item.quantity,
+                          price: formatCurrency(item.price, currencyOptions),
+                        })}
                       </p>
                     </div>
                   </div>
@@ -124,10 +140,10 @@ export default function CheckoutOrderSummary({
             <dl className="space-y-3">
               <div className="flex items-center justify-between">
                 <dt className="text-sm text-gray-600">
-                  Tạm tính ({numberOfItems} sản phẩm)
+                  {tSummary("subtotalLabel", { count: numberOfItems })}
                 </dt>
                 <dd className="text-sm font-medium text-gray-900">
-                  {formatCurrency(subtotal)}
+                  {formatCurrency(subtotal, currencyOptions)}
                 </dd>
               </div>
 
@@ -135,27 +151,29 @@ export default function CheckoutOrderSummary({
                 <div className="flex items-center justify-between">
                   <dt className="flex items-center text-sm text-green-600">
                     <FiTag className="mr-1.5 h-4 w-4" />
-                    <span>Giảm giá ({appliedCouponFull.code})</span>
+                    <span>{tSummary("discountLabel", { code: appliedCouponFull.code })}</span>
                   </dt>
                   <dd className="text-sm font-medium text-green-600">
-                    -{formatCurrency(discount)}
+                    -{formatCurrency(discount, currencyOptions)}
                   </dd>
                 </div>
               )}
 
               <div className="flex items-center justify-between">
-                <dt className="text-sm text-gray-600">Phí vận chuyển</dt>
+                <dt className="text-sm text-gray-600">{tSummary("shippingFeeLabel")}</dt>
                 <dd className="text-sm font-medium text-gray-900">
-                  {shippingFee > 0 ? formatCurrency(shippingFee) : "Miễn phí"}
+                  {shippingFee > 0
+                    ? formatCurrency(shippingFee, currencyOptions)
+                    : tSummary("shippingFeeFree")}
                 </dd>
               </div>
 
               <div className="flex items-center justify-between border-t border-gray-200 pt-4">
                 <dt className="text-base font-semibold text-gray-900">
-                  Tổng cộng
+                  {tSummary("totalLabel")}
                 </dt>
                 <dd className="text-base font-semibold text-gray-900">
-                  {formatCurrency(finalTotal + shippingFee)}
+                  {formatCurrency(finalTotal + shippingFee, currencyOptions)}
                 </dd>
               </div>
             </dl>
@@ -164,44 +182,52 @@ export default function CheckoutOrderSummary({
               <div className="flex items-center rounded-md bg-yellow-50 p-2 text-xs text-yellow-600">
                 <FiInfo className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span>
-                  Mã &quot;{appliedCouponFull.code}&quot; không đủ điều kiện áp
-                  dụng cho các sản phẩm đã chọn.
+                  {tSummary("couponNotApplicable", { code: appliedCouponFull.code })}
                 </span>
               </div>
             )}
           </div>
 
-          {stockError && (
+          {stockErrorObject && (
             <div className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800">
-              <p>{stockError} Vui lòng quay lại giỏ hàng để điều chỉnh.</p>
+              {tCheckoutPage("stockErrorToast", {
+                name: stockErrorObject.name,
+                stock: stockErrorObject.stock,
+              })}{" "}
+              {tSummary("stockError")}
             </div>
           )}
 
-          <div className="mt-8">
-            <button
-              type="button" // Để không submit form cha nếu có
-              onClick={onPlaceOrderTriggerFromSummary}
-              disabled={isButtonDisabled}
-              className={classNames(
-                "flex w-full items-center justify-center rounded-md border border-transparent px-6 py-3 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",
-                items.length === 0
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
-                { "cursor-wait opacity-70": isPlacingOrder },
-              )}
-            >
-              {isPlacingOrder && (
-                <FiLoader className="mr-3 -ml-1 h-5 w-5 animate-spin text-white" />
-              )}
-              {isPlacingOrder ? "Đang xử lý..." : `Đặt Hàng (${numberOfItems})`}
-            </button>
-          </div>
+          {paymentMethod !== "PAYPAL" && (
+            <div className="mt-8">
+              <button
+                type="button" // Để không submit form cha nếu có
+                onClick={onPlaceOrderTriggerFromSummary}
+                disabled={isButtonDisabled}
+                className={classNames(
+                  "flex w-full items-center justify-center rounded-md border border-transparent px-6 py-3 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none",
+                  items.length === 0
+                    ? "cursor-not-allowed bg-gray-400"
+                    : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
+                  { "cursor-wait opacity-70": isPlacingOrder },
+                )}
+              >
+                {isPlacingOrder && (
+                  <FiLoader className="mr-3 -ml-1 h-5 w-5 animate-spin text-white" />
+                )}
+                {isPlacingOrder
+                  ? tSummary("processingButton")
+                  : tSummary("placeOrderButton", { count: numberOfItems })}
+              </button>
+            </div>
+          )}
           <div className="mt-4 text-center">
             <Link
               href="/cart"
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
             >
-              Quay lại giỏ hàng<span aria-hidden="true"> →</span>
+              {tSummary("continueShoppingLink")}
+              <span aria-hidden="true">{tSummary("continueShoppingArrow")}</span>
             </Link>
           </div>
         </>

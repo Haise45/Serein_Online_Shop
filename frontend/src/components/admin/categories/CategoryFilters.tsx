@@ -1,3 +1,4 @@
+import { getLocalizedName } from "@/lib/utils";
 import { Category } from "@/types";
 import { cilPlus, cilSearch } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
@@ -10,6 +11,7 @@ import {
   CInputGroupText,
   CRow,
 } from "@coreui/react";
+import { useLocale, useTranslations } from "next-intl";
 import React from "react";
 
 // Định nghĩa kiểu cho giá trị filter trạng thái
@@ -38,6 +40,9 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   isLoadingParentCategories,
   onAddNew,
 }) => {
+  const t = useTranslations("AdminCategories.filters");
+  const locale = useLocale() as "vi" | "en";
+
   return (
     <CRow className="g-3 items-center justify-between">
       {/* Cột Tìm kiếm */}
@@ -47,10 +52,10 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             <CIcon icon={cilSearch} />
           </CInputGroupText>
           <CFormInput
-            placeholder="Tìm theo tên hoặc slug..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={onSearchChange}
-            aria-label="Tìm kiếm danh mục"
+            aria-label={t("searchAriaLabel")}
           />
         </CInputGroup>
       </CCol>
@@ -62,14 +67,14 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
           onChange={(e) => onParentChange(e.target.value)}
           disabled={isLoadingParentCategories}
         >
-          <option value="">Tất cả danh mục cha</option>
-          <option value="null">-Chỉ danh mục cấp cao nhất-</option>
+          <option value="">{t("allParentCategories")}</option>
+          <option value="null">{t("onlyTopLevel")}</option>
           {isLoadingParentCategories ? (
-            <option>Đang tải...</option>
+            <option>{t("loading")}</option>
           ) : (
             parentCategoryOptions.map((cat) => (
               <option key={cat._id} value={cat._id}>
-                {cat.name}
+                {getLocalizedName(cat.name, locale)}
               </option>
             ))
           )}
@@ -80,13 +85,11 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       <CCol md={2}>
         <CFormSelect
           value={filterIsActive}
-          onChange={(e) => 
-            onFilterChange(e.target.value as StatusFilterValue)
-          }
+          onChange={(e) => onFilterChange(e.target.value as StatusFilterValue)}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="true">Hoạt động</option>
-          <option value="false">Đã ẩn</option>
+          <option value="">{t("allStatuses")}</option>
+          <option value="true">{t("active")}</option>
+          <option value="false">{t("hidden")}</option>
         </CFormSelect>
       </CCol>
 
@@ -94,7 +97,7 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       <CCol md="auto" className="ms-md-auto">
         <CButton color="primary" onClick={onAddNew} className="w-full">
           <CIcon icon={cilPlus} className="mr-2" />
-          Thêm danh mục
+          {t("addNew")}
         </CButton>
       </CCol>
     </CRow>

@@ -1,6 +1,6 @@
-// src/components/ui/CustomSpinner.tsx (hoặc vị trí bạn muốn)
-"use client"; // Nếu bạn dùng animation phức tạp có thể cần JS
+"use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 interface CustomSpinnerProps {
@@ -14,6 +14,7 @@ const CustomSpinner: React.FC<CustomSpinnerProps> = ({
   color = "text-indigo-600",
   className = "",
 }) => {
+  const t = useTranslations("CartPreviewModal");
   const sizeClasses = {
     sm: "h-5 w-5",
     md: "h-8 w-8",
@@ -26,7 +27,7 @@ const CustomSpinner: React.FC<CustomSpinnerProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      aria-label="Đang tải..." // Thêm aria-label cho accessibility
+      aria-label={t("loading")}
     >
       <circle
         className="opacity-25"

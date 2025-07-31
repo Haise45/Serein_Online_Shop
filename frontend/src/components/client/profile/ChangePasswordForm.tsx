@@ -6,8 +6,10 @@ import { FiLoader } from "react-icons/fi";
 import { useUpdateUserProfile } from "@/lib/react-query/userQueries";
 import { UpdateUserProfilePayload } from "@/types/user";
 import PasswordInput from "./PasswordInput";
+import { useTranslations } from "next-intl";
 
 const ChangePasswordForm: React.FC = () => {
+  const t = useTranslations("ChangePasswordForm");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,19 +22,19 @@ const ChangePasswordForm: React.FC = () => {
   const handleSubmitPassword = (e: FormEvent) => {
     e.preventDefault();
     if (!currentPassword) {
-      toast.error("Vui lòng nhập mật khẩu hiện tại.");
+      toast.error(t("currentPasswordRequired"));
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      toast.error(t("newPasswordMinLength"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("Mật khẩu mới và xác nhận mật khẩu không khớp.");
+      toast.error(t("passwordMismatch"));
       return;
     }
     if (newPassword === currentPassword) {
-      toast.error("Mật khẩu mới không được trùng với mật khẩu hiện tại.");
+      toast.error(t("newPasswordSameAsOld"));
       return;
     }
 
@@ -49,7 +51,7 @@ const ChangePasswordForm: React.FC = () => {
         setShowCurrent(false); // Reset visibility
         setShowNew(false);
         setShowConfirm(false);
-        toast.success("Đổi mật khẩu thành công!");
+        toast.success(t("successToast"));
       },
       // onError đã được xử lý trong hook useUpdateUserProfile
     });
@@ -59,7 +61,7 @@ const ChangePasswordForm: React.FC = () => {
     <form onSubmit={handleSubmitPassword} className="space-y-6">
       <PasswordInput
         id="current-password"
-        label="Mật khẩu hiện tại"
+        label={t("currentPasswordLabel")}
         value={currentPassword}
         onChange={setCurrentPassword}
         show={showCurrent}
@@ -67,7 +69,7 @@ const ChangePasswordForm: React.FC = () => {
       />
       <PasswordInput
         id="new-password"
-        label="Mật khẩu mới"
+        label={t("newPasswordLabel")}
         value={newPassword}
         onChange={setNewPassword}
         show={showNew}
@@ -75,7 +77,7 @@ const ChangePasswordForm: React.FC = () => {
       />
       <PasswordInput
         id="confirm-password"
-        label="Xác nhận mật khẩu mới"
+        label={t("confirmPasswordLabel")}
         value={confirmPassword}
         onChange={setConfirmPassword}
         show={showConfirm}
@@ -89,7 +91,7 @@ const ChangePasswordForm: React.FC = () => {
         {updateProfileMutation.isPending && (
           <FiLoader className="mr-2 -ml-1 h-4 w-4 animate-spin" />
         )}
-        Đổi mật khẩu
+        {t("changePasswordButton")}
       </button>
     </form>
   );

@@ -1,12 +1,17 @@
 "use client";
 
+import { Link, useRouter } from "@/i18n/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { AppDispatch } from "@/store";
 import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
-import { CartData, CartItem as CartItemType, Category } from "@/types";
+import {
+  CartData,
+  CartItem as CartItemType,
+  Category,
+  ExchangeRates,
+} from "@/types";
 import classNames from "classnames";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import toast from "react-hot-toast";
 import { FiAlertCircle } from "react-icons/fi";
@@ -21,6 +26,7 @@ interface CartSummaryProps {
     categoryId: string,
     categoryMap: Map<string, Category>,
   ) => string[]; // Hàm để lấy tổ tiên category
+  currencyOptions: { currency: "VND" | "USD"; rates: ExchangeRates | null };
 }
 
 export default function CartSummary({
@@ -28,7 +34,9 @@ export default function CartSummary({
   selectedItemsForSummary,
   categoryMap,
   getAncestorsFn,
+  currencyOptions,
 }: CartSummaryProps) {
+  const t = useTranslations("CartSummary");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -117,13 +125,11 @@ export default function CartSummary({
 
   const handleProceedToCheckout = () => {
     if (hasStockErrorInSelectedItems) {
-      toast.error(
-        "Một số sản phẩm bạn chọn có số lượng vượt quá tồn kho. Vui lòng kiểm tra lại.",
-      );
+      toast.error(t("stockErrorToast"));
       return;
     }
     if (selectedItemsForSummary.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một sản phẩm để tiếp tục.");
+      toast.error(t("noItemsSelectedToast"));
       return;
     }
 
@@ -138,17 +144,19 @@ export default function CartSummary({
       className="sticky top-20 rounded-lg border border-gray-200 bg-white p-6 shadow-sm lg:col-span-4 lg:p-8"
     >
       <h2 id="summary-heading" className="text-xl font-semibold text-gray-900">
-        Tóm tắt đơn hàng
+        {t("title")}
       </h2>
 
       <dl className="mt-6 space-y-4">
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600">
-            Tạm tính ({numberOfSelectedProductLines} loại,{" "}
-            {totalSelectedQuantity} sản phẩm)
+            {t("subtotalLabel", {
+              lineCount: numberOfSelectedProductLines,
+              quantityCount: totalSelectedQuantity,
+            })}
           </dt>
           <dd className="text-sm font-medium text-gray-900">
-            {formatCurrency(selectedSubtotal)}
+            {formatCurrency(selectedSubtotal, currencyOptions)}
           </dd>
         </div>
 
@@ -159,23 +167,30 @@ export default function CartSummary({
           selectedItems={selectedItemsForSummary}
           categoryMap={categoryMap}
           getAncestorsFn={getAncestorsFn}
+          currencyOptions={currencyOptions}
         />
 
         {originalCart.appliedCoupon && discountAmountForSelected > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <dt className="flex items-center text-sm text-green-600">
-              <span>Giảm giá ({originalCart.appliedCoupon.code})</span>
+              <span>
+                {t("discountLabel", {
+                  code: originalCart.appliedCoupon.code ?? "",
+                })}
+              </span>
             </dt>
             <dd className="text-sm font-medium text-green-600">
-              -{formatCurrency(discountAmountForSelected)}
+              -{formatCurrency(discountAmountForSelected, currencyOptions)}
             </dd>
           </div>
         )}
 
         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-          <dt className="text-base font-semibold text-gray-900">Tổng cộng</dt>
+          <dt className="text-base font-semibold text-gray-900">
+            {t("totalLabel")}
+          </dt>
           <dd className="text-base font-semibold text-gray-900">
-            {formatCurrency(finalTotalForSelected)}
+            {formatCurrency(finalTotalForSelected, currencyOptions)}
           </dd>
         </div>
       </dl>
@@ -192,8 +207,7 @@ export default function CartSummary({
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-red-800">
-                Sản phẩm bạn chọn có số lượng không hợp lệ. Vui lòng kiểm tra
-                lại các sản phẩm được tô đỏ trong giỏ hàng.
+                {t("stockErrorNotice")}
               </p>
             </div>
           </div>
@@ -212,7 +226,7 @@ export default function CartSummary({
               : "cursor-not-allowed bg-gray-400",
           )}
         >
-          Tiến hành đặt hàng ({totalSelectedQuantity})
+          {t("proceedToCheckoutButton", { count: totalSelectedQuantity })}
         </button>
       </div>
       <div className="mt-4 text-center">
@@ -220,7 +234,8 @@ export default function CartSummary({
           href="/"
           className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
         >
-          Hoặc tiếp tục mua sắm<span aria-hidden="true"> →</span>
+          {t("continueShoppingLink")}
+          <span aria-hidden="true"> →</span>
         </Link>
       </div>
     </section>

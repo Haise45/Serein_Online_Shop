@@ -1,0 +1,234 @@
+[{
+  "_id": {
+    "$oid": "680f2e82e16cffa286aa2fbd"
+  },
+  "name": "Haise",
+  "email": "phuocnguyenlebao@gmail.com",
+  "password": "$2b$10$fupuRpOnTSIRXSvAj736Nerqj6F0cwb59UwTDJyz.GBzCnLvkM1gK",
+  "role": "admin",
+  "phone": "0123456789",
+  "isEmailVerified": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": "2025-04-28T07:30:10.921Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-28T07:30:10.921Z"
+  },
+  "__v": 0,
+  "isActive": true
+},
+{
+  "_id": {
+    "$oid": "680f2ecae16cffa286aa2fc1"
+  },
+  "name": "BaoPhuoc",
+  "email": "phuocnlb@devcamp.edu.vn",
+  "password": "$2b$10$L.Po8oSzVEUnnJrM01.bmOwuH7EAUQ9IcDDsbCv8DITmiy/Ws3W4G",
+  "role": "customer",
+  "phone": "0942220015",
+  "isEmailVerified": true,
+  "addresses": [
+    {
+      "fullName": "Nguyễn Lê Bảo Phước",
+      "phone": "0942220015",
+      "street": "04 Đường 43",
+      "communeCode": "27283",
+      "communeName": "Phường 4",
+      "districtCode": "773",
+      "districtName": "Quận 4",
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "countryCode": "VN",
+      "isDefault": true,
+      "_id": {
+        "$oid": "680f9f2faa99d2f68a5ee4c5"
+      }
+    },
+    {
+      "fullName": "Văn Phương Nguyễn",
+      "phone": "0942220010",
+      "street": "04 Đường 21",
+      "communeCode": "27283",
+      "communeName": "Phường 4",
+      "districtCode": "773",
+      "districtName": "Quận 4",
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "countryCode": "VN",
+      "isDefault": false,
+      "_id": {
+        "$oid": "6835668d23f9fc3056fcad14"
+      }
+    },
+    {
+      "fullName": "Lê Ngọc Xuân",
+      "phone": "0942220015",
+      "street": "04 Đường 43",
+      "communeCode": "27259",
+      "communeName": "Phường 13",
+      "districtCode": "773",
+      "districtName": "Quận 4",
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "countryCode": "VN",
+      "isDefault": false,
+      "_id": {
+        "$oid": "683a63095411519bf933a0a0"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-04-28T07:31:22.934Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-18T13:55:04.221Z"
+  },
+  "__v": 17,
+  "wishlistItems": [
+    {
+      "$oid": "6818db68cece2901692ae83b"
+    },
+    {
+      "$oid": "681d9d2c878f5d7af823b8a7"
+    }
+  ],
+  "isActive": true
+},
+{
+  "_id": {
+    "$oid": "68234adc93dbf2053ca6023e"
+  },
+  "name": "BaoPhuoc45",
+  "email": "ayaseyuuki2003@gmail.com",
+  "password": "$2b$10$3MJjd/16P2A0JY9vTPtlYuyt/.5jaQ9QC6JJXjdAKKckcM7cXPCzW",
+  "role": "customer",
+  "phone": "0942220013",
+  "isEmailVerified": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": "2025-05-13T13:36:28.340Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-19T13:36:08.123Z"
+  },
+  "__v": 0,
+  "isActive": false,
+  "suspensionEndDate": {
+    "$date": "2025-06-20T00:00:00.000Z"
+  },
+  "suspensionReason": "Tess"
+},
+{
+  "_id": {
+    "$oid": "682835f2ec1e0536a6154cb5"
+  },
+  "name": "Nguyễn Lê Bảo Phước",
+  "email": "haiseayasa2104@gmail.com",
+  "password": "$2b$10$yCJgPVsszhG.rYCie0tMcuxAQX5GE1rqtLawccqCf97U92GI55TCa",
+  "role": "customer",
+  "phone": "0941220411",
+  "isEmailVerified": true,
+  "addresses": [
+    {
+      "fullName": "Nguyễn Lê Bảo Phước",
+      "phone": "0942220015",
+      "street": "04 Đường 43",
+      "communeCode": "27283",
+      "communeName": "Phường 4",
+      "districtCode": "773",
+      "districtName": "Quận 4",
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "countryCode": "VN",
+      "isDefault": true,
+      "_id": {
+        "$oid": "6835d4ac50a5108557f7abc2"
+      }
+    },
+    {
+      "fullName": "Nguyễn Văn Phương",
+      "phone": "0942220015",
+      "street": "04 Đường 43",
+      "communeCode": "27283",
+      "communeName": "Phường 4",
+      "districtCode": "773",
+      "districtName": "Quận 4",
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "countryCode": "VN",
+      "isDefault": false,
+      "_id": {
+        "$oid": "68397c04b8fe78ae56ef17e1"
+      }
+    },
+    {
+      "fullName": "Lê Ngọc Xuân",
+      "phone": "0942220015",
+      "street": "04 Đường 43",
+      "communeCode": "27283",
+      "communeName": "Phường 4",
+      "districtCode": "773",
+      "districtName": "Quận 4",
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "countryCode": "VN",
+      "isDefault": false,
+      "_id": {
+        "$oid": "68398a78b8fe78ae56ef1995"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-05-17T07:08:34.304Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-02T14:20:52.321Z"
+  },
+  "__v": 3,
+  "passwordResetExpires": {
+    "$date": "2025-07-02T14:30:52.320Z"
+  },
+  "passwordResetToken": "d74c08652d1b01c0bb4bdc3e3e75f84f17cdd4e00445d6071a846081dde700f4",
+  "isActive": true
+},
+{
+  "_id": {
+    "$oid": "682ef3f9c542a48aefb45495"
+  },
+  "name": "hoàng",
+  "email": "nguyenhoang01656140986@gmail.com",
+  "password": "$2b$10$et34NFs.sbbFtw2cgwEsduVMWt2dYV44XgkvjjhWzufu8.3JC2MR.",
+  "role": "customer",
+  "phone": "0354125786",
+  "isEmailVerified": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": "2025-05-22T09:52:57.210Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-18T13:54:53.360Z"
+  },
+  "__v": 0,
+  "isActive": true
+},
+{
+  "_id": {
+    "$oid": "68305ada23b806e3d105ce61"
+  },
+  "name": "Phước Bảo",
+  "email": "nguyenvanphuong5646@gmail.com",
+  "password": "$2b$10$DAzzVf6e8cvSmQbOiYV8J.BbVBuRnPWbcCNHYTOwTXOdUl3g1ZLte",
+  "role": "customer",
+  "phone": "0942220113",
+  "isEmailVerified": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": "2025-05-23T11:24:10.475Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-18T13:54:50.300Z"
+  },
+  "__v": 0,
+  "isActive": true
+}]

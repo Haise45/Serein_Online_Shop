@@ -1,3 +1,4 @@
+export * from "./dashboard"
 export * from "./cart";
 export * from "./category";
 export * from "./next";
@@ -11,3 +12,9 @@ export * from "./order_model";
 export * from "./wishlist";
 export * from "./coupon";
 export * from "./attribute";
+export * from "./setting";
+
+export type I18nField = {
+  vi: string;
+  en: string;
+};

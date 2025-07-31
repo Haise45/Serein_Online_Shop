@@ -11,7 +11,14 @@ const orderShippedTemplate = require("../utils/emailTemplates/orderShippedTempla
 const orderDeliveredTemplate = require("../utils/emailTemplates/orderDeliveredTemplate");
 const requestAdminNotificationTemplate = require("../utils/emailTemplates/requestAdminNotificationTemplate");
 const requestStatusUpdateTemplate = require("../utils/emailTemplates/requestStatusUpdateTemplate");
+const paymentSuccessTemplate = require("../utils/emailTemplates/paymentSuccessTemplate");
 const { createAdminNotification } = require("../utils/notificationUtils");
+const {
+  createPayPalOrder,
+  capturePayPalOrder,
+  refundPayPalOrder,
+} = require("../utils/paypalClient");
+const { getVndToUsdRate } = require("../utils/paypalClient");
 
 require("dotenv").config();
 
@@ -28,7 +35,8 @@ require("dotenv").config();
 const getAndValidateCartForOrder = async (
   cartIdentifier,
   selectedCartItemIds,
-  session
+  session,
+  locale
 ) => {
   const originalCart = await Cart.findOne(cartIdentifier).session(session);
   if (!originalCart || originalCart.items.length === 0) {
@@ -53,7 +61,10 @@ const getAndValidateCartForOrder = async (
   });
 
   // Sử dụng hàm từ cartController để tính toán lại giá, coupon...
-  const calculatedData = await populateAndCalculateCart(cartForCalculation);
+  const calculatedData = await populateAndCalculateCart(
+    cartForCalculation,
+    locale
+  );
 
   if (
     !calculatedData ||
@@ -62,7 +73,7 @@ const getAndValidateCartForOrder = async (
   ) {
     throw new Error("Không thể xử lý các sản phẩm đã chọn trong giỏ hàng.");
   }
-  return { calculatedData, originalCartId: originalCart._id };
+  return { calculatedData, originalCartId: originalCart?._id };
 };
 
 /**
@@ -171,6 +182,179 @@ const cleanupCart = async (cartId, processedItemIds, session) => {
   }
 };
 
+// --- Helper: "Làm phẳng" i18n ---
+const flattenI18nObject = (obj, locale, fields) => {
+  if (!obj) return obj;
+  // Đảm bảo làm việc với một plain object
+  const newObj = obj.toObject ? obj.toObject() : { ...obj };
+  for (const field of fields) {
+    if (
+      newObj[field] &&
+      typeof newObj[field] === "object" &&
+      !mongoose.Types.ObjectId.isValid(newObj[field])
+    ) {
+      newObj[field] = newObj[field][locale] || newObj[field].vi;
+    }
+  }
+  return newObj;
+};
+
+// Hàm helper để làm phẳng các items trong một đơn hàng
+const flattenOrderItems = (order, locale) => {
+  if (!order || !order.orderItems) return order;
+
+  // Tạo một bản sao của đơn hàng để tránh thay đổi object gốc
+  const newOrder = order.toObject ? order.toObject() : { ...order };
+
+  newOrder.orderItems = newOrder.orderItems.map((item) => {
+    const flatItem = flattenI18nObject(item, locale, ["name"]);
+    if (flatItem.variant?.options) {
+      flatItem.variant.options = flatItem.variant.options.map((opt) => {
+        // Đổi tên trường `value` thành `valueName` để khớp với frontend
+        const flatOpt = flattenI18nObject(opt, locale, [
+          "attributeName",
+          "value",
+        ]);
+        // Gán lại tên thuộc tính cho đúng
+        return {
+          attributeName: flatOpt.attributeName,
+          value: flatOpt.value,
+        };
+      });
+    }
+    return flatItem;
+  });
+  return newOrder;
+};
+
+// @desc    Tạo một đơn hàng PayPal (chưa lưu vào DB, chỉ tạo trên PayPal)
+// @route   POST /api/v1/orders/create-paypal-order
+// @access  Public (sử dụng protectOptional)
+const createPayPalOrderController = asyncHandler(async (req, res) => {
+  // 1. Lấy dữ liệu cần thiết từ request
+  const locale = req.locale || "vi";
+  const { selectedCartItemIds, shippingAddress } = req.body;
+
+  // 2. Xác định người dùng và lấy thông tin giỏ hàng đã được tính toán
+  const loggedInUser = req.user;
+  const cartGuestId = req.cookies.cartGuestId;
+  let cartIdentifier;
+  if (loggedInUser) {
+    cartIdentifier = { userId: loggedInUser._id };
+  } else if (cartGuestId) {
+    cartIdentifier = { guestId: cartGuestId };
+  } else {
+    throw new Error("Không tìm thấy thông tin giỏ hàng.");
+  }
+
+  const { calculatedData } = await getAndValidateCartForOrder(
+    cartIdentifier,
+    selectedCartItemIds.map((id) => new mongoose.Types.ObjectId(id)),
+    null,
+    locale
+  );
+
+  // 3. Chuyển đổi các giá trị tiền tệ cần thiết sang USD
+  const exchangeRate = await getVndToUsdRate(); // Hàm lấy tỷ giá từ paypalClient
+
+  // Lấy các giá trị đã được tính toán chính xác bằng VND từ giỏ hàng
+  const subtotalVND = calculatedData.subtotal;
+  const discountVND = calculatedData.discountAmount;
+  const finalTotalVND = calculatedData.finalTotal;
+
+  // Quy đổi sang USD
+  const subtotalUSD = subtotalVND * exchangeRate;
+  const discountUSD = discountVND * exchangeRate;
+  const totalAmountUSD = finalTotalVND * exchangeRate;
+
+  // 4. Tạo mô tả ngắn gọn cho đơn hàng để hiển thị trên PayPal
+  const firstItemName = calculatedData.items[0]?.name || "sản phẩm";
+  const totalItems = calculatedData.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  const orderDescription = `Thanh toán cho ${totalItems} sản phẩm tại Serein Shop (VD: ${firstItemName}...)`;
+
+  // 5. Gọi hàm helper để tạo đơn hàng trên PayPal với payload đã được chuẩn bị
+  const paypalOrder = await createPayPalOrder({
+    subtotalUSD,
+    discountUSD,
+    totalAmountUSD,
+    shippingDetails: shippingAddress,
+    orderDescription: orderDescription.substring(0, 127), // Giới hạn 127 ký tự theo yêu cầu của PayPal
+  });
+
+  // 6. Trả về orderID của PayPal cho frontend
+  res.status(200).json({ orderID: paypalOrder.id });
+});
+
+// @desc    Capture thanh toán PayPal và cập nhật đơn hàng trong DB
+// @route   POST /api/v1/orders/:id/capture-paypal
+// @access  Public
+const capturePayPalOrderController = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
+  const { paypalOrderId } = req.body;
+  const orderId = req.params.id; // Đây là ID đơn hàng trong DB của bạn
+
+  // 1. Capture thanh toán trên PayPal
+  const captureData = await capturePayPalOrder(paypalOrderId);
+
+  // 2. Kiểm tra kết quả capture
+  if (captureData.status === "COMPLETED") {
+    // 3. Cập nhật đơn hàng trong DB
+    const order = await Order.findById(orderId);
+    if (order) {
+      order.isPaid = true;
+      order.paidAt = new Date();
+      const capture = captureData.purchase_units[0]?.payments?.captures?.[0];
+      order.paymentResult = {
+        // Giả sử bạn có trường này trong Order model
+        id: captureData.id,
+        status: captureData.status,
+        update_time: captureData.update_time,
+        email_address: captureData.payer.email_address,
+        captureId: capture?.id,
+      };
+      await order.save();
+
+      // Có thể gửi email xác nhận thanh toán thành công ở đây
+      try {
+        await order.populate("user", "name email");
+        const flatOrderForEmail = flattenOrderItems(order, locale);
+        const customerName = flatOrderForEmail.user
+          ? flatOrderForEmail.user.name
+          : flatOrderForEmail.shippingAddress.fullName;
+        const emailHtml = paymentSuccessTemplate(
+          customerName,
+          flatOrderForEmail
+        );
+        await sendEmail({
+          email: flatOrderForEmail.user
+            ? flatOrderForEmail.user.email
+            : flatOrderForEmail.guestOrderEmail,
+          subject: `Thanh toán thành công cho đơn hàng #${flatOrderForEmail._id
+            .toString()
+            .slice(-6)}`,
+          html: emailHtml,
+        });
+      } catch (emailError) {
+        console.error(
+          `Lỗi gửi email thanh toán thành công cho đơn ${flatOrderForEmail._id}:`,
+          emailError
+        );
+      }
+      const responseOrder = flattenOrderItems(order, locale);
+      res.status(200).json({ responseOrder });
+    } else {
+      res.status(404);
+      throw new Error("Không tìm thấy đơn hàng để cập nhật.");
+    }
+  } else {
+    res.status(400);
+    throw new Error("Thanh toán PayPal không thành công.");
+  }
+});
+
 // @desc    Tạo đơn hàng mới
 // @route   POST /api/v1/orders
 // @access  Public (User or Guest)
@@ -218,23 +402,26 @@ const createOrder = asyncHandler(async (req, res) => {
     await revalidateStock(calculatedData.items, session);
 
     // --- 6. Chuẩn bị dữ liệu cho đơn hàng (Snapshot) ---
-    const orderItems = calculatedData.items.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-      image: item.image,
-      product: item.productId,
-      variant: item.variantId
-        ? {
-            variantId: item.variantId,
-            sku: item.sku,
-            options: item.variantInfo.options.map((opt) => ({
-              attributeName: opt.attributeName,
-              value: opt.valueName,
-            })),
-          }
-        : null,
-    }));
+    const orderItems = calculatedData.items.map((item) => {
+      const rawProductInfo = item.rawProductInfo;
+      return {
+        name: rawProductInfo.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+        product: item.productId,
+        variant: item.variantId
+          ? {
+              variantId: item.variantId,
+              sku: item.sku,
+              options: item.variantInfo.options.map((opt) => ({
+                attributeName: opt.attributeName,
+                value: opt.valueName,
+              })),
+            }
+          : null,
+      };
+    });
 
     // --- 7. Tạo đối tượng Order ---
     const initialStatus = ["BANK_TRANSFER", "PAYPAL"].includes(paymentMethod)
@@ -296,54 +483,73 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // --- 12. Gửi thông báo (Email, Admin Notification) ---
   if (createdOrder) {
-    try {
-      const orderForEmail = await Order.findById(createdOrder._id)
-        .populate("user", "name email") // Lấy cả name và email
-        .lean();
-      if (orderForEmail) {
-        let customerEmail;
-        let customerName;
+    // Lấy ngôn ngữ để gửi email, ưu tiên ngôn ngữ người dùng đặt hàng, fallback về tiếng Việt
+    const localeForEmail = req.locale || "vi";
 
-        if (orderForEmail.user) {
-          // Nếu là đơn hàng của user đã đăng nhập
-          customerEmail = orderForEmail.user.email;
-          customerName = orderForEmail.user.name;
-        } else {
-          // Nếu là đơn hàng của guest
-          customerEmail = orderForEmail.guestOrderEmail;
-          customerName = orderForEmail.shippingAddress.fullName;
-        }
+    // Tạo một bản sao của đơn hàng và "làm phẳng" nó theo đúng ngôn ngữ để gửi email
+    // Chúng ta cần populate lại user vì `createdOrder` từ .save() không có
+    try {
+      const orderForNotifications = await Order.findById(createdOrder._id)
+        .populate("user", "name email")
+        .lean(); // Dùng lean ở đây để tăng tốc
+
+      if (orderForNotifications) {
+        const flatOrderForEmail = flattenOrderItems(
+          orderForNotifications,
+          localeForEmail
+        );
+
+        const customerName = flatOrderForEmail.user
+          ? flatOrderForEmail.user.name
+          : flatOrderForEmail.shippingAddress.fullName;
+        const customerEmail = flatOrderForEmail.user
+          ? flatOrderForEmail.user.email
+          : flatOrderForEmail.guestOrderEmail;
 
         // Kiểm tra lần cuối trước khi gửi để đảm bảo có người nhận
         if (customerEmail) {
           let guestTrackingUrl = null;
-          if (!orderForEmail.user && orderForEmail.guestOrderTrackingToken) {
-            guestTrackingUrl = `${process.env.FRONTEND_URL}/track-order/${orderForEmail._id}/${orderForEmail.guestOrderTrackingToken}`;
+          if (
+            !flatOrderForEmail.user &&
+            flatOrderForEmail.guestOrderTrackingToken
+          ) {
+            guestTrackingUrl = `${process.env.FRONTEND_URL}/${localeForEmail}/track-order/${flatOrderForEmail._id}/${flatOrderForEmail.guestOrderTrackingToken}`;
           }
 
           const emailHtml = orderConfirmationTemplate(
             customerName,
-            orderForEmail,
+            flatOrderForEmail,
             guestTrackingUrl
           );
 
           await sendEmail({
             email: customerEmail,
-            subject: `Xác nhận đơn hàng #${orderForEmail._id
+            subject: `Xác nhận đơn hàng #${flatOrderForEmail._id
               .toString()
               .slice(-6)} tại ${process.env.SHOP_NAME || "Shop"}`,
             html: emailHtml,
           });
 
-          // Gửi thông báo cho Admin (logic này có vẻ đã đúng)
+          // Gửi thông báo cho Admin (thông báo này có thể luôn là tiếng Việt)
+          const flatOrderForAdmin = flattenOrderItems(
+            orderForNotifications,
+            "vi"
+          );
+          const adminCustomerName = flatOrderForAdmin.user
+            ? flatOrderForAdmin.user.name
+            : flatOrderForEmail.shippingAddress.fullName;
+
           await createAdminNotification(
-            `Đơn hàng mới #${createdOrder._id.toString().slice(-6)}`,
-            `Đơn hàng bởi "${customerName}" vừa được đặt với tổng tiền ${createdOrder.totalPrice.toLocaleString(
+            `Đơn hàng mới #${flatOrderForAdmin._id.toString().slice(-6)}`,
+            `Đơn hàng bởi "${adminCustomerName}" vừa được đặt với tổng tiền ${flatOrderForAdmin.totalPrice.toLocaleString(
               "vi-VN"
             )}đ.`,
             "NEW_ORDER_PLACED",
-            `/admin/orders/${createdOrder._id}`,
-            { orderId: createdOrder._id, userId: createdOrder.user }
+            `/admin/orders/${flatOrderForAdmin._id}`,
+            {
+              orderId: flatOrderForAdmin._id,
+              userId: flatOrderForAdmin.user?._id,
+            }
           );
         } else {
           console.error(
@@ -358,7 +564,9 @@ const createOrder = asyncHandler(async (req, res) => {
       );
     }
 
-    res.status(201).json(createdOrder.toObject());
+    // Trả về response cho client với dữ liệu đã được làm phẳng theo đúng ngôn ngữ request
+    const responseOrder = flattenOrderItems(createdOrder, req.locale || "vi");
+    res.status(201).json(responseOrder);
   } else {
     // Trường hợp hiếm gặp
     res.status(500).json({
@@ -371,6 +579,7 @@ const createOrder = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/orders/my
 // @access  Private
 const getMyOrders = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const userId = req.user._id;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
@@ -405,7 +614,9 @@ const getMyOrders = asyncHandler(async (req, res) => {
     .sort(sort)
     .skip(skip)
     .limit(limit)
-    .select("_id status totalPrice createdAt orderItems.name orderItems.image")
+    .select(
+      "_id status totalPrice createdAt orderItems isDelivered deliveredAt"
+    )
     .lean();
 
   const totalOrdersQuery = Order.countDocuments(filter);
@@ -415,6 +626,11 @@ const getMyOrders = asyncHandler(async (req, res) => {
     totalOrdersQuery.exec(),
   ]);
 
+  // "Làm phẳng" dữ liệu cho từng đơn hàng trước khi gửi về client
+  const flattenedOrders = orders.map((order) =>
+    flattenOrderItems(order, locale)
+  );
+
   const totalPages = Math.ceil(totalOrders / limit);
 
   res.status(200).json({
@@ -422,7 +638,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
     totalPages: totalPages,
     totalOrders: totalOrders,
     limit: limit,
-    orders: orders,
+    orders: flattenedOrders,
   });
 });
 
@@ -430,6 +646,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/orders/guest-track/:orderId/:token
 // @access  Public
 const getGuestOrderByTrackingToken = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const { orderId, token } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -447,7 +664,9 @@ const getGuestOrderByTrackingToken = asyncHandler(async (req, res) => {
     guestOrderTrackingToken: token,
     guestOrderTrackingTokenExpires: { $gt: Date.now() }, // Token còn hạn
     user: null, // Đảm bảo đây là đơn hàng guest chưa được liên kết
-  }).populate("user", "name email phone"); // Populate vẫn có thể dùng, user sẽ là null
+  })
+    .populate("user", "name email phone")
+    .lean(); // Populate vẫn có thể dùng, user sẽ là null
 
   if (!order) {
     res.status(404);
@@ -456,13 +675,17 @@ const getGuestOrderByTrackingToken = asyncHandler(async (req, res) => {
     );
   }
 
-  res.status(200).json(order);
+  // Làm phẳng dữ liệu trước khi gửi về client
+  const flattenedOrder = flattenOrderItems(order, locale);
+
+  res.status(200).json(flattenedOrder);
 });
 
 // @desc    Lấy chi tiết đơn hàng (cho User hoặc Admin)
 // @route   GET /api/v1/orders/:id
 // @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     res.status(400);
@@ -486,12 +709,29 @@ const getOrderById = asyncHandler(async (req, res) => {
   // Kiểm tra quyền truy cập: Hoặc là Admin, hoặc là chủ đơn hàng
   if (
     req.user.role !== "admin" &&
-    order.user._id.toString() !== req.user._id.toString()
+    order.user?._id.toString() !== req.user._id.toString()
   ) {
     res.status(403);
     throw new Error("Bạn không có quyền truy cập vào đơn hàng này.");
   }
-  res.status(200).json(order);
+
+  // Làm phẳng dữ liệu trước khi gửi về client
+  const flattenedOrder = flattenOrderItems(order, locale);
+
+  // Cũng làm phẳng tên sản phẩm đã được populate trong orderItems
+  if (flattenedOrder.orderItems) {
+    flattenedOrder.orderItems.forEach((item) => {
+      if (
+        item.product &&
+        typeof item.product === "object" &&
+        item.product.name
+      ) {
+        item.product = flattenI18nObject(item.product, locale, ["name"]);
+      }
+    });
+  }
+
+  res.status(200).json(flattenedOrder);
 });
 
 // @desc    User yêu cầu hủy đơn hàng
@@ -685,6 +925,7 @@ const requestRefund = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/orders/:id/deliver
 // @access  Private (Chủ đơn hàng)
 const markOrderAsDelivered = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   const userId = req.user._id;
 
@@ -729,35 +970,32 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
 
   const updatedOrder = await order.save();
   await updatedOrder.populate("user", "name email phone");
+  let flatOrderForEmail;
 
   // --- Gửi Email xác nhận đã giao ---
   if (updatedOrder && updatedOrder.user) {
     // Đảm bảo có user để lấy email và tên
     try {
-      // --- LOGIC XÁC ĐỊNH guestTrackingUrl (SẼ LUÔN LÀ NULL VÌ ROUTE NÀY YÊU CẦU LOGIN) ---
-      const guestTrackingUrl = null; // Vì route này yêu cầu user đã đăng nhập
-
-      console.log(
-        `[Email Send][Delivered] Name: ${updatedOrder.user.name}, Email: ${updatedOrder.user.email}, GuestURL: ${guestTrackingUrl}`
-      );
+      flatOrderForEmail = flattenOrderItems(updatedOrder, locale);
+      const guestTrackingUrl = null;
       const userEmailHtml = orderDeliveredTemplate(
-        updatedOrder.user.name,
-        updatedOrder,
+        flatOrderForEmail.user.name,
+        flatOrderForEmail,
         guestTrackingUrl
       );
       await sendEmail({
-        email: updatedOrder.user.email,
-        subject: `Đơn hàng #${updatedOrder._id
+        email: flatOrderForEmail.user.email,
+        subject: `Đơn hàng #${flatOrderForEmail._id
           .toString()
           .slice(-6)} đã giao thành công!`,
         html: userEmailHtml,
       });
       console.log(
-        `[Email Send][Delivered] Successfully sent to ${updatedOrder.user.email}`
+        `[Email Send][Delivered] Successfully sent to ${flatOrderForEmail.user.email}`
       );
     } catch (emailError) {
       console.error(
-        `Lỗi gửi mail delivered cho order ${updatedOrder._id}:`,
+        `Lỗi gửi mail delivered cho order ${flatOrderForEmail._id}:`,
         emailError
       );
     }
@@ -765,14 +1003,16 @@ const markOrderAsDelivered = asyncHandler(async (req, res) => {
 
   // --- Gửi thông báo cho Admin ---
   await createAdminNotification(
-    `Đơn hàng #${updatedOrder._id.toString().slice(-6)} đã giao thành công`,
-    `Khách hàng "${updatedOrder.user.name}" đã xác nhận nhận hàng.`,
+    `Đơn hàng #${flatOrderForEmail._id
+      .toString()
+      .slice(-6)} đã giao thành công`,
+    `Khách hàng "${flatOrderForEmail.user.name}" đã xác nhận nhận hàng.`,
     "ORDER_STATUS_DELIVERED",
-    `/admin/orders/${updatedOrder._id}`,
-    { orderId: updatedOrder._id, userId: updatedOrder.user._id }
+    `/admin/orders/${flatOrderForEmail._id}`,
+    { orderId: flatOrderForEmail._id, userId: flatOrderForEmail.user._id }
   );
 
-  res.json(updatedOrder);
+  res.json(flattenOrderItems(updatedOrder, locale));
 });
 
 // --- Các hàm cho Admin ---
@@ -794,6 +1034,7 @@ const buildOrderSort = (query) => {
 // @route   GET /api/v1/orders
 // @access  Private/Admin
 const getAllOrders = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
@@ -841,7 +1082,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
     .skip(skip)
     .limit(limit)
     .select(
-      "_id user guestOrderEmail shippingAddress status totalPrice createdAt isPaid paidAt orderItems isStockRestored"
+      "_id user guestOrderEmail shippingAddress status totalPrice createdAt isPaid paidAt orderItems isStockRestored isDelivered deliveredAt"
     )
     .lean();
 
@@ -852,6 +1093,11 @@ const getAllOrders = asyncHandler(async (req, res) => {
     totalOrdersQuery.exec(),
   ]);
 
+  // Làm phẳng dữ liệu cho từng đơn hàng
+  const flattenedOrders = orders.map((order) =>
+    flattenOrderItems(order, locale)
+  );
+
   const totalPages = Math.ceil(totalOrders / limit);
 
   res.status(200).json({
@@ -859,7 +1105,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
     totalPages: totalPages,
     totalOrders: totalOrders,
     limit: limit,
-    orders: orders,
+    orders: flattenedOrders,
   });
 });
 
@@ -867,6 +1113,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/orders/:id/status
 // @access  Private/Admin
 const updateOrderStatus = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   const { status } = req.body;
 
@@ -951,17 +1198,22 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     if (updatedOrder.user || updatedOrder.guestOrderEmail) {
       // Phải có thông tin người nhận email
       try {
-        const nameForEmail = updatedOrder.user
-          ? updatedOrder.user.name
-          : updatedOrder.shippingAddress.fullName || "Quý khách";
-        const emailForNotification = updatedOrder.user
-          ? updatedOrder.user.email
-          : updatedOrder.guestOrderEmail;
+        const flatOrderForEmail = flattenOrderItems(updatedOrder, "vi");
+
+        const nameForEmail = flatOrderForEmail.user
+          ? flatOrderForEmail.user.name
+          : flatOrderForEmail.shippingAddress.fullName || "Quý khách";
+        const emailForNotification = flatOrderForEmail.user
+          ? flatOrderForEmail.user.email
+          : flatOrderForEmail.guestOrderEmail;
 
         // --- LOGIC XÁC ĐỊNH guestTrackingUrl ---
         let guestTrackingUrl = null;
-        if (!updatedOrder.user && updatedOrder.guestOrderTrackingToken) {
-          guestTrackingUrl = `${process.env.FRONTEND_URL}/track-order/${updatedOrder._id}/${updatedOrder.guestOrderTrackingToken}`;
+        if (
+          !flatOrderForEmail.user &&
+          flatOrderForEmail.guestOrderTrackingToken
+        ) {
+          guestTrackingUrl = `${process.env.FRONTEND_URL}/vi/track-order/${flatOrderForEmail._id}/${flatOrderForEmail.guestOrderTrackingToken}`;
         }
         // -------------------------------------
 
@@ -970,12 +1222,12 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         );
         const userEmailHtml = orderShippedTemplate(
           nameForEmail,
-          updatedOrder,
+          flatOrderForEmail,
           guestTrackingUrl
         );
         await sendEmail({
           email: emailForNotification,
-          subject: `Đơn hàng #${updatedOrder._id
+          subject: `Đơn hàng #${flatOrderForEmail._id
             .toString()
             .slice(-6)} của bạn đã được giao đi!`,
           html: userEmailHtml,
@@ -985,19 +1237,20 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         );
       } catch (emailError) {
         console.error(
-          `Lỗi gửi mail shipped cho order ${updatedOrder._id}:`,
+          `Lỗi gửi mail shipped cho order ${flatOrderForEmail._id}:`,
           emailError
         );
       }
     }
   }
-  res.json(updatedOrder);
+  res.json(flattenOrderItems(updatedOrder, locale));
 });
 
 // @desc    Admin chấp nhận yêu cầu hủy đơn hàng
 // @route   PUT /api/v1/orders/:id/approve-cancellation
 // @access  Private/Admin
 const approveCancellation = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     res.status(400);
@@ -1016,39 +1269,70 @@ const approveCancellation = asyncHandler(async (req, res) => {
     throw new Error("Đơn hàng này không có yêu cầu hủy đang chờ xử lý.");
   }
 
+  if (order.isPaid) {
+    // Chỉ thực hiện hoàn tiền nếu đơn hàng ĐÃ được thanh toán
+    if (order.paymentMethod === "PAYPAL") {
+      const captureId = order.paymentResult?.captureId;
+      if (!captureId) {
+        throw new Error(
+          "Không tìm thấy mã giao dịch PayPal (Capture ID) để hoàn tiền."
+        );
+      }
+      try {
+        await refundPayPalOrder(
+          captureId,
+          "Đơn hàng đã được hủy theo yêu cầu."
+        );
+        order.adminNotes =
+          (order.adminNotes || "") +
+          "\n[System] Đã hoàn tiền thành công qua PayPal.";
+      } catch (refundError) {
+        // Nếu hoàn tiền PayPal thất bại, không nên tiếp tục hủy đơn
+        throw new Error(`Hoàn tiền PayPal thất bại: ${refundError.message}`);
+      }
+    } else if (order.paymentMethod === "BANK_TRANSFER") {
+      // Đối với chuyển khoản, chỉ ghi chú lại
+      order.adminNotes =
+        (order.adminNotes || "") +
+        "\n[Action Required] Cần thực hiện hoàn tiền thủ công cho khách hàng.";
+    }
+  }
+  // Nếu isPaid = false (đơn COD), không cần làm gì cả.
   // Chuyển trạng thái sang Cancelled
   order.status = "Cancelled";
-  order.adminNotes = "Yêu cầu hủy được chấp nhận.";
+  order.adminNotes = (order.adminNotes || "") + "\nYêu cầu hủy được chấp nhận.";
 
   const updatedOrder = await order.save();
   await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email thông báo cho User ---
   try {
+    // *** LÀM PHẲNG DỮ LIỆU CHO EMAIL ***
+    const flatOrderForEmail = flattenOrderItems(updatedOrder, "vi");
     const userEmailHtml = requestStatusUpdateTemplate(
-      updatedOrder.user.name,
-      updatedOrder,
+      flatOrderForEmail.user.name,
+      flatOrderForEmail,
       "cancellation",
       true
     );
     await sendEmail({
-      email: updatedOrder.user.email,
-      subject: `Yêu cầu hủy đơn hàng #${updatedOrder._id
+      email: flatOrderForEmail.user.email,
+      subject: `Yêu cầu hủy đơn hàng #${flatOrderForEmail._id
         .toString()
         .slice(-6)} đã được chấp nhận`,
-      message: `Yêu cầu hủy đơn hàng ${updatedOrder._id} được chấp nhận.`,
+      message: `Yêu cầu hủy đơn hàng ${flatOrderForEmail._id} được chấp nhận.`,
       html: userEmailHtml,
     });
   } catch (emailError) {
     console.error(
-      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      `Lỗi gửi mail thông báo cho order ${flatOrderForEmail._id}:`,
       emailError
     );
   }
 
   res.json({
     message: "Đã chấp nhận yêu cầu hủy đơn hàng.",
-    order: updatedOrder,
+    order: flattenOrderItems(updatedOrder, locale),
   });
 });
 
@@ -1056,6 +1340,7 @@ const approveCancellation = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/orders/:id/reject-cancellation
 // @access  Private/Admin
 const rejectCancellation = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   const { reason } = req.body;
 
@@ -1092,31 +1377,32 @@ const rejectCancellation = asyncHandler(async (req, res) => {
 
   // --- Gửi email thông báo cho User ---
   try {
+    const flatOrderForEmail = flattenOrderItems(updatedOrder, "vi");
     const userEmailHtml = requestStatusUpdateTemplate(
-      updatedOrder.user.name,
-      updatedOrder,
+      flatOrderForEmail.user.name,
+      flatOrderForEmail,
       "cancellation",
       false,
       reason
     );
     await sendEmail({
-      email: updatedOrder.user.email,
-      subject: `Yêu cầu hủy đơn hàng #${updatedOrder._id
+      email: flatOrderForEmail.user.email,
+      subject: `Yêu cầu hủy đơn hàng #${flatOrderForEmail._id
         .toString()
         .slice(-6)} bị từ chối`,
-      message: `Yêu cầu hủy đơn hàng ${updatedOrder._id} bị từ chối. Lý do: ${reason}`,
+      message: `Yêu cầu hủy đơn hàng ${flatOrderForEmail._id} bị từ chối. Lý do: ${reason}`,
       html: userEmailHtml,
     });
   } catch (emailError) {
     console.error(
-      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      `Lỗi gửi mail thông báo cho order ${flatOrderForEmail._id}:`,
       emailError
     );
   }
 
   res.json({
     message: "Đã từ chối yêu cầu hủy đơn hàng.",
-    order: updatedOrder,
+    order: flattenOrderItems(updatedOrder, locale),
   });
 });
 
@@ -1124,6 +1410,7 @@ const rejectCancellation = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/orders/:id/approve-refund
 // @access  Private/Admin
 const approveRefund = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     res.status(400);
@@ -1141,35 +1428,71 @@ const approveRefund = asyncHandler(async (req, res) => {
     throw new Error("Đơn hàng này không có yêu cầu hoàn tiền đang chờ xử lý.");
   }
 
+  if (order.isPaid) {
+    if (order.paymentMethod === "PAYPAL") {
+      const captureId = order.paymentResult?.captureId;
+      if (!captureId) {
+        throw new Error(
+          "Không tìm thấy mã giao dịch PayPal (Capture ID) để hoàn tiền."
+        );
+      }
+      try {
+        await refundPayPalOrder(
+          captureId,
+          "Chấp nhận yêu cầu trả hàng/hoàn tiền."
+        );
+        order.adminNotes =
+          (order.adminNotes || "") +
+          "\n[System] Đã hoàn tiền thành công qua PayPal.";
+      } catch (refundError) {
+        throw new Error(`Hoàn tiền PayPal thất bại: ${refundError.message}`);
+      }
+    } else if (
+      order.paymentMethod === "BANK_TRANSFER" ||
+      order.paymentMethod === "COD"
+    ) {
+      // Với COD đã giao (tức đã trả tiền) hoặc Chuyển khoản
+      order.adminNotes =
+        (order.adminNotes || "") +
+        "\n[Action Required] Cần thực hiện hoàn tiền thủ công cho khách hàng.";
+    }
+  } else {
+    // Trường hợp rất hiếm: yêu cầu refund trên đơn chưa thanh toán (vô lý)
+    console.warn(
+      `[Refund] Yêu cầu hoàn tiền cho đơn hàng chưa thanh toán ${orderId}. Chỉ cập nhật trạng thái.`
+    );
+  }
+
   // Chuyển trạng thái sang Refunded
   order.status = "Refunded";
-  // (Tùy chọn) Cập nhật isPaid = false, paidAt = null ? Tùy quy trình kế toán
+  order.adminNotes =
+    (order.adminNotes || "") + "\nYêu cầu hoàn tiền được chấp nhận.";
   order.isPaid = false;
   order.paidAt = null;
-  order.adminNotes = "Yêu cầu hoàn tiền được chấp nhận.";
 
   const updatedOrder = await order.save();
   await updatedOrder.populate("user", "name email phone");
 
   // --- Gửi email thông báo cho User ---
   try {
+    const flatOrderForEmail = flattenOrderItems(updatedOrder, "vi");
     const userEmailHtml = requestStatusUpdateTemplate(
-      updatedOrder.user.name,
-      updatedOrder,
+      flatOrderForEmail.user.name,
+      flatOrderForEmail,
       "refund",
       true
     );
     await sendEmail({
-      email: updatedOrder.user.email,
-      subject: `Yêu cầu hoàn tiền đơn hàng #${updatedOrder._id
+      email: flatOrderForEmail.user.email,
+      subject: `Yêu cầu hoàn tiền đơn hàng #${flatOrderForEmail._id
         .toString()
         .slice(-6)} đã được chấp nhận`,
-      message: `Yêu cầu hoàn tiền đơn hàng ${updatedOrder._id} được chấp nhận.`,
+      message: `Yêu cầu hoàn tiền đơn hàng ${flatOrderForEmail._id} được chấp nhận.`,
       html: userEmailHtml,
     });
   } catch (emailError) {
     console.error(
-      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      `Lỗi gửi mail thông báo cho order ${flatOrderForEmail._id}:`,
       emailError
     );
   }
@@ -1180,7 +1503,7 @@ const approveRefund = asyncHandler(async (req, res) => {
   res.json({
     message:
       "Đã chấp nhận yêu cầu hoàn tiền. Quy trình hoàn tiền sẽ được xử lý.",
-    order: updatedOrder,
+    order: flattenOrderItems(updatedOrder, locale),
   });
 });
 
@@ -1188,6 +1511,7 @@ const approveRefund = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/orders/:id/reject-refund
 // @access  Private/Admin
 const rejectRefund = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const orderId = req.params.id;
   const { reason } = req.body;
 
@@ -1225,29 +1549,33 @@ const rejectRefund = asyncHandler(async (req, res) => {
 
   // --- Gửi email thông báo cho User ---
   try {
+    const flatOrderForEmail = flattenOrderItems(updatedOrder, "vi");
     const userEmailHtml = requestStatusUpdateTemplate(
-      updatedOrder.user.name,
-      updatedOrder,
+      flatOrderForEmail.user.name,
+      flatOrderForEmail,
       "refund",
       false,
       reason
     );
     await sendEmail({
-      email: updatedOrder.user.email,
-      subject: `Yêu cầu hoàn tiền đơn hàng #${updatedOrder._id
+      email: flatOrderForEmail.user.email,
+      subject: `Yêu cầu hoàn tiền đơn hàng #${flatOrderForEmail._id
         .toString()
         .slice(-6)} bị từ chối`,
-      message: `Yêu cầu hoàn tiền đơn hàng ${updatedOrder._id} bị từ chối. Lý do: ${reason}`,
+      message: `Yêu cầu hoàn tiền đơn hàng ${flatOrderForEmail._id} bị từ chối. Lý do: ${reason}`,
       html: userEmailHtml,
     });
   } catch (emailError) {
     console.error(
-      `Lỗi gửi mail thông báo cho order ${updatedOrder._id}:`,
+      `Lỗi gửi mail thông báo cho order ${flatOrderForEmail._id}:`,
       emailError
     );
   }
 
-  res.json({ message: "Đã từ chối yêu cầu hoàn tiền.", order: updatedOrder });
+  res.json({
+    message: "Đã từ chối yêu cầu hoàn tiền.",
+    order: flattenOrderItems(updatedOrder, locale),
+  });
 });
 
 // @desc    Admin khôi phục tồn kho cho đơn hàng
@@ -1261,7 +1589,7 @@ const restockOrderItems = asyncHandler(async (req, res) => {
     throw new Error("ID đơn hàng không hợp lệ.");
   }
 
-  const order = await Order.findById(orderId)
+  const order = await Order.findById(orderId);
   if (!order) {
     res.status(404);
     throw new Error("Không tìm thấy đơn hàng.");
@@ -1339,6 +1667,8 @@ const restockOrderItems = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  createPayPalOrderController,
+  capturePayPalOrderController,
   createOrder,
   getMyOrders,
   getGuestOrderByTrackingToken,

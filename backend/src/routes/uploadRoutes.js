@@ -35,16 +35,12 @@ const upload = multer({
 // Ví dụ: POST /api/v1/upload/images/products
 // Body sẽ là form-data với field tên là "images" chứa các file ảnh (tối đa 10 file)
 router.post(
-  "/images/:area",
+  /^\/images\/(.*)/,
   protect, // Yêu cầu đăng nhập
   upload.array("images", 20), // Middleware xử lý upload nhiều file (tối đa 20), field name là 'images'
   (req, res, next) => {
     // Middleware xử lý lỗi cụ thể từ multer trước khi vào controller
-    if (req.multerError) {
-      return res
-        .status(400)
-        .json({ message: `Lỗi upload: ${req.multerError.message}` });
-    }
+    req.params.area = req.params[0];
     next();
   },
   uploadImages // Controller xử lý logic sau khi upload thành công

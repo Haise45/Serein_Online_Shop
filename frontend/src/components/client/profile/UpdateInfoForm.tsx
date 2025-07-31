@@ -14,7 +14,8 @@ import {
 import { useUpdateUserProfile } from "@/lib/react-query/userQueries";
 import { UpdateUserProfilePayload, User } from "@/types/user";
 import InfoDisplay from "./InfoDisplay";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface UpdateInfoFormProps {
   initialUser: User;
@@ -36,6 +37,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
   const updateProfileMutation = useUpdateUserProfile();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("UpdateInfoForm");
 
   useEffect(() => {
     if (initialUser) {
@@ -57,7 +59,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
   const handleSubmitInfo = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.error("Vui lòng nhập họ và tên.");
+      toast.error(t("nameRequiredError"));
       return;
     }
     if (
@@ -66,11 +68,11 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
         phone.trim(),
       )
     ) {
-      toast.error("Số điện thoại không hợp lệ.");
+      toast.error(t("invalidPhoneError"));
       return;
     }
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      toast.error("Địa chỉ email mới không hợp lệ.");
+      toast.error(t("invalidEmailError"));
       return;
     }
 
@@ -86,7 +88,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
     }
 
     if (Object.keys(payload).length === 0) {
-      toast("Không có thông tin nào thay đổi.");
+      toast(t("noChangesToast"));
       setIsEditing(false);
       return;
     }
@@ -104,18 +106,15 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
         );
 
         if (emailChangedAndRequiresVerification) {
-          toast(
-            "Thông tin đã cập nhật. Email của bạn đã thay đổi, vui lòng xác thực email mới.",
-            {
-              icon: "ℹ️",
-              duration: 5000,
-            },
-          );
+          toast(t("emailVerificationNotice"), {
+            icon: "ℹ️",
+            duration: 5000,
+          });
           router.push(
             `/verify-email?email=${encodeURIComponent(updatedUserData.email)}&redirect=${encodeURIComponent(pathname)}`,
           );
         } else {
-          toast.success("Thông tin cá nhân đã được cập nhật!");
+          toast.success(t("updateSuccessToast"));
         }
         setIsEditing(false);
       },
@@ -127,17 +126,17 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
     return (
       <div className="space-y-4">
         <InfoDisplay
-          label="Họ và tên"
+          label={t("nameLabel")}
           value={initialUser.name}
           icon={<FiUser size={14} />}
         />
         <InfoDisplay
-          label="Email"
+          label={t("emailLabel")}
           value={initialUser.email}
           icon={<FiMail size={14} />}
         />
         <InfoDisplay
-          label="Số điện thoại"
+          label={t("phoneLabel")}
           value={initialUser.phone}
           icon={<FiPhone size={14} />}
         />
@@ -146,7 +145,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
           className="mt-6 inline-flex items-center justify-center rounded-md border border-indigo-600 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 shadow-sm hover:bg-indigo-100 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
         >
           <FiEdit2 className="mr-2 h-4 w-4" />
-          Chỉnh sửa thông tin
+          {t("editInfoButton")}
         </button>
       </div>
     );
@@ -156,7 +155,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
     <form onSubmit={handleSubmitInfo} className="space-y-6">
       <div>
         <label htmlFor="profile-name-edit" className="form-label">
-          Họ và tên <span className="text-red-500">*</span>
+          {t("nameLabel")} <span className="text-red-500">*</span>
         </label>
         <input
           id="profile-name-edit"
@@ -169,7 +168,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
       </div>
       <div>
         <label htmlFor="profile-email-edit" className="form-label">
-          Email <span className="text-red-500">*</span>
+          {t("emailLabel")} <span className="text-red-500">*</span>
         </label>
         <input
           id="profile-email-edit"
@@ -181,13 +180,13 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
         />
         {email.trim().toLowerCase() !== initialUser.email.toLowerCase() && (
           <p className="mt-1 text-xs text-orange-600">
-            Thay đổi email sẽ yêu cầu bạn xác thực lại địa chỉ email mới.
+            {t("emailChangeNotice")}
           </p>
         )}
       </div>
       <div>
         <label htmlFor="profile-phone-edit" className="form-label">
-          Số điện thoại
+          {t("phoneLabel")}
         </label>
         <input
           id="profile-phone-edit"
@@ -195,7 +194,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="input-field"
-          placeholder="Để trống nếu muốn xóa"
+          placeholder={t("phonePlaceholder")}
         />
       </div>
       <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
@@ -207,7 +206,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
           {updateProfileMutation.isPending && (
             <FiLoader className="mr-2 -ml-1 h-4 w-4 animate-spin" />
           )}
-          <FiSave className="mr-2 h-4 w-4" /> Lưu thay đổi
+          <FiSave className="mr-2 h-4 w-4" /> {t("saveChangesButton")}
         </button>
         <button
           type="button"
@@ -215,7 +214,7 @@ const UpdateInfoForm: React.FC<UpdateInfoFormProps> = ({
           className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:w-auto"
           disabled={updateProfileMutation.isPending}
         >
-          <FiXCircle className="mr-2 h-4 w-4 text-gray-400" /> Hủy
+          <FiXCircle className="mr-2 h-4 w-4 text-gray-400" /> {t("cancelButton")}
         </button>
       </div>
     </form>

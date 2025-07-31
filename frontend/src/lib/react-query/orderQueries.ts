@@ -1,6 +1,8 @@
 import {
   approveRequestAdminApi,
+  capturePayPalOrderApi,
   createOrderApi,
+  createPayPalOrderApi,
   getAllOrdersAdminApi,
   GetAllOrdersAdminParams,
   getGuestOrderByTokenApi,
@@ -15,7 +17,11 @@ import {
   updateOrderStatusAdminApi,
   UpdateOrderStatusAdminPayload,
 } from "@/services/orderService";
-import { OrderCreationPayload, OrderRequestPayload } from "@/types/order";
+import {
+  OrderCreationPayload,
+  OrderRequestPayload,
+  ShippingAddressData,
+} from "@/types/order";
 import { Order, PaginatedOrdersResponse } from "@/types/order_model";
 import {
   useMutation,
@@ -27,6 +33,7 @@ import {
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { cartKeys } from "./cartQueries";
+import { useTranslations } from "next-intl";
 
 // --- Query Keys for Order ---
 // Định nghĩa kiểu cho params trong queryKey
@@ -70,6 +77,7 @@ type CustomQueryOptions<
 export const useCreateOrder = (
   options?: MutationOptions<Order, OrderCreationPayload>,
 ) => {
+  const t = useTranslations("reactQuery.order");
   const queryClient = useQueryClient();
   return useMutation<
     Order,
@@ -79,15 +87,15 @@ export const useCreateOrder = (
     mutationFn: createOrderApi,
     onSuccess: (newOrder, variables, context) => {
       toast.success(
-        `Đặt hàng thành công! Mã đơn hàng: #${newOrder._id.toString().slice(-6)}`,
+        t("createSuccess", { id: newOrder._id.toString().slice(-6) }),
       );
       // Gọi lại onSuccess gốc nếu có
       options?.onSuccess?.(newOrder, variables, context);
     },
-    
+
     onError: (error, variables, context) => {
       toast.error(
-        error.response?.data?.message || error.message || "Đặt hàng thất bại.",
+        error.response?.data?.message || error.message || t("createError"),
       );
       options?.onError?.(error, variables, context);
     },
@@ -97,14 +105,14 @@ export const useCreateOrder = (
       // 1. Invalidate query giỏ hàng.
       // Invalidate sẽ đánh dấu là stale và refetch ở lần tiếp theo component active.
       queryClient.invalidateQueries({ queryKey: cartKeys.cart });
-      
+
       // 2. Invalidate danh sách đơn hàng để nó được làm mới.
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
 
       // Gọi lại onSettled gốc nếu có
       options?.onSettled?.(data, error, variables, context);
     },
-    
+
     ...options,
   });
 };
@@ -181,6 +189,7 @@ export const useRequestCancellation = (
     { orderId: string; payload: OrderRequestPayload }
   >,
 ) => {
+  const t = useTranslations("reactQuery.order");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string; order: Order },
@@ -201,7 +210,7 @@ export const useRequestCancellation = (
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Gửi yêu cầu hủy thất bại.",
+          t("requestCancelError"),
       );
       options?.onError?.(error, variables, context);
     },
@@ -216,6 +225,7 @@ export const useRequestRefund = (
     { orderId: string; payload: OrderRequestPayload }
   >,
 ) => {
+  const t = useTranslations("reactQuery.order");
   const queryClient = useQueryClient();
   return useMutation<
     { message: string; order: Order },
@@ -235,7 +245,7 @@ export const useRequestRefund = (
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Gửi yêu cầu hoàn tiền thất bại.",
+          t("requestRefundError"),
       );
       options?.onError?.(error, variables, context);
     },
@@ -247,12 +257,13 @@ export const useRequestRefund = (
 export const useMarkOrderAsDelivered = (
   options?: MutationOptions<Order, string>,
 ) => {
+  const t = useTranslations("reactQuery.order");
   const queryClient = useQueryClient();
   return useMutation<Order, AxiosError<{ message?: string }>, string>({
     // string là orderId
     mutationFn: markOrderAsDeliveredApi,
     onSuccess: (updatedOrder, orderId, context) => {
-      toast.success("Đã xác nhận nhận hàng!");
+      toast.success(t("markAsDeliveredSuccess"));
       queryClient.setQueryData(orderKeys.detail(orderId), updatedOrder);
       queryClient.invalidateQueries({ queryKey: orderKeys.list({}) });
       options?.onSuccess?.(updatedOrder, orderId, context);
@@ -261,7 +272,7 @@ export const useMarkOrderAsDelivered = (
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Xác nhận nhận hàng thất bại.",
+          t("markAsDeliveredError"),
       );
       options?.onError?.(error, variables, context);
     },
@@ -288,6 +299,7 @@ export const useUpdateOrderStatusAdmin = (
     { orderId: string; payload: UpdateOrderStatusAdminPayload }
   >,
 ) => {
+  const t = useTranslations("reactQuery.order");
   const queryClient = useQueryClient();
   return useMutation<
     Order,
@@ -298,12 +310,11 @@ export const useUpdateOrderStatusAdmin = (
       updateOrderStatusAdminApi(orderId, payload),
     onSuccess: (updatedOrder, variables, context) => {
       toast.success(
-        `Cập nhật trạng thái đơn hàng #${variables.orderId.slice(-6)} thành công.`,
+        t("updateStatusSuccess", { id: variables.orderId.slice(-6) }),
       );
-      queryClient.setQueryData(
-        orderKeys.detail(variables.orderId),
-        updatedOrder,
-      );
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(variables.orderId),
+      });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() }); // Invalidate all lists for admin
       options?.onSuccess?.(updatedOrder, variables, context);
     },
@@ -311,7 +322,7 @@ export const useUpdateOrderStatusAdmin = (
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Cập nhật trạng thái thất bại.",
+          t("updateStatusError"),
       );
       options?.onError?.(error, variables, context);
     },
@@ -335,7 +346,9 @@ export const useApproveRequestAdmin = (
     mutationFn: ({ orderId, type }) => approveRequestAdminApi(orderId, type),
     onSuccess: (data, variables, context) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: orderKeys.detail(variables.orderId) });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(variables.orderId),
+      });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
@@ -371,7 +384,9 @@ export const useRejectRequestAdmin = (
       rejectRequestAdminApi(orderId, type, payload),
     onSuccess: (data, variables, context) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: orderKeys.detail(variables.orderId) });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(variables.orderId),
+      });
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
@@ -385,11 +400,12 @@ export const useRejectRequestAdmin = (
 
 // Hook for restock (Admin)
 export const useRestockOrderItemsAdmin = (
-  options?: MutationOptions<{ message: string, order: Order }, string>,
+  options?: MutationOptions<{ message: string; order: Order }, string>,
 ) => {
+  const t = useTranslations("reactQuery.order");
   const queryClient = useQueryClient();
   return useMutation<
-    { message: string, order: Order },
+    { message: string; order: Order },
     AxiosError<{ message?: string }>,
     string
   >({
@@ -405,12 +421,44 @@ export const useRestockOrderItemsAdmin = (
     },
     onError: (error, variables, context) => {
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Khôi phục tồn kho thất bại.",
+        error.response?.data?.message || error.message || t("restockError"),
       );
       options?.onError?.(error, variables, context);
     },
     ...options,
+  });
+};
+
+// --- Hook: Tạo một đơn hàng trên hệ thống PayPal (chưa lưu vào DB) ---
+export const useCreatePayPalOrder = () => {
+  return useMutation<
+    { orderID: string }, // Kiểu dữ liệu trả về từ API
+    Error, // Kiểu lỗi
+    { selectedCartItemIds: string[]; shippingAddress: ShippingAddressData } // Kiểu dữ liệu đầu vào (payload)
+  >({
+    mutationFn: createPayPalOrderApi,
+  });
+};
+
+// --- Hook: Capture thanh toán PayPal và cập nhật đơn hàng trong DB ---
+export const useCapturePayPalOrder = () => {
+  const t = useTranslations("reactQuery.order");
+  const queryClient = useQueryClient();
+  return useMutation<
+    { message: string; order: Order },
+    Error,
+    { orderId: string; paypalOrderId: string }
+  >({
+    mutationFn: ({ orderId, paypalOrderId }) =>
+      capturePayPalOrderApi(orderId, paypalOrderId),
+    onSuccess: () => {
+      // Invalidate các query liên quan để làm mới dữ liệu
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      queryClient.invalidateQueries({ queryKey: cartKeys.cart });
+      toast.success(t("capturePayPalSuccess"));
+    },
+    onError: (error) => {
+      toast.error(error.message || t("capturePayPalError"));
+    },
   });
 };

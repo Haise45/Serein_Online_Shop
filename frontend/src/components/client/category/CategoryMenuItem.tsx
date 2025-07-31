@@ -2,8 +2,8 @@
 
 import { Category } from "@/types";
 import classNames from "classnames";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 
@@ -24,11 +24,34 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
   onShowOverlay,
   onHideOverlay,
 }) => {
+  const t = useTranslations("CategoryMenu");
   const [isOpen, setIsOpen] = useState(false); // Cho hover trên desktop và click trên mobile
   const hasChildren = category.children && category.children.length > 0;
   const router = useRouter();
+  const locale = useLocale();
 
   const categoryLinkHref = `/products?category=${category.slug}`;
+
+  // *** HÀM HELPER ĐỂ LẤY TÊN ĐÃ ĐƯỢC DỊCH ***
+  const getLocalizedName = (
+    name: string | { vi: string; en: string } | null | undefined,
+  ): string => {
+    // 1. Xử lý các trường hợp không hợp lệ trước
+    if (!name) {
+      return ""; // Hoặc một chuỗi mặc định nào đó
+    }
+
+    // 2. Nếu nó là một object, xử lý logic đa ngôn ngữ
+    if (typeof name === "object") {
+      // Ưu tiên ngôn ngữ hiện tại, fallback về tiếng Việt, cuối cùng là chuỗi rỗng
+      return name[locale as "vi" | "en"] || name.vi || "";
+    }
+
+    // 3. Nếu không phải object, nó chắc chắn là một chuỗi string, trả về chính nó
+    return name;
+  };
+
+  const localizedCategoryName = getLocalizedName(category.name);
 
   // --- LOGIC CHO MOBILE HOẶC DESKTOP SUB-MENU (dropdown thường) ---
   const handleSimpleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -70,8 +93,8 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
     };
 
     return (
-       <div
-        className="group h-full flex items-center"
+      <div
+        className="group flex h-full items-center"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -85,7 +108,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
             { "bg-gray-100 text-gray-900": isOpen }, // Active state khi mega menu mở
           )}
         >
-          {category.name.toUpperCase()}
+          {localizedCategoryName.toUpperCase()}
           <FiChevronDown
             className={`ml-1 h-4 w-4 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""
@@ -114,7 +137,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                     onClick={handleMegaMenuLinkClick}
                     className="group/link flex items-center text-base font-bold text-gray-800 hover:text-indigo-700"
                   >
-                    Tất cả {category.name}
+                    {t("all", { categoryName: localizedCategoryName })}
                     <FiChevronRight className="ml-1.5 h-4 w-4 opacity-0 transition-opacity group-hover/link:opacity-100" />
                   </Link>
                   <Link
@@ -122,14 +145,14 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                     onClick={handleMegaMenuLinkClick}
                     className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
                   >
-                    Sản phẩm mới
+                    {t("newProducts")}
                   </Link>
                   <Link
                     href={`/products?category=${category.slug}&sortBy=totalSold&sortOrder=desc`}
                     onClick={handleMegaMenuLinkClick}
                     className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
                   >
-                    Bán chạy nhất
+                    {t("bestSellers")}
                   </Link>
                 </div>
 
@@ -146,7 +169,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                             onClick={handleMegaMenuLinkClick}
                             className="group/link flex items-center text-base font-bold text-gray-800 hover:text-indigo-700"
                           >
-                            {subCategory1.name}
+                            {getLocalizedName(subCategory1.name)}
                             <FiChevronRight className="ml-1.5 h-4 w-4 opacity-0 transition-opacity group-hover/link:opacity-100" />
                           </Link>
                           <ul className="space-y-1.5">
@@ -157,7 +180,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                                   onClick={handleMegaMenuLinkClick}
                                   className="block text-sm text-gray-600 hover:text-indigo-700 hover:underline"
                                 >
-                                  {subCategory2.name}
+                                  {getLocalizedName(subCategory2.name)}
                                 </Link>
                               </li>
                             ))}
@@ -179,7 +202,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
                     </div>
                   ) : (
                     <p className="text-sm text-gray-500">
-                      Không có danh mục con.
+                      {t("noSubcategories")}
                     </p>
                   )}
                 </div>
@@ -196,9 +219,9 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
     return (
       <Link
         href={categoryLinkHref}
-        className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:bg-gray-100 whitespace-nowrap"
+        className="rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-gray-700 hover:bg-gray-100 focus:bg-gray-100"
       >
-        {category.name.toUpperCase()}
+        {localizedCategoryName.toUpperCase()}
       </Link>
     );
   }
@@ -210,7 +233,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
         href={categoryLinkHref}
         className="rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-white hover:bg-gray-700 focus:bg-gray-700"
       >
-        {category.name.toUpperCase()}
+        {localizedCategoryName.toUpperCase()}
       </Link>
     );
   }
@@ -233,7 +256,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
           },
         )}
       >
-        <span>{category.name}</span>
+        <span>{localizedCategoryName}</span>
         {hasChildren &&
           (isOpen ? (
             <FiChevronDown className="h-4 w-4" />
@@ -258,7 +281,7 @@ const CategoryMenuItem: React.FC<CategoryMenuItemProps> = ({
               },
             )}
           >
-            Tất cả {category.name}
+            Tất cả {localizedCategoryName}
           </Link>
           {category.children?.map((child) => (
             <CategoryMenuItem

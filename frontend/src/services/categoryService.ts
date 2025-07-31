@@ -1,5 +1,13 @@
 import axiosInstance from "@/lib/axiosInstance";
-import { Category, CategoryCreationData, CategoryUpdateData, GetCategoriesParams, PaginatedCategoriesResponse } from "@/types";
+import {
+  Category,
+  CategoryAdmin,
+  CategoryCreationData,
+  CategoryUpdateData,
+  GetCategoriesParams,
+  PaginatedAdminCategoriesResponse,
+  PaginatedCategoriesResponse,
+} from "@/types";
 import { AxiosError } from "axios";
 
 // Helper lấy thông điệp lỗi
@@ -16,13 +24,18 @@ const getErrorMessage = (err: unknown, fallback: string): string => {
  * @returns Promise<Category[]>
  */
 export const getAllCategories = async (
-  params: GetCategoriesParams = {}
+  params: GetCategoriesParams = {},
 ): Promise<PaginatedCategoriesResponse> => {
   try {
-    const { data } = await axiosInstance.get<PaginatedCategoriesResponse>("categories", { params });
+    const { data } = await axiosInstance.get<PaginatedCategoriesResponse>(
+      "categories",
+      { params },
+    );
     return data;
   } catch (error: unknown) {
-    throw new Error(getErrorMessage(error, "Không thể tải danh sách danh mục."));
+    throw new Error(
+      getErrorMessage(error, "Không thể tải danh sách danh mục."),
+    );
   }
 };
 
@@ -48,6 +61,22 @@ export const getCategoryByIdOrSlug = async (
   }
 };
 
+export const getAdminCategoriesApi = async (
+  params: GetCategoriesParams,
+): Promise<PaginatedAdminCategoriesResponse> => {
+  const { data } = await axiosInstance.get("/categories/admin", { params });
+  return data;
+};
+
+export const getAdminCategoryDetailsApi = async (
+  id: string,
+): Promise<CategoryAdmin> => {
+  const { data } = await axiosInstance.get<CategoryAdmin>(
+    `/categories/admin/${id}`,
+  );
+  return data;
+};
+
 /**
  * Tạo một danh mục mới.
  * @param categoryData Dữ liệu để tạo danh mục.
@@ -55,9 +84,9 @@ export const getCategoryByIdOrSlug = async (
  */
 export const createCategory = async (
   categoryData: CategoryCreationData,
-): Promise<Category> => {
+): Promise<CategoryAdmin> => {
   try {
-    const { data } = await axiosInstance.post<Category>(
+    const { data } = await axiosInstance.post<CategoryAdmin>(
       "categories",
       categoryData,
     );
@@ -76,9 +105,9 @@ export const createCategory = async (
 export const updateCategory = async (
   categoryId: string,
   categoryData: CategoryUpdateData,
-): Promise<Category> => {
+): Promise<CategoryAdmin> => {
   try {
-    const { data } = await axiosInstance.put<Category>(
+    const { data } = await axiosInstance.put<CategoryAdmin>(
       `categories/${categoryId}`,
       categoryData,
     );

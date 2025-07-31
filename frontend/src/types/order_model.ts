@@ -40,6 +40,14 @@ export interface OrderRequestInfo {
   requestedAt: string | Date;
 }
 
+export interface PaymentResult {
+  id: string;
+  status: string;
+  update_time: string;
+  email_address: string;
+  captureId: string;
+}
+
 // Dựa trên orderSchema
 export interface Order {
   _id: string;
@@ -51,6 +59,7 @@ export interface Order {
   orderItems: OrderItem[];
   shippingAddress: OrderShippingAddress;
   paymentMethod: "COD" | "BANK_TRANSFER" | "PAYPAL" | string; // String nếu có thể có phương thức khác
+  paymentResult?: PaymentResult | null;
   shippingMethod?: string;
   itemsPrice: number;
   shippingPrice: number;
@@ -95,6 +104,8 @@ export interface OrderSummary {
   guestOrderEmail?: string | null;
   isPaid: boolean;
   paidAt?: string | Date | null;
+  isDelivered?: boolean;
+  deliveredAt?: string | Date | null;
 
   // Thêm shippingAddress.fullName để hiển thị tên guest
   shippingAddress: Pick<OrderShippingAddress, "fullName">;

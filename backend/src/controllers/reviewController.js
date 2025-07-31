@@ -5,6 +5,22 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const mongoose = require("mongoose");
 const { createAdminNotification } = require("../utils/notificationUtils");
 
+// --- Helper: "Làm phẳng" các trường đa ngôn ngữ ---
+const flattenI18nObject = (obj, locale, fields) => {
+  if (!obj) return obj;
+  const newObj = obj.toObject ? obj.toObject() : { ...obj };
+  for (const field of fields) {
+    if (
+      newObj[field] &&
+      typeof newObj[field] === "object" &&
+      !mongoose.Types.ObjectId.isValid(newObj[field])
+    ) {
+      newObj[field] = newObj[field][locale] || newObj[field].vi;
+    }
+  }
+  return newObj;
+};
+
 // --- Hàm Helper Tính toán Rating ---
 const calculateAndUpdateProductRating = async (productId) => {
   if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -201,13 +217,16 @@ const createReview = asyncHandler(async (req, res) => {
 
   // --- Gửi thông báo cho Admin ---
   // Populate product để lấy tên cho thông báo
+  const localeForAdmin = "vi";
   const productForNotification = await Product.findById(productId)
     .select("name")
     .lean();
   await createAdminNotification(
     "Đánh giá sản phẩm mới",
     `Có đánh giá mới cho sản phẩm "${
-      productForNotification?.name || "Không rõ"
+      productForNotification?.name?.[localeForAdmin] ||
+      productForNotification?.name?.vi ||
+      "Không rõ"
     }" từ người dùng "${req.user.name}".`,
     "NEW_REVIEW_SUBMITTED",
     `/admin/reviews?isApproved=false`, // Link tới trang duyệt review
@@ -311,6 +330,7 @@ const updateUserReview = asyncHandler(async (req, res) => {
 
   // --- Bước 8: Gửi thông báo cho Admin (nếu có) ---
   try {
+    const localeForAdmin = "vi";
     // Lấy tên sản phẩm để hiển thị trong thông báo
     const productForNotification = await Product.findById(review.product)
       .select("name")
@@ -319,7 +339,9 @@ const updateUserReview = asyncHandler(async (req, res) => {
     await createAdminNotification(
       "Đánh giá sản phẩm đã được sửa",
       `Đánh giá cho sản phẩm "${
-        productForNotification?.name || "Không rõ"
+        productForNotification?.name?.[localeForAdmin] ||
+        productForNotification?.name?.vi ||
+        "Không rõ"
       }" bởi "${req.user.name}" đã được chỉnh sửa và cần duyệt lại.`,
       "REVIEW_EDITED",
       `/admin/reviews?isApproved=false&reviewId=${review._id}`,
@@ -380,6 +402,7 @@ const getMyReviewForProduct = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/products/:productId/reviews
 // @access  Public
 const getProductReviews = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const productId = req.params.productId;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
@@ -420,6 +443,16 @@ const getProductReviews = asyncHandler(async (req, res) => {
     totalReviewsQuery.exec(),
   ]);
 
+  const flattenedReviews = reviews.map((review) => {
+    if (review.adminReply) {
+      return {
+        ...review,
+        adminReply: flattenI18nObject(review.adminReply, locale, ["comment"]),
+      };
+    }
+    return review;
+  });
+
   const totalPages = Math.ceil(totalReviews / limit);
 
   res.json({
@@ -427,7 +460,7 @@ const getProductReviews = asyncHandler(async (req, res) => {
     totalPages: totalPages,
     totalReviews: totalReviews,
     limit: limit,
-    reviews: reviews,
+    reviews: flattenedReviews,
   });
 });
 
@@ -468,6 +501,7 @@ const deleteMyReview = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/reviews
 // @access  Private/Admin
 const getAllReviews = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
@@ -479,7 +513,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
   // Admin cần xem nhiều thông tin hơn
   const reviewsQuery = Review.find(filter)
     .populate("user", "name email") // Lấy đầy đủ thông tin user
-    .populate("product", "name slug sku images") // Lấy đủ thông tin product
+    .populate("product", "name slug sku images isActive") // Lấy đủ thông tin product
     .populate("approvedBy", "name") // Admin nào đã duyệt
     .populate("adminReply.user", "name") // Admin nào đã phản hồi
     .sort(sort)
@@ -494,6 +528,23 @@ const getAllReviews = asyncHandler(async (req, res) => {
     totalReviewsQuery.exec(),
   ]);
 
+  const flattenedReviews = reviews.map((review) => {
+    const flatReview = { ...review };
+    // Làm phẳng product
+    if (flatReview.product && typeof flatReview.product === "object") {
+      flatReview.product = flattenI18nObject(flatReview.product, locale, [
+        "name",
+      ]);
+    }
+    // Làm phẳng adminReply
+    if (flatReview.adminReply) {
+      flatReview.adminReply = flattenI18nObject(flatReview.adminReply, locale, [
+        "comment",
+      ]);
+    }
+    return flatReview;
+  });
+
   const totalPages = Math.ceil(totalReviews / limit);
 
   res.json({
@@ -501,7 +552,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
     totalPages: totalPages,
     totalReviews: totalReviews,
     limit: limit,
-    reviews: reviews,
+    reviews: flattenedReviews,
   });
 });
 
@@ -509,6 +560,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/reviews/:reviewId/approve
 // @access  Private/Admin
 const approveReview = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const reviewId = req.params.reviewId;
   if (!mongoose.Types.ObjectId.isValid(reviewId)) {
     res.status(400);
@@ -535,12 +587,32 @@ const approveReview = asyncHandler(async (req, res) => {
   // Tính toán lại rating cho sản phẩm
   await calculateAndUpdateProductRating(review.product);
 
-  await review.populate("user", "name email");
-  await review.populate("product", "name slug");
+  // Populate các trường cần thiết
+  await review.populate([
+    { path: "user", select: "name email" },
+    { path: "product", select: "name slug images" },
+    { path: "approvedBy", select: "name" },
+    { path: "adminReply.user", select: "name" },
+  ]);
+
+  // Làm phẳng trước khi trả về
+  const flattenedReview = flattenI18nObject(review, locale, []); // Làm phẳng các trường con
+  if (flattenedReview.product)
+    flattenedReview.product = flattenI18nObject(
+      flattenedReview.product,
+      locale,
+      ["name"]
+    );
+  if (flattenedReview.adminReply)
+    flattenedReview.adminReply = flattenI18nObject(
+      flattenedReview.adminReply,
+      locale,
+      ["comment"]
+    );
 
   res.json({
     message: "Đánh giá đã được duyệt.",
-    review,
+    flattenedReview,
   });
 });
 
@@ -548,6 +620,7 @@ const approveReview = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/reviews/:reviewId/reject
 // @access  Private/Admin
 const rejectReview = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const reviewId = req.params.reviewId;
   if (!mongoose.Types.ObjectId.isValid(reviewId)) {
     res.status(400);
@@ -570,10 +643,30 @@ const rejectReview = asyncHandler(async (req, res) => {
     await calculateAndUpdateProductRating(review.product);
   }
 
-  await review.populate("user", "name email");
-  await review.populate("product", "name slug");
+  // Populate các trường cần thiết
+  await review.populate([
+    { path: "user", select: "name email" },
+    { path: "product", select: "name slug images" },
+    { path: "approvedBy", select: "name" },
+    { path: "adminReply.user", select: "name" },
+  ]);
 
-  res.json({ message: "Đánh giá đã được ẩn/từ chối.", review });
+  // Làm phẳng trước khi trả về
+  const flattenedReview = flattenI18nObject(review, locale, []); // Làm phẳng các trường con
+  if (flattenedReview.product)
+    flattenedReview.product = flattenI18nObject(
+      flattenedReview.product,
+      locale,
+      ["name"]
+    );
+  if (flattenedReview.adminReply)
+    flattenedReview.adminReply = flattenI18nObject(
+      flattenedReview.adminReply,
+      locale,
+      ["comment"]
+    );
+
+  res.json({ message: "Đánh giá đã được ẩn/từ chối.", flattenedReview });
 });
 
 // @desc    Admin xóa hẳn review
@@ -633,13 +726,33 @@ const addAdminReply = asyncHandler(async (req, res) => {
   };
 
   await review.save();
-  await review.populate("user", "name email");
-  await review.populate("product", "name slug");
-  await review.populate("adminReply.user", "name");
+
+  // Populate các trường cần thiết
+  await review.populate([
+    { path: "user", select: "name email" },
+    { path: "product", select: "name slug images" },
+    { path: "approvedBy", select: "name" },
+    { path: "adminReply.user", select: "name" },
+  ]);
+
+  // Làm phẳng trước khi trả về
+  const flattenedReview = flattenI18nObject(review, locale, []); // Làm phẳng các trường con
+  if (flattenedReview.product)
+    flattenedReview.product = flattenI18nObject(
+      flattenedReview.product,
+      locale,
+      ["name"]
+    );
+  if (flattenedReview.adminReply)
+    flattenedReview.adminReply = flattenI18nObject(
+      flattenedReview.adminReply,
+      locale,
+      ["comment"]
+    );
 
   res
     .status(201)
-    .json({ message: "Đã thêm phản hồi của quản trị viên.", review });
+    .json({ message: "Đã thêm phản hồi của quản trị viên.", flattenedReview });
 });
 
 module.exports = {

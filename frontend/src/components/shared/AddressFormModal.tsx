@@ -25,6 +25,7 @@ import {
   FiUser,
   FiX,
 } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface AddressFormModalProps {
   isOpen: boolean;
@@ -44,6 +45,8 @@ export default function AddressFormModal({
   addressToEdit,
   onAddressSaved,
 }: AddressFormModalProps) {
+  const t = useTranslations("AddressFormModal");
+
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     phone: "",
@@ -144,7 +147,7 @@ export default function AddressFormModal({
       !formData.districtCode ||
       !formData.communeCode
     ) {
-      toast.error("Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã.");
+      toast.error(t("validationErrorToast"));
       return;
     }
 
@@ -217,7 +220,7 @@ export default function AddressFormModal({
                       <FiMapPin className="h-5 w-5" />
                     </div>
                     <span>
-                      {addressToEdit ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}
+                      {addressToEdit ? t("editTitle") : t("addTitle")}
                     </span>
                   </div>
                   <button
@@ -229,9 +232,7 @@ export default function AddressFormModal({
                   </button>
                 </DialogTitle>
                 <p className="mt-2 text-sm text-indigo-100">
-                  {addressToEdit
-                    ? "Cập nhật thông tin địa chỉ giao hàng của bạn"
-                    : "Thêm địa chỉ giao hàng mới vào danh sách của bạn"}
+                  {addressToEdit ? t("editDescription") : t("addDescription")}
                 </p>
               </div>
 
@@ -242,7 +243,7 @@ export default function AddressFormModal({
                   <div className="space-y-4">
                     <h4 className="flex items-center space-x-2 text-lg font-semibold text-gray-800">
                       <FiUser className="h-5 w-5 text-indigo-600" />
-                      <span>Thông tin người nhận</span>
+                      <span>{t("receiverInfoTitle")}</span>
                     </h4>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -252,7 +253,7 @@ export default function AddressFormModal({
                           htmlFor="fullName"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Họ và tên người nhận *
+                          {t("fullNameLabel")}
                         </label>
                         <div className="relative">
                           <input
@@ -262,7 +263,7 @@ export default function AddressFormModal({
                             value={formData.fullName}
                             onChange={handleChange}
                             className="block w-full rounded-lg border border-gray-200 p-3 pl-10 shadow-sm transition-colors duration-200 focus:border-indigo-600 focus:ring-indigo-600 focus:outline-none"
-                            placeholder="Nhập họ và tên"
+                            placeholder={t("fullNamePlaceholder")}
                             required
                           />
                           <FiUser className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
@@ -275,7 +276,7 @@ export default function AddressFormModal({
                           htmlFor="phone"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Số điện thoại *
+                          {t("phoneLabel")}
                         </label>
                         <div className="relative">
                           <input
@@ -285,7 +286,7 @@ export default function AddressFormModal({
                             value={formData.phone}
                             onChange={handleChange}
                             className="block w-full rounded-lg border border-gray-200 p-3 pl-10 shadow-sm transition-colors duration-200 focus:border-indigo-600 focus:ring-indigo-600 focus:outline-none"
-                            placeholder="Nhập số điện thoại"
+                            placeholder={t("phonePlaceholder")}
                             required
                           />
                           <FiPhone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
@@ -298,7 +299,7 @@ export default function AddressFormModal({
                   <div className="space-y-4">
                     <h4 className="flex items-center space-x-2 text-lg font-semibold text-gray-800">
                       <FiMapPin className="h-5 w-5 text-indigo-600" />
-                      <span>Địa chỉ giao hàng</span>
+                      <span>{t("shippingAddressTitle")}</span>
                     </h4>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -308,7 +309,7 @@ export default function AddressFormModal({
                           htmlFor="provinceCode"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Tỉnh/Thành phố *
+                          {t("provinceLabel")}
                         </label>
                         <select
                           name="provinceCode"
@@ -321,8 +322,8 @@ export default function AddressFormModal({
                         >
                           <option value="">
                             {isLoadingProvinces
-                              ? "Đang tải..."
-                              : "Chọn Tỉnh/Thành"}
+                              ? t("loadingProvinces")
+                              : t("provincePlaceholder")}
                           </option>
                           {provinces?.map((p) => (
                             <option key={p.code} value={p.code}>
@@ -338,7 +339,7 @@ export default function AddressFormModal({
                           htmlFor="districtCode"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Quận/Huyện *
+                          {t("districtLabel")}
                         </label>
                         <select
                           name="districtCode"
@@ -353,8 +354,8 @@ export default function AddressFormModal({
                         >
                           <option value="">
                             {isLoadingDistricts
-                              ? "Đang tải..."
-                              : "Chọn Quận/Huyện"}
+                              ? t("loadingDistricts")
+                              : t("districtPlaceholder")}
                           </option>
                           {districts?.map((d) => (
                             <option key={d.code} value={d.code}>
@@ -370,7 +371,7 @@ export default function AddressFormModal({
                           htmlFor="communeCode"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Phường/Xã *
+                          {t("communeLabel")}
                         </label>
                         <select
                           name="communeCode"
@@ -383,8 +384,8 @@ export default function AddressFormModal({
                         >
                           <option value="">
                             {isLoadingCommunes
-                              ? "Đang tải..."
-                              : "Chọn Phường/Xã"}
+                              ? t("loadingCommunes")
+                              : t("communePlaceholder")}
                           </option>
                           {communes?.map((c) => (
                             <option key={c.code} value={c.code}>
@@ -401,7 +402,7 @@ export default function AddressFormModal({
                         htmlFor="street"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Địa chỉ cụ thể *
+                        {t("streetLabel")}
                       </label>
                       <div className="relative">
                         <input
@@ -411,7 +412,7 @@ export default function AddressFormModal({
                           value={formData.street}
                           onChange={handleChange}
                           className="block w-full rounded-lg border border-gray-200 p-3 pl-10 shadow-sm transition-colors duration-200 focus:border-indigo-600 focus:ring-indigo-600 focus:outline-none"
-                          placeholder="Số nhà, tên đường, khu vực..."
+                          placeholder={t("streetPlaceholder")}
                           required
                         />
                         <FiHome className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
@@ -433,10 +434,10 @@ export default function AddressFormModal({
                       htmlFor="isDefault"
                       className="ml-3 block text-sm font-medium text-gray-700"
                     >
-                      Đặt làm địa chỉ mặc định
+                      {t("isDefaultLabel")}
                     </label>
                     <span className="ml-2 text-xs text-gray-500">
-                      (Địa chỉ này sẽ được chọn mặc định khi đặt hàng)
+                      {t("isDefaultHint")}
                     </span>
                   </div>
 
@@ -447,7 +448,7 @@ export default function AddressFormModal({
                       onClick={onClose}
                       className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
                     >
-                      Hủy bỏ
+                      {t("cancelButton")}
                     </button>
                     <button
                       type="submit"
@@ -458,7 +459,9 @@ export default function AddressFormModal({
                         <FiLoader className="h-4 w-4 animate-spin" />
                       )}
                       <span>
-                        {addressToEdit ? "Lưu thay đổi" : "Thêm địa chỉ"}
+                        {addressToEdit
+                          ? t("saveChangesButton")
+                          : t("addAddressButton")}
                       </span>
                     </button>
                   </div>

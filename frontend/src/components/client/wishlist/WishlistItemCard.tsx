@@ -4,20 +4,28 @@ import { useAddToCart } from "@/lib/react-query/cartQueries";
 import { formatCurrency } from "@/lib/utils";
 import { AppDispatch } from "@/store";
 import { addPopup } from "@/store/slices/notificationPopupSlice";
-import { Attribute, WishlistItem } from "@/types";
+import { Attribute, ExchangeRates, WishlistItem } from "@/types";
 import classNames from "classnames";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { FiAlertCircle, FiLoader, FiShoppingCart, FiTrash2 } from "react-icons/fi";
+import {
+  FiAlertCircle,
+  FiLoader,
+  FiShoppingCart,
+  FiTrash2,
+} from "react-icons/fi";
 import { useDispatch } from "react-redux";
+import { useTranslations } from "next-intl";
 
 interface WishlistItemCardProps {
   item: WishlistItem;
   onRemove: (productId: string, variantId?: string | null) => void;
   isRemoving: boolean;
   attributes: Attribute[];
+  displayCurrency: "VND" | "USD";
+  rates: ExchangeRates | null;
 }
 
 export default function WishlistItemCard({
@@ -25,18 +33,26 @@ export default function WishlistItemCard({
   onRemove,
   isRemoving,
   attributes,
+  displayCurrency,
+  rates,
 }: WishlistItemCardProps) {
+  const t = useTranslations("WishlistItemCard");
   const dispatch: AppDispatch = useDispatch();
   const addToCartMutation = useAddToCart();
 
   // Tạo bộ đệm tra cứu
   const attributeMap = useMemo(() => {
     if (!attributes) return new Map();
-    const map = new Map<string, { label: string; values: Map<string, string> }>();
+    const map = new Map<
+      string,
+      { label: string; values: Map<string, string> }
+    >();
     attributes.forEach((attr) => {
       const valueMap = new Map<string, string>();
-      attr.values.forEach((val) => valueMap.set(val._id, val.value));
-      map.set(attr._id, { label: attr.label, values: valueMap });
+      // `val.value` bây giờ đã là string, không phải object
+      attr.values.forEach((val) => valueMap.set(val._id, val.value as string));
+      // `attr.label` bây giờ đã là string, không phải object
+      map.set(attr._id, { label: attr.label as string, values: valueMap });
     });
     return map;
   }, [attributes]);
@@ -46,14 +62,19 @@ export default function WishlistItemCard({
     if (!item.variantDetails?.optionValues) return null;
     return item.variantDetails.optionValues
       .map((opt) => {
-        const attrId = typeof opt.attribute === "string" ? opt.attribute : opt.attribute._id;
-        const valueId = typeof opt.value === "string" ? opt.value : opt.value._id;
+        const attrId =
+          typeof opt.attribute === "string" ? opt.attribute : opt.attribute._id;
+        const valueId =
+          typeof opt.value === "string" ? opt.value : opt.value._id;
+
         const attrInfo = attributeMap.get(attrId);
-        const valueName = attrInfo?.values.get(valueId);
-        return `${attrInfo?.label || "Thuộc tính"}: ${valueName || "N/A"}`;
+        const attributeLabel = attrInfo?.label || t("defaultAttribute");
+        const valueName = attrInfo?.values.get(valueId) || "N/A";
+
+        return t("attributeLabel", { label: attributeLabel, value: valueName });
       })
       .join(" / ");
-  }, [item.variantDetails, attributeMap]);
+  }, [item.variantDetails, attributeMap, t]);
 
   // Logic quản lý ảnh hover
   const getInitialImage = useCallback(() => {
@@ -84,24 +105,27 @@ export default function WishlistItemCard({
   };
 
   // Các giá trị hiển thị
-  const name = item.name;
+  const name = item.name as string;
   const slug = item.slug;
   const wishlistedVariantId = item.wishlistedVariantId;
 
+  // Lấy giá trị gốc (luôn là VND)
   const displayPrice = item.variantDetails?.displayPrice ?? item.displayPrice;
   const originalPrice = item.variantDetails?.price ?? item.price;
   const isOnSale = item.variantDetails?.isOnSale ?? item.isOnSale;
-  
+
   // Xử lý stockQuantity và isOutOfStock
-  const stockQuantity = item.variantDetails?.stockQuantity ?? item.stockQuantity;
+  const stockQuantity =
+    item.variantDetails?.stockQuantity ?? item.stockQuantity;
   const isOutOfStock = stockQuantity === 0;
+  const currencyOptions = { currency: displayCurrency, rates };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (isOutOfStock) {
-      toast.error("Sản phẩm này hiện đã hết hàng.");
+      toast.error(t("outOfStockToast"));
       return;
     }
 
@@ -124,7 +148,7 @@ export default function WishlistItemCard({
             dispatch(addPopup(addedOrUpdatedItemInCart));
           } else {
             // Fallback (giữ nguyên)
-            toast.success(`Đã thêm "${name}" vào giỏ hàng!`);
+            toast.success(t("addToCartSuccess", { name: name }));
           }
         },
       },
@@ -146,17 +170,20 @@ export default function WishlistItemCard({
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            quality={100}
             className={classNames(
               "object-cover object-center transition-transform duration-300",
               // Thêm hiệu ứng mờ nếu hết hàng
-              { "opacity-50 grayscale": isOutOfStock }
+              { "opacity-50 grayscale": isOutOfStock },
             )}
             priority={false}
           />
           {/* Lớp phủ thông báo hết hàng */}
           {isOutOfStock && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <span className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-lg">Hết hàng</span>
+              <span className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-lg">
+                {t("outOfStock")}
+              </span>
             </div>
           )}
         </div>
@@ -166,20 +193,22 @@ export default function WishlistItemCard({
       {isOnSale && displayPrice < originalPrice && !isOutOfStock && (
         <div className="absolute top-3 left-3 z-10">
           <span className="rounded-md bg-red-100 px-2 py-1 text-[10px] font-semibold text-red-700 sm:text-xs">
-            -
-            {Math.round(((originalPrice - displayPrice) / originalPrice) * 100)}
-            %
+            {t("saleBadge", {
+              percentage: Math.round(
+                ((originalPrice - displayPrice) / originalPrice) * 100,
+              ),
+            })}
           </span>
         </div>
       )}
-      
+
       {/* Nút xóa */}
       <button
         onClick={() => onRemove(item._id, wishlistedVariantId)}
         disabled={isRemoving}
         className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 text-gray-500 backdrop-blur-sm transition-all hover:bg-red-500 hover:text-white disabled:opacity-50 sm:top-3 sm:right-3"
-        title="Xóa khỏi yêu thích"
-        aria-label="Xóa khỏi yêu thích"
+        title={t("removeFromWishlist")}
+        aria-label={t("removeFromWishlist")}
       >
         {isRemoving ? (
           <FiLoader className="h-4 w-4 animate-spin" />
@@ -208,20 +237,20 @@ export default function WishlistItemCard({
                 "text-base sm:text-lg",
               )}
             >
-              {formatCurrency(displayPrice)}
+              {formatCurrency(displayPrice, currencyOptions)}
             </p>
             {isOnSale && displayPrice < originalPrice && !isOutOfStock && (
               <p className="ml-2 text-xs text-gray-400 line-through sm:text-sm">
-                {formatCurrency(originalPrice)}
+                {formatCurrency(originalPrice, currencyOptions)}
               </p>
             )}
           </div>
-          
+
           {/* Thông báo hết hàng rõ ràng hơn */}
           {isOutOfStock && (
-             <div className="mb-2 flex items-center text-xs font-semibold text-red-600">
-                <FiAlertCircle className="mr-1.5 h-4 w-4" />
-                <span>Sản phẩm tạm hết hàng</span>
+            <div className="mb-2 flex items-center text-xs font-semibold text-red-600">
+              <FiAlertCircle className="mr-1.5 h-4 w-4" />
+              <span>{t("outOfStock")}</span>
             </div>
           )}
 
@@ -235,7 +264,7 @@ export default function WishlistItemCard({
                 : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500",
               { "cursor-wait opacity-70": addToCartMutation.isPending },
             )}
-            aria-label="Thêm vào giỏ hàng"
+            aria-label={t("addToCartButton")}
           >
             {addToCartMutation.isPending ? (
               <FiLoader className="mr-2 h-4 w-4 animate-spin" />
@@ -243,7 +272,7 @@ export default function WishlistItemCard({
               <FiShoppingCart className="mr-2 h-4 w-4" />
             )}
             {/* Thay đổi text của nút */}
-            {isOutOfStock ? "Đã hết hàng" : "Thêm vào giỏ"}
+            {isOutOfStock ? t("outOfStockButton") : t("addToCartButton")}
           </button>
         </div>
       </div>

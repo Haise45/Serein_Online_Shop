@@ -1,8 +1,10 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
+import RelativeTime from "@/components/shared/RelativeTime";
 import { useRestockOrderItemsAdmin } from "@/lib/react-query/orderQueries";
-import { formatCurrency, timeAgo } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { OrderItem, OrderSummary } from "@/types/order_model";
 import {
   cilCheckCircle,
@@ -29,25 +31,29 @@ import {
   CTooltip,
 } from "@coreui/react";
 import classNames from "classnames";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 // Helper để định dạng trạng thái đơn hàng
-const getStatusBadge = (status: string) => {
-  const statusMap: Record<string, { color: string; text: string }> = {
-    Pending: { color: "secondary", text: "Chờ xác nhận" },
-    Processing: { color: "info", text: "Đang xử lý" },
-    Shipped: { color: "primary", text: "Đang giao" },
-    Delivered: { color: "success", text: "Đã giao" },
-    Cancelled: { color: "dark", text: "Đã hủy" },
-    Refunded: { color: "warning", text: "Đã hoàn tiền" },
-    CancellationRequested: { color: "danger", text: "Yêu cầu hủy" },
-    RefundRequested: { color: "danger", text: "Yêu cầu hoàn tiền" },
+export const getStatusBadge = (
+  status: string,
+  t: ReturnType<typeof useTranslations>,
+) => {
+  const statusMap: Record<string, string> = {
+    Pending: "secondary",
+    Processing: "info",
+    Shipped: "primary",
+    Delivered: "success",
+    Cancelled: "dark",
+    Refunded: "warning",
+    CancellationRequested: "danger",
+    RefundRequested: "danger",
   };
-  const config = statusMap[status] || { color: "light", text: status };
-  return <CBadge color={config.color}>{config.text}</CBadge>;
+  const color = statusMap[status] || "light";
+  return <CBadge color={color}>{t(status)}</CBadge>;
 };
 
 interface OrderTableProps {
@@ -66,7 +72,13 @@ const OrderTable: React.FC<OrderTableProps> = ({
   queryString,
 }) => {
   // --- State ---
+  const t = useTranslations("AdminOrders.table");
+  const tStatus = useTranslations("OrderStatus");
+  const tShared = useTranslations("Shared.confirmModal");
+  const locale = useLocale();
   const router = useRouter(); // Khởi tạo router
+  // *** SỬ DỤNG CONTEXT ĐỂ LẤY THÔNG TIN TIỀN TỆ ***
+  const { displayCurrency, rates } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrderItems, setSelectedOrderItems] = useState<OrderItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderSummary | null>(null);
@@ -76,6 +88,8 @@ const OrderTable: React.FC<OrderTableProps> = ({
   }>({ visible: false, orderId: null });
 
   const restockMutation = useRestockOrderItemsAdmin();
+  const getStatusBadgeWithT = (status: string) =>
+    getStatusBadge(status, tStatus);
 
   const handleViewItemsClick = (order: OrderSummary) => {
     setSelectedOrderItems(order.orderItems as OrderItem[]);
@@ -123,52 +137,52 @@ const OrderTable: React.FC<OrderTableProps> = ({
               style={{ width: "100px" }}
               className="fw-semibold text-center"
             >
-              Mã Đơn
+              {t("colOrderId")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "200px" }}
               className="fw-semibold"
             >
-              Khách hàng
+              {t("colCustomer")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "150px" }}
               onClick={() => handleSort("createdAt")}
               className="fw-semibold user-select-none cursor-pointer hover:bg-gray-100"
             >
-              Ngày đặt {renderSortIcon("createdAt")}
+              {t("colDate")} {renderSortIcon("createdAt")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "250px" }}
               className="fw-semibold"
             >
-              Sản phẩm
+              {t("colProducts")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "130px" }}
               onClick={() => handleSort("totalPrice")}
               className="fw-semibold user-select-none cursor-pointer text-end hover:bg-gray-100"
             >
-              Tổng tiền {renderSortIcon("totalPrice")}
+              {t("colTotal")} {renderSortIcon("totalPrice")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "150px" }}
               onClick={() => handleSort("status")}
               className="fw-semibold user-select-none cursor-pointer text-center hover:bg-gray-100"
             >
-              Trạng thái {renderSortIcon("status")}
+              {t("colStatus")} {renderSortIcon("status")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "100px" }}
               className="fw-semibold text-center"
             >
-              Thanh toán
+              {t("colPayment")}
             </CTableHeaderCell>
             <CTableHeaderCell
               style={{ width: "100px" }}
               className="fw-semibold text-center"
             >
-              Hành động
+              {t("colActions")}
             </CTableHeaderCell>
           </CTableRow>
         </CTableHead>
@@ -186,8 +200,8 @@ const OrderTable: React.FC<OrderTableProps> = ({
             const canRestock = ["Cancelled", "Refunded"].includes(order.status);
             const hasBeenRestored = order.isStockRestored;
             const restockTooltip = hasBeenRestored
-              ? "Tồn kho đã được khôi phục"
-              : "Khôi phục tồn kho";
+              ? t("restockDoneTooltip")
+              : t("restockTooltip");
 
             const detailLink = `/admin/orders/${order._id}?${queryString}`;
 
@@ -212,14 +226,12 @@ const OrderTable: React.FC<OrderTableProps> = ({
                     className="text-muted truncate text-xs"
                     title={customerContact || "N/A"}
                   >
-                    {customerContact || "Guest"}
+                    {customerContact || t("guest")}
                   </div>
                 </CTableDataCell>
                 <CTableDataCell>
-                  <div
-                    title={new Date(order.createdAt).toLocaleString("vi-VN")}
-                  >
-                    {timeAgo(order.createdAt)}
+                  <div title={new Date(order.createdAt).toLocaleString(locale)}>
+                    <RelativeTime date={order.createdAt} />
                   </div>
                 </CTableDataCell>
                 <CTableDataCell>
@@ -248,7 +260,9 @@ const OrderTable: React.FC<OrderTableProps> = ({
                             onClick={() => handleViewItemsClick(order)}
                             className="mt-1 text-xs text-indigo-600 hover:underline"
                           >
-                            + {order.orderItems.length - 1} sản phẩm khác...
+                            {t("moreProducts", {
+                              count: order.orderItems.length - 1,
+                            })}
                           </button>
                         )}
                       </div>
@@ -257,18 +271,25 @@ const OrderTable: React.FC<OrderTableProps> = ({
                 </CTableDataCell>
                 <CTableDataCell className="text-end">
                   <span className="fw-semibold text-gray-800">
-                    {formatCurrency(order.totalPrice)}
+                    {formatCurrency(order.totalPrice, {
+                      currency: displayCurrency,
+                      rates,
+                    })}
                   </span>
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
-                  {getStatusBadge(order.status)}
+                  {getStatusBadgeWithT(order.status)}
                 </CTableDataCell>
                 <CTableDataCell className="text-center">
                   <CTooltip
                     content={
                       order.isPaid
-                        ? `Đã thanh toán lúc ${new Date(order.paidAt!).toLocaleString("vi-VN")}`
-                        : "Chưa thanh toán"
+                        ? t("paidTooltip", {
+                            date: new Date(order.paidAt!).toLocaleString(
+                              "vi-VN",
+                            ),
+                          })
+                        : t("unpaidTooltip")
                     }
                   >
                     <CIcon
@@ -283,7 +304,7 @@ const OrderTable: React.FC<OrderTableProps> = ({
                 <CTableDataCell className="text-center">
                   <div className="flex justify-center gap-2">
                     <Link href={detailLink} passHref>
-                      <CTooltip content="Xem chi tiết và xử lý đơn hàng">
+                      <CTooltip content={t("viewDetailsTooltip")}>
                         <CButton
                           color="info"
                           variant="outline"
@@ -326,10 +347,15 @@ const OrderTable: React.FC<OrderTableProps> = ({
       >
         <CModalHeader>
           <CModalTitle>
-            Chi tiết sản phẩm trong đơn
-            <span className="text-primary fw-medium text-decoration-none">
-              {" "}
-              #{selectedOrder?._id.slice(-6).toUpperCase()}
+            <span>
+              {t.rich("itemsModalTitle", {
+                id: selectedOrder?._id?.slice(-6).toUpperCase() || "",
+                primary: (chunks) => (
+                  <span className="font-semibold text-indigo-600">
+                    {chunks}
+                  </span>
+                ),
+              })}
             </span>
           </CModalTitle>
         </CModalHeader>
@@ -338,29 +364,29 @@ const OrderTable: React.FC<OrderTableProps> = ({
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell style={{ width: "80px" }}>
-                  Ảnh
+                  {t("itemsModalColImage")}
                 </CTableHeaderCell>
-                <CTableHeaderCell>Tên sản phẩm</CTableHeaderCell>
+                <CTableHeaderCell>{t("itemsModalColName")}</CTableHeaderCell>
                 <CTableHeaderCell style={{ width: "150px" }}>
-                  SKU
+                  {t("itemsModalColSku")}
                 </CTableHeaderCell>
                 <CTableHeaderCell
                   className="text-center"
                   style={{ width: "100px" }}
                 >
-                  Số lượng
+                  {t("itemsModalColQty")}
                 </CTableHeaderCell>
                 <CTableHeaderCell
                   className="text-end"
                   style={{ width: "130px" }}
                 >
-                  Đơn giá
+                  {t("itemsModalColPrice")}
                 </CTableHeaderCell>
                 <CTableHeaderCell
                   className="text-end"
                   style={{ width: "130px" }}
                 >
-                  Tổng tiền
+                  {t("itemsModalColTotal")}
                 </CTableHeaderCell>
               </CTableRow>
             </CTableHead>
@@ -405,10 +431,16 @@ const OrderTable: React.FC<OrderTableProps> = ({
                       {item.quantity}
                     </CTableDataCell>
                     <CTableDataCell className="text-end">
-                      {formatCurrency(item.price)}
+                      {formatCurrency(item.price, {
+                        currency: displayCurrency,
+                        rates,
+                      })}
                     </CTableDataCell>
                     <CTableDataCell className="fw-semibold text-end">
-                      {formatCurrency(item.price * item.quantity)}
+                      {formatCurrency(item.price * item.quantity, {
+                        currency: displayCurrency,
+                        rates,
+                      })}
                     </CTableDataCell>
                   </CTableRow>
                 );
@@ -422,11 +454,11 @@ const OrderTable: React.FC<OrderTableProps> = ({
             variant="outline"
             onClick={() => setIsModalOpen(false)}
           >
-            Đóng
+            {t("itemsModalClose")}
           </CButton>
           <CButton color="primary" onClick={handleViewOrderDetails}>
             <CIcon icon={cilExternalLink} className="me-2" />
-            Xem chi tiết đơn hàng
+            {t("itemsModalViewDetails")}
           </CButton>
         </CModalFooter>
       </CModal>
@@ -437,9 +469,19 @@ const OrderTable: React.FC<OrderTableProps> = ({
         onClose={() => setRestockModal({ visible: false, orderId: null })}
         onConfirm={handleConfirmRestock}
         isConfirming={restockMutation.isPending}
-        title="Xác nhận Khôi phục Tồn kho"
-        body={`Bạn có chắc chắn muốn cộng lại số lượng sản phẩm của đơn hàng #${restockModal.orderId?.slice(-6).toUpperCase()} vào tồn kho? Hành động này có thể ảnh hưởng đến báo cáo kho hàng.`}
-        confirmButtonText="Đồng ý khôi phục"
+        title={t("restockModalTitle")}
+        body={
+          <span>
+            {t.rich("restockModalBody", {
+              id: restockModal.orderId?.slice(-6).toUpperCase() || "",
+              bold: (chunks) => (
+                <span className="font-semibold text-indigo-600">{chunks}</span>
+              ),
+            })}
+          </span>
+        }
+        confirmButtonText={tShared("confirmRestock")}
+        cancelButtonText={tShared("cancel")}
         confirmButtonColor="warning"
       />
     </>

@@ -1,10 +1,11 @@
 "use client";
 
-import { getNotificationIcon } from "@/components/admin/layout/NotificationBell"; // Tái sử dụng helper icon
-import { timeAgo } from "@/lib/utils";
+import { getNotificationIcon } from "@/components/admin/layout/NotificationBell";
+import RelativeTime from "@/components/shared/RelativeTime";
 import { Notification } from "@/types";
 import classNames from "classnames";
-import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 interface NotificationItemProps {
   notification: Notification;
@@ -15,8 +16,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   onMarkAsRead,
 }) => {
+  const locale = useLocale();
   const router = useRouter();
-  const { icon, bgColor, label } = getNotificationIcon(notification.type);
+  const tBell = useTranslations("Admin.notifications");
+  const t = useTranslations("AdminNotifications.item");
+
+  // Truyền hàm dịch vào helper
+  const { icon, bgColor, label } = getNotificationIcon(
+    notification.type,
+    tBell,
+  );
 
   const handleClick = () => {
     onMarkAsRead(); // Gọi hàm để đánh dấu đã đọc
@@ -25,7 +34,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     }
   };
 
-  return (
+    return (
     <div
       onClick={handleClick}
       className={classNames(
@@ -57,7 +66,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           {!notification.isRead && (
             <span
               className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-blue-500"
-              title="Chưa đọc"
+              title={t("unreadTooltip")}
             ></span>
           )}
         </div>
@@ -71,14 +80,18 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         </p>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-gray-400">
-            {timeAgo(notification.createdAt)}
+            <div
+              title={new Date(notification.createdAt).toLocaleString(locale)}
+            >
+              <RelativeTime date={notification.createdAt} />
+            </div>
           </span>
           <span
             className={classNames(
               "rounded-full px-2 py-0.5 text-xs font-medium",
               notification.isRead
                 ? "bg-gray-200 text-gray-700"
-                : `${bgColor} ${icon.props.className.split(" ")[0]}`, // Lấy class màu text từ icon
+                : `${bgColor} ${icon.props.className.split(" ")[0]}`,
             )}
           >
             {label}

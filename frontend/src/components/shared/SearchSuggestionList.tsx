@@ -1,9 +1,10 @@
 import { Product } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import React from "react";
 import { FiLoader } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface SearchSuggestionListProps {
   suggestions: Product[];
@@ -20,18 +21,24 @@ const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
   onSuggestionClick,
   onViewAllClick,
 }) => {
+  const t = useTranslations("SearchSuggestion");
+
+  if (!searchTerm) {
+    return null;
+  }
+
   if (isLoading) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
-        <FiLoader className="mr-2 inline animate-spin" /> Đang tìm...
+        <FiLoader className="mr-2 inline animate-spin" /> {t("loading")}
       </div>
     );
   }
 
-  if (suggestions.length === 0 && searchTerm) {
+  if (suggestions.length === 0) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
-        Không tìm thấy sản phẩm nào khớp với &quot;{searchTerm}&quot;.
+        {t("noResults", { searchTerm })}
       </div>
     );
   }
@@ -40,7 +47,7 @@ const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
     return (
       <ul className="divide-y divide-gray-100">
         {suggestions.map((product) => (
-          <li key={product._id} className="hover:bg-gray-100 rounded-md">
+          <li key={product._id} className="rounded-md hover:bg-gray-100">
             <Link
               href={`/products/${product.slug}`}
               onClick={onSuggestionClick}
@@ -51,6 +58,7 @@ const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
                 alt={product.name}
                 width={40}
                 height={40}
+                quality={100}
                 className="mr-3 h-10 w-10 flex-shrink-0 rounded-md object-cover"
               />
               <div className="min-w-0 flex-1">
@@ -75,7 +83,7 @@ const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
               onClick={onViewAllClick}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
             >
-              Xem tất cả kết quả cho &quot;{searchTerm}&quot;
+              {t("viewAll", { searchTerm })}
             </button>
           </li>
         )}

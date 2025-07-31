@@ -5,7 +5,7 @@ import {
   useRemoveCartItem,
   useUpdateCartItem,
 } from "@/lib/react-query/cartQueries";
-import { getVariantDisplayNameClient } from "@/lib/utils";
+import { formatCurrency, getVariantDisplayNameClient } from "@/lib/utils";
 import { AppDispatch } from "@/store";
 import { CartItem } from "@/types/cart";
 import {
@@ -16,7 +16,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Fragment } from "react";
 import {
   FiAlertTriangle,
@@ -28,14 +28,10 @@ import {
   FiX,
 } from "react-icons/fi";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
 import { setSelectedItemsForCheckout } from "@/store/slices/checkoutSlice";
 import toast from "react-hot-toast";
-
-const formatCurrency = (amount: number | undefined) => {
-  if (typeof amount !== "number" || isNaN(amount)) return "N/A";
-  return amount.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
-};
+import { useSettings } from "@/app/SettingsContext";
+import { useTranslations } from "next-intl";
 
 interface CartPreviewModalProps {
   isOpen: boolean;
@@ -48,7 +44,14 @@ export default function CartPreviewModal({
   setIsOpen,
   attributeMap,
 }: CartPreviewModalProps) {
+  const t = useTranslations("CartPreviewModal");
   const { data: cartData, isLoading, isError, error, refetch } = useGetCart();
+  // *** LẤY THÔNG TIN TIỀN TỆ ***
+  const settingsContext = useSettings();
+  const currencyOptions = {
+    currency: settingsContext?.displayCurrency || "VND",
+    rates: settingsContext?.rates || null,
+  };
   const removeCartItemMutation = useRemoveCartItem();
   const updateCartItemMutation = useUpdateCartItem();
 
@@ -79,7 +82,7 @@ export default function CartPreviewModal({
 
   const handleProceedToCheckout = () => {
     if (!cartData || !cartData.items || cartData.items.length === 0) {
-      toast.error("Giỏ hàng của bạn đang trống.");
+      toast.error(t("emptyCartToast"));
       return;
     }
 
@@ -109,14 +112,12 @@ export default function CartPreviewModal({
       <div className="flex min-h-[250px] flex-col items-center justify-center px-4 py-10 text-center">
         <FiAlertTriangle className="mb-4 h-12 w-12 text-red-400" />
         <h3 className="text-base font-semibold text-gray-800">
-          Lỗi tải giỏ hàng
+          {t("loadingErrorTitle")}
         </h3>
-        <p className="mt-1 text-sm text-red-600">
-          Đã có lỗi xảy ra khi tải thông tin giỏ hàng của bạn.
-        </p>
+        <p className="mt-1 text-sm text-red-600">{t("loadingErrorSubtitle")}</p>
         {error.message && (
           <p className="mt-1 text-xs text-gray-500">
-            Chi tiết: {error.message}
+            {t("errorDetails", { message: error.message })}
           </p>
         )}
         <button
@@ -127,7 +128,7 @@ export default function CartPreviewModal({
           <FiRefreshCw
             className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
           />
-          Thử lại
+          {t("retryButton")}
         </button>
       </div>
     );
@@ -136,16 +137,14 @@ export default function CartPreviewModal({
       <div className="flex min-h-[300px] flex-col items-center justify-center px-4 py-10 text-center">
         <FiShoppingCart className="h-20 w-20 text-gray-300" />
         <p className="mt-6 text-base font-medium text-gray-700">
-          Giỏ hàng của bạn trống
+          {t("emptyCartTitle")}
         </p>
-        <p className="mt-2 text-sm text-gray-500">
-          Thêm sản phẩm vào giỏ để mua sắm nhé!
-        </p>
+        <p className="mt-2 text-sm text-gray-500">{t("emptyCartSubtitle")}</p>
         <button
           onClick={closeModal}
           className="mt-8 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
         >
-          Tiếp tục mua sắm
+          {t("continueShoppingButton")}
         </button>
       </div>
     );
@@ -191,7 +190,7 @@ export default function CartPreviewModal({
                           </Link>
                         </h3>
                         <p className="ml-4 whitespace-nowrap">
-                          {formatCurrency(item.price)}
+                          {formatCurrency(item.price, currencyOptions)}
                         </p>
                       </div>
                       {variantDisplayName && (
@@ -212,7 +211,9 @@ export default function CartPreviewModal({
                               updateCartItemMutation.variables?.itemId ===
                                 item._id)
                           }
-                          aria-label={`Giảm số lượng sản phẩm ${item.name}`}
+                          aria-label={t("decreaseQuantityLabel", {
+                            name: item.name,
+                          })}
                           className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
                         >
                           <FiMinus className="h-4 w-4 text-gray-600" />
@@ -222,8 +223,9 @@ export default function CartPreviewModal({
                           type="text"
                           readOnly
                           value={item.quantity}
-                          aria-label={`Số lượng hiện tại của ${item.name}`}
-                          title={`Số lượng ${item.name}`}
+                          aria-label={t("currentQuantityLabel", {
+                            name: item.name,
+                          })}
                           className="w-10 border-x border-gray-200 bg-white text-center text-sm font-medium text-gray-800 select-none focus:outline-none"
                         />
 
@@ -237,7 +239,9 @@ export default function CartPreviewModal({
                                 item._id) ||
                             item.quantity >= item.availableStock
                           }
-                          aria-label={`Tăng số lượng sản phẩm ${item.name}`}
+                          aria-label={t("increaseQuantityLabel", {
+                            name: item.name,
+                          })}
                           className="flex items-center justify-center bg-white px-2 py-1 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-40"
                         >
                           <FiPlus className="h-4 w-4 text-gray-600" />
@@ -253,7 +257,7 @@ export default function CartPreviewModal({
                             removeCartItemMutation.variables === item._id
                           }
                           className="p-1.5 font-medium text-gray-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-70"
-                          title={`Xóa ${item.name} khỏi giỏ hàng`}
+                          title={t("removeItemTitle", { name: item.name })}
                         >
                           <FiTrash2 className="h-4 w-4" />
                         </button>
@@ -261,12 +265,16 @@ export default function CartPreviewModal({
                     </div>
                     {hasStockError && (
                       <p className="mt-1.5 text-right text-xs font-semibold text-red-600">
-                        Tồn kho chỉ còn: {item.availableStock}
+                        {t("stockRemaining", { stock: item.availableStock })}
                       </p>
                     )}
                     {/* Hiển thị tổng tiền của item này (nếu muốn) */}
                     <p className="mt-1 text-right text-xs font-medium text-indigo-600">
-                      Tổng: {formatCurrency(item.price * item.quantity)}
+                      {t("lineTotalLabel")}{" "}
+                      {formatCurrency(
+                        item.price * item.quantity,
+                        currencyOptions,
+                      )}
                     </p>
                   </div>
                 </li>
@@ -278,42 +286,38 @@ export default function CartPreviewModal({
         {/* Phần tổng kết và buttons */}
         <div className="border-t border-gray-200 px-1 py-6">
           <div className="flex justify-between text-sm font-medium text-gray-900">
-            <p>Tạm tính ({cartData.totalQuantity} sản phẩm)</p>
-            <p>{formatCurrency(cartData.subtotal)}</p>
+            <p>{t("subtotalLabel", { count: cartData.totalQuantity })}</p>
+            <p>{formatCurrency(cartData.subtotal, currencyOptions)}</p>
           </div>
           {cartData.appliedCoupon && cartData.discountAmount > 0 && (
             <div className="mt-1.5 flex justify-between text-xs text-green-600">
               <p>
-                Giảm giá (
-                <span className="font-semibold">
-                  {cartData.appliedCoupon.code}
-                </span>
-                )
+                {t("discountLabel", {
+                  code: cartData.appliedCoupon.code ?? "",
+                })}
               </p>
-              <p>−{formatCurrency(cartData.discountAmount)}</p>
+              <p>−{formatCurrency(cartData.discountAmount, currencyOptions)}</p>
             </div>
           )}
           <div className="mt-3 flex justify-between text-base font-semibold text-indigo-700">
-            <p>Tổng cộng</p>
-            <p>{formatCurrency(cartData.finalTotal)}</p>
+            <p>{t("totalLabel")}</p>
+            <p>{formatCurrency(cartData.finalTotal, currencyOptions)}</p>
           </div>
-          <p className="mt-1 text-xs text-gray-500">
-            Phí vận chuyển sẽ được tính ở bước thanh toán.
-          </p>
+          <p className="mt-1 text-xs text-gray-500">{t("shippingFeeNotice")}</p>
           <div className="mt-6 space-y-3">
             <Link
               href="/cart"
               onClick={closeModal}
               className="flex w-full items-center justify-center rounded-lg border border-indigo-600 bg-indigo-50 px-6 py-3 text-sm font-medium text-indigo-700 shadow-sm transition-colors hover:bg-indigo-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
-              Xem chi tiết giỏ hàng
+              {t("viewCartDetailsButton")}
             </Link>
             <button
               type="button"
               onClick={handleProceedToCheckout}
               className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
-              Tiến hành thanh toán
+              {t("proceedToCheckoutButton")}
             </button>
           </div>
         </div>
@@ -354,14 +358,14 @@ export default function CartPreviewModal({
                       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-5 sm:px-6">
                         <div className="flex items-center justify-between">
                           <DialogTitle className="text-lg font-semibold text-white">
-                            Giỏ hàng của bạn
+                            {t("modalTitle")}
                           </DialogTitle>
                           <div className="ml-3 flex h-7 items-center">
                             <button
                               type="button"
                               className="relative rounded-md p-1 text-indigo-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                               onClick={closeModal}
-                              aria-label="Đóng giỏ hàng"
+                              aria-label={t("closeModalLabel")}
                             >
                               <FiX className="h-5 w-5" aria-hidden="true" />
                             </button>
@@ -370,7 +374,9 @@ export default function CartPreviewModal({
                         {/* Có thể thêm thông tin số lượng item ở đây */}
                         {cartData && cartData.totalQuantity > 0 && (
                           <p className="mt-1 text-sm text-indigo-200">
-                            Hiện có {cartData.totalQuantity} sản phẩm.
+                            {t("itemCountMessage", {
+                              count: cartData.totalQuantity,
+                            })}
                           </p>
                         )}
                       </div>

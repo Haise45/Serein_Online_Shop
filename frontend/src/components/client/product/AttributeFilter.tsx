@@ -1,9 +1,10 @@
 "use client";
-import { ProductFilters } from "@/app/(main)/(client)/products/ProductsPageClient";
+import { ProductFilters } from "@/app/[locale]/(main)/(client)/products/ProductsPageClient";
 import { Attribute } from "@/types";
 import classNames from "classnames";
 import { FiCheck } from "react-icons/fi";
 import FilterDisclosure from "./FilterDisclosure";
+import { useTranslations } from "next-intl";
 
 interface AttributeFilterProps {
   currentFilters: ProductFilters;
@@ -18,6 +19,7 @@ export default function AttributeFilter({
   attributes,
   isLoading,
 }: AttributeFilterProps) {
+  const t = useTranslations("ProductFilters");
   const handleAttributeChange = (
     attributeName: string,
     value: string,
@@ -80,7 +82,7 @@ export default function AttributeFilter({
           return (
             <FilterDisclosure
               key={attr._id}
-              title={attr.label}
+              title={t("attributeTitle")}
               defaultOpen={true}
             >
               <div className="ml-0.5 grid grid-cols-5 gap-2 sm:grid-cols-6 md:grid-cols-5">
@@ -131,7 +133,7 @@ export default function AttributeFilter({
         return (
           <FilterDisclosure
             key={attr._id}
-            title={attr.label}
+            title={t("sizeTitle")}
             defaultOpen={true}
           >
             <div className="grid grid-cols-4 gap-2">

@@ -1,7 +1,8 @@
-// src/app/(main)/products/components/PaginationControls.tsx
 "use client";
+
 import classNames from "classnames";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -14,6 +15,8 @@ export default function PaginationControls({
   totalPages,
   onPageChange,
 }: PaginationControlsProps) {
+  const t = useTranslations("Pagination");
+
   if (totalPages <= 1) return null;
 
   const handlePrevious = () => {
@@ -88,8 +91,11 @@ export default function PaginationControls({
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Trang <span className="font-medium">{currentPage}</span> /{" "}
-            <span className="font-medium">{totalPages}</span>
+            {t.rich("page", {
+              currentPage,
+              totalPages,
+              bold: (chunks) => <span className="font-medium">{chunks}</span>,
+            })}
           </p>
         </div>
         <div>
@@ -105,10 +111,12 @@ export default function PaginationControls({
                 inactiveButtonClass,
                 "rounded-l-md",
               )}
-              aria-label="Trang trước"
+              aria-label={t("previous")}
             >
               <FiChevronLeft className="h-5 w-5" aria-hidden="true" />
-              <span className="sr-only ml-1 sm:not-sr-only">Trước</span>
+              <span className="sr-only ml-1 sm:not-sr-only">
+                {t("previous")}
+              </span>
             </button>
 
             {pageNumbers.map((number, index) =>
@@ -141,9 +149,9 @@ export default function PaginationControls({
                 inactiveButtonClass,
                 "rounded-r-md",
               )}
-              aria-label="Trang sau"
+              aria-label={t("next")}
             >
-              <span className="sr-only mr-1 sm:not-sr-only">Sau</span>
+              <span className="sr-only mr-1 sm:not-sr-only">{t("next")}</span>
               <FiChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
@@ -157,7 +165,7 @@ export default function PaginationControls({
           disabled={currentPage === 1}
           className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Trước
+          {t("previous")}
         </button>
         <p className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500">
           {currentPage} / {totalPages}
@@ -167,7 +175,7 @@ export default function PaginationControls({
           disabled={currentPage === totalPages}
           className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Sau
+          {t("next")}
         </button>
       </div>
     </nav>

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const i18nStringSchema = require("./schemas/i18nStringSchema");
 
 // Sub-schema cho địa chỉ giao hàng (snapshot)
 const shippingAddressSchema = new mongoose.Schema(
@@ -18,18 +19,21 @@ const shippingAddressSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Sub-schema cho một tùy chọn của biến thể trong snapshot
+const orderItemVariantOptionSchema = new mongoose.Schema(
+  {
+    attributeName: i18nStringSchema,
+    value: i18nStringSchema,
+  },
+  { _id: false }
+);
+
 // Sub-schema cho thông tin biến thể (snapshot)
 const orderItemVariantSchema = new mongoose.Schema(
   {
     variantId: { type: mongoose.Schema.Types.ObjectId, required: true },
     sku: { type: String },
-    options: [
-      {
-        _id: false,
-        attributeName: { type: String, required: true },
-        value: { type: String, required: true },
-      },
-    ],
+    options: [orderItemVariantOptionSchema],
   },
   { _id: false }
 );
@@ -37,7 +41,7 @@ const orderItemVariantSchema = new mongoose.Schema(
 // Sub-schema cho một item trong đơn hàng (snapshot)
 const orderItemSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // Tên sản phẩm lúc đặt
+    name: { type: i18nStringSchema, required: true }, // Tên sản phẩm lúc đặt
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true }, // Giá MỘT sản phẩm lúc đặt
     image: { type: String }, // URL ảnh chính hoặc ảnh variant lúc đặt
@@ -62,6 +66,18 @@ const requestSchema = new mongoose.Schema(
     reason: { type: String, required: true }, // Lý do yêu cầu
     imageUrls: { type: [String], default: [] }, // URL ảnh đính kèm (nếu có)
     requestedAt: { type: Date, default: Date.now }, // Thời điểm yêu cầu
+  },
+  { _id: false }
+);
+
+// Sub-schema lưu kết quả thanh toán
+const paymentResultSchema = new mongoose.Schema(
+  {
+    id: { type: String }, // ID giao dịch từ PayPal hoặc cổng thanh toán khác
+    status: { type: String }, // Ví dụ: 'COMPLETED' từ PayPal
+    update_time: { type: String }, // Thời gian cập nhật từ PayPal
+    email_address: { type: String }, // Email người trả tiền từ PayPal
+    captureId: { type: String },
   },
   { _id: false }
 );
@@ -112,6 +128,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, "Vui lòng chọn phương thức thanh toán"],
       enum: ["COD", "BANK_TRANSFER", "PAYPAL"],
+    },
+    paymentResult: {
+      type: paymentResultSchema,
+      default: null,
     },
     shippingMethod: {
       type: String,
@@ -219,7 +239,7 @@ const orderSchema = new mongoose.Schema(
     isStockRestored: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   {
     timestamps: true,
