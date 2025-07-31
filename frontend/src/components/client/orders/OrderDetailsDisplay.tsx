@@ -1,6 +1,8 @@
 "use client";
 
+import { useSettings } from "@/app/SettingsContext";
 import ProductReviewModal from "@/components/client/review/ProductReviewModal";
+import { Link } from "@/i18n/navigation";
 import {
   useCreateReview,
   useDeleteReview,
@@ -16,12 +18,15 @@ import {
   Review,
   UpdateReviewPayload,
 } from "@/types/review";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
+  FiAlertCircle,
   FiBox,
   FiCalendar,
+  FiCheckCircle,
   FiCreditCard,
   FiEdit2,
   FiFileText,
@@ -36,10 +41,6 @@ import {
 } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import OrderStatusStepper from "./OrderStatusStepper";
-import toast from "react-hot-toast";
-import { FiAlertCircle } from "react-icons/fi";
-import { useSettings } from "@/app/SettingsContext";
-import { useTranslations } from "next-intl";
 
 interface OrderDetailsDisplayProps {
   order: Order;
@@ -420,6 +421,15 @@ export default function OrderDetailsDisplay({
                 {formatDate(order.createdAt)}
               </span>
             </p>
+            {order.isDelivered && order.deliveredAt && (
+              <p className="flex items-center text-green-600">
+                <FiCheckCircle className="mr-1.5 h-3.5 w-3.5" />
+                {t("deliveredDateLabel")}{" "}
+                <span className="ml-1 font-medium">
+                  {formatDate(order.deliveredAt)}
+                </span>
+              </p>
+            )}
             {order.user && typeof order.user !== "string" && (
               <>
                 <p className="flex items-center">
@@ -500,11 +510,15 @@ export default function OrderDetailsDisplay({
             <div className="flex items-center justify-between">
               <dt className="text-sm text-gray-600">{t("shippingFee")}</dt>
               <dd className="text-sm font-medium text-gray-900">
-                {shipping > 0 ? formatCurrency(shipping, currencyOptions) : t("shippingFeeFree")}
+                {shipping > 0
+                  ? formatCurrency(shipping, currencyOptions)
+                  : t("shippingFeeFree")}
               </dd>
             </div>
             <div className="flex items-center justify-between border-t border-gray-300 pt-4">
-              <dt className="text-base font-bold text-gray-900">{t("total")}</dt>
+              <dt className="text-base font-bold text-gray-900">
+                {t("total")}
+              </dt>
               <dd className="text-base font-bold text-gray-900">
                 {formatCurrency(total, currencyOptions)}
               </dd>

@@ -21,15 +21,19 @@ const LOW_STOCK_THRESHOLD = 10; // Ngưỡng cảnh báo tồn kho thấp
  * @param {Array<string>} fields - Mảng các trường cần làm phẳng.
  * @returns {object} Object đã được làm phẳng.
  */
-const flattenI18n = (doc, locale, fields) => {
-  if (!doc) return null;
-  const obj = doc.toObject ? doc.toObject() : { ...doc }; // Hoạt động với cả lean object
+const flattenI18nObject = (obj, locale, fields) => {
+  if (!obj) return obj;
+  const newObj = { ...obj }; // Hoạt động với cả lean object
   for (const field of fields) {
-    if (obj[field]) {
-      obj[field] = obj[field][locale] || obj[field].vi; // Lấy ngôn ngữ yêu cầu, fallback về tiếng Việt
+    if (
+      newObj[field] &&
+      typeof newObj[field] === "object" &&
+      !mongoose.Types.ObjectId.isValid(newObj[field])
+    ) {
+      newObj[field] = newObj[field][locale] || newObj[field].vi;
     }
   }
-  return obj;
+  return newObj;
 };
 
 // =================================================================
@@ -96,12 +100,27 @@ const buildFilter = async (query, isAdmin = false, locale = "vi") => {
   }
 
   // --- 4. Lọc theo thuộc tính (đã chuyển sang dùng ObjectId) ---
-  if (query.attributes && typeof query.attributes === "object") {
+  if (
+    query.attributes &&
+    typeof query.attributes === "object" &&
+    Object.keys(query.attributes).length > 0
+  ) {
+    const attrLabels = Object.keys(query.attributes);
+    const allAttributes = await Attribute.find({
+      $or: [
+        { "label.vi": { $in: attrLabels } },
+        { "label.en": { $in: attrLabels } },
+      ],
+    }).lean();
+    const attributeMap = new Map(
+      allAttributes.map((a) => [getLocalizedName(a.label, "vi"), a])
+    ); // Dùng tên Tiếng Việt làm key
+    attributeMap.set(
+      allAttributes.map((a) => [getLocalizedName(a.label, "en"), a])
+    );
+
     for (const attrLabel in query.attributes) {
-      // Tìm Attribute document dựa trên label (VD: "Màu sắc")
-      const attributeDoc = await Attribute.findOne({
-        $or: [{ "label.vi": attrLabel }, { "label.en": attrLabel }],
-      }).lean();
+      const attributeDoc = attributeMap.get(attrLabel);
       if (!attributeDoc) continue;
 
       const valueStrings = String(query.attributes[attrLabel])
@@ -168,11 +187,14 @@ const buildFilter = async (query, isAdmin = false, locale = "vi") => {
   // --- 6. Tìm kiếm Text ($text index) ---
   if (query.search && query.search.trim()) {
     // Bọc chuỗi tìm kiếm trong dấu ngoặc kép để tìm kiếm chính xác cụm từ
-    const searchTerm = `"${query.search.trim()}"`;
+    const searchRegex = new RegExp(query.search.trim(), "i");
     andConditions.push({
-      $text: {
-        $search: searchTerm,
-      },
+      // Chỉ tìm trên các trường liên quan đến ngôn ngữ hiện tại và các trường chung
+      $or: [
+        { [`name.${locale}`]: searchRegex },
+        { sku: searchRegex },
+        { "variants.sku": searchRegex },
+      ],
     });
   }
 
@@ -201,29 +223,13 @@ const buildSort = (query, locale = "vi") => {
   const sortByField = query.sortBy;
   const sortOrder = query.sortOrder === "asc" ? 1 : -1;
 
-  // 1. Nếu có tìm kiếm bằng text ($text index), ưu tiên sắp xếp theo độ liên quan
-  if (query.search && query.search.trim()) {
-    sort.score = { $meta: "textScore" };
-    // Bạn vẫn có thể thêm một tiêu chí sắp xếp phụ sau độ liên quan
-    if (sortByField && allowedSortFields.includes(sortByField)) {
-      // Nếu trường sắp xếp là 'name', hãy dùng trường ngôn ngữ tương ứng
-      const i18nSortField =
-        sortByField === "name" ? `name.${locale}` : sortByField;
-      sort[i18nSortField] = sortOrder;
-    }
-    return sort;
-  }
-
-  // 2. Nếu không có tìm kiếm, sắp xếp theo trường được chỉ định
   if (sortByField && allowedSortFields.includes(sortByField)) {
-    // Nếu trường sắp xếp là 'name', hãy dùng trường ngôn ngữ tương ứng
     const i18nSortField =
       sortByField === "name" ? `name.${locale}` : sortByField;
     sort[i18nSortField] = sortOrder;
-  }
-  // 3. Mặc định cuối cùng nếu không có sortBy nào được chỉ định
-  else {
-    sort.createdAt = -1; // Mặc định sắp xếp theo sản phẩm mới nhất
+  } else {
+    // Mặc định sắp xếp theo ngày tạo mới nhất
+    sort.createdAt = -1;
   }
 
   return sort;
@@ -491,94 +497,78 @@ const getProducts = asyncHandler(async (req, res) => {
     { $sort: sortOptions },
     { $skip: skip },
     { $limit: limit },
-    // Chọn các trường cần thiết để giảm lượng dữ liệu truyền đi
     {
-      $project: {
-        name: 1,
-        slug: 1,
-        price: 1,
-        salePrice: 1,
-        salePriceEffectiveDate: 1,
-        salePriceExpiryDate: 1,
-        sku: 1,
-        images: { $slice: ["$images", 2] },
-        category: 1,
-        averageRating: 1,
-        numReviews: 1,
-        totalSold: 1,
-        createdAt: 1,
-        isPublished: 1,
-        isActive: 1,
-        variants: 1,
-        attributes: 1,
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "categoryInfo",
       },
     },
+    { $addFields: { category: { $arrayElemAt: ["$categoryInfo", 0] } } },
+    { $project: { categoryInfo: 0 } }, // Dọn dẹp
   ];
 
-  // Thực thi song song pipeline đếm và pipeline lấy dữ liệu
-  const [totalResult, productsFromAggregation] = await Promise.all([
+  // Tạo đối tượng aggregation cho dữ liệu
+  const dataAggregation = Product.aggregate(dataPipeline);
+
+  // Chỉ thêm collation nếu người dùng đang sắp xếp theo 'name'
+  if (req.query.sortBy === "name") {
+    dataAggregation.collation({
+      locale: locale, // 'vi' hoặc 'en'
+      strength: 2, // Mức độ 2: so sánh cả chữ cái và dấu, không phân biệt hoa/thường
+    });
+  }
+
+  // Thực thi song song pipeline đếm và pipeline lấy dữ liệu đã có collation
+  const [totalResult, productsFromDB] = await Promise.all([
     Product.aggregate(countPipeline),
-    Product.aggregate(dataPipeline),
+    dataAggregation.exec(),
   ]);
 
   const totalProducts = totalResult[0]?.totalCount || 0;
 
-  // Lấy ra các _id từ kết quả aggregation
-  const productIds = productsFromAggregation.map((p) => p._id);
-
-  // Query lại một lần nữa để lấy về Mongoose documents đầy đủ
-  const productsFromDB = await Product.find({ _id: { $in: productIds } })
-    .populate({ path: "category", select: "name slug parent" })
-    .sort(sortOptions);
-
   // --- 5. "LÀM PHẲNG" DỮ LIỆU ĐA NGÔN NGỮ VÀ THÊM VIRTUALS ---
   const flattenedProducts = productsFromDB.map((p) => {
-    // Dữ liệu từ aggregate đã là object thuần túy, không cần .toObject()
-    const productObject = p.toObject({ virtuals: true });
-
-    // Tính toán các trường virtual thủ công
     const now = new Date();
-    productObject.isOnSale =
-      productObject.salePrice &&
-      productObject.salePrice < productObject.price &&
-      (!productObject.salePriceEffectiveDate ||
-        new Date(productObject.salePriceEffectiveDate) <= now) &&
-      (!productObject.salePriceExpiryDate ||
-        new Date(productObject.salePriceExpiryDate) >= now);
-    productObject.displayPrice = productObject.isOnSale
-      ? productObject.salePrice
-      : productObject.price;
-    productObject.isConsideredNew =
-      (new Date() - new Date(productObject.createdAt)) / (1000 * 3600 * 24) <
-      30; // Ví dụ: mới trong 30 ngày
+    // Tính virtuals cho sản phẩm chính
+    p.isOnSale =
+      p.salePrice &&
+      p.salePrice < p.price &&
+      (!p.salePriceEffectiveDate ||
+        new Date(p.salePriceEffectiveDate) <= now) &&
+      (!p.salePriceExpiryDate || new Date(p.salePriceExpiryDate) >= now);
+    p.displayPrice = p.isOnSale ? p.salePrice : p.price;
+    p.isConsideredNew = (now - new Date(p.createdAt)) / (1000 * 3600 * 24) < 30;
+
+    // Tính virtuals cho các biến thể
+    if (p.variants) {
+      p.variants.forEach((v) => {
+        v.isOnSale =
+          v.salePrice &&
+          v.salePrice < v.price &&
+          (!v.salePriceEffectiveDate ||
+            new Date(v.salePriceEffectiveDate) <= now) &&
+          (!v.salePriceExpiryDate || new Date(v.salePriceExpiryDate) >= now);
+        v.displayPrice = v.isOnSale ? v.salePrice : v.price;
+      });
+    }
 
     // Làm phẳng các trường đa ngôn ngữ
-    if (productObject.name) {
-      productObject.name = productObject.name[locale] || productObject.name.vi;
+    const flatProduct = flattenI18nObject(p, locale, ["name", "description"]);
+    if (flatProduct.category) {
+      flatProduct.category = flattenI18nObject(flatProduct.category, locale, [
+        "name",
+      ]);
     }
-    if (productObject.description) {
-      // Mặc dù không select, phòng trường hợp thay đổi project
-      productObject.description =
-        productObject.description[locale] || productObject.description.vi;
-    }
-    if (
-      productObject.category &&
-      typeof productObject.category === "object" &&
-      productObject.category.name
-    ) {
-      productObject.category.name =
-        productObject.category.name[locale] || productObject.category.name.vi;
-    }
-
-    return productObject;
+    return flatProduct;
   });
 
-  // --- 6. TRẢ VỀ RESPONSE ---
   res.json({
     currentPage: page,
     totalPages: Math.ceil(totalProducts / limit),
-    totalProducts: totalProducts,
-    limit: limit,
+    totalProducts,
+    limit,
     products: flattenedProducts,
   });
 });
