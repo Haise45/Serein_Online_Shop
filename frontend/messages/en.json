@@ -861,6 +861,7 @@
   "OrderRow": {
     "orderCode": "Order Code: #{code}",
     "orderDate": "Order Date: {date}",
+    "deliveredDate": "Delivered on: {date}",
     "andXMoreProducts": "and {count} more product",
     "andXMoreProducts_plural": "and {count} more products",
     "totalAmount": "Total:",
@@ -918,6 +919,7 @@
     "orderInfoTitle": "Order Information",
     "orderCodeLabel": "Order ID:",
     "orderDateLabel": "Order Date:",
+    "deliveredDateLabel": "Delivered On:",
     "customerLabel": "Customer:",
     "phoneLabel": "Phone:",
     "guestEmailLabel": "Guest Email:",
@@ -1679,6 +1681,7 @@
     "header": {
       "order": "Order #{id}",
       "placedAt": "Placed at: {date}",
+      "deliveredAt": "Delivered at: {date}",
       "restock": "Restock",
       "restockTooltipDone": "This action cannot be performed again",
       "restockTooltip": "Add product quantities back to inventory",

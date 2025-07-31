@@ -9,6 +9,7 @@ import {
   cilClock,
   cilLoopCircular,
   cilOptions,
+  cilTruck,
 } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import {
@@ -22,7 +23,7 @@ import {
   CTooltip,
 } from "@coreui/react";
 import classNames from "classnames";
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface OrderDetailHeaderProps {
   order: Order;
@@ -44,7 +45,7 @@ const getStatusConfig = (
     label: status, // Label này sẽ bị ghi đè
     color: "light",
   };
-  
+
   // Dùng hàm `t` để dịch label
   const translatedLabel = t(status as string);
 
@@ -126,6 +127,15 @@ const OrderDetailHeader: React.FC<OrderDetailHeaderProps> = ({
             date: new Date(order.createdAt).toLocaleString(locale),
           })}
         </p>
+
+        {order.isDelivered && order.deliveredAt && (
+          <p className="mt-1 flex items-center text-sm text-green-600">
+            <CIcon icon={cilTruck} className="mr-1.5 h-4 w-4" />
+            {t("deliveredAt", {
+              date: new Date(order.deliveredAt).toLocaleString(locale),
+            })}
+          </p>
+        )}
       </div>
       {/* Các nút hành động */}
       <div className="flex items-center gap-2">
