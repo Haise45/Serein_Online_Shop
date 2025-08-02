@@ -112,12 +112,13 @@ const buildFilter = async (query, isAdmin = false, locale = "vi") => {
         { "label.en": { $in: attrLabels } },
       ],
     }).lean();
-    const attributeMap = new Map(
-      allAttributes.map((a) => [getLocalizedName(a.label, "vi"), a])
-    ); // Dùng tên Tiếng Việt làm key
-    attributeMap.set(
-      allAttributes.map((a) => [getLocalizedName(a.label, "en"), a])
-    );
+
+    // Tạo một map để tra cứu attribute document từ tên (cả vi và en)
+    const attributeMap = new Map();
+    allAttributes.forEach((attr) => {
+      attributeMap.set(attr.label.vi, attr);
+      attributeMap.set(attr.label.en, attr);
+    });
 
     for (const attrLabel in query.attributes) {
       const attributeDoc = attributeMap.get(attrLabel);
