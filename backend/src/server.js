@@ -10,7 +10,7 @@ connectDB();
 const PORT = process.env.PORT || 5000;
 
 const httpServer = http.createServer(app);
-const io = initSocket(httpServer);
+initSocket(httpServer);
 
 const serverInstance = httpServer.listen(PORT, () => {
   console.log(
