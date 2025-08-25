@@ -1,15 +1,15 @@
 import {
+  addAdminReplyApi,
+  approveReviewAdminApi,
   createReviewApi,
   deleteMyReviewApi,
-  getProductReviewsApi,
-  getUserReviewForProductApi,
-  updateUserReviewApi,
+  deleteReviewAdminApi,
   getAllReviewsAdminApi,
   GetAllReviewsAdminParams,
-  approveReviewAdminApi,
+  getProductReviewsApi,
+  getUserReviewForProductApi,
   rejectReviewAdminApi,
-  deleteReviewAdminApi,
-  addAdminReplyApi,
+  updateUserReviewApi,
 } from "@/services/reviewService";
 import {
   CreateReviewPayload,
@@ -26,9 +26,9 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import { productKeys } from "./productQueries";
-import { useTranslations } from "next-intl";
 
 // --- Query Keys ---
 export const reviewKeys = {
@@ -233,7 +233,9 @@ const useAdminReviewMutationInvalidation = () => {
 
     // Invalidate các query khác nếu có thông tin sản phẩm
     const productId =
-      typeof review.product === "string" ? review.product : review.product?._id;
+      review && review.product && typeof review.product === "object"
+        ? review.product._id
+        : null;
     if (productId) {
       queryClient.invalidateQueries({ queryKey: reviewKeys.productLists() });
       queryClient.invalidateQueries({

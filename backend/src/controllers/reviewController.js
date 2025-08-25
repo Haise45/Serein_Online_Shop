@@ -588,15 +588,17 @@ const approveReview = asyncHandler(async (req, res) => {
   await calculateAndUpdateProductRating(review.product);
 
   // Populate các trường cần thiết
-  await review.populate([
-    { path: "user", select: "name email" },
-    { path: "product", select: "name slug images" },
-    { path: "approvedBy", select: "name" },
-    { path: "adminReply.user", select: "name" },
-  ]);
+  const populatedReview = await Review.findById(reviewId)
+    .populate([
+      { path: "user", select: "name email" },
+      { path: "product", select: "name slug images" }, // Đảm bảo populate product
+      { path: "approvedBy", select: "name" },
+      { path: "adminReply.user", select: "name" },
+    ])
+    .lean();
 
   // Làm phẳng trước khi trả về
-  const flattenedReview = flattenI18nObject(review, locale, []); // Làm phẳng các trường con
+  const flattenedReview = flattenI18nObject(populatedReview, locale, []); // Làm phẳng các trường con
   if (flattenedReview.product)
     flattenedReview.product = flattenI18nObject(
       flattenedReview.product,
@@ -644,15 +646,17 @@ const rejectReview = asyncHandler(async (req, res) => {
   }
 
   // Populate các trường cần thiết
-  await review.populate([
-    { path: "user", select: "name email" },
-    { path: "product", select: "name slug images" },
-    { path: "approvedBy", select: "name" },
-    { path: "adminReply.user", select: "name" },
-  ]);
+  const populatedReview = await Review.findById(reviewId)
+    .populate([
+      { path: "user", select: "name email" },
+      { path: "product", select: "name slug images" }, // Đảm bảo populate product
+      { path: "approvedBy", select: "name" },
+      { path: "adminReply.user", select: "name" },
+    ])
+    .lean();
 
   // Làm phẳng trước khi trả về
-  const flattenedReview = flattenI18nObject(review, locale, []); // Làm phẳng các trường con
+  const flattenedReview = flattenI18nObject(populatedReview, locale, []); // Làm phẳng các trường con
   if (flattenedReview.product)
     flattenedReview.product = flattenI18nObject(
       flattenedReview.product,
@@ -702,6 +706,7 @@ const deleteReview = asyncHandler(async (req, res) => {
 // @route   POST /api/v1/reviews/:reviewId/reply
 // @access  Private/Admin
 const addAdminReply = asyncHandler(async (req, res) => {
+  const locale = req.locale || "vi";
   const reviewId = req.params.reviewId;
   const { comment } = req.body;
 
